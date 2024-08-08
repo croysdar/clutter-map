@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import ListView from '../pages/ListView'; // Import the ListView component
+import ListView from '../pages/ListView'; // Import the ListView component
 
 const Pages: React.FC = () => {
     return (
@@ -8,7 +8,7 @@ const Pages: React.FC = () => {
             <Routes>
                 {/* <Route exact path="/" component={Home} /> */}
                 {/* <Route path="/add-item" component={AddItem} /> */}
-                {/* <Route path="/list-view" Component={ListView} />  */}
+                <Route path="/rooms" Component={ListView} /> 
             </Routes>
         </BrowserRouter>
     );
