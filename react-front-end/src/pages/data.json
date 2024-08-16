@@ -15,16 +15,19 @@
                 "id": 1011,
                 "name": "Remote Control",
                 "description": "Remote control for the TV.",
-                "location": "On top of the table"
+                "location": "On top of the table",
+                "comments": []
               },
               {
                 "id": 1012,
                 "name": "Xbox controller",
                 "description": "Black xbox controller.",
-                "location": "Bottom left drawer"
+                "location": "Bottom left drawer",
+                "comments": []
               }
             ],
-            "subLocations": []
+            "subLocations": [],
+            "comments": []
           },
           {
             "id": 102,
@@ -35,16 +38,20 @@
                 "id": 1021,
                 "name": "Android Phone Charger",
                 "description": "Charger for mobile phones.",
-                "location": "Attached to the side of the table"
+                "location": "Attached to the side of the table",
+                "comments": []
               },
               {
                 "id": 1022,
                 "name": "Nail Trimmer",
                 "description": "Silver metal nail trimmer.",
-                "location": "On top of the table"
+                "location": "On top of the table",
+                "comments": []
               }
             ],
-            "subLocations": []
+            "subLocations": [],
+            "comments": []
+
           }
         ]
       },
@@ -62,10 +69,12 @@
                 "id": 2011,
                 "name": "Tupperware",
                 "description": "Plastic containers for food storage.",
-                "location": "On the top shelf"
+                "location": "On the top shelf",
+                "comments": []
               }
             ],
-            "subLocations": []
+            "subLocations": [],
+            "comments": []
           },
           {
             "id": 202,
@@ -76,16 +85,19 @@
                 "id": 2021,
                 "name": "Silverware",
                 "description": "Forks, Knives, Spoons.",
-                "location": "Inside the drawer in the silverware organizer."
+                "location": "Inside the drawer in the silverware organizer.",
+                "comments": []
               },
               {
                 "id": 2022,
                 "name": "Serving Spoons and Forks.",
                 "description": "Larger metal cutlery for serving.",
-                "location": "In the back of the silverware organizer."
+                "location": "In the back of the silverware organizer.",
+                "comments": []
               }
             ],
-            "subLocations": []
+            "subLocations": [],
+            "comments": []
           },
           {
             "id": 203,
@@ -96,16 +108,19 @@
                 "id": 2031,
                 "name": "Hand Soap",
                 "description": "Liquid hand soap.",
-                "location": "Next to the sink on the right hand side."
+                "location": "Next to the sink on the right hand side.",
+                "comments": []
               },
               {
                 "id": 2032,
                 "name": "Dishwasher Soap",
                 "description": "Large container of liquid dishwasher soap.",
-                "location": "Below the sink on the left hand side."
+                "location": "Below the sink on the left hand side.",
+                "comments": []
               }
             ],
-            "subLocations": []
+            "subLocations": [],
+            "comments": []
           }
         ]
       },
@@ -129,12 +144,15 @@
                     "id": 3011,
                     "name": "Extra toiletries",
                     "description": "Lotions, face wash, etc.",
-                    "location": "Left side of the shelf."
+                    "location": "Left side of the shelf.",
+                "comments": []
                   }
                 ],
-                "subLocations": []
+                "subLocations": [],
+                "comments": []
               }
-            ]
+            ],
+            "comments": []
           }
         ]
       },
@@ -152,10 +170,12 @@
                 "id": 4011,
                 "name": "Printer Paper",
                 "description": "Reams of printer paper.",
-                "location": "On the top shelf"
+                "location": "On the top shelf",
+                "comments": []
               }
             ],
-						"subLocations" : []
+						"subLocations" : [],
+            "comments": []
           }
         ]
       },
@@ -173,10 +193,12 @@
                 "id": 5011,
                 "name": "Toothbrush",
                 "description": "Electric toothbrush.",
-                "location": "On the countertop"
+                "location": "On the countertop",
+                "comments": []
               }
             ],
-						"subLocations" : []
+						"subLocations" : [],
+            "comments": []
           },
           {
             "id": 502,
@@ -187,12 +209,14 @@
                 "id": 5021,
                 "name": "Shampoo",
                 "description": "Bottle of shampoo.",
-                "location": "In the shower caddy"
+                "location": "In the shower caddy",
+                "comments": []
               }
             ],
-						"subLocations" : []
-          },
-          {
+						"subLocations" : [],
+            "comments": []
+        },
+        {
             "id": 503,
             "name": "Towel Rack",
             "description": "The towel rack.",
@@ -201,10 +225,12 @@
                 "id": 5031,
                 "name": "Towels",
                 "description": "Hand towels.",
-                "location": "On the rack"
+                "location": "On the rack",
+                "comments": []
               }
             ],
-						"subLocations" : []
+						"subLocations" : [],
+            "comments": []
           }
         ]
       },
@@ -228,16 +254,19 @@
                     "id": 601101,
                     "name": "Paint Cans",
                     "description": "Various paint cans.",
-                    "location": "Left side"
+                    "location": "Left side",
+                    "comments": []
                   },
                   {
                     "id": 601102,
                     "name": "Toolbox",
                     "description": "A red toolbox.",
-                    "location": "Right side"
+                    "location": "Right side",
+                    "comments": []
                   }
                 ],
-                "subLocations": []
+                "subLocations": [],
+                "comments": []
               },
               {
                 "id": 6012,
@@ -248,12 +277,15 @@
                     "id": 601201,
                     "name": "Cleaning Supplies",
                     "description": "Various cleaning supplies.",
-                    "location": "Center"
+                    "location": "Center",
+                    "comments": []
                   }
                 ],
-                "subLocations": []
+                "subLocations": [],
+                "comments": []
               }
-            ]
+            ],
+            "comments": []
           }
 				]
 			}
