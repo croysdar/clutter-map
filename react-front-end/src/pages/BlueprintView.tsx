@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Stage } from 'react-konva';
 import CreateRoomBlueprint from 'components/blueprints/CreateRoomBlueprint';
 import { Typography } from '@mui/material';
+import FillRoomBlueprint from 'components/blueprints/FillRoomBlueprint';
 
 const BlueprintView: React.FC = () => {
     const [ state, setState ] = useState<string>("create-room");
@@ -13,6 +14,10 @@ const BlueprintView: React.FC = () => {
             case "create-room": 
                 return(
                     <CreateRoomBlueprint/>
+                )
+            case "fill-room": 
+                return(
+                    <FillRoomBlueprint/>
                 )
             default:
                 <>something is wrong</>

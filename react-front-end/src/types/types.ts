@@ -37,8 +37,9 @@ export interface Location {
 // comment TODO
 export interface Comment {
     // How to handle reply structure
-    // How to handle picture commments?
-
+    // How to handle picture comments?
+    text: string,
+    user: User
 }
 
 // coordinate : x, y
@@ -62,6 +63,11 @@ export interface HomeData {
     home: {
         rooms: Room[];
     };
+}
+
+export interface User {
+    name: string,
+    username: string
 }
 
 
