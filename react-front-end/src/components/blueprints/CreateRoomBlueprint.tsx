@@ -2,7 +2,7 @@
 import { KonvaEventObject } from 'konva/lib/Node';
 import React, { useState } from 'react';
 
-import { Layer } from 'react-konva';
+import { Layer, Text } from 'react-konva';
 
 
 // svg imports
@@ -61,24 +61,39 @@ const CreateRoomBlueprint: React.FC = () => {
 
     return (
         <Layer>
-            {
-                chosenRoom ?
-                    <AdjustRoomShape coordinates={chosenRoom} />
-                    :
-                    RoomOptions.map((option, index) => {
-                        return (
-                            <KonvaImage
-                                id={`room-bank-${index}`}
-                                svg={option.svg}
-                                x={10}
-                                y={10 + 100 * index}
-                                width={80}
-                                height={80}
-                                onMouseDown={(e : KonvaEventObject<MouseEvent>) => setChosenRoom(RoomOptions[index].coordinates) }
-                            />
-                        )
-                    })
-            }
+            <Text text={'Choose Room Shape'} fontSize={20} fill="white" />
+            <>
+                {RoomOptions.map((option, index) =>
+                    <KonvaImage
+                        id={`room-bank-${index}`}
+                        key={`room-bank-${index}`}
+                        svg={option.svg}
+                        x={10}
+                        y={50 + 100 * index}
+                        width={80}
+                        height={80}
+
+                        // Set chosen room style on click
+                        onMouseDown={(e: KonvaEventObject<MouseEvent>) => {
+                            setChosenRoom(RoomOptions[index].coordinates)
+                            console.log(RoomOptions[index].coordinates, index)
+                        }}
+
+                        // Set cursor style
+                        onMouseEnter={(e: KonvaEventObject<MouseEvent>) => {
+                            const container = e.target.getStage()?.container();
+                            if (container)
+                                container.style.cursor = "pointer";
+                        }}
+                        onMouseLeave={(e: KonvaEventObject<MouseEvent>) => {
+                            const container = e.target.getStage()?.container();
+                            if (container)
+                                container.style.cursor = "default";
+                        }}
+                    />
+                )}
+            </>
+            {chosenRoom && <AdjustRoomShape x={250} y={150} coordinates={chosenRoom} />}
         </Layer>
     )
 }

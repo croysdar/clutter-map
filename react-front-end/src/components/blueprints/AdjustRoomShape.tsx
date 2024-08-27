@@ -1,5 +1,5 @@
 // src/pages/AdjustRoomShape.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // konva imports
 import { KonvaEventObject } from 'konva/lib/Node';
@@ -23,11 +23,24 @@ import { Coordinate } from 'types/types';
 */
 
 type ComponentProps = {
-    coordinates: Coordinate[]
+    coordinates: Coordinate[],
+    x: number,
+    y: number
 }
 
-const AdjustRoomShape: React.FC<ComponentProps> = ({coordinates}) => {
-    const [corners, setCorners] = useState<Coordinate[]>(coordinates);
+const translatedCoordinates = (coordinates: Coordinate[], offsetX: number, offsetY: number) => {
+    return coordinates.map(coordinate => ({
+        x: coordinate.x + offsetX,
+        y: coordinate.y + offsetY
+    }));
+}
+
+const AdjustRoomShape: React.FC<ComponentProps> = ({ coordinates, x, y }) => {
+    const [corners, setCorners] = useState<Coordinate[]>(translatedCoordinates(coordinates, x, y));
+
+    useEffect(() => {
+        setCorners(translatedCoordinates(coordinates, x, y))
+    }, [x, y, coordinates])
 
     const handleDragMove = (e: KonvaEventObject<MouseEvent>, index: number) => {
         const newCorners = [...corners];
@@ -68,6 +81,7 @@ const AdjustRoomShape: React.FC<ComponentProps> = ({coordinates}) => {
                         />
                     )
                 }
+                return <></>
             })}
             {
                 corners.map((coord, index) => {
@@ -83,7 +97,7 @@ const AdjustRoomShape: React.FC<ComponentProps> = ({coordinates}) => {
                             <Rect
                                 key={`rect-${index}`}
                                 x={isHorizontal ? coord.x : coord.x - thickness / 2}
-                                y={ isHorizontal ? coord.y - thickness / 2 : coord.y }
+                                y={isHorizontal ? coord.y - thickness / 2 : coord.y}
                                 width={isHorizontal ? next.x - coord.x : thickness}
                                 height={isHorizontal ? thickness : next.y - coord.y}
                                 fill={"white"}

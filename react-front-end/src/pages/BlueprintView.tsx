@@ -20,7 +20,7 @@ const BlueprintView: React.FC = () => {
                     <FillRoomBlueprint/>
                 )
             default:
-                <>something is wrong</>
+                <p>something is wrong</p>
         }
     }
 
