@@ -6,8 +6,11 @@ import { Layer, Text } from 'react-konva';
 
 
 // svg imports
-import LRoomOne from 'assets/images/L_Room_1.svg'
-import SquareRoom from 'assets/images/Square_Room.svg'
+import LRoomOne from 'assets/images/rooms/L_Room_1.svg'
+import LRoomTwo from 'assets/images/rooms/L_Room_2.svg'
+import LRoomThree from 'assets/images/rooms/L_Room_3.svg'
+import LRoomFour from 'assets/images/rooms/L_Room_4.svg'
+import SquareRoom from 'assets/images/rooms/Square_Room.svg'
 
 import { Coordinate } from 'types/types';
 import AdjustRoomShape from './AdjustRoomShape';
@@ -28,22 +31,52 @@ import KonvaImage from 'components/common/KonvaImage';
     4. Go to fill room screen to add furniture
 */
 
-const coordinates_Square : Coordinate[] = [
-    { x: 250, y: 50 },
-    { x: 450, y: 50 },
-    { x: 450, y: 250 },
-    { x: 250, y: 250 },
-    { x: 250, y: 50 },
+const coordinates_Square: Coordinate[] = [
+    { x: 0, y: 0 },
+    { x: 200, y: 0 },
+    { x: 200, y: 200 },
+    { x: 0, y: 200 },
+    { x: 0, y: 0 },
 ]
 
-const coordinates_L: Coordinate[] = [
-    { x: 250, y: 50 },
-    { x: 350, y: 50 },
-    { x: 350, y: 150 },
-    { x: 450, y: 150 },
-    { x: 450, y: 250 },
-    { x: 250, y: 250 },
-    { x: 250, y: 50 },
+const coordinates_L_1: Coordinate[] = [
+    { x: 0, y: 0 },
+    { x: 100, y: 0 },
+    { x: 100, y: 100 },
+    { x: 200, y: 100 },
+    { x: 200, y: 200 },
+    { x: 0, y: 200 },
+    { x: 0, y: 0 },
+]
+
+const coordinates_L_2: Coordinate[] = [
+    { x: 100, y: 0 },
+    { x: 200, y: 0 },
+    { x: 200, y: 200 },
+    { x: 0, y: 200 },
+    { x: 0, y: 100 },
+    { x: 100, y: 100 },
+    { x: 100, y: 0 }
+]
+
+const coordinates_L_3: Coordinate[] = [
+    { x: 0, y: 0 },
+    { x: 200, y: 0 },
+    { x: 200, y: 100 },
+    { x: 100, y: 100 },
+    { x: 100, y: 200 },
+    { x: 0, y: 200 },
+    { x: 0, y: 0 },
+]
+
+const coordinates_L_4: Coordinate[] = [
+    { x: 0, y: 0 },
+    { x: 200, y: 0 },
+    { x: 200, y: 200 },
+    { x: 100, y: 200 },
+    { x: 100, y: 100 },
+    { x: 0, y: 100 },
+    { x: 0, y: 0 }
 ]
 
 type RoomOption = {
@@ -52,7 +85,10 @@ type RoomOption = {
 }
 
 const RoomOptions: RoomOption[] = [
-    { svg: LRoomOne, coordinates: coordinates_L },
+    { svg: LRoomOne, coordinates: coordinates_L_1 },
+    { svg: LRoomTwo, coordinates: coordinates_L_2 },
+    { svg: LRoomThree, coordinates: coordinates_L_3 },
+    { svg: LRoomFour, coordinates: coordinates_L_4 },
     { svg: SquareRoom, coordinates: coordinates_Square },
 ]
 

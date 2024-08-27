@@ -6,7 +6,7 @@ import { Layer, Rect } from 'react-konva';
 import KonvaImage from 'components/common/KonvaImage';
 import { KonvaEventObject } from 'konva/lib/Node';
 
-import WoodenChair from 'assets/images/wooden-chair.svg'
+import WoodenChair from 'assets/images/wooden_chair.svg'
 
 interface BaseShapeProps {
     id: string;
