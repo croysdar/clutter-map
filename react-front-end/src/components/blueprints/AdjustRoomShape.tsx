@@ -35,6 +35,16 @@ const translatedCoordinates = (coordinates: Coordinate[], offsetX: number, offse
     }));
 }
 
+// TODO make initial room size dependent on stage size?
+// TODO make room size show feet/inches
+// TODO make walls not able to phase through each other
+// TODO define a workable area
+// TODO make walls not able to move outside workable area
+// TODO Swap from rect to line
+// TODO Make corners draggable
+
+// TODO implement saving
+
 const AdjustRoomShape: React.FC<ComponentProps> = ({ coordinates, x, y }) => {
     const [corners, setCorners] = useState<Coordinate[]>(translatedCoordinates(coordinates, x, y));
 
