@@ -65,13 +65,7 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ## API Endpoints
 
-The following REST endpoints are available:
-
-- `GET /api/items`: Retrieve a list of all items.
-- `POST /api/items`: Create a new item.
-- `PUT /api/items/{id}`: Update an existing item.
-- `DELETE /api/items/{id}`: Delete an item.
 
 ## Database Configuration
 
-The application uses PostgreSQL as its database. Configuration is stored in `src/main/resources/application.properties`.
+The application uses PostgreSQL as its database. Configuration is stored in `back-end/src/main/resources/application.properties`.
