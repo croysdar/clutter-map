@@ -1,12 +1,12 @@
 export interface Item {
-    id: number;
+    id: string;
     name: string;
     description: string;
     location: string;
 }
 
 export interface Location {
-    id: number;
+    id: string;
     name: string;
     description: string;
     items: Item[];
@@ -14,10 +14,10 @@ export interface Location {
 }
 
 export interface Room {
-    id: number;
+    id: string;
     name: string;
     description: string;
-    locations: Location[];
+    locations: Location[] | null;
 }
 
 export interface HomeData {
@@ -25,3 +25,11 @@ export interface HomeData {
         rooms: Room[];
     };
 }
+
+export const IDLE_STATUS = "idle"
+export const PENDING_STATUS = "pending"
+export const SUCCEEDED_STATUS = "succeeded"
+export const FAILED_STATUS = "failed"
+
+export type QueryStatus = "idle" | "pending" | "succeeded" | "failed"
+
