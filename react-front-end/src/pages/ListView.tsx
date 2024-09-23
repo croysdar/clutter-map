@@ -1,5 +1,5 @@
 // src/pages/ListView.tsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import {
     Accordion,
@@ -12,25 +12,25 @@ import {
     Typography
 } from '@mui/material';
 
-import { HomeData, Location } from '../types/types';
-import RoomMenu from '../components/RoomMenu';
-import sampleData from './data.json'
+import { Location } from '../types/types';
+import RoomMenu from '@/components/RoomMenu';
+import { useGetRoomsQuery } from '@/api/apiSlice';
+import { API_BASE_URL } from '@/utils/constants';
 
 const ListView: React.FC = () => {
-    const [data, setData] = useState<HomeData | null>(null);
+    const {
+        data: rooms = [],
+        isLoading,
+        isError,
+        error
+    } = useGetRoomsQuery();
 
-    useEffect(() => {
-        // Simulate fetching data from an API
-        const fetchData = async () => {
-            // TODO Replace this with an actual API call
-            setData(sampleData);
-        };
-
-        fetchData();
-    }, []);
-
-    if (!data) {
+    if (isLoading) {
         return <div>Loading...</div>;
+    }
+
+    if (isError) {
+        return <div>{error.toString()}</div>
     }
 
     const renderLocation = (location: Location) => {
@@ -63,9 +63,9 @@ const ListView: React.FC = () => {
     return (
         <div>
             <h1>Clutter Map - Room List</h1>
-            {data.home.rooms.map((room) => (
+            {rooms.map((room) => (
                 <>
-                    <Card>
+                    <Card key={`room-card-${room.id}`}>
                         <div key={room.id} >
                             <CardHeader
                                 title={room.name}
@@ -73,7 +73,7 @@ const ListView: React.FC = () => {
                             />
                             <CardContent>
                                 {/* <p>{room.description}</p> */}
-                                {room.locations.map((location) => (
+                                {room.locations?.map((location) => (
                                     renderLocation(location)
                                 ))}
                             </CardContent>
