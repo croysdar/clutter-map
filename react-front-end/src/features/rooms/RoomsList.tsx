@@ -13,7 +13,7 @@ import {
 
 import { Location } from '../../types/types';
 import RoomMenu from '@/components/RoomMenu';
-import { useGetRoomsQuery } from '@/api/apiSlice';
+import { useGetRoomsQuery } from '@/features/api/apiSlice';
 
 const RoomsList: React.FC = () => {
     const {
