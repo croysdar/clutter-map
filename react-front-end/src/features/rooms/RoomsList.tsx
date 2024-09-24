@@ -1,4 +1,3 @@
-// src/pages/ListView.tsx
 import React from 'react';
 
 import {
@@ -12,12 +11,11 @@ import {
     Typography
 } from '@mui/material';
 
-import { Location } from '../types/types';
+import { Location } from '../../types/types';
 import RoomMenu from '@/components/RoomMenu';
 import { useGetRoomsQuery } from '@/api/apiSlice';
-import { API_BASE_URL } from '@/utils/constants';
 
-const ListView: React.FC = () => {
+const RoomsList: React.FC = () => {
     const {
         data: rooms = [],
         isLoading,
@@ -86,4 +84,4 @@ const ListView: React.FC = () => {
     );
 };
 
-export default ListView;
+export default RoomsList;
