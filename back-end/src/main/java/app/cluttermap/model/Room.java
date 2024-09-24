@@ -2,20 +2,23 @@ package app.cluttermap.model;
 
 public class Room {
     private String id;
+    private Long id;
+
     private String name;
+
     private String description;
 
-    public Room(String id, String name, String description){
+    public Room(Long id, String name, String description){
         this.id = id;
         this.name = name;
         this.description = description;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

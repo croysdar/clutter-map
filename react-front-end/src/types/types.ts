@@ -1,12 +1,12 @@
 export interface Item {
-    id: string;
+    id: number;
     name: string;
     description: string;
     location: string;
 }
 
 export interface Location {
-    id: string;
+    id: number;
     name: string;
     description: string;
     items: Item[];
@@ -14,7 +14,7 @@ export interface Location {
 }
 
 export interface Room {
-    id: string;
+    id: number;
     name: string;
     description: string;
     locations: Location[] | null;

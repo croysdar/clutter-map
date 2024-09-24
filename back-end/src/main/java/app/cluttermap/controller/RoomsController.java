@@ -18,8 +18,13 @@ public class RoomsController {
         System.out.println("GET /rooms called");
 
         return Arrays.asList(
-                new Room("room1", "Kitchen", "The kitchen"),
-                new Room("room2", "Living Room", "The room with the tv"),
-                new Room("room3", "Master Bedroom", "The main bedroom"));
+                new Room(1001L, "Kitchen", "The kitchen"),
+                new Room(1002L, "Living Room", "The room with the tv"),
+                new Room(1003L, "Master Bedroom", "The main bedroom"));
     }
 }
+
+
+// https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html
+
+// https://hackernoon.com/using-postgres-effectively-in-spring-boot-applications
