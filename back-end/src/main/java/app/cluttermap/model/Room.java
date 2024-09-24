@@ -1,15 +1,33 @@
 package app.cluttermap.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+// table annotation overrides the default table name
+@Table(name = "rooms")
 public class Room {
-    private String id;
+
+    @Id
+    // Postgres generates an ID
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     private String description;
 
-    public Room(Long id, String name, String description){
-        this.id = id;
+    // no-arg constructor for Hibernate
+    private Room() {}
+
+    // public constructor
+    // ID is not required because Postgres generates the ID
+    public Room(String name, String description){
         this.name = name;
         this.description = description;
     }
