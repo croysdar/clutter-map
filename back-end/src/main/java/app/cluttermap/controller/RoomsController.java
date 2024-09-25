@@ -71,7 +71,7 @@ public class RoomsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Room> deleteOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
+    public ResponseEntity<Room> deleteOneRoom(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
 
         if (roomData.isPresent()) {

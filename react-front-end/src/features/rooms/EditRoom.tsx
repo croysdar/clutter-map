@@ -1,8 +1,10 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CircularProgress, Container, TextField, Typography } from '@mui/material'
+import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
+
 import { useGetRoomQuery, useUpdateRoomMutation } from '../api/apiSlice'
+import DeleteRoomButton from './DeleteRoomButton'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -46,7 +48,7 @@ const EditRoom = () => {
         const description = elements.roomDescription.value
 
         if (room && name) {
-            await updateRoom({id: room.id, name: name, description: description})
+            await updateRoom({ id: room.id, name: name, description: description })
             navigate(`/rooms`)
         }
     }
@@ -54,11 +56,15 @@ const EditRoom = () => {
     return (
         <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CardHeader
+                    title={
+                        <Typography variant="h4" component="h2" gutterBottom align="center">
+                            Edit Room
+                        </Typography>
+                    }
+                />
                 <CardContent>
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Room
-                    </Typography>
-                    <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+                    <form onSubmit={handleSubmit}>
                         {/* Room Name */}
                         <TextField
                             label="Room Name"
@@ -103,6 +109,9 @@ const EditRoom = () => {
                             Save Changes
                         </Button>
                     </form>
+
+                    {/* Delete button with a confirmation dialog */}
+                    <DeleteRoomButton room={room} isDisabled={updateLoading}/>
 
                 </CardContent>
             </Card>
