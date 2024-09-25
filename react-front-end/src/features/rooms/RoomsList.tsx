@@ -7,7 +7,8 @@ import {
     Card,
     CardContent,
     CardHeader,
-    Divider,
+    Container,
+    Paper,
     Typography
 } from '@mui/material';
 
@@ -59,28 +60,31 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        <div>
-            <h1>Clutter Map - Room List</h1>
-            {rooms.map((room) => (
-                <>
-                    <Card key={`room-card-${room.id}`}>
-                        <div key={room.id} >
-                            <CardHeader
-                                title={room.name}
-                                action={<RoomMenu room={room} />}
-                            />
-                            <CardContent>
-                                {/* <p>{room.description}</p> */}
-                                {room.locations?.map((location) => (
+        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <Typography variant="h2">
+                    Room List
+                </Typography>
+                {rooms.map((room) => (
+                    <>
+                        <Card key={`room-card-${room.id}`} sx={{marginTop: 3}}>
+                            <div key={room.id} >
+                                <CardHeader
+                                    title={<Typography variant='h4'> {room.name}</Typography>}
+                                    action={<RoomMenu room={room} />}
+                                />
+                                <CardContent>
+                                    <Typography variant="body2">{room.description}</Typography>
+                                    {/* {room.locations?.map((location) => (
                                     renderLocation(location)
-                                ))}
-                            </CardContent>
-                        </div>
-                    </Card>
-                    <Divider style={{ "marginTop": "10px" }} />
-                </>
-            ))}
-        </div>
+                                ))} */}
+                                </CardContent>
+                            </div>
+                        </Card>
+                    </>
+                ))}
+            </Paper>
+        </Container>
     );
 };
 
