@@ -1,7 +1,7 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { API_BASE_URL } from '@/utils/constants'
-import { Room, NewRoom } from '../rooms/roomsSlice'
+import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
 
 export const apiSlice = createApi({
     reducerPath: 'api',
@@ -17,8 +17,20 @@ export const apiSlice = createApi({
                 'Room',
                 ...result.map(({ id }) => ({ type: 'Room', id } as const))
             ]
-            query: () => '/rooms'
+        }),
 
+        getRoom: builder.query<Room, string>({
+            query: (roomId) => `/rooms/${roomId}`,
+            providesTags: (result, error, arg) => [{ type: 'Room', id: arg }]
+        }),
+
+        updateRoom: builder.mutation<Room, RoomUpdate>({
+            query: room => ({
+                url: `/rooms/${room.id}`,
+                method: 'PUT',
+                body: room
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'Room', id: arg.id }]
         }),
 
         addNewRoom: builder.mutation<Room, NewRoom> ({
@@ -34,5 +46,7 @@ export const apiSlice = createApi({
 
 export const {
     useGetRoomsQuery,
+    useGetRoomQuery,
+    useUpdateRoomMutation,
     useAddNewRoomMutation
 } = apiSlice
