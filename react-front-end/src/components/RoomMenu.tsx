@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
-import { Room } from '../types/types';
+import { Room } from '@/features/rooms/roomsSlice';
+
 
 type RoomMenuProps = {
     room: Room

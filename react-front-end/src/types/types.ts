@@ -1,3 +1,5 @@
+import { Room } from "@/features/rooms/roomsSlice";
+
 export interface Item {
     id: number;
     name: string;
@@ -11,13 +13,6 @@ export interface Location {
     description: string;
     items: Item[];
     subLocations: Location[];
-}
-
-export interface Room {
-    id: number;
-    name: string;
-    description: string;
-    locations: Location[] | null;
 }
 
 export interface HomeData {
