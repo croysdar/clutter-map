@@ -15,10 +15,9 @@ export interface Room {
     locations: Location[] | null;
 }
 
-export interface NewRoom {
-    name: string;
-    description: string;
-}
+export type NewRoom = Pick<Room, 'name' | 'description'>
+
+export type RoomUpdate = Pick<Room, 'id' | 'name' | 'description'>
 
 const roomsSlice = createAppSlice({
     name: 'rooms',
