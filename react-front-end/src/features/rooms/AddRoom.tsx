@@ -18,7 +18,6 @@ export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
     const navigate = useNavigate()
 
-
     const handleSubmit = async (e: React.FormEvent<AddRoomFormElements>) => {
         e.preventDefault()
 
@@ -59,6 +58,7 @@ export const AddRoom = () => {
                             fullWidth
                             margin="normal"
                             variant="outlined"
+                            InputLabelProps={{shrink: true}}
                         />
 
                         {/* Room Description */}
@@ -73,6 +73,7 @@ export const AddRoom = () => {
                             rows={4}
                             margin="normal"
                             variant="outlined"
+                            InputLabelProps={{shrink: true}}
                         />
 
                         {/* Submit Button */}
