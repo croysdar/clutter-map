@@ -15,6 +15,7 @@ import {
 import { Location } from '../../types/types';
 import RoomMenu from '@/components/RoomMenu';
 import { useGetRoomsQuery } from '@/features/api/apiSlice';
+import ButtonLink from '@/components/common/ButtonLink';
 
 const RoomsList: React.FC = () => {
     const {
@@ -83,6 +84,7 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
+                <ButtonLink href="/rooms/add" label="Create a new Room"/>
             </Paper>
         </Container>
     );
