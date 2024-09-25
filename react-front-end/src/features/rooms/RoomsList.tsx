@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 
 import { Location } from '../../types/types';
-import RoomMenu from '@/components/RoomMenu';
+import RoomMenu from '@/features/rooms/RoomMenu';
 import { useGetRoomsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
 
