@@ -33,6 +33,14 @@ export const apiSlice = createApi({
             invalidatesTags: (result, error, arg) => [{ type: 'Room', id: arg.id }]
         }),
 
+        deleteRoom: builder.mutation<{success: boolean, id: number}, number>({
+            query: roomId => ({
+                url: `/rooms/${roomId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => [{type: 'Room', id}]
+        }),
+
         addNewRoom: builder.mutation<Room, NewRoom> ({
             query: initialRoom => ({
                 url: '/rooms',
@@ -48,5 +56,6 @@ export const {
     useGetRoomsQuery,
     useGetRoomQuery,
     useUpdateRoomMutation,
-    useAddNewRoomMutation
+    useAddNewRoomMutation,
+    useDeleteRoomMutation
 } = apiSlice

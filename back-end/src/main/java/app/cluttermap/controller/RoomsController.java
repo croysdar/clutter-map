@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,8 +70,27 @@ public class RoomsController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Room> deleteOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
+        Optional<Room> roomData = roomsRepository.findById(id);
+
+        if (roomData.isPresent()) {
+            try {
+                roomsRepository.deleteById(id);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            catch (Exception e) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
 
 // https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html
 
 // https://hackernoon.com/using-postgres-effectively-in-spring-boot-applications
+
+// https://www.bezkoder.com/spring-boot-postgresql-example/
