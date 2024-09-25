@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
 import { useAddNewRoomMutation } from '../api/apiSlice';
+import { useNavigate } from 'react-router-dom';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -14,21 +15,25 @@ interface AddRoomFormElements extends HTMLFormElement {
 
 
 export const AddRoom = () => {
-    const [addNewRoom, { isLoading }] = useAddNewRoomMutation();
+    const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
+    const navigate = useNavigate()
 
 
     const handleSubmit = async (e: React.FormEvent<AddRoomFormElements>) => {
         e.preventDefault()
 
-        const { elements } = e.currentTarget;
-        const name = elements.roomName.value;
-        const description = elements.roomDescription.value;
+        const { elements } = e.currentTarget
+        const name = elements.roomName.value
+        const description = elements.roomDescription.value
 
-        const form = e.currentTarget;
+        const form = e.currentTarget
 
         try {
             await addNewRoom({ name, description }).unwrap()
             form.reset()
+
+            // redirect to /rooms
+            navigate('/rooms')
         } catch (err) {
             console.log("Failed to create the room: ", err)
         }
