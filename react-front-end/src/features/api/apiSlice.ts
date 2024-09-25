@@ -8,9 +8,17 @@ export const apiSlice = createApi({
 
     baseQuery: fetchBaseQuery({baseUrl: API_BASE_URL}),
 
+    tagTypes: ['Room'],
+
     endpoints: builder => ({
         getRooms: builder.query<Room[], void>({
+            query: () => '/rooms',
+            providesTags: (result = []) => [
+                'Room',
+                ...result.map(({ id }) => ({ type: 'Room', id } as const))
+            ]
             query: () => '/rooms'
+
         }),
 
         addNewRoom: builder.mutation<Room, NewRoom> ({
@@ -18,7 +26,8 @@ export const apiSlice = createApi({
                 url: '/rooms',
                 method: 'POST',
                 body: initialRoom
-            })
+            }),
+            invalidatesTags: ['Room']
         })
     })
 })
