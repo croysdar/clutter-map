@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,7 @@ public class RoomsController {
 
     @PostMapping()
     public ResponseEntity<Room> addOneRoom(@RequestBody Room room) {
-        if (room.getName() == null || room.getName().isEmpty()){
+        if (room.getName() == null || room.getName().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -49,13 +50,27 @@ public class RoomsController {
 
         if (roomData.isPresent()) {
             return new ResponseEntity<>(roomData.get(), HttpStatus.OK);
-        }
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-}
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
+        Optional<Room> roomData = roomsRepository.findById(id);
+
+        if (roomData.isPresent()) {
+            Room _room = roomData.get();
+            _room.setName(room.getName());
+            _room.setDescription(room.getDescription());
+
+            return new ResponseEntity<>(roomsRepository.save(_room), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+}
 
 // https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html
 
