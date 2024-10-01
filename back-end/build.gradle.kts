@@ -20,6 +20,14 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+
+	implementation("com.google.oauth-client:google-oauth-client:1.32.1")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.32.1") // For HTTP transport
+    implementation("com.google.api-client:google-api-client-gson:1.32.1") // For JSON factory
+
+	implementation ("org.springframework.boot:spring-boot-starter-security")
+	implementation ("org.springframework.boot:spring-boot-starter-oauth2-client")
+
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.postgresql:postgresql:42.2.23")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
