@@ -27,19 +27,19 @@ const Pages: React.FC = () => {
         <BrowserRouter>
             <Routes>
                 <Route path="/" Component={LoginPage} />
-                <Route path="/*"
+                {/* <Route path="/*"
                     element={
                         <ProtectedRoute>
-                            <Routes>
+                            <Routes> */}
                                 <Route path="/home" Component={HomePage} />
                                 <Route path="/rooms" Component={RoomsList} />
                                 <Route path="/rooms/add" Component={AddRoom} />
                                 <Route path="/rooms/:roomID/edit" Component={EditRoom} />
                                 {/* <Route path="/add-item" component={AddItem} /> */}
-                            </Routes>
+                            {/* </Routes>
                         </ProtectedRoute>
                     }
-                />
+                /> */}
             </Routes>
         </BrowserRouter>
     );
