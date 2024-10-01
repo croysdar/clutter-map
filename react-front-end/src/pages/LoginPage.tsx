@@ -30,9 +30,15 @@ const LoginPage: React.FC = () => {
                         },
                         body: idToken
                     })
-                        .then((response) => response.json()) // Parse the JSON response
-                        .then((data) => {
-                            console.log("Token verification success:", data);
+                        .then((response) => {
+                            if (response.ok) {
+                                return response.text();
+                            }
+                            throw new Error("Token verification failed");
+                        })
+                        .then((jwtToken) => {
+                            console.log("Token verification success:", jwtToken);
+                            localStorage.setItem('jwt', jwtToken);
                         })
                         .catch((error) => {
                             console.error("Token verification failed:", error);
