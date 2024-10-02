@@ -1,8 +1,23 @@
 import React from 'react'
+
 import { Container, Typography } from '@mui/material'
-import { GoogleLogin } from '@react-oauth/google'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
+import { useAppDispatch } from '@/hooks/useAppHooks'
+import { useNavigate } from 'react-router-dom'
+import { login } from '@/features/auth/authSlice'
+
 
 const LoginPage: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate()
+
+    const handleSuccess = async (cred: CredentialResponse) => {
+        const idToken = cred.credential
+        if (idToken) {
+            await dispatch(login(idToken));
+            navigate('/home');
+        }
+    }
 
     return (
         <Container maxWidth="md" sx={{
@@ -16,34 +31,7 @@ const LoginPage: React.FC = () => {
             <Typography variant='h5'>You must be logged in to continue</Typography>
 
             <GoogleLogin
-                onSuccess={(cred) => {
-                    const idToken = cred.credential
-
-                    console.log(cred)
-
-                    // Send the token to your backend
-                    fetch("http://localhost:8080/auth/verify-token", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-
-                        },
-                        body: idToken
-                    })
-                        .then((response) => {
-                            if (response.ok) {
-                                return response.text();
-                            }
-                            throw new Error("Token verification failed");
-                        })
-                        .then((jwtToken) => {
-                            console.log("Token verification success:", jwtToken);
-                            localStorage.setItem('jwt', jwtToken);
-                        })
-                        .catch((error) => {
-                            console.error("Token verification failed:", error);
-                        });
-                }}
+                onSuccess={handleSuccess}
             />
         </Container>
     )
