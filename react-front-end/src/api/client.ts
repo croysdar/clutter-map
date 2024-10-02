@@ -24,7 +24,7 @@ export async function client<T>(
     }
 
     if (body) {
-        config.body = JSON.stringify(body)
+        config.body = typeof body === 'string' ? body : JSON.stringify(body)
     }
 
     let data
