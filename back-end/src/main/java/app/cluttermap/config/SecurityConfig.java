@@ -1,12 +1,19 @@
 package app.cluttermap.config;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,22 +24,50 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+    // Used to get the jwt secret token
+    @Autowired
+    private JwtConfig jwtConfig;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Applying security configuration...");
+
+        // Configure authorization rules
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/verify-token").permitAll() // Allow access to specific endpoints
-                        .anyRequest().authenticated() // Secure all other endpoints
-                )
+                        // Allow requests to "/auth/verify-token" without authentication
+                        .requestMatchers("/auth/verify-token").permitAll()
+                        // All other requests require authentication
+                        .anyRequest().authenticated())
+                // Enable Cross-Origin Resource Sharing (CORS) with default configuration
                 .cors(Customizer.withDefaults())
-                // TODO figure out how to add csrf back in
-                .csrf().disable();
 
+                // Temporarily disable Cross-Site Request Forgery (CSRF) protection
+                // TODO: Figure out how to re-enable CSRF protection safely
+                .csrf().disable()
+
+
+                // Configure the OAuth2 resource server to expect JWT tokens
+                .oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(Customizer.withDefaults())
+                );
 
         logger.info("Security configuration applied successfully.");
+
+        // Build and return the SecurityFilterChain object
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        // Retrieve the JWT secret key from configuration
+        String JWT_SECRET = jwtConfig.getSecretKey();
+
+        // Create a SecretKey using the secret string with HmacSHA256 algorithm
+        SecretKey key = new SecretKeySpec(JWT_SECRET.getBytes(), "HmacSHA256");
+
+        // Create and return a JwtDecoder using the secret key
+        return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
     // Global CORS configuration
@@ -42,6 +77,8 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 logger.info("CORS configuration being added...");
+                
+                // Allow cross-origin requests for all endpoints
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000") // Allow requests from your frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
