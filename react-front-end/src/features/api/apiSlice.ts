@@ -6,7 +6,18 @@ import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
 export const apiSlice = createApi({
     reducerPath: 'api',
 
-    baseQuery: fetchBaseQuery({baseUrl: API_BASE_URL}),
+    baseQuery: fetchBaseQuery({
+        baseUrl: API_BASE_URL,
+        prepareHeaders: (headers, {getState}) => {
+            const token = localStorage.getItem('jwt');
+
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+
+            return headers
+        }
+    }),
 
     tagTypes: ['Room'],
 
