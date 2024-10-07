@@ -62,6 +62,7 @@ public class ProjectsController {
         if (projectData.isPresent()) {
             Project _project = projectData.get();
             _project.setName(project.getName());
+            _project.setRooms(project.getRooms());
 
             return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
         } else {

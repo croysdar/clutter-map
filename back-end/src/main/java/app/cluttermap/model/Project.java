@@ -1,11 +1,17 @@
 package app.cluttermap.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import app.cluttermap.model.Room;
 
 @Entity
 @Table (name = "projects")
@@ -25,6 +31,9 @@ public class Project {
         this.name = name;
     }
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Room> rooms = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -41,6 +50,22 @@ public class Project {
         this.name = name;
     }
 
-    
+    public List<Room> getRooms() {
+        return rooms;
+    }
 
+    public void setRooms(List<Room> rooms) {
+        this.rooms = rooms;
+    }
+
+    // Utility methods for convenience
+    public void addRoom(Room room) {
+        rooms.add(room);
+        room.setProject(this);
+    }
+
+    public void removeRoom(Room room) {
+        rooms.remove(room);
+        room.setProject(null);
+    }
 }
