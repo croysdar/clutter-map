@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table (name = "projects")
-
 public class Project {
     
     @Id
@@ -19,6 +18,12 @@ public class Project {
 
     @Column(nullable = false)
     private String name;
+
+    private Project() {}
+
+    public Project(String name){
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -37,4 +42,5 @@ public class Project {
     }
 
     
+
 }
