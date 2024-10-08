@@ -1,6 +1,7 @@
 import { client } from "@/api/client";
 import { RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
+import { API_BASE_URL } from "@/utils/constants";
 
 export interface AuthState {
     token: string | null,
@@ -31,10 +32,10 @@ const authSlice = createAppSlice({
     initialState,
     reducers: create => {
         return {
-            login: create.asyncThunk(
+            verifyToken: create.asyncThunk(
                 // TODO figure out how to implement csrf token
                 async (idToken: string) => {
-                    const response = await client.post<VerifyTokenReturn>('http://localhost:8080/auth/verify-token', idToken)
+                    const response = await client.post<VerifyTokenReturn>(`${API_BASE_URL}/auth/verify-token`, idToken)
 
                     // Store the token in localStorage if the token exists
                     // This is done outside of the reducer to keep the reducer pure
@@ -62,7 +63,7 @@ const authSlice = createAppSlice({
             fetchUserInfo: create.asyncThunk(
                 async (token: string, {rejectWithValue}) => {
                     try {
-                        const response = await client.get<UserInfoReturn>('http://localhost:8080/auth/user-info', {
+                        const response = await client.get<UserInfoReturn>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
 
@@ -124,7 +125,7 @@ const authSlice = createAppSlice({
     },
 })
 
-export const { login, fetchUserInfo, rejectAuthStatus } = authSlice.actions
+export const { verifyToken, fetchUserInfo, rejectAuthStatus } = authSlice.actions
 
 export const selectCurrentUserName = (state: RootState) => state.auth.userName
 export const selectCurrentUserEmail = (state: RootState) => state.auth.userEmail

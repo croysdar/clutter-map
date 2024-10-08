@@ -4,7 +4,7 @@ import { Container, Typography } from '@mui/material'
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks'
 import { useNavigate } from 'react-router-dom'
-import { login, selectAuthStatus } from '@/features/auth/authSlice'
+import { selectAuthStatus, verifyToken } from '@/features/auth/authSlice'
 
 
 const LoginPage: React.FC = () => {
@@ -14,16 +14,15 @@ const LoginPage: React.FC = () => {
     const handleSuccess = async (cred: CredentialResponse) => {
         const idToken = cred.credential
         if (idToken) {
-            await dispatch(login(idToken));
+            await dispatch(verifyToken(idToken));
             navigate('/home');
         }
     }
 
+    // If the user is logged in and verified
+    // reroute to home when attempting to view the login page
     const authStatus = useAppSelector(selectAuthStatus);
-
     useEffect(() => {
-        // If the user is logged in and verified
-        // reroute to home when attempting to view the login page
         if (authStatus === 'verified') {
             navigate('/home')
         }
