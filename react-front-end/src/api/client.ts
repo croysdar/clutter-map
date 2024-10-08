@@ -27,22 +27,43 @@ export async function client<T>(
         config.body = typeof body === 'string' ? body : JSON.stringify(body)
     }
 
-    let data
     try {
         const response = await window.fetch(endpoint, config)
-        data = await response.json()
-        if (response.ok) {
-            // Return a result object similar to Axios
+
+        // Check if the response status is 204 (No Content)
+        if (response.status === 204) {
             return {
                 status: response.status,
-                data,
+                data: null as any,
                 headers: response.headers,
                 url: response.url,
-            }
+            };
         }
-        throw new Error(response.statusText)
+
+        // Attempt to parse JSON only if the response has a JSON content type
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+        const data = isJson ? await response.json() : null;
+
+        if (!response.ok) {
+            throw new Error(
+                JSON.stringify({ 
+                    status: response.status, 
+                    message: data?.message || 'Unknown Error' 
+                })
+            )
+        }
+
+        // Return a result object similar to Axios
+        return {
+            status: response.status,
+            data,
+            headers: response.headers,
+            url: response.url,
+        }
     } catch (err: any) {
-        return Promise.reject(err.message ? err.message : data)
+        // Handle fetch error
+        return Promise.reject(err.message ? err.message : { status: 500, message: 'Unknown error' })
     }
 }
 
