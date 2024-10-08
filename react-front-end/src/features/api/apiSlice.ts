@@ -2,6 +2,7 @@ import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { API_BASE_URL } from '@/utils/constants'
 import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
+import { getCsrfTokenFromCookies } from '@/utils/utils';
 
 export const apiSlice = createApi({
     reducerPath: 'api',
@@ -14,6 +15,8 @@ export const apiSlice = createApi({
             if (token) {
                 headers.set('authorization', `Bearer ${token}`)
             }
+
+            headers.set('X-CSRF-Token', getCsrfTokenFromCookies() || '')
 
             return headers
         }

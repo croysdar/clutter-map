@@ -13,8 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -42,10 +42,11 @@ public class SecurityConfig {
                 // Enable Cross-Origin Resource Sharing (CORS) with default configuration
                 .cors(Customizer.withDefaults())
 
-                // Temporarily disable Cross-Site Request Forgery (CSRF) protection
-                // TODO: Figure out how to re-enable CSRF protection safely
-                .csrf().disable()
-
+                .csrf(csrf -> csrf
+                    // CSRF token in cookies
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .ignoringRequestMatchers("/auth/verify-token")
+                )  
 
                 // Configure the OAuth2 resource server to expect JWT tokens
                 .oauth2ResourceServer(oauth2 -> oauth2

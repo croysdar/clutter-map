@@ -1,6 +1,8 @@
 // A tiny wrapper around fetch(), borrowed from
 // https://kentcdodds.com/blog/replace-axios-with-a-simple-custom-fetch-wrapper
 
+import { getCsrfTokenFromCookies } from "@/utils/utils"
+
 interface ClientResponse<T> {
     status: number
     data: T
@@ -19,6 +21,8 @@ export async function client<T>(
         ...customConfig,
         headers: {
             ...headers,
+            'X-CSRF-Token': getCsrfTokenFromCookies() || '', // Automatically include CSRF token
+
             ...customConfig.headers,
         },
     }
