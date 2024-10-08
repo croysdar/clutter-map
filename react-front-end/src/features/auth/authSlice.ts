@@ -6,15 +6,17 @@ export interface AuthState {
     token: string | null,
     userEmail: string | null,
     userName: string | null,
-    // status: string
+    status: AuthStatus
 }
 
 const initialState: AuthState = {
     token: null,
     userEmail: null,
     userName: null,
-    // status: '',
+    status: 'idle',
 }
+
+type AuthStatus = 'idle' | 'pending' | 'verified' | 'none'
 
 interface UserInfoReturn {
     userEmail: string,
@@ -43,10 +45,17 @@ const authSlice = createAppSlice({
                     return response.data
                 },
                 {
+                    pending: (state) => {
+                        state.status = 'pending'
+                    },
                     fulfilled: (state, action) => {
                         state.token = action.payload.token
                         state.userEmail = action.payload.userEmail
                         state.userName = action.payload.userName
+                        state.status = 'verified'
+                    },
+                    rejected: (state) => {
+                        state.status = 'none'
                     }
                 }
             ),
@@ -60,36 +69,45 @@ const authSlice = createAppSlice({
                         return response.data
                     }
                     catch (error: any) {
-                        if (error.response) {
+                        if (error.status) {
                             return rejectWithValue({
                                 message: error.message,
-                                status: error.response.status
+                                status: error.status
                             })
                         }
                         throw error
                     }
-
                 },
                 {
+                    pending: (state) => {
+                        state.status = 'pending';
+                    },
                     fulfilled: (state, action) => {
                         state.userEmail = action.payload.userEmail;
                         state.userName = action.payload.userName;
+                        state.status = 'verified'
                     },
                     rejected: (state, action) => {
-                        const errorPayload = action.payload as { status?: number };
+                        let errorPayload;
+                        try {
+                            errorPayload = action.error.message && JSON.parse(action.error.message);
+                        }
+                        catch (error: any) {
+                            console.log("Error parsing the error message: ", error)
+                        }
+
                         const statusCode = errorPayload?.status
 
                         if (statusCode === 500) {
                             console.error('Server error: ', action.error)
                         }
                         else if (statusCode === 401 || statusCode === 403) {
-                            console.error('Unauthorized:', action.payload);
-
                             // Invalid token
                             localStorage.removeItem('jwt')
                             state.token = null;
                             state.userEmail = null;
                             state.userName = null;
+                            state.status = 'none'
                         } 
                         else {
                             console.error('Failed to fetch user info: ', action.error)
@@ -105,6 +123,6 @@ export const { login, fetchUserInfo } = authSlice.actions
 
 export const selectCurrentUserName = (state: RootState) => state.auth.userName
 export const selectCurrentUserEmail = (state: RootState) => state.auth.userEmail
-export const selectCurrentAuthToken = (state: RootState) => state.auth.token
+export const selectAuthStatus = (state: RootState) => state.auth.status
 
 export default authSlice.reducer
