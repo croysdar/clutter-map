@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { Container, Typography } from '@mui/material'
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
-import { useAppDispatch } from '@/hooks/useAppHooks'
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks'
 import { useNavigate } from 'react-router-dom'
-import { login } from '@/features/auth/authSlice'
+import { login, selectAuthStatus } from '@/features/auth/authSlice'
 
 
 const LoginPage: React.FC = () => {
@@ -18,6 +18,17 @@ const LoginPage: React.FC = () => {
             navigate('/home');
         }
     }
+
+    const authStatus = useAppSelector(selectAuthStatus);
+
+    useEffect(() => {
+        // If the user is logged in and verified
+        // reroute to home when attempting to view the login page
+        if (authStatus === 'verified') {
+            navigate('/home')
+        }
+    }, [authStatus, navigate])
+
 
     return (
         <Container maxWidth="md" sx={{
