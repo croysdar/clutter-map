@@ -36,7 +36,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Allow requests to "/auth/verify-token" without authentication
-                        .requestMatchers("/auth/verify-token").permitAll()
+                        .requestMatchers("/auth/verify-token", "/auth/user-info").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated())
                 // Enable Cross-Origin Resource Sharing (CORS) with default configuration

@@ -13,16 +13,16 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -32,6 +32,9 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import app.cluttermap.model.User;
 import app.cluttermap.repository.UsersRepository;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @RestController
 @RequestMapping("/auth")
@@ -64,7 +67,6 @@ public class GoogleAuthController {
 
         // Verify the token
         GoogleIdToken idToken = verifier.verify(idTokenString);
-
 
         if (idToken != null) {
             System.out.println("Token Verified");
@@ -122,5 +124,25 @@ public class GoogleAuthController {
             // Invalid ID token
             return ResponseEntity.badRequest().body("Invalid ID token.");
         }
+    }
+
+    @GetMapping("/user-info")
+    public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        // Get the JWT token from the authentication object
+        Jwt jwtToken = (Jwt) authentication.getPrincipal();
+
+        // Extract claims from JWT
+        String userEmail = jwtToken.getClaim("email");
+        String userName = jwtToken.getClaim("username");
+
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("userName", userEmail);
+        userInfo.put("userName", userName);
+
+        return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 }
