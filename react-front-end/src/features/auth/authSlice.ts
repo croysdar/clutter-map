@@ -114,12 +114,17 @@ const authSlice = createAppSlice({
                         }
                     }
                 }
-            )
+            ),
+            rejectAuthStatus: create.reducer(
+                (state) => {
+                    state.status = 'none';
+                }
+            ),
         }
     },
 })
 
-export const { login, fetchUserInfo } = authSlice.actions
+export const { login, fetchUserInfo, rejectAuthStatus } = authSlice.actions
 
 export const selectCurrentUserName = (state: RootState) => state.auth.userName
 export const selectCurrentUserEmail = (state: RootState) => state.auth.userEmail
