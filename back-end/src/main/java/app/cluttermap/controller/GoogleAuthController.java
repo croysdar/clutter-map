@@ -129,7 +129,9 @@ public class GoogleAuthController {
     @GetMapping("/user-info")
     public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Invalid JWT Token");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
         // Get the JWT token from the authentication object
