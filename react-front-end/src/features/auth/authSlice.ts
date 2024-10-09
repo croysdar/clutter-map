@@ -33,7 +33,6 @@ const authSlice = createAppSlice({
     reducers: create => {
         return {
             verifyToken: create.asyncThunk(
-                // TODO figure out how to implement csrf token
                 async (idToken: string) => {
                     const response = await client.post<VerifyTokenReturn>(`${API_BASE_URL}/auth/verify-token`, idToken)
 
