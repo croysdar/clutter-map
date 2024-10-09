@@ -34,7 +34,7 @@ export const AddRoom = () => {
             // redirect to /rooms
             navigate('/rooms')
         } catch (err) {
-            console.log("Failed to create the room: ", err)
+            console.error("Failed to create the room: ", err)
         }
     }
 

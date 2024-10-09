@@ -94,7 +94,7 @@ const authSlice = createAppSlice({
                             errorPayload = action.error.message && JSON.parse(action.error.message);
                         }
                         catch (error: any) {
-                            console.log("Error parsing the error message: ", error)
+                            console.error("Error parsing the error message: ", error)
                         }
 
                         const statusCode = errorPayload?.status
