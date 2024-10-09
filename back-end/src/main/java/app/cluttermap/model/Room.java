@@ -1,5 +1,7 @@
 package app.cluttermap.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,10 +30,11 @@ public class Room {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
+    @JsonBackReference
     private Project project;
 
     // no-arg constructor for Hibernate
-    private Room() {}
+    protected Room() {}
 
     // public constructor
     // ID is not required because Postgres generates the ID

@@ -3,6 +3,8 @@ package app.cluttermap.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,13 +27,15 @@ public class Project {
     @Column(nullable = false)
     private String name;
 
-    private Project() {}
+    // no-arg constructor for Hibernate
+    protected Project() {}
 
     public Project(String name){
         this.name = name;
     }
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
 
     public Long getId() {
