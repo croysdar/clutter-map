@@ -9,7 +9,7 @@ export const apiSlice = createApi({
 
     baseQuery: fetchBaseQuery({ baseUrl: API_BASE_URL }),
 
-    tagTypes: ['Room'],
+    tagTypes: ['Room', 'Project'],
 
     endpoints: builder => ({
         getRooms: builder.query<Room[], void>({
@@ -53,10 +53,15 @@ export const apiSlice = createApi({
 
         getProjects: builder.query<Project[], void>({
             query: () => '/projects',
+            providesTags: (result = []) => [
+                'Project',
+                ...result.map(({ id }) => ({ type: 'Project', id } as const))
+            ]
         }),
 
         getProject: builder.query<Project, string>({
             query: (projectId) => `/projects/${projectId}`,
+            providesTags: (result, error, arg) => [{ type: 'Project', id: arg }]
         }),
 
         updateProject: builder.mutation<Project, ProjectUpdate>({
@@ -65,6 +70,7 @@ export const apiSlice = createApi({
                 method: 'PUT',
                 body: project
             }),
+            invalidatesTags: (result, error, arg) => [{ type: 'Project', id: arg.id }]
         }),
 
         deleteProject: builder.mutation<{ success: boolean, id: number }, number>({
@@ -72,6 +78,7 @@ export const apiSlice = createApi({
                 url: `/projects/${projectId}`,
                 method: 'DELETE',
             }),
+            invalidatesTags: (result, error, id) => [{ type: 'Project', id }]
         }),
 
         addNewProject: builder.mutation<Project, NewProject>({
@@ -80,7 +87,7 @@ export const apiSlice = createApi({
                 method: 'POST',
                 body: initialProject
             }),
-        })
+            invalidatesTags: ['Project']
         })
 
     })
