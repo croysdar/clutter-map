@@ -10,9 +10,12 @@ const Pages: React.FC = () => {
             <Routes>
                 {/* <Route exact path="/" component={Home} /> */}
                 {/* <Route path="/add-item" component={AddItem} /> */}
-                <Route path="/rooms" Component={RoomsList} /> 
+                {/* <Route path="/rooms" Component={RoomsList} /> 
                 <Route path="/rooms/add" Component={AddRoom} /> 
-                <Route path="/rooms/:roomID/edit" Component={EditRoom} /> 
+                <Route path="/rooms/:roomID/edit" Component={EditRoom} /> */}
+                <Route path="/projects/:projectID/rooms" Component={RoomsList} /> 
+                <Route path="/projects/:projectID/rooms/add" Component={AddRoom} /> 
+                <Route path="/projects/:projectID/rooms/:roomID/edit" Component={EditRoom} /> 
             </Routes>
         </BrowserRouter>
     );
