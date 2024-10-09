@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.cluttermap.model.Project;
+import app.cluttermap.model.Room;
 import app.cluttermap.repository.ProjectsRepository;
+import app.cluttermap.repository.RoomsRepository;
 
 @RestController
 @RequestMapping("/projects")
@@ -63,6 +65,22 @@ public class ProjectsController {
             Project _project = projectData.get();
             _project.setName(project.getName());
             _project.setRooms(project.getRooms());
+
+            return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/{id}/rooms")
+    public ResponseEntity<Project> addOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
+        Optional<Project> projectData = projectsRepository.findById(id);
+        if (projectData.isPresent()) {
+            Project _project = projectData.get();
+            Room newRoom = new Room("name", "description", _project);
+            newRoom.setName(room.getName());
+            newRoom.setDescription(room.getDescription());
+            _project.addRoom(newRoom);
 
             return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
         } else {
