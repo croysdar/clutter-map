@@ -12,9 +12,6 @@ import {
     Typography
 } from '@mui/material';
 
-import { Location } from '../../types/types';
-import RoomMenu from '@/features/rooms/RoomMenu';
-import { useGetRoomsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
 import { useGetRoomsQuery, useGetProjectQuery } from '@/features/api/apiSlice';
 import RoomMenu from '@/features/rooms/RoomMenu';
@@ -76,7 +73,7 @@ const RoomsList: React.FC = () => {
         <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
-                    Room List
+                    {project.name}
                 </Typography>
                 {rooms.map((room) => (
                     <>
