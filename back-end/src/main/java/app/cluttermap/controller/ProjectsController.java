@@ -2,6 +2,7 @@ package app.cluttermap.controller;
 
 import java.util.Optional;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,18 @@ public class ProjectsController {
         return this.projectsRepository.findAll();
     }
 
+    @GetMapping("/{id}/rooms")
+    public ResponseEntity<List<Room>> getProjectRooms(@PathVariable("id") Long id) {
+        Optional<Project> projectData = projectsRepository.findById(id);
+
+        if (projectData.isPresent()) {
+            Project project = projectData.get();
+            return new ResponseEntity<>(project.getRooms(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    
     @PostMapping()
     public ResponseEntity<Project> addOneProject(@RequestBody Project project) {
         if (project.getName() == null || project.getName().isEmpty()) {

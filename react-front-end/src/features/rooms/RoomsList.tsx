@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetRoomsQuery, useGetProjectQuery } from '@/features/api/apiSlice';
+import { useGetRoomsByProjectQuery, useGetProjectQuery } from '@/features/api/apiSlice';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useParams } from 'react-router-dom';
 import { Location } from '../../types/types';
@@ -28,7 +28,7 @@ const RoomsList: React.FC = () => {
         isLoading,
         isError,
         error
-    } = useGetRoomsQuery();
+    } = useGetRoomsByProjectQuery(projectId!);
 
     if (isLoading) {
         return <div>Loading...</div>;

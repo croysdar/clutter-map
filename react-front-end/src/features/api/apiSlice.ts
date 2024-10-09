@@ -20,6 +20,14 @@ export const apiSlice = createApi({
             ]
         }),
 
+        getRoomsByProject: builder.query<Room[], string>({
+            query: (projectID) => `/projects/${projectID}/rooms`,
+            providesTags: (result = []) => [
+                'Room',
+                ...result.map(({ id }) => ({ type: 'Room', id } as const))
+            ]
+        }),
+
         getRoom: builder.query<Room, string>({
             query: (roomId) => `/rooms/${roomId}`,
             providesTags: (result, error, arg) => [{ type: 'Room', id: arg }]
@@ -95,6 +103,7 @@ export const apiSlice = createApi({
 
 export const {
     useGetRoomsQuery,
+    useGetRoomsByProjectQuery,
     useGetRoomQuery,
     useUpdateRoomMutation,
     useAddNewRoomMutation,
