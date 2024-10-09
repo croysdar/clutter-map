@@ -4,7 +4,7 @@ import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
 import { Room } from '@/features/rooms/roomsSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 type RoomMenuProps = {
@@ -15,6 +15,7 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const open = Boolean(anchorEl)
     const navigate = useNavigate();
+    const { projectId } = useParams();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -24,7 +25,7 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
     }
 
     const handleEdit = () => {
-        navigate(`/rooms/${room.id}/edit`)
+        navigate(`/projects/${projectId}/rooms/${room.id}/edit`)
         handleClose();
     }
 

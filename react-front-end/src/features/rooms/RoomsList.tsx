@@ -16,8 +16,16 @@ import { Location } from '../../types/types';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useGetRoomsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
+import { useGetRoomsQuery, useGetProjectQuery } from '@/features/api/apiSlice';
+import RoomMenu from '@/features/rooms/RoomMenu';
+import { useParams } from 'react-router-dom';
+import { Location } from '../../types/types';
 
 const RoomsList: React.FC = () => {
+    const { projectId } = useParams();
+
+    const { data: project } = useGetProjectQuery(projectId!);
+
     const {
         data: rooms = [],
         isLoading,
@@ -31,6 +39,10 @@ const RoomsList: React.FC = () => {
 
     if (isError) {
         return <div>{error.toString()}</div>
+    }
+
+    if (!project) {
+        return <div>Project not found.</div>
     }
 
     const renderLocation = (location: Location) => {
@@ -84,7 +96,7 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href="/rooms/add" label="Create a new Room"/>
+                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room"/>
             </Paper>
         </Container>
     );

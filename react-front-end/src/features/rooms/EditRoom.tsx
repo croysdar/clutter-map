@@ -16,10 +16,11 @@ interface EditRoomFormElements extends HTMLFormElement {
 }
 
 const EditRoom = () => {
-    const { roomID } = useParams();
+    const { roomId } = useParams();
     const navigate = useNavigate();
+    const { projectId } = useParams();
 
-    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomID!);
+    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
 
     const [
         updateRoom,
@@ -49,7 +50,8 @@ const EditRoom = () => {
 
         if (room && name) {
             await updateRoom({ id: room.id, name: name, description: description })
-            navigate(`/rooms`)
+            // redirect to [this project]/rooms
+            navigate(`/projects/${projectId}/rooms`)
         }
     }
 
