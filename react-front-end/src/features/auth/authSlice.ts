@@ -4,14 +4,12 @@ import { createAppSlice } from "@/hooks/useAppHooks";
 import { API_BASE_URL } from "@/utils/constants";
 
 export interface AuthState {
-    token: string | null,
     userEmail: string | null,
     userName: string | null,
     status: AuthStatus
 }
 
 const initialState: AuthState = {
-    token: null,
     userEmail: null,
     userName: null,
     status: 'idle',
@@ -24,7 +22,7 @@ interface UserInfoReturn {
     userName: string
 }
 
-type VerifyTokenReturn = Pick<AuthState, 'token' | 'userEmail' | 'userName'>
+type VerifyTokenReturn = Pick<AuthState, 'userEmail' | 'userName'> & { 'token': string }
 
 
 const authSlice = createAppSlice({
@@ -49,7 +47,6 @@ const authSlice = createAppSlice({
                         state.status = 'pending'
                     },
                     fulfilled: (state, action) => {
-                        state.token = action.payload.token
                         state.userEmail = action.payload.userEmail
                         state.userName = action.payload.userName
                         state.status = 'verified'
@@ -104,7 +101,6 @@ const authSlice = createAppSlice({
                         else if (statusCode === 401 || statusCode === 403) {
                             // Invalid token
                             localStorage.removeItem('jwt')
-                            state.token = null;
                             state.userEmail = null;
                             state.userName = null;
                             state.status = 'none'
