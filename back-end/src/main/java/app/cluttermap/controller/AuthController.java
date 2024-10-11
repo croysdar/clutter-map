@@ -98,12 +98,11 @@ public class AuthController {
             logger.info("\nGoogle ID: " + userGoogleId + "\nEmail: " + email + "\nName: " + name);
 
             // Look up the user by google id
-            Optional<User> existingUser = usersRepository.findByGoogleId(userGoogleId);
+            Optional<User> existingUser = usersRepository.findByProviderId(userGoogleId);
 
             // If the user does not exist (first login), create a new user
             User user = existingUser.orElseGet(() -> {
-                User newUser = new User();
-                newUser.setGoogleId(userGoogleId);
+                User newUser = new User(userGoogleId);
                 newUser.setEmail(email);
                 newUser.setProvider("google");
                 newUser.setUsername(name);

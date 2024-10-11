@@ -11,17 +11,24 @@ import jakarta.persistence.Table;
 import java.util.Date;
 
 @Entity
-@Table(name = "app_user")
+@Table(name = "app_users")
 public class User {
     @Id
+    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String googleId;
+    private String providerId;
     private String username;
     private String email;
-    private String provider; // 'google'
+    private String provider; // ex: 'google'
 
+    // no-arg constructor for Hibernate
+    protected User() {}
+
+    public User(String providerId) {
+        this.providerId = providerId;
+    }
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -30,24 +37,31 @@ public class User {
     public Date getCreatedAt() {
         return createdAt;
     }
+
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
-    public String getGoogleId() {
-        return googleId;
+
+    public String getProviderId() {
+        return providerId;
     }
-    public void setGoogleId(String googleId) {
-        this.googleId = googleId;
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
+
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -55,6 +69,7 @@ public class User {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -62,6 +77,7 @@ public class User {
     public String getProvider() {
         return provider;
     }
+
     public void setProvider(String provider) {
         this.provider = provider;
     }

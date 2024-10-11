@@ -10,5 +10,5 @@ import app.cluttermap.model.User;
 @Repository
 public interface UsersRepository extends CrudRepository<User, Long> {
     Optional <User> findByEmail(String email);
-    Optional <User> findByGoogleId(String googleId);
+    Optional <User> findByProviderId(String googleId);
 }
