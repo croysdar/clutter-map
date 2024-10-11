@@ -23,11 +23,11 @@ public class Room {
     private String description;
 
     // no-arg constructor for Hibernate
-    private Room() {}
+    protected Room() { }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Room(String name, String description){
+    public Room(String name, String description) {
         this.name = name;
         this.description = description;
     }
