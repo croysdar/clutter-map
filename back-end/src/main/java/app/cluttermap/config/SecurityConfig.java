@@ -22,6 +22,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Logger is used to log important information and events during the
+    // application's runtime, helping with debugging, auditing, and tracking application flow.
+    // supports different levels (INFO, DEBUG, ERROR, WARN)
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     // Used to get the jwt secret token

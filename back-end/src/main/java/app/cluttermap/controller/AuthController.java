@@ -11,13 +11,14 @@ import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +39,11 @@ import io.jsonwebtoken.security.Keys;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
+    // Logger is used to log important information and events during the
+    // application's runtime, helping with debugging, auditing, and tracking application flow.
+    // supports different levels (INFO, DEBUG, ERROR, WARN)
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     // Factory for JSON processing, using Gson for serialization and deserialization
     private final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -63,7 +67,7 @@ public class AuthController {
     @PostMapping("/verify-token/google")
     public ResponseEntity<?> verifyGoogleToken(@RequestBody String idTokenString)
             throws GeneralSecurityException, IOException {
-        System.out.println("Verify Token Called");
+        logger.info("Verify Token Called");
 
         // Create the google id token verifier
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
@@ -76,11 +80,9 @@ public class AuthController {
         GoogleIdToken idToken = verifier.verify(idTokenString);
 
         if (idToken != null) {
-            System.out.println("Token Verified");
-
-            GoogleIdToken.Payload payload = idToken.getPayload();
 
             // Get user information from the payload
+            GoogleIdToken.Payload payload = idToken.getPayload();
             String userId = payload.getSubject();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
@@ -93,9 +95,7 @@ public class AuthController {
             // String givenName = (String) payload.get("given_name");
 
             // Log the profile information
-            System.out.println("User ID: " + userId);
-            System.out.println("Email: " + email);
-            System.out.println("Name: " + name);
+            logger.info("\nUser ID: " + userId + "\nEmail: " + email + "\nName: " + name);
 
             // Look up the user by email
             Optional<User> existingUser = usersRepository.findByGoogleId(userId);
@@ -138,6 +138,8 @@ public class AuthController {
         }
     }
 
+    // Used to both validate a JWT token (typically issued from this backend)
+    // as well as get simple user info to return to the frontend
     @GetMapping("/user-info")
     public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
@@ -153,6 +155,7 @@ public class AuthController {
         String userEmail = jwtToken.getClaim("email");
         String userName = jwtToken.getClaim("username");
 
+        // Build the response object
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("userEmail", userEmail);
         userInfo.put("userName", userName);
