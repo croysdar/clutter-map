@@ -83,7 +83,7 @@ public class AuthController {
 
             // Get user information from the payload
             GoogleIdToken.Payload payload = idToken.getPayload();
-            String userId = payload.getSubject();
+            String userGoogleId = payload.getSubject();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
 
@@ -95,14 +95,15 @@ public class AuthController {
             // String givenName = (String) payload.get("given_name");
 
             // Log the profile information
-            logger.info("\nUser ID: " + userId + "\nEmail: " + email + "\nName: " + name);
+            logger.info("\nGoogle ID: " + userGoogleId + "\nEmail: " + email + "\nName: " + name);
 
-            // Look up the user by email
-            Optional<User> existingUser = usersRepository.findByGoogleId(userId);
+            // Look up the user by google id
+            Optional<User> existingUser = usersRepository.findByGoogleId(userGoogleId);
 
             // If the user does not exist (first login), create a new user
             User user = existingUser.orElseGet(() -> {
                 User newUser = new User();
+                newUser.setGoogleId(userGoogleId);
                 newUser.setEmail(email);
                 newUser.setProvider("google");
                 newUser.setUsername(name);
