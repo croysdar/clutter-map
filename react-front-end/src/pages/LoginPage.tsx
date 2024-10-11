@@ -14,7 +14,7 @@ const LoginPage: React.FC = () => {
     const handleSuccess = async (cred: CredentialResponse) => {
         const idToken = cred.credential
         if (idToken) {
-            await dispatch(verifyToken(idToken));
+            await dispatch(verifyToken({idToken, provider: 'google'}));
             navigate('/home');
         }
     }

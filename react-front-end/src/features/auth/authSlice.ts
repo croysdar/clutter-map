@@ -33,8 +33,8 @@ const authSlice = createAppSlice({
     reducers: create => {
         return {
             verifyToken: create.asyncThunk(
-                async (idToken: string) => {
-                    const response = await client.post<VerifyTokenReturn>(`${API_BASE_URL}/auth/verify-token`, idToken)
+                async ({ idToken, provider }: { idToken: string, provider: string }) => {
+                    const response = await client.post<VerifyTokenReturn>(`${API_BASE_URL}/auth/verify-token/${provider}`, idToken)
 
                     // Store the token in localStorage if the token exists
                     // This is done outside of the reducer to keep the reducer pure
@@ -60,7 +60,7 @@ const authSlice = createAppSlice({
                 }
             ),
             fetchUserInfo: create.asyncThunk(
-                async (token: string, {rejectWithValue}) => {
+                async (token: string, { rejectWithValue }) => {
                     try {
                         const response = await client.get<UserInfoReturn>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }
@@ -108,7 +108,7 @@ const authSlice = createAppSlice({
                             state.userEmail = null;
                             state.userName = null;
                             state.status = 'none'
-                        } 
+                        }
                         else {
                             console.error('Failed to fetch user info: ', action.error)
                         }

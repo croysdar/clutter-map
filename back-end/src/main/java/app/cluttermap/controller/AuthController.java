@@ -39,9 +39,12 @@ import io.jsonwebtoken.security.Keys;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = "http://localhost:3000")
-public class GoogleAuthController {
+public class AuthController {
 
+    // Factory for JSON processing, using Gson for serialization and deserialization
     private final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
+    // HTTP transport layer, used to send HTTP requests over the network
     private final NetHttpTransport transport = new NetHttpTransport();
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
@@ -55,13 +58,17 @@ public class GoogleAuthController {
 
     private final long EXPIRATION_TIME = 86400000; // 1 day
 
-    @PostMapping("/verify-token")
+    // This is called after a user logs in with the "Sign in with Google" button
+    // Google returns a token to the frontend and we now want to verify it
+    @PostMapping("/verify-token/google")
     public ResponseEntity<?> verifyGoogleToken(@RequestBody String idTokenString)
             throws GeneralSecurityException, IOException {
         System.out.println("Verify Token Called");
 
-        // Create the token verifier
+        // Create the google id token verifier
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                // Set the audience to our client id
+                // this verifies that the token was issued for our app
                 .setAudience(Collections.singletonList(clientId))
                 .build();
 
@@ -76,8 +83,10 @@ public class GoogleAuthController {
             // Get user information from the payload
             String userId = payload.getSubject();
             String email = payload.getEmail();
-            // boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
             String name = (String) payload.get("name");
+
+            // OTHER INFORMATION WE COULD STORE IF WE WANT IN THE FUTURE
+            // boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
             // String pictureUrl = (String) payload.get("picture");
             // String locale = (String) payload.get("locale");
             // String familyName = (String) payload.get("family_name");
@@ -100,6 +109,9 @@ public class GoogleAuthController {
                 return usersRepository.save(newUser);
             });
 
+            // Securely convert the JWT_SECRET into a key used for signing the JWT using
+            // HMAC SHA-256.
+            // This helps ensure that the JWT is tamper-proof once signed.
             SecretKey key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
             // Create our own JWT
@@ -142,7 +154,7 @@ public class GoogleAuthController {
         String userName = jwtToken.getClaim("username");
 
         Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("userName", userEmail);
+        userInfo.put("userEmail", userEmail);
         userInfo.put("userName", userName);
 
         return new ResponseEntity<>(userInfo, HttpStatus.OK);

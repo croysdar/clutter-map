@@ -36,22 +36,20 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Allow requests to "/auth/verify-token" without authentication
-                        .requestMatchers("/auth/verify-token", "/auth/user-info").permitAll()
+                        .requestMatchers("/auth/verify-token/google", "/auth/user-info").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated())
                 // Enable Cross-Origin Resource Sharing (CORS) with default configuration
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf
-                    // CSRF token in cookies
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .ignoringRequestMatchers("/auth/verify-token")
-                )  
+                        // CSRF token in cookies
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers("/auth/verify-token/google"))
 
                 // Configure the OAuth2 resource server to expect JWT tokens
                 .oauth2ResourceServer(oauth2 -> oauth2
-                    .jwt(Customizer.withDefaults())
-                );
+                        .jwt(Customizer.withDefaults()));
 
         logger.info("Security configuration applied successfully.");
 
@@ -78,7 +76,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 logger.info("CORS configuration being added...");
-                
+
                 // Allow cross-origin requests for all endpoints
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000") // Allow requests from your frontend
