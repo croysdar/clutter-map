@@ -12,7 +12,7 @@ const HomePage: React.FC = () => {
             height: '100vh'
         }}>
             <Typography variant='h1'>Welcome to Clutter Map</Typography>
-            <ButtonLink href="/rooms" label="Rooms" />
+            <ButtonLink href="/projects" label="Projects" />
 
         </Container>
     )
