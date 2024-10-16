@@ -90,7 +90,7 @@ const ProjectsList: React.FC = () => {
                                 <CardHeader
                                     title={<Typography variant='h4'> {project.name}</Typography>}
                                     action={<ProjectMenu project={project} />}
-                                    onClick={(e) =>  handleClick(e, project.id)}
+                                    onClick={(e) => handleClick(e, project.id)}
                                 />
                             </div>
                         </Card>

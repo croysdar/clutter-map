@@ -17,13 +17,17 @@ const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
     const navigate = useNavigate();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     }
     const handleClose = () => {
         setAnchorEl(null);
     }
 
-    const handleEdit = () => {
+    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         navigate(`/projects/${project.id}/edit`)
         handleClose();
     }
