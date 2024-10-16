@@ -34,7 +34,7 @@ public class Room {
     private Project project;
 
     // no-arg constructor for Hibernate
-    protected Room() {}
+    protected Room() { }
 
     // public constructor
     // ID is not required because Postgres generates the ID

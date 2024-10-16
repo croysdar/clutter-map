@@ -3,11 +3,25 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { API_BASE_URL } from '@/utils/constants'
 import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
 import { Project, NewProject, ProjectUpdate } from '../projects/projectsTypes'
+import { getCsrfTokenFromCookies } from '@/utils/utils';
 
 export const apiSlice = createApi({
     reducerPath: 'api',
 
-    baseQuery: fetchBaseQuery({ baseUrl: API_BASE_URL }),
+    baseQuery: fetchBaseQuery({
+        baseUrl: API_BASE_URL,
+        prepareHeaders: (headers, {getState}) => {
+            const token = localStorage.getItem('jwt');
+
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+
+            headers.set('X-CSRF-Token', getCsrfTokenFromCookies() || '')
+
+            return headers
+        }
+    }),
 
     tagTypes: ['Room', 'Project'],
 

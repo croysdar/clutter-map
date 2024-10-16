@@ -23,7 +23,6 @@ import app.cluttermap.repository.RoomsRepository;
 
 @RestController
 @RequestMapping("/rooms")
-@CrossOrigin(origins = "http://localhost:3000")
 public class RoomsController {
     @Autowired
     private final RoomsRepository roomsRepository;
