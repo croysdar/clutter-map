@@ -97,16 +97,15 @@ export const AddRoom = () => {
                             Create Room
                         </Button>
                     </form>
-
                     <Button
-                    variant="text"
-                    color="error"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={() => navigate(`/projects/${projectId}/rooms`)}
+                        variant="text"
+                        color="error"
+                        fullWidth
+                        sx={{ marginTop: 2 }}
+                        onClick={() => navigate(`/projects/${projectId}/rooms`)}
 
                     >
-                    Cancel
+                        Cancel
                     </Button>
 
                 </CardContent>

@@ -41,10 +41,7 @@ public class RoomsController {
 
     @PostMapping()
     public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
-        if (roomDTO.getName() == null || roomDTO.getName().isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if (roomDTO.getProjectId() == null) {
+        if (roomDTO.getName() == null || roomDTO.getName().isEmpty() || roomDTO.getProjectId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

@@ -86,23 +86,6 @@ public class ProjectsController {
         }
     }
 
-    @PostMapping("/{id}/rooms")
-    public ResponseEntity<Project> addOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
-        Optional<Project> projectData = projectsRepository.findById(id);
-        if (projectData.isPresent()) {
-            Project _project = projectData.get();
-            Room newRoom = new Room("name", "description", _project);
-            newRoom.setName(room.getName());
-            newRoom.setDescription(room.getDescription());
-            _project.addRoom(newRoom);
-            // We don't need to do roomsRepository.save(newRoom) here because we have the cascade under @OneToMany
-
-            return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Project> deleteOneProject(@PathVariable("id") Long id) {
         Optional<Project> projectData = projectsRepository.findById(id);

@@ -50,33 +50,6 @@ const ProjectsList: React.FC = () => {
         return <div>{error.toString()}</div>
     }
 
-    const renderLocation = (location: Location) => {
-        return (
-            <Accordion>
-                <AccordionSummary >
-                    <Typography > {location.name} </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div key={location.id} className="location">
-                        <Typography> {location.description} </Typography>
-                        <ul>
-                            {location.items.map((item) => (
-                                <ul key={item.id}>
-                                    <Typography>
-                                        <strong>{item.name}</strong>: {item.description} (Location: {item.location})
-                                    </Typography>
-                                </ul>
-                            ))}
-                        </ul>
-                        <ul>
-                            {location.subLocations.map((location) => renderLocation(location))}
-                        </ul>
-                    </div>
-                </AccordionDetails>
-            </Accordion>
-        )
-    }
-
     return (
         <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>

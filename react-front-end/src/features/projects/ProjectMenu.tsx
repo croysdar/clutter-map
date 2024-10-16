@@ -32,12 +32,6 @@ const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
         handleClose();
     }
 
-    const handleAddLocation = () => {
-        // TODO add location addition functionality
-        alert(project.id);
-        handleClose();
-    }
-
     return (
         <>
             <Tooltip title="Settings">
@@ -61,9 +55,6 @@ const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
             */}
                 <MenuItem onClick={handleEdit}>
                     Edit Project
-                </MenuItem>
-                <MenuItem onClick={handleAddLocation}>
-                    Add Location
                 </MenuItem>
 
             </Menu>
