@@ -83,6 +83,9 @@ jobs:
         echo "DB_SOURCE_URL=$DB_SOURCE_URL"
         echo "OAUTH_GOOGLE_CLIENT_ID=$OAUTH_GOOGLE_CLIENT_ID"
         echo "OAUTH_GOOGLE_CLIENT_SECRET=$OAUTH_GOOGLE_CLIENT_SECRET"
+    
+    - name: List environment variables
+      run: printenv
 
     - name: Build Application
       run: cd back-end && chmod +x ./gradlew && ./gradlew build
