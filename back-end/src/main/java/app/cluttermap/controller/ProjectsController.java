@@ -23,7 +23,6 @@ import app.cluttermap.repository.RoomsRepository;
 
 @RestController
 @RequestMapping("/projects")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ProjectsController {
     @Autowired
     private final ProjectsRepository projectsRepository;
@@ -72,12 +71,16 @@ public class ProjectsController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id, @RequestBody Project project) {
+        /*
+         * Takes project, returns a project. 
+         * Use to change project name.
+         * Cannot use to change rooms within project.
+         */
         Optional<Project> projectData = projectsRepository.findById(id);
 
         if (projectData.isPresent()) {
             Project _project = projectData.get();
             _project.setName(project.getName());
-            _project.setRooms(project.getRooms());
 
             return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
         } else {
@@ -94,6 +97,7 @@ public class ProjectsController {
             newRoom.setName(room.getName());
             newRoom.setDescription(room.getDescription());
             _project.addRoom(newRoom);
+            // We don't need to do roomsRepository.save(newRoom) here because we have the cascade under @OneToMany
 
             return new ResponseEntity<>(projectsRepository.save(_project), HttpStatus.OK);
         } else {
