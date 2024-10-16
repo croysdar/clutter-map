@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: .
+    destination: /home/ec2-user/clutter-map
+hooks:
+  AfterInstall:
+    - location: /home/ec2-user/clutter-map/back-end/scripts/install_app_dependencies
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: /home/ec2-user/clutter-map/back-end/scripts/start_server
+      timeout: 300
+      runas: root
