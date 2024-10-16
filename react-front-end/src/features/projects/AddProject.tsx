@@ -73,6 +73,17 @@ export const AddProject = () => {
                         </Button>
                     </form>
 
+                    <Button
+                    variant="text"
+                    color="error"
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={() => navigate('/projects')}
+
+                    >
+                    Cancel
+                    </Button>
+
                 </CardContent>
             </Card>
         </Container>
