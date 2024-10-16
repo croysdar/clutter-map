@@ -9,7 +9,8 @@ import {
     CardHeader,
     Container,
     Paper,
-    Typography
+    Typography,
+    Button 
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
@@ -70,7 +71,15 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        //Container previous properties: , justifyContent: 'center', alignItems: 'center',
+        <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
+            <Button 
+                href={`/projects`}
+                variant="text" 
+                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
+            >
+                Projects List
+            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
                     {project.name}
