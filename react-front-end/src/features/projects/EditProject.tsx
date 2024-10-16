@@ -3,55 +3,51 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetRoomQuery, useUpdateRoomMutation } from '../api/apiSlice'
-import DeleteRoomButton from './DeleteRoomButton'
+import { useGetProjectQuery, useUpdateProjectMutation } from '../api/apiSlice'
+import DeleteProjectButton from './DeleteProjectButton'
 
-interface EditRoomFormFields extends HTMLFormControlsCollection {
-    roomName: HTMLInputElement,
-    roomDescription: HTMLTextAreaElement
+interface EditProjectFormFields extends HTMLFormControlsCollection {
+    projectName: HTMLInputElement,
 }
 
-interface EditRoomFormElements extends HTMLFormElement {
-    readonly elements: EditRoomFormFields
+interface EditProjectFormElements extends HTMLFormElement {
+    readonly elements: EditProjectFormFields
 }
 
-const EditRoom = () => {
-    const { roomId } = useParams();
-    const navigate = useNavigate();
+const EditProject = () => {
     const { projectId } = useParams();
+    const navigate = useNavigate();
 
-    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
+    const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 
     const [
-        updateRoom,
+        updateProject,
         { isLoading: updateLoading }
-    ] = useUpdateRoomMutation();
+    ] = useUpdateProjectMutation();
 
-    if (!room) {
+    if (!project) {
         return (
             <section>
-                <Typography variant='h2'>Room not found!</Typography>
+                <Typography variant='h2'>Project not found!</Typography>
             </section>
         )
     }
 
-    if (roomLoading) {
+    if (projectLoading) {
         return (
             <CircularProgress />
         )
     }
 
-    const handleSubmit = async (e: React.FormEvent<EditRoomFormElements>) => {
+    const handleSubmit = async (e: React.FormEvent<EditProjectFormElements>) => {
         e.preventDefault()
 
         const { elements } = e.currentTarget
-        const name = elements.roomName.value
-        const description = elements.roomDescription.value
+        const name = elements.projectName.value
 
-        if (room && name) {
-            await updateRoom({ id: room.id, name: name, description: description })
-            // redirect to [this project]/rooms
-            navigate(`/projects/${projectId}/rooms`)
+        if (project && name) {
+            await updateProject({ id: project.id, name: name })
+            navigate(`/projects`)
         }
     }
 
@@ -61,39 +57,23 @@ const EditRoom = () => {
                 <CardHeader
                     title={
                         <Typography variant="h4" component="h2" gutterBottom align="center">
-                            Edit Room
+                            Edit Project
                         </Typography>
                     }
                 />
                 <CardContent>
                     <form onSubmit={handleSubmit}>
-                        {/* Room Name */}
+                        {/* Project Name */}
                         <TextField
-                            label="Room Name"
+                            label="Project Name"
 
-                            id="roomName"
+                            id="projectName"
                             name="name"
-                            defaultValue={room.name}
+                            defaultValue={project.name}
 
                             required
 
                             fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                        />
-
-                        {/* Room Description */}
-                        <TextField
-                            label="Room Description"
-
-                            id="roomDescription"
-                            name="description"
-                            defaultValue={room.description}
-
-                            fullWidth
-                            multiline
-                            rows={4}
                             margin="normal"
                             variant="outlined"
                             InputLabelProps={{ shrink: true }}
@@ -113,7 +93,7 @@ const EditRoom = () => {
                     </form>
 
                     {/* Delete button with a confirmation dialog */}
-                    <DeleteRoomButton room={room} isDisabled={updateLoading}/>
+                    <DeleteProjectButton project={project} isDisabled={updateLoading}/>
 
                 </CardContent>
             </Card>
@@ -121,4 +101,4 @@ const EditRoom = () => {
     )
 }
 
-export default EditRoom
+export default EditProject

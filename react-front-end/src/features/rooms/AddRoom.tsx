@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
-import { useAddNewRoomMutation } from '../api/apiSlice';
+import { useAddNewRoomMutation, useGetProjectQuery } from '../api/apiSlice';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -17,6 +18,9 @@ interface AddRoomFormElements extends HTMLFormElement {
 export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
     const navigate = useNavigate()
+    const { projectId } = useParams();
+
+    const { data: project } = useGetProjectQuery(projectId!);
 
     const handleSubmit = async (e: React.FormEvent<AddRoomFormElements>) => {
         e.preventDefault()
@@ -27,12 +31,17 @@ export const AddRoom = () => {
 
         const form = e.currentTarget
 
+        if (!project) {
+            console.log("Project not found")
+            return
+        }
+
         try {
-            await addNewRoom({ name, description }).unwrap()
+            await addNewRoom({ name, description, projectId }).unwrap()
             form.reset()
 
-            // redirect to /rooms
-            navigate('/rooms')
+            // redirect to [this project]/rooms
+            navigate(`/projects/${projectId}/rooms`)
         } catch (err) {
             console.error("Failed to create the room: ", err)
         }
@@ -88,6 +97,16 @@ export const AddRoom = () => {
                             Create Room
                         </Button>
                     </form>
+                    <Button
+                        variant="text"
+                        color="error"
+                        fullWidth
+                        sx={{ marginTop: 2 }}
+                        onClick={() => navigate(`/projects/${projectId}/rooms`)}
+
+                    >
+                        Cancel
+                    </Button>
 
                 </CardContent>
             </Card>
