@@ -51,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps: 
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     # Use OIDC for credentials
     - name: Configure AWS credentials
@@ -58,6 +60,20 @@ jobs:
       with:
         aws-region: us-east-1
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v1
+      with:
+        java-version: '21'
+
+    - name: Set environment variables
+      run: |
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
+        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
 
     - name: Build Application
       run: cd back-end && chmod +x ./gradlew && ./gradlew build
