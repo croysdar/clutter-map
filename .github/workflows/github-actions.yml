@@ -43,7 +43,7 @@ jobs:
 
     # This confirms that the application built properly
     - name: Build Application
-      run: cd back-end && ./gradlew build
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build
 
   deploy-on-push:
     if: github.event_name == 'push'
@@ -59,7 +59,7 @@ jobs:
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
 
     - name: Build Application
-      run: cd back-end && ./gradlew build
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build
 
     # Deploy build to S3
     - name: Upload to S3
