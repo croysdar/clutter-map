@@ -48,6 +48,7 @@ jobs:
         set -a
         source .env
         set +a
+        export $(cat .env | xargs)
     
     - name: Print environment variables for debugging
       run: |
@@ -61,7 +62,7 @@ jobs:
     
     # This confirms that the application built properly
     - name: Build Application
-      run: cd back-end && chmod +x ./gradlew && ./gradlew build
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build --scan
 
   deploy-on-push:
     if: github.event_name == 'push'
