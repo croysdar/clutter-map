@@ -35,16 +35,34 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
-        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
-
+        touch .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> .env
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> .env
+        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> .env
+        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> .env
+    
+    - name: Source .env file
+      run: |
+        set -a
+        source .env
+        set +a
+        export $(cat .env | xargs)
+    
+    - name: Print environment variables for debugging
+      run: |
+        cat .env
+        echo "JWT_SECRET=$JWT_SECRET"
+        echo "DB_USERNAME=$DB_USERNAME"
+        echo "DB_PASSWORD=$DB_PASSWORD"
+        echo "DB_SOURCE_URL=$DB_SOURCE_URL"
+        echo "OAUTH_GOOGLE_CLIENT_ID=$OAUTH_GOOGLE_CLIENT_ID"
+        echo "OAUTH_GOOGLE_CLIENT_SECRET=$OAUTH_GOOGLE_CLIENT_SECRET"
+    
     # This confirms that the application built properly
     - name: Build Application
-      run: cd back-end && chmod +x ./gradlew && ./gradlew build
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build --scan
 
   deploy-on-push:
     if: github.event_name == 'push'
@@ -68,21 +86,13 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
-        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
-    
-    - name: Print environment variables for debugging
-      run: |
-        echo "JWT_SECRET=$JWT_SECRET"
-        echo "DB_USERNAME=$DB_USERNAME"
-        echo "DB_PASSWORD=$DB_PASSWORD"
-        echo "DB_SOURCE_URL=$DB_SOURCE_URL"
-        echo "OAUTH_GOOGLE_CLIENT_ID=$OAUTH_GOOGLE_CLIENT_ID"
-        echo "OAUTH_GOOGLE_CLIENT_SECRET=$OAUTH_GOOGLE_CLIENT_SECRET"
+        touch .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> .env
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> .env
+        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> .env
+        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> .env
 
     - name: Build Application
       run: cd back-end && chmod +x ./gradlew && ./gradlew build
