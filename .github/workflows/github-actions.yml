@@ -89,8 +89,7 @@ jobs:
     - name: Upload to S3
       working-directory: back-end/build/libs
       run: |
-        aws s3 sync ./ \ 
-        s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
+        aws s3 sync ./ s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
     
     - name: Archive test results
       if: always()
