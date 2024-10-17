@@ -39,8 +39,8 @@ jobs:
         echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
         echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
-        echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
       # touch .env
       # echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> .env
       # echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
