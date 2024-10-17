@@ -51,7 +51,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: test-report
+        name: test-report-build
         path: back-end/build/reports/tests/test
 
   deploy-on-push:
@@ -97,7 +97,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: test-report
+        name: test-report-deploy
         path: back-end/build/reports/tests/test
 
     # # Trigger CodeDeploy
