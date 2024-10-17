@@ -97,11 +97,11 @@ jobs:
         name: test-report-deploy
         path: back-end/build/reports/tests/test
 
-    # # Trigger CodeDeploy
-    # - name: Deploy to AWS CodeDeploy
-    #   run: |
-    #     aws deploy create-deployment \
-    #     --application-name ${{env.codedeployname}}-${{env.environment}}  \
-    #     --deployment-group-name Production-Deployment-Group \
-    #     --deployment-config-name CodeDeployDefault.OneAtATime \
-    #     --s3-location bucket=${{env.codedeployname}}, key=ClutterMapApp.zip, bundleType=zip
+    # Trigger CodeDeploy
+    - name: Deploy to AWS CodeDeploy
+      run: |
+        aws deploy create-deployment \
+        --application-name ${{env.codedeployname}}-${{env.environment}}  \
+        --deployment-group-name Production-Deployment-Group \
+        --deployment-config-name CodeDeployDefault.OneAtATime \
+        --s3-location bucket=${{env.codedeployname}}, key=ClutterMapApp.zip, bundleType=zip
