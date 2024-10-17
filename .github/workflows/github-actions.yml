@@ -32,6 +32,18 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '21'
+    
+    # Use OIDC for credentials
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-1
+        role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+    
+    
+    - name: Test creds
+      run: |
+        aws sts get-caller-identity
 
     - name: Set environment variables
       run: |
