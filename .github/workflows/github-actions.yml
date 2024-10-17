@@ -83,7 +83,7 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: us-east-1
+        aws-region: us-east-2
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
 
     # Deploy build to S3
