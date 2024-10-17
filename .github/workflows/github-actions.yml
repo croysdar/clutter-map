@@ -19,6 +19,22 @@ env:
   environment: production
 
 jobs:
+  oidc_debug_test:
+    runs-on: ubuntu-latest
+    name: A test of the oidc debugger
+    steps:
+      - name: Checkout actions-oidc-debugger
+        uses: actions/checkout@v3
+        with:
+          repository: github/actions-oidc-debugger
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN}}
+          path: ./.github/actions/actions-oidc-debugger
+      - name: Debug OIDC Claims
+        uses: ./.github/actions/actions-oidc-debugger
+        with:
+          audience: '${{ github.server_url }}/${{ github.repository_owner }}'
+
   build-on-pr:
     # This happens when the PR is opened, or new changes are added to an open PR
     if: github.event_name == 'pull_request'
@@ -39,7 +55,6 @@ jobs:
       with:
         aws-region: us-east-1
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
-    
     
     - name: Test creds
       run: |
