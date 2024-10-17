@@ -15,7 +15,7 @@ permissions:
 env:
   reponame: clutter-map
   codedeployname: cluttermap-deploy
-  s3bucket: cluttermap-production-build 
+  s3bucket: cluttermap-bucket
   environment: production
 
 jobs:
@@ -88,8 +88,7 @@ jobs:
     - name: Upload to S3
       working-directory: back-end/build/libs
       run: |
-        aws s3 sync ./ \ 
-        s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
+        aws s3 sync ./ s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
     
     - name: Archive test results
       if: always()
