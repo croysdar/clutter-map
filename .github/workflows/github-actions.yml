@@ -15,7 +15,7 @@ permissions:
 env:
   reponame: clutter-map
   codedeployname: cluttermap-deploy
-  s3bucket: cluttermap-production-build 
+  s3bucket: cluttermap-bucket
   environment: production
 
 jobs:
