@@ -105,4 +105,4 @@ jobs:
         --application-name ${{env.codedeployname}}-${{env.environment}}  \
         --deployment-group-name Production-Deployment-Group \
         --deployment-config-name CodeDeployDefault.OneAtATime \
-        --s3-location bucket=${{env.codedeployname}}, key=ClutterMapApp.zip, bundleType=zip
+        --s3-location bucket=${{env.codedeployname}},bundleType=zip,key=ClutterMapApp.zip
