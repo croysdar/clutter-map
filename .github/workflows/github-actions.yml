@@ -45,7 +45,7 @@ jobs:
     
     # This confirms that the application built properly
     - name: Build Application
-      run: cd back-end && chmod +x ./gradlew && ./gradlew build --scan
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build
     
     - name: Archive test results
       if: always()
@@ -92,6 +92,13 @@ jobs:
       run: |
         aws s3 sync ./ \ 
         s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
+    
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report
+        path: back-end/build/reports/tests/test
 
     # # Trigger CodeDeploy
     # - name: Deploy to AWS CodeDeploy
