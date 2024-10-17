@@ -32,7 +32,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '21'
-
+    
     - name: Set environment variables
       run: |
         echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
@@ -41,24 +41,6 @@ jobs:
         echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
         echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
         echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
-      # touch .env
-      # echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> .env
-      # echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-      # echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-      # echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> .env
-      # echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> .env
-      # echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> .env
-    
-    # - name: Source .env file
-    #   run: |
-    #     set -a
-    #     source .env
-    #     set +a
-    #     export $(cat .env | xargs)
-    
-    # - name: Print .env for debugging
-    #   run: |
-    #     cat .env
     
     # This confirms that the application built properly
     - name: Build Application
@@ -72,7 +54,6 @@ jobs:
         path: back-end/build/reports/tests/test
 
   deploy-on-push:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps: 
@@ -111,11 +92,11 @@ jobs:
         aws s3 sync ./ \ 
         s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
 
-    # Trigger CodeDeploy
-    - name: Deploy to AWS CodeDeploy
-      run: |
-        aws deploy create-deployment \
-        --application-name ${{env.codedeployname}}-${{env.environment}}  \
-        --deployment-group-name Production-Deployment-Group \
-        --deployment-config-name CodeDeployDefault.OneAtATime \
-        --s3-location bucket=${{env.codedeployname}}, key=ClutterMapApp.zip, bundleType=zip
+    # # Trigger CodeDeploy
+    # - name: Deploy to AWS CodeDeploy
+    #   run: |
+    #     aws deploy create-deployment \
+    #     --application-name ${{env.codedeployname}}-${{env.environment}}  \
+    #     --deployment-group-name Production-Deployment-Group \
+    #     --deployment-config-name CodeDeployDefault.OneAtATime \
+    #     --s3-location bucket=${{env.codedeployname}}, key=ClutterMapApp.zip, bundleType=zip
