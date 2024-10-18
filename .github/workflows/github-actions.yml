@@ -85,6 +85,11 @@ jobs:
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+
+    - name: Set execute permissions for scripts
+      run: |
+        chmod +x ../../scripts/install_app_dependencies.sh
+        chmod +x ../../scripts/start_server.sh
     
     - name: Zip bundle
       working-directory: back-end/build/libs
