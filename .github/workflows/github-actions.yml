@@ -84,12 +84,18 @@ jobs:
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+    
+    - name: Zip bundle
+      working-directory: back-end/build/libs
+      run: |
+        zip ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar
 
     # Deploy build to S3
     - name: Upload to S3
       working-directory: back-end/build/libs
       run: |
-        aws s3 sync ./ s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
+        aws s3 cp ClutterMapApp.zip s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/
+      # aws s3 sync ./ s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/ --delete
     
     - name: Archive test results
       if: always()
@@ -105,4 +111,4 @@ jobs:
         --application-name ${{env.codedeployname}}-${{env.environment}}  \
         --deployment-group-name ${{env.deploymentgroupname}} \
         --deployment-config-name CodeDeployDefault.OneAtATime \
-        --s3-location bucket=${{env.codedeployname}},bundleType=zip,key=ClutterMapApp.zip
+        --s3-location bucket=${{env.s3bucket}},bundleType=zip,key=${{ env.codedeployname }}/${{ env.environment }}/ClutterMapApp.zip
