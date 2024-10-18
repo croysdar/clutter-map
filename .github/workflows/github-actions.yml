@@ -106,4 +106,4 @@ jobs:
         --application-name ${{env.codedeployname}}-${{env.environment}}  \
         --deployment-group-name ${{env.deploymentgroupname}} \
         --deployment-config-name CodeDeployDefault.OneAtATime \
-        --s3-location bucket=${{env.s3bucket}},key=${{ env.codedeployname }}/${{ env.environment }}/clutter-map-0.0.1-SNAPSHOT.jar
+        --s3-location bucket=${{env.s3bucket}},bundleType=jar,key=${{ env.codedeployname }}/${{ env.environment }}/clutter-map-0.0.1-SNAPSHOT.jar
