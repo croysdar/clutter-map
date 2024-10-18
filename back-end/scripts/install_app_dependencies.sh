@@ -20,5 +20,7 @@ if ! command -v /usr/local/bin/supervisord &> /dev/null; then
     sudo pip3 install supervisor
 fi
 
+source set_env_vars.sh
+
 # Ensure the JAR is executable (if needed)
 chmod +x clutter-map-0.0.1-SNAPSHOT.jar

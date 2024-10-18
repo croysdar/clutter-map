@@ -84,6 +84,19 @@ jobs:
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+    
+    - name: Create set env var script
+      working-directory: back-end/scripts
+      run: |
+        touch set_env_vars.sh
+        echo "#!/bin/bash" > set_env_vars.sh
+        echo "export JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> set_env_vars.sh
+        echo "export DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> set_env_vars.sh
+        echo "export DB_USERNAME=${{ secrets.DB_USERNAME }}" >> set_env_vars.sh
+        echo "export DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> set_env_vars.sh
+        echo "export GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> set_env_vars.sh
+        echo "export GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> set_env_vars.sh
+        chmod +x set_env_vars.sh
 
     - name: Set execute permissions for scripts
       working-directory: back-end/scripts
@@ -94,7 +107,7 @@ jobs:
     - name: Zip bundle
       working-directory: back-end/build/libs
       run: |
-        zip -j ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar ../../../appspec.yml ../../scripts/start_server.sh ../../scripts/install_app_dependencies.sh ../../../supervisord.conf
+        zip -j ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar ../../../appspec.yml ../../scripts/start_server.sh ../../scripts/install_app_dependencies.sh ../../scripts/set_env_vars.sh ../../../supervisord.conf
       # zip -r ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar ../../../appspec.yml ../../scripts
 
     # Deploy build to S3
