@@ -2,31 +2,29 @@ import React, { useState } from 'react';
 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Room } from './roomsSlice';
+import { Project } from './projectsTypes';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteRoomMutation } from '../api/apiSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useDeleteProjectMutation } from '../api/apiSlice';
+import { useNavigate } from 'react-router-dom';
 
-type DeleteRoomProps = {
-    room: Room,
+type DeleteProjectProps = {
+    project: Project,
     isDisabled: boolean | undefined
 }
 
-const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
+const DeleteProjectButton: React.FC<DeleteProjectProps> = ({ project, isDisabled }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
 
     const navigate = useNavigate();
-    const { projectId } = useParams();
 
-    const [deleteRoom] = useDeleteRoomMutation();
+    const [deleteProject] = useDeleteProjectMutation();
     
     const handleDelete = async () => {
-        await deleteRoom(room.id);
-        // redirect to [this project]/rooms
-        navigate(`/projects/${projectId}/rooms`)
+        await deleteProject(project.id);
+        navigate('/projects');
     }
 
     return (
@@ -42,23 +40,23 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
                 onClick={handleOpen}
 
             >
-                DELETE ROOM
+                DELETE PROJECT
                 <DeleteForever/>
             </Button>
 
             {/* Confirmation dialog */}
-            <Dialog open={open} onClose={handleClose} id={`delete-room-${room.id}-dialog`}>
-                <DialogTitle>Delete {room.name}</DialogTitle>
+            <Dialog open={open} onClose={handleClose} id={`delete-project-${project.id}-dialog`}>
+                <DialogTitle>Delete {project.name}</DialogTitle>
                 <DialogContent>
-                    <Typography > Are you SURE you want to delete this room? </Typography>
+                    <Typography > Are you SURE you want to delete this project? This will delete all the rooms it contains. </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete}color="error">Delete the room</Button>
+                    <Button onClick={handleDelete}color="error">Delete the project</Button>
                 </DialogActions>
             </Dialog>
         </>
     )
 }
 
-export default DeleteRoomButton
+export default DeleteProjectButton
