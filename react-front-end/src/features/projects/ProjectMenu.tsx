@@ -3,35 +3,32 @@ import React, { useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
-import { Room } from '@/features/rooms/roomsSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Project } from '@/features/projects/projectsTypes';
+import { useNavigate } from 'react-router-dom';
 
 
-type RoomMenuProps = {
-    room: Room
+type ProjectMenuProps = {
+    project: Project
 }
 
-const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
+const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const open = Boolean(anchorEl)
     const navigate = useNavigate();
-    const { projectId } = useParams();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     }
     const handleClose = () => {
         setAnchorEl(null);
     }
 
-    const handleEdit = () => {
-        navigate(`/projects/${projectId}/rooms/${room.id}/edit`)
-        handleClose();
-    }
-
-    const handleAddLocation = () => {
-        // TODO add location addition functionality
-        alert(room.id);
+    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        navigate(`/projects/${project.id}/edit`)
         handleClose();
     }
 
@@ -47,20 +44,17 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
             <Menu
                 anchorEl={anchorEl}
                 open={open}
-                id={`room-${room.id}-menu`}
+                id={`project-${project.id}-menu`}
                 onClose={handleClose}
             // onClick={handleClose}
 
             >
                 {/* 
-                Edit Room - takes you to an edit page?
+                Edit Project - takes you to an edit page?
                 Add location - takes you to 'new location' page?
             */}
                 <MenuItem onClick={handleEdit}>
-                    Edit Room
-                </MenuItem>
-                <MenuItem onClick={handleAddLocation}>
-                    Add Location
+                    Edit Project
                 </MenuItem>
 
             </Menu>
@@ -68,4 +62,4 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
     );
 }
 
-export default RoomMenu;
+export default ProjectMenu;

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.cluttermap.dto.NewRoomDTO;
+import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
+import app.cluttermap.repository.ProjectsRepository;
 import app.cluttermap.repository.RoomsRepository;
 
 @RestController
@@ -24,8 +26,12 @@ public class RoomsController {
     @Autowired
     private final RoomsRepository roomsRepository;
 
-    public RoomsController(RoomsRepository roomsRepository) {
+    @Autowired
+    private final ProjectsRepository projectsRepository;
+
+    public RoomsController(RoomsRepository roomsRepository, ProjectsRepository projectsRepository) {
         this.roomsRepository = roomsRepository;
+        this.projectsRepository = projectsRepository;
     }
 
     @GetMapping()
@@ -34,13 +40,21 @@ public class RoomsController {
     }
 
     @PostMapping()
-    public ResponseEntity<Room> addOneRoom(@RequestBody Room room) {
-        if (room.getName() == null || room.getName().isEmpty()) {
+    public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
+        if (roomDTO.getName() == null || roomDTO.getName().isEmpty() || roomDTO.getProjectId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Room savedRoom = this.roomsRepository.save(room);
-        return new ResponseEntity<>(savedRoom, HttpStatus.CREATED);
+        // Get project from project ID
+        Optional<Project> projectData = this.projectsRepository.findById(Long.parseLong(roomDTO.getProjectId()));
+        if (!projectData.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // Create room using name, description, and project
+        Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), projectData.get());
+
+        return new ResponseEntity<>(this.roomsRepository.save(newRoom), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

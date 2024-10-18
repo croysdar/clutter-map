@@ -9,21 +9,27 @@ import {
     CardHeader,
     Container,
     Paper,
-    Typography
+    Typography,
+    Button 
 } from '@mui/material';
 
-import { Location } from '../../types/types';
-import RoomMenu from '@/features/rooms/RoomMenu';
-import { useGetRoomsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
+import { useGetRoomsByProjectQuery, useGetProjectQuery } from '@/features/api/apiSlice';
+import RoomMenu from '@/features/rooms/RoomMenu';
+import { useParams } from 'react-router-dom';
+import { Location } from '../../types/types';
 
 const RoomsList: React.FC = () => {
+    const { projectId } = useParams();
+
+    const { data: project } = useGetProjectQuery(projectId!);
+
     const {
         data: rooms = [],
         isLoading,
         isError,
         error
-    } = useGetRoomsQuery();
+    } = useGetRoomsByProjectQuery(projectId!);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -31,6 +37,10 @@ const RoomsList: React.FC = () => {
 
     if (isError) {
         return <div>{error.toString()}</div>
+    }
+
+    if (!project) {
+        return <div>Project not found.</div>
     }
 
     const renderLocation = (location: Location) => {
@@ -61,10 +71,18 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        //Container previous properties: , justifyContent: 'center', alignItems: 'center',
+        <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
+            <Button 
+                href={`/projects`}
+                variant="text" 
+                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
+            >
+                Projects List
+            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
-                    Room List
+                    {project.name}
                 </Typography>
                 {rooms.map((room) => (
                     <>
@@ -84,7 +102,7 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href="/rooms/add" label="Create a new Room"/>
+                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room"/>
             </Paper>
         </Container>
     );
