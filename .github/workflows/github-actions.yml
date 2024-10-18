@@ -89,7 +89,7 @@ jobs:
     - name: Zip bundle
       working-directory: back-end/build/libs
       run: |
-        zip ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar
+        zip -r ClutterMapApp.zip clutter-map-0.0.1-SNAPSHOT.jar ../../../appspec.yml ../../scripts
 
     # Deploy build to S3
     - name: Upload to S3
