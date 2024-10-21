@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { API_BASE_URL } from '@/utils/constants'
 import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
+import { OrgUnit, NewOrgUnit, OrgUnitUpdate } from '../orgUnits/orgUnitsSlice'
 import { Project, NewProject, ProjectUpdate } from '../projects/projectsTypes'
 import { getCsrfTokenFromCookies } from '@/utils/utils';
 
@@ -23,7 +24,7 @@ export const apiSlice = createApi({
         }
     }),
 
-    tagTypes: ['Room', 'Project'],
+    tagTypes: ['Room', 'Project', 'OrgUnit'],
 
     endpoints: builder => ({
         getRooms: builder.query<Room[], void>({
@@ -71,6 +72,53 @@ export const apiSlice = createApi({
                 body: initialRoom
             }),
             invalidatesTags: ['Room']
+        }),
+
+        getOrgUnits: builder.query<OrgUnit[], void>({
+            query: () => '/orgUnits',
+            providesTags: (result = []) => [
+                'OrgUnit',
+                ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
+            ]
+        }),
+
+        getOrgUnitsByRoom: builder.query<OrgUnit[], string>({
+            query: (roomID) => `/rooms/${roomID}/orgUnits`,
+            providesTags: (result = []) => [
+                'OrgUnit',
+                ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
+            ]
+        }),
+
+        getOrgUnit: builder.query<OrgUnit, string>({
+            query: (orgUnitId) => `/orgUnits/${orgUnitId}`,
+            providesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg }]
+        }),
+
+        updateOrgUnit: builder.mutation<OrgUnit, OrgUnitUpdate>({
+            query: orgUnit => ({
+                url: `/orgUnits/${orgUnit.id}`,
+                method: 'PUT',
+                body: orgUnit
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg.id }]
+        }),
+
+        deleteOrgUnit: builder.mutation<{ success: boolean, id: number }, number>({
+            query: orgUnitId => ({
+                url: `/orgUnits/${orgUnitId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => [{ type: 'OrgUnit', id }]
+        }),
+
+        addNewOrgUnit: builder.mutation<OrgUnit, NewOrgUnit>({
+            query: initialOrgUnit => ({
+                url: '/orgUnits',
+                method: 'POST',
+                body: initialOrgUnit
+            }),
+            invalidatesTags: ['OrgUnit']
         }),
 
         getProjects: builder.query<Project[], void>({
@@ -122,6 +170,12 @@ export const {
     useUpdateRoomMutation,
     useAddNewRoomMutation,
     useDeleteRoomMutation,
+    useGetOrgUnitsQuery,
+    useGetOrgUnitsByRoomQuery,
+    useGetOrgUnitQuery,
+    useUpdateOrgUnitMutation,
+    useAddNewOrgUnitMutation,
+    useDeleteOrgUnitMutation,
     useGetProjectsQuery,
     useGetProjectQuery,
     useUpdateProjectMutation,

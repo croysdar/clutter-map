@@ -1,5 +1,6 @@
 package app.cluttermap.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.cluttermap.dto.NewRoomDTO;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.repository.ProjectsRepository;
@@ -95,6 +97,17 @@ public class RoomsController {
             catch (Exception e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{id}/orgUnits")
+    public ResponseEntity<List<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
+        Optional<Room> roomData = roomsRepository.findById(id);
+        if (roomData.isPresent()) {
+            Room room = roomData.get();
+            return new ResponseEntity<>(room.getOrgUnits(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -1,12 +1,7 @@
 package app.cluttermap.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,14 +10,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 // table annotation overrides the default table name
-@Table(name = "rooms")
-public class Room {
-
+@Table(name = "orgunits")
+public class OrgUnit {
+    
     @Id
     // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,24 +29,20 @@ public class Room {
 
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "room_id")
     @JsonBackReference
-    private Project project;
+    private Room room;
 
     // no-arg constructor for Hibernate
-    protected Room() { }
+    protected OrgUnit() { }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Room(String name, String description, Project project){
+    public OrgUnit(String name, String description, Room room){
         this.name = name;
         this.description = description;
-        this.project = project;
+        this.room = room;
     }
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<OrgUnit> orgUnits = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -78,29 +68,11 @@ public class Room {
         this.description = description;
     }
 
-    public Project getProject() {
-        return project;
+    public Room getRoom() {
+        return room;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public List<OrgUnit> getOrgUnits() {
-        return orgUnits;
-    }
-
-    public void setOrgUnits(List<OrgUnit> orgUnits) {
-        this.orgUnits = orgUnits;
-    }
-
-    public void addOrgUnit(OrgUnit orgUnit) {
-        orgUnits.add(orgUnit);
-        orgUnit.setRoom(this);
-    }
-
-    public void removeOrgUnit(OrgUnit orgUnit) {
-        orgUnits.remove(orgUnit);
-        orgUnit.setRoom(null);
+    public void setRoom(Room room) {
+        this.room = room;
     }
 }
