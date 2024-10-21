@@ -4,6 +4,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Button,
     Card,
     CardContent,
     CardHeader,
@@ -13,7 +14,7 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetOrgUnitsByRoomQuery, useGetRoomQuery, useGetProjectQuery } from '@/features/api/apiSlice';
+import { useGetOrgUnitsByRoomQuery, useGetProjectQuery, useGetRoomQuery } from '@/features/api/apiSlice';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useParams } from 'react-router-dom';
 import { Location } from '../../types/types';
@@ -80,6 +81,20 @@ const OrgUnitsList: React.FC = () => {
     return (
         //Container previous properties: , justifyContent: 'center', alignItems: 'center',
         <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
+                        <Button 
+                href={`/projects`}
+                variant="text" 
+                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
+            >
+                Projects List
+            </Button>
+            <Button 
+                href={`/projects/${projectId}/rooms`}
+                variant="text" 
+                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
+            >
+                Rooms in this project
+            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
                     {room.name}
