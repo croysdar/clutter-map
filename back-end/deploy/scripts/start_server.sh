@@ -13,4 +13,5 @@ sudo supervisord -c supervisord.conf
 
 # Restart caddy (used to reverse proxy for HTTP)
 sudo pkill caddy
+sudo caddy fmt --overwrite
 sudo caddy start --config ./Caddyfile
