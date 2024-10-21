@@ -102,10 +102,9 @@ public class RoomsController {
         }
     }
 
-    @GetMapping("/{id}/orgunits")
+    @GetMapping("/{id}/orgUnits")
     public ResponseEntity<List<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
-
         if (roomData.isPresent()) {
             Room room = roomData.get();
             return new ResponseEntity<>(room.getOrgUnits(), HttpStatus.OK);
