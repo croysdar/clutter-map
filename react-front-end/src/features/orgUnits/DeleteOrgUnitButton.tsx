@@ -2,31 +2,32 @@ import React, { useState } from 'react';
 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Room } from './roomsSlice';
+import { OrgUnit } from './orgUnitsSlice';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteRoomMutation } from '../api/apiSlice';
+import { useDeleteOrgUnitMutation } from '../api/apiSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
-type DeleteRoomProps = {
-    room: Room,
+type DeleteOrgUnitProps = {
+    orgUnit: OrgUnit,
     isDisabled: boolean | undefined
 }
 
-const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
+const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
 
     const navigate = useNavigate();
+    const { roomId } = useParams();
     const { projectId } = useParams();
 
-    const [deleteRoom] = useDeleteRoomMutation();
+    const [deleteOrgUnit] = useDeleteOrgUnitMutation();
     
     const handleDelete = async () => {
-        await deleteRoom(room.id);
-        // redirect to [this project]/rooms
-        navigate(`/projects/${projectId}/rooms`)
+        await deleteOrgUnit(orgUnit.id);
+        // redirect to [this room]/orgUnits
+        navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
     }
 
     return (
@@ -42,23 +43,23 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
                 onClick={handleOpen}
 
             >
-                DELETE ROOM
+                DELETE ORG UNIT
                 <DeleteForever/>
             </Button>
 
             {/* Confirmation dialog */}
-            <Dialog open={open} onClose={handleClose} id={`delete-room-${room.id}-dialog`}>
-                <DialogTitle>Delete {room.name}</DialogTitle>
+            <Dialog open={open} onClose={handleClose} id={`delete-orgUnit-${orgUnit.id}-dialog`}>
+                <DialogTitle>Delete {orgUnit.name}</DialogTitle>
                 <DialogContent>
-                    <Typography > Are you SURE you want to delete this room? This will delete all of its organizational units. </Typography>
+                    <Typography > Are you SURE you want to delete this orgUnit? </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete}color="error">Delete the room</Button>
+                    <Button onClick={handleDelete}color="error">Delete the orgUnit</Button>
                 </DialogActions>
             </Dialog>
         </>
     )
 }
 
-export default DeleteRoomButton
+export default DeleteOrgUnitButton

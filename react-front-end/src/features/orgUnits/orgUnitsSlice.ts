@@ -1,14 +1,24 @@
 import { createAppSlice } from "@/hooks/useAppHooks";
 
-export interface OrgUnitState {
+export interface OrgUnitsState {
 
 }
 
-const initialState: OrgUnitState = {
+const initialState: OrgUnitsState = {
 
 }
 
-const orgUnitSlice = createAppSlice({
+export interface OrgUnit {
+    id: number;
+    name: string;
+    description: string;
+}
+
+export type NewOrgUnit = Pick<OrgUnit, 'name' | 'description'> | {roomId: string}
+
+export type OrgUnitUpdate = Pick<OrgUnit, 'id' | 'name' | 'description'>
+
+const orgUnitsSlice = createAppSlice({
     name: 'orgUnits',
     initialState,
     reducers: {
@@ -16,4 +26,4 @@ const orgUnitSlice = createAppSlice({
     },
 })
 
-export default orgUnitSlice.reducer
+export default orgUnitsSlice.reducer

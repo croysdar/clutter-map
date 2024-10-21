@@ -1,17 +1,20 @@
 import React, { ReactElement } from 'react';
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import RoomsList from '@/features/rooms/RoomsList';
-import { AddRoom } from '@/features/rooms/AddRoom';
-import EditRoom from '@/features/rooms/EditRoom';
-import ProjectsList from '@/features/projects/ProjectsList';
+import { selectAuthStatus } from '@/features/auth/authSlice';
 import { AddProject } from '@/features/projects/AddProject';
 import EditProject from '@/features/projects/EditProject';
+import ProjectsList from '@/features/projects/ProjectsList';
+import { AddRoom } from '@/features/rooms/AddRoom';
+import EditRoom from '@/features/rooms/EditRoom';
+import RoomsList from '@/features/rooms/RoomsList';
+import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
+import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
+import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
+import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
-import { useAppSelector } from '@/hooks/useAppHooks';
-import { selectAuthStatus } from '@/features/auth/authSlice';
 import { CircularProgress } from '@mui/material';
 
 
@@ -41,7 +44,10 @@ const Pages: React.FC = () => {
                                 <Route path="/home" Component={HomePage} />
                                 <Route path="/projects/:projectId/rooms" Component={RoomsList} /> 
                                 <Route path="/projects/:projectId/rooms/add" Component={AddRoom} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
+                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits" Component={OrgUnitsList} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits/add" Component={AddOrgUnit} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits/:orgUnitId/edit" Component={EditOrgUnit} /> 
                                 <Route path="/projects" Component={ProjectsList} />
                                 <Route path="/projects/add" Component={AddProject} /> 
                                 <Route path="/projects/:projectId/edit" Component={EditProject} /> 

@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Card,
-    CardContent,
     CardHeader,
     Container,
     Paper,
     Typography
 } from '@mui/material';
 
-import { Location } from '../../types/types';
 import ProjectMenu from '@/features/projects/ProjectMenu';
 import { useGetProjectsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';

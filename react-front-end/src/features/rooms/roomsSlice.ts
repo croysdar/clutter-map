@@ -1,5 +1,5 @@
 import { createAppSlice } from "@/hooks/useAppHooks";
-import { Project } from "../projects/projectsTypes";
+import { OrgUnit } from '../orgUnits/orgUnitsSlice'
 
 export interface RoomsState {
 
@@ -13,7 +13,7 @@ export interface Room {
     id: number;
     name: string;
     description: string;
-    locations: Location[] | null;
+    orgUnits: OrgUnit[];
 }
 
 export type NewRoom = Pick<Room, 'name' | 'description'> | {projectId: string}

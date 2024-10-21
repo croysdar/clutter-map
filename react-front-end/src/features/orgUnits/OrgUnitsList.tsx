@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -14,37 +13,26 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetProjectQuery, useGetRoomsByProjectQuery } from '@/features/api/apiSlice';
-import RoomMenu from '@/features/rooms/RoomMenu';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useGetOrgUnitsByRoomQuery, useGetRoomQuery, useGetProjectQuery } from '@/features/api/apiSlice';
+import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
+import { useParams } from 'react-router-dom';
 import { Location } from '../../types/types';
 
-const RoomsList: React.FC = () => {
+const OrgUnitsList: React.FC = () => {
+    const { roomId } = useParams();
+
+    const { data: room } = useGetRoomQuery(roomId!);
+
     const { projectId } = useParams();
 
     const { data: project } = useGetProjectQuery(projectId!);
 
     const {
-        data: rooms = [],
+        data: orgUnits = [],
         isLoading,
         isError,
         error
-    } = useGetRoomsByProjectQuery(projectId!);
-
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl)
-    const navigate = useNavigate();
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    }
-
-    const handleClick = (e : any, roomId : number) => {
-        e.preventDefault();
-
-        navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
-        handleClose();
-    }
+    } = useGetOrgUnitsByRoomQuery(roomId!);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -52,6 +40,10 @@ const RoomsList: React.FC = () => {
 
     if (isError) {
         return <div>{error.toString()}</div>
+    }
+
+    if (!room) {
+        return <div>Room not found.</div>
     }
 
     if (!project) {
@@ -88,29 +80,21 @@ const RoomsList: React.FC = () => {
     return (
         //Container previous properties: , justifyContent: 'center', alignItems: 'center',
         <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
-            <Button 
-                href={`/projects`}
-                variant="text" 
-                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
-            >
-                Projects List
-            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
-                    {project.name}
+                    {room.name}
                 </Typography>
-                {rooms.map((room) => (
+                {orgUnits.map((orgUnit) => (
                     <>
-                        <Card key={`room-card-${room.id}`} sx={{marginTop: 3}}>
-                            <div key={room.id} >
+                        <Card key={`orgUnit-card-${orgUnit.id}`} sx={{marginTop: 3}}>
+                            <div key={orgUnit.id} >
                                 <CardHeader
-                                    title={<Typography variant='h4'> {room.name}</Typography>}
-                                    action={<RoomMenu room={room} />}
-                                    onClick={(e) => handleClick(e, room.id)}
+                                    title={<Typography variant='h4'> {orgUnit.name}</Typography>}
+                                    action={<OrgUnitMenu orgUnit={orgUnit} />}
                                 />
                                 <CardContent>
-                                    <Typography variant="body2">{room.description}</Typography>
-                                    {/* {room.locations?.map((location) => (
+                                    <Typography variant="body2">{orgUnit.description}</Typography>
+                                    {/* {orgUnit.locations?.map((location) => (
                                     renderLocation(location)
                                 ))} */}
                                 </CardContent>
@@ -118,10 +102,10 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room"/>
+                <ButtonLink href={`/projects/${projectId}/rooms/${roomId}/orgUnits/add`} label="Create a new OrgUnit"/>
             </Paper>
         </Container>
     );
 };
 
-export default RoomsList;
+export default OrgUnitsList;
