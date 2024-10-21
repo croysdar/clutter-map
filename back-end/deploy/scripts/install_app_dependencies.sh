@@ -20,6 +20,13 @@ if ! command -v /usr/local/bin/supervisord &> /dev/null; then
     sudo pip3 install supervisor
 fi
 
+if ! command -v 2>&1; then
+    sudo yum -y install yum-plugin-copr
+    sudo yum -y copr enable @caddy/caddy epel-8-$(arch)
+    sudo yum -y install caddy
+    sudo setcap cap_net_bind_service=+ep $(which caddy)
+fi
+
 source set_env_vars.sh
 
 # Ensure the JAR is executable (if needed)

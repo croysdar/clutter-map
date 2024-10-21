@@ -9,4 +9,8 @@ export PATH=$PATH:/usr/local/bin
 sudo pkill supervisord
 
 # Start the Spring Boot application using supervisor
-supervisord -c supervisord.conf
+sudo supervisord -c supervisord.conf
+
+# Restart caddy (used to reverse proxy for HTTP)
+sudo pkill caddy
+sudo caddy start --config ./Caddyfile
