@@ -30,12 +30,6 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
         handleClose();
     }
 
-    const handleAddLocation = () => {
-        // TODO add location addition functionality
-        alert(orgUnit.id);
-        handleClose();
-    }
-
     return (
         <>
             <Tooltip title="Settings">
@@ -53,15 +47,8 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
             // onClick={handleClose}
 
             >
-                {/* 
-                Edit OrgUnit - takes you to an edit page?
-                Add location - takes you to 'new location' page?
-            */}
                 <MenuItem onClick={handleEdit}>
                     Edit OrgUnit
-                </MenuItem>
-                <MenuItem onClick={handleAddLocation}>
-                    Add Location
                 </MenuItem>
 
             </Menu>
