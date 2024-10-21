@@ -1,10 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { API_BASE_URL } from '@/utils/constants'
-import { Room, NewRoom, RoomUpdate } from '../rooms/roomsSlice'
-import { OrgUnit, NewOrgUnit, OrgUnitUpdate } from '../orgUnits/orgUnitsSlice'
-import { Project, NewProject, ProjectUpdate } from '../projects/projectsTypes'
-import { getCsrfTokenFromCookies } from '@/utils/utils';
+import { getCsrfTokenFromCookies } from '@/utils/utils'
+import { NewOrgUnit, OrgUnit, OrgUnitUpdate } from '../orgUnits/orgUnitsSlice'
+import { NewProject, Project, ProjectUpdate } from '../projects/projectsTypes'
+import { NewRoom, Room, RoomUpdate } from '../rooms/roomsSlice'
+import { NewItem, Item, ItemUpdate } from '../items/itemsSlice'
 
 export const apiSlice = createApi({
     reducerPath: 'api',
@@ -24,7 +25,7 @@ export const apiSlice = createApi({
         }
     }),
 
-    tagTypes: ['Room', 'Project', 'OrgUnit'],
+    tagTypes: ['Room', 'Project', 'OrgUnit', 'Item'],
 
     endpoints: builder => ({
         getRooms: builder.query<Room[], void>({
@@ -119,6 +120,53 @@ export const apiSlice = createApi({
                 body: initialOrgUnit
             }),
             invalidatesTags: ['OrgUnit']
+        }),
+
+        getItems: builder.query<Item[], void>({
+            query: () => '/items',
+            providesTags: (result = []) => [
+                'Item',
+                ...result.map(({ id }) => ({ type: 'Item', id } as const))
+            ]
+        }),
+
+        getItemsByOrgUnit: builder.query<Item[], string>({
+            query: (orgUnitID) => `/orgUnits/${orgUnitID}/items`,
+            providesTags: (result = []) => [
+                'Item',
+                ...result.map(({ id }) => ({ type: 'Item', id } as const))
+            ]
+        }),
+
+        getItem: builder.query<Item, string>({
+            query: (itemId) => `/items/${itemId}`,
+            providesTags: (result, error, arg) => [{ type: 'Item', id: arg }]
+        }),
+
+        updateItem: builder.mutation<Item, ItemUpdate>({
+            query: item => ({
+                url: `/items/${item.id}`,
+                method: 'PUT',
+                body: item
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'Item', id: arg.id }]
+        }),
+
+        deleteItem: builder.mutation<{ success: boolean, id: number }, number>({
+            query: itemId => ({
+                url: `/items/${itemId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => [{ type: 'Item', id }]
+        }),
+
+        addNewItem: builder.mutation<Item, NewItem>({
+            query: initialItem => ({
+                url: '/items',
+                method: 'POST',
+                body: initialItem
+            }),
+            invalidatesTags: ['Item']
         }),
 
         getProjects: builder.query<Project[], void>({
