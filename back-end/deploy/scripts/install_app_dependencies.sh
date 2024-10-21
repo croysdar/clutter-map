@@ -27,7 +27,6 @@ if ! command -v 2>&1; then
     sudo setcap cap_net_bind_service=+ep $(which caddy)
 fi
 
-source set_env_vars.sh
-
 # Ensure the JAR is executable (if needed)
-chmod +x clutter-map-0.0.1-SNAPSHOT.jar
+sudo chown root:root /home/ec2-user/deployment/clutter-map-0.0.1-SNAPSHOT.jar
+sudo chmod +x clutter-map-0.0.1-SNAPSHOT.jar
