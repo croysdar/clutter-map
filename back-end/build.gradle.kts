@@ -39,6 +39,7 @@ dependencies {
 	testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher") // JUnit platform launcher for running tests.
 
+	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
 
 	// IN CASE YOU GET AN ERROR AT THE TOP ABOUT THE GRADLE PLUGIN
 	// https://stackoverflow.com/questions/68321708/could-not-run-phased-build-action-using-connection-to-gradle-distribution

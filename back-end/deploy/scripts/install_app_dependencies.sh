@@ -28,5 +28,4 @@ if ! command -v 2>&1; then
 fi
 
 # Ensure the JAR is executable (if needed)
-sudo chown root:root /home/ec2-user/deployment/clutter-map-0.0.1-SNAPSHOT.jar
 sudo chmod +x clutter-map-0.0.1-SNAPSHOT.jar
