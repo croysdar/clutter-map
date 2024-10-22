@@ -44,8 +44,6 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
                 open={open}
                 id={`orgUnit-${orgUnit.id}-menu`}
                 onClose={handleClose}
-            // onClick={handleClose}
-
             >
                 <MenuItem onClick={handleEdit}>
                     Edit OrgUnit

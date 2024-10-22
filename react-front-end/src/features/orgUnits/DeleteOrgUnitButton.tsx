@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
 import { OrgUnit } from './orgUnitsSlice';
 import { DeleteForever } from '@mui/icons-material';
@@ -23,11 +23,11 @@ const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled
     const { projectId } = useParams();
 
     const [deleteOrgUnit] = useDeleteOrgUnitMutation();
-    
+
     const handleDelete = async () => {
         await deleteOrgUnit(orgUnit.id);
-        // redirect to [this room]/orgUnits
-        navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
+        // redirect to [this room]/org-units
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
     }
 
     return (
@@ -44,7 +44,7 @@ const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled
 
             >
                 DELETE ORG UNIT
-                <DeleteForever/>
+                <DeleteForever />
             </Button>
 
             {/* Confirmation dialog */}
@@ -55,7 +55,7 @@ const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete}color="error">Delete the orgUnit</Button>
+                    <Button onClick={handleDelete} color="error">Delete the orgUnit</Button>
                 </DialogActions>
             </Dialog>
         </>

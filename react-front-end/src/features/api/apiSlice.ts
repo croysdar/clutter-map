@@ -11,7 +11,7 @@ export const apiSlice = createApi({
 
     baseQuery: fetchBaseQuery({
         baseUrl: API_BASE_URL,
-        prepareHeaders: (headers, {getState}) => {
+        prepareHeaders: (headers, { getState }) => {
             const token = localStorage.getItem('jwt');
 
             if (token) {
@@ -75,7 +75,7 @@ export const apiSlice = createApi({
         }),
 
         getOrgUnits: builder.query<OrgUnit[], void>({
-            query: () => '/orgUnits',
+            query: () => '/org-units',
             providesTags: (result = []) => [
                 'OrgUnit',
                 ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
@@ -83,7 +83,7 @@ export const apiSlice = createApi({
         }),
 
         getOrgUnitsByRoom: builder.query<OrgUnit[], string>({
-            query: (roomID) => `/rooms/${roomID}/orgUnits`,
+            query: (roomID) => `/rooms/${roomID}/org-units`,
             providesTags: (result = []) => [
                 'OrgUnit',
                 ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
@@ -91,13 +91,13 @@ export const apiSlice = createApi({
         }),
 
         getOrgUnit: builder.query<OrgUnit, string>({
-            query: (orgUnitId) => `/orgUnits/${orgUnitId}`,
+            query: (orgUnitId) => `/org-units/${orgUnitId}`,
             providesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg }]
         }),
 
         updateOrgUnit: builder.mutation<OrgUnit, OrgUnitUpdate>({
             query: orgUnit => ({
-                url: `/orgUnits/${orgUnit.id}`,
+                url: `/org-units/${orgUnit.id}`,
                 method: 'PUT',
                 body: orgUnit
             }),
@@ -106,7 +106,7 @@ export const apiSlice = createApi({
 
         deleteOrgUnit: builder.mutation<{ success: boolean, id: number }, number>({
             query: orgUnitId => ({
-                url: `/orgUnits/${orgUnitId}`,
+                url: `/org-units/${orgUnitId}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => [{ type: 'OrgUnit', id }]
@@ -114,7 +114,7 @@ export const apiSlice = createApi({
 
         addNewOrgUnit: builder.mutation<OrgUnit, NewOrgUnit>({
             query: initialOrgUnit => ({
-                url: '/orgUnits',
+                url: '/org-units',
                 method: 'POST',
                 body: initialOrgUnit
             }),

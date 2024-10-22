@@ -45,9 +45,9 @@ const Pages: React.FC = () => {
                                 <Route path="/projects/:projectId/rooms" Component={RoomsList} /> 
                                 <Route path="/projects/:projectId/rooms/add" Component={AddRoom} /> 
                                 <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
-                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits" Component={OrgUnitsList} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits/add" Component={AddOrgUnit} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/orgUnits/:orgUnitId/edit" Component={EditOrgUnit} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} /> 
+                                <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} /> 
                                 <Route path="/projects" Component={ProjectsList} />
                                 <Route path="/projects/add" Component={AddProject} /> 
                                 <Route path="/projects/:projectId/edit" Component={EditProject} /> 
