@@ -1,11 +1,24 @@
 #!/bin/bash
 
+# Define the deployment directory and ensure it exists
+DEPLOY_DIR="/home/ec2-user/deployment"
+if [ ! -d "$DEPLOY_DIR" ]; then
+    echo "Deployment directory $DEPLOY_DIR does not exist. Exiting."
+    exit 1
+fi
+
 # Navigate to the deployment directory
-cd /home/ec2-user/deployment
+cd $DEPLOY_DIR || { echo "Failed to navigate to $DEPLOY_DIR"; exit 1; }
 
 export PATH=$PATH:/usr/local/bin
 
-source ./set_env_vars.sh
+# Source environment variables if the file exists
+if [ -f ./set_env_vars.sh ]; then
+    source ./set_env_vars.sh
+else
+    echo "set_env_vars.sh not found. Exiting."
+    exit 1
+fi
 
 # Check if supervisord is running
 if pgrep -x "supervisord" > /dev/null
@@ -17,7 +30,7 @@ else
     echo "Supervisord is not running. Starting supervisord..."
 
     # Start the Spring Boot application using supervisor and the env variables
-    supervisord -c ./supervisord.conf
+    supervisord -c "$DEPLOY_DIR/supervisord.conf"
     
     # Verify that supervisord started successfully
     if pgrep -x "supervisord" > /dev/null
@@ -40,6 +53,9 @@ done
 # Check if timeout ran out
 if [ $timeout -le 0 ]; then
     echo "Spring Boot app failed to start within the timeout period."
+    echo "Checking Spring Boot logs for errors..."
+    # Check application logs
+    tail -n 50 /home/ec2-user/logs/clutter-map.out.log
     exit 1
 fi
 
@@ -59,13 +75,17 @@ else
 fi
 
 # Format the Caddyfile and start Caddy
-sudo caddy fmt --overwrite
-sudo caddy start --config ./Caddyfile
+if sudo caddy fmt --overwrite; then
+    echo "Caddyfile formatted successfully."
+else
+    echo "Failed to format Caddyfile. Exiting."
+    exit 1
+fi
 
-if pgrep -x "caddy" > /dev/null
-then
+# Start Caddy
+if sudo caddy start --config "$DEPLOY_DIR/Caddyfile"; then
     echo "Caddy started successfully."
 else
-    echo "Failed to start Caddy."
+    echo "Failed to start Caddy. Exiting."
     exit 1
 fi
