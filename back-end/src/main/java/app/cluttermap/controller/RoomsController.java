@@ -93,8 +93,7 @@ public class RoomsController {
             try {
                 roomsRepository.deleteById(id);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
@@ -102,7 +101,7 @@ public class RoomsController {
         }
     }
 
-    @GetMapping("/{id}/orgUnits")
+    @GetMapping("/{id}/org-units")
     public ResponseEntity<List<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
         if (roomData.isPresent()) {

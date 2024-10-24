@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
 import { Room } from './roomsSlice';
 import { DeleteForever } from '@mui/icons-material';
@@ -22,7 +22,7 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
     const { projectId } = useParams();
 
     const [deleteRoom] = useDeleteRoomMutation();
-    
+
     const handleDelete = async () => {
         await deleteRoom(room.id);
         // redirect to [this project]/rooms
@@ -43,7 +43,7 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
 
             >
                 DELETE ROOM
-                <DeleteForever/>
+                <DeleteForever />
             </Button>
 
             {/* Confirmation dialog */}
@@ -54,7 +54,7 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete}color="error">Delete the room</Button>
+                    <Button onClick={handleDelete} color="error">Delete the room</Button>
                 </DialogActions>
             </Dialog>
         </>

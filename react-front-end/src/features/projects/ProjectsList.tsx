@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
     Card,
@@ -11,7 +11,6 @@ import {
 import ProjectMenu from '@/features/projects/ProjectMenu';
 import { useGetProjectsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
-import { Project } from '@/features/projects/projectsTypes';
 import { useNavigate } from 'react-router-dom';
 
 const ProjectsList: React.FC = () => {
@@ -22,19 +21,13 @@ const ProjectsList: React.FC = () => {
         error
     } = useGetProjectsQuery();
 
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl)
     const navigate = useNavigate();
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    }
 
-    const handleClick = (e : any, projectId : number) => {
+    const handleClick = (e: any, projectId: number) => {
         e.preventDefault();
 
         navigate(`/projects/${projectId}/rooms`)
-        handleClose();
     }
 
     if (isLoading) {
@@ -53,7 +46,7 @@ const ProjectsList: React.FC = () => {
                 </Typography>
                 {projects.map((project) => (
                     <>
-                        <Card key={`project-card-${project.id}`} sx={{marginTop: 3}}>
+                        <Card key={`project-card-${project.id}`} sx={{ marginTop: 3 }}>
                             <div key={project.id} >
                                 <CardHeader
                                     title={<Typography variant='h4'> {project.name}</Typography>}
@@ -64,7 +57,7 @@ const ProjectsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href="/projects/add" label="Create a new Project"/>
+                <ButtonLink href="/projects/add" label="Create a new Project" />
             </Paper>
         </Container>
     );

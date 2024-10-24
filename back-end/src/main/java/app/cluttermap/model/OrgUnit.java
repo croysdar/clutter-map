@@ -14,9 +14,9 @@ import jakarta.persistence.Table;
 
 @Entity
 // table annotation overrides the default table name
-@Table(name = "orgunits")
+@Table(name = "org_units")
 public class OrgUnit {
-    
+
     @Id
     // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,18 +27,18 @@ public class OrgUnit {
 
     private String description;
 
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     @JsonBackReference
     private Room room;
 
     // no-arg constructor for Hibernate
-    protected OrgUnit() { }
+    protected OrgUnit() {
+    }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public OrgUnit(String name, String description, Room room){
+    public OrgUnit(String name, String description, Room room) {
         this.name = name;
         this.description = description;
         this.room = room;

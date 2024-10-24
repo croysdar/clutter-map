@@ -51,8 +51,8 @@ const EditOrgUnit = () => {
 
         if (orgUnit && name) {
             await updateOrgUnit({ id: orgUnit.id, name: name, description: description })
-            // redirect to [this room]/orgUnits
-            navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
+            // redirect to [this room]/org-units
+            navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
         }
     }
 
@@ -114,7 +114,7 @@ const EditOrgUnit = () => {
                     </form>
 
                     {/* Delete button with a confirmation dialog */}
-                    <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading}/>
+                    <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} />
 
                 </CardContent>
             </Card>

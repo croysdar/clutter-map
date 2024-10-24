@@ -8,36 +8,126 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write # This is required for requesting the JWT for OIDC
+  contents: read  # This is required for actions/checkout
+
+env:
+  reponame: clutter-map
+  codedeployname: cluttermap-deploy
+  deploymentgroupname: Production-Deployment-Group 
+  s3bucket: cluttermap-bucket
+  environment: production
+
 jobs:
-  build-backend:
-    name: Build Spring Boot Backend
+  build-on-pr:
+    # This happens when the PR is opened, or new changes are added to an open PR
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-#     - name: Set up JDK 21
-#       uses: actions/setup-java@v1
-#       with:
-#         java-version: '21'
+    - name: Set up JDK 21
+      uses: actions/setup-java@v1
+      with:
+        java-version: '21'
+    
+    - name: Set environment variables
+      run: |
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+    
+    # This confirms that the application built properly
+    - name: Build Application
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build
+    
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report-build
+        path: back-end/build/reports/tests/test
 
-#     - name: Build with Gradle
-#       run: cd back-end && ./gradlew build
+  deploy-on-push:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
 
-#     - name: Set environment variables
-#       run: |
-#         echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
-#         echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
-#         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-#         echo "OAUTH_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
-#         echo "OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+    steps: 
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-#     - name: Run Spring Boot application
-#       run: cd back-end && ./gradlew bootRun
-#       env:
-#         JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-#         DB_USERNAME: ${{ secrets.DB_USERNAME }}
-#         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-#         OAUTH_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-#         OAUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+    - name: Set up JDK 21
+      uses: actions/setup-java@v1
+      with:
+        java-version: '21'
+
+    - name: Set environment variables
+      run: |
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >>$GITHUB_ENV
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+
+    - name: Build Application
+      run: cd back-end && chmod +x ./gradlew && ./gradlew build
+
+    # Use OIDC for credentials
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+    
+    - name: Create set env var script
+      working-directory: back-end/deploy/scripts
+      run: |
+        touch set_env_vars.sh
+        echo "#!/bin/bash" > set_env_vars.sh
+        echo "export JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> set_env_vars.sh
+        echo "export DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> set_env_vars.sh
+        echo "export DB_USERNAME=${{ secrets.DB_USERNAME }}" >> set_env_vars.sh
+        echo "export DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> set_env_vars.sh
+        echo "export GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> set_env_vars.sh
+        echo "export GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> set_env_vars.sh
+
+    - name: Set execute permissions for scripts
+      working-directory: back-end/deploy/scripts
+      run: |
+        chmod +x install_app_dependencies.sh
+        chmod +x start_server.sh
+        chmod +x set_env_vars.sh
+    
+    - name: Zip bundle
+      working-directory: back-end/deploy
+      run: |
+        zip -j ClutterMapApp.zip ../build/libs/clutter-map-0.0.1-SNAPSHOT.jar appspec.yml supervisord.conf Caddyfile ./scripts/start_server.sh ./scripts/install_app_dependencies.sh ./scripts/set_env_vars.sh
+
+    # Deploy build to S3
+    - name: Upload to S3
+      working-directory: back-end/deploy
+      run: |
+        aws s3 cp ClutterMapApp.zip s3://${{ env.s3bucket }}/${{ env.codedeployname }}/${{ env.environment }}/
+    
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report-deploy
+        path: back-end/build/reports/tests/test
+
+    # Trigger CodeDeploy
+    - name: Deploy to AWS CodeDeploy
+      run: |
+        aws deploy create-deployment \
+        --application-name ${{env.codedeployname}}-${{env.environment}}  \
+        --deployment-group-name ${{env.deploymentgroupname}} \
+        --deployment-config-name CodeDeployDefault.OneAtATime \
+        --s3-location bucket=${{env.s3bucket}},bundleType=zip,key=${{ env.codedeployname }}/${{ env.environment }}/ClutterMapApp.zip

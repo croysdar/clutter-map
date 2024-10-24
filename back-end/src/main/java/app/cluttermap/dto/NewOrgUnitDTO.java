@@ -35,6 +35,4 @@ public class NewOrgUnitDTO {
     public void setRoomId(String roomId) {
         this.roomId = roomId;
     }
-    
-    
 }

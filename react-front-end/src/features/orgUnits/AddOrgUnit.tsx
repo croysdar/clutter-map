@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
-import { useAddNewOrgUnitMutation, useGetRoomQuery, useGetProjectQuery } from '../api/apiSlice';
+import { useAddNewOrgUnitMutation, useGetRoomQuery } from '../api/apiSlice';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 
@@ -14,7 +14,6 @@ interface AddOrgUnitFormElements extends HTMLFormElement {
     readonly elements: AddOrgUnitFormFields
 }
 
-
 export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
     const navigate = useNavigate()
@@ -23,8 +22,6 @@ export const AddOrgUnit = () => {
     const { data: room } = useGetRoomQuery(roomId!);
 
     const { projectId } = useParams();
-
-    const { data: project } = useGetProjectQuery(projectId!);
 
     const handleSubmit = async (e: React.FormEvent<AddOrgUnitFormElements>) => {
         e.preventDefault()
@@ -44,8 +41,8 @@ export const AddOrgUnit = () => {
             await addNewOrgUnit({ name, description, roomId }).unwrap()
             form.reset()
 
-            // redirect to [this room]/orgUnits
-            navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
+            // redirect to [this room]/org-units
+            navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
         } catch (err) {
             console.error("Failed to create the orgUnit: ", err)
         }
@@ -71,7 +68,7 @@ export const AddOrgUnit = () => {
                             fullWidth
                             margin="normal"
                             variant="outlined"
-                            InputLabelProps={{shrink: true}}
+                            InputLabelProps={{ shrink: true }}
                         />
 
                         {/* OrgUnit Description */}
@@ -86,7 +83,7 @@ export const AddOrgUnit = () => {
                             rows={4}
                             margin="normal"
                             variant="outlined"
-                            InputLabelProps={{shrink: true}}
+                            InputLabelProps={{ shrink: true }}
                         />
 
                         {/* Submit Button */}
@@ -106,8 +103,7 @@ export const AddOrgUnit = () => {
                         color="error"
                         fullWidth
                         sx={{ marginTop: 2 }}
-                        onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)}
-
+                        onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}
                     >
                         Cancel
                     </Button>
@@ -115,6 +111,5 @@ export const AddOrgUnit = () => {
                 </CardContent>
             </Card>
         </Container>
-
     )
 }

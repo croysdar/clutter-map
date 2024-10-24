@@ -21,7 +21,7 @@ import app.cluttermap.repository.RoomsRepository;
 import app.cluttermap.repository.OrgUnitsRepository;
 
 @RestController
-@RequestMapping("/orgUnits")
+@RequestMapping("/org-units")
 public class OrgUnitsController {
     @Autowired
     private final OrgUnitsRepository orgUnitsRepository;
@@ -94,8 +94,7 @@ public class OrgUnitsController {
             try {
                 orgUnitsRepository.deleteById(id);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {

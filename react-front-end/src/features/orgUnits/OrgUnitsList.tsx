@@ -1,9 +1,6 @@
 import React from 'react';
 
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Button,
     Card,
     CardContent,
@@ -17,7 +14,6 @@ import ButtonLink from '@/components/common/ButtonLink';
 import { useGetOrgUnitsByRoomQuery, useGetProjectQuery, useGetRoomQuery } from '@/features/api/apiSlice';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useParams } from 'react-router-dom';
-import { Location } from '../../types/types';
 
 const OrgUnitsList: React.FC = () => {
     const { roomId } = useParams();
@@ -51,46 +47,20 @@ const OrgUnitsList: React.FC = () => {
         return <div>Project not found.</div>
     }
 
-    const renderLocation = (location: Location) => {
-        return (
-            <Accordion>
-                <AccordionSummary >
-                    <Typography > {location.name} </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div key={location.id} className="location">
-                        <Typography> {location.description} </Typography>
-                        <ul>
-                            {location.items.map((item) => (
-                                <ul key={item.id}>
-                                    <Typography>
-                                        <strong>{item.name}</strong>: {item.description} (Location: {item.location})
-                                    </Typography>
-                                </ul>
-                            ))}
-                        </ul>
-                        <ul>
-                            {location.subLocations.map((location) => renderLocation(location))}
-                        </ul>
-                    </div>
-                </AccordionDetails>
-            </Accordion>
-        )
-    }
 
     return (
         //Container previous properties: , justifyContent: 'center', alignItems: 'center',
         <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
-                        <Button 
+            <Button
                 href={`/projects`}
-                variant="text" 
+                variant="text"
                 sx={{ marginBottom: 2, fontSize: '0.875rem' }}
             >
                 Projects List
             </Button>
-            <Button 
+            <Button
                 href={`/projects/${projectId}/rooms`}
-                variant="text" 
+                variant="text"
                 sx={{ marginBottom: 2, fontSize: '0.875rem' }}
             >
                 Rooms in this project
@@ -101,7 +71,7 @@ const OrgUnitsList: React.FC = () => {
                 </Typography>
                 {orgUnits.map((orgUnit) => (
                     <>
-                        <Card key={`orgUnit-card-${orgUnit.id}`} sx={{marginTop: 3}}>
+                        <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ marginTop: 3 }}>
                             <div key={orgUnit.id} >
                                 <CardHeader
                                     title={<Typography variant='h4'> {orgUnit.name}</Typography>}
@@ -109,15 +79,12 @@ const OrgUnitsList: React.FC = () => {
                                 />
                                 <CardContent>
                                     <Typography variant="body2">{orgUnit.description}</Typography>
-                                    {/* {orgUnit.locations?.map((location) => (
-                                    renderLocation(location)
-                                ))} */}
                                 </CardContent>
                             </div>
                         </Card>
                     </>
                 ))}
-                <ButtonLink href={`/projects/${projectId}/rooms/${roomId}/orgUnits/add`} label="Create a new OrgUnit"/>
+                <ButtonLink href={`/projects/${projectId}/rooms/${roomId}/org-units/add`} label="Create a new OrgUnit" />
             </Paper>
         </Container>
     );

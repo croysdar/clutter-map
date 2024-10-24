@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Button,
     Card,
     CardContent,
@@ -17,7 +14,6 @@ import ButtonLink from '@/components/common/ButtonLink';
 import { useGetProjectQuery, useGetRoomsByProjectQuery } from '@/features/api/apiSlice';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Location } from '../../types/types';
 
 const RoomsList: React.FC = () => {
     const { projectId } = useParams();
@@ -31,19 +27,12 @@ const RoomsList: React.FC = () => {
         error
     } = useGetRoomsByProjectQuery(projectId!);
 
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl)
     const navigate = useNavigate();
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    }
-
-    const handleClick = (e : any, roomId : number) => {
+    const handleClick = (e: any, roomId: number) => {
         e.preventDefault();
 
-        navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits`)
-        handleClose();
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
     }
 
     if (isLoading) {
@@ -58,39 +47,12 @@ const RoomsList: React.FC = () => {
         return <div>Project not found.</div>
     }
 
-    const renderLocation = (location: Location) => {
-        return (
-            <Accordion>
-                <AccordionSummary >
-                    <Typography > {location.name} </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div key={location.id} className="location">
-                        <Typography> {location.description} </Typography>
-                        <ul>
-                            {location.items.map((item) => (
-                                <ul key={item.id}>
-                                    <Typography>
-                                        <strong>{item.name}</strong>: {item.description} (Location: {item.location})
-                                    </Typography>
-                                </ul>
-                            ))}
-                        </ul>
-                        <ul>
-                            {location.subLocations.map((location) => renderLocation(location))}
-                        </ul>
-                    </div>
-                </AccordionDetails>
-            </Accordion>
-        )
-    }
-
     return (
         //Container previous properties: , justifyContent: 'center', alignItems: 'center',
         <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
-            <Button 
+            <Button
                 href={`/projects`}
-                variant="text" 
+                variant="text"
                 sx={{ marginBottom: 2, fontSize: '0.875rem' }}
             >
                 Projects List
@@ -101,7 +63,7 @@ const RoomsList: React.FC = () => {
                 </Typography>
                 {rooms.map((room) => (
                     <>
-                        <Card key={`room-card-${room.id}`} sx={{marginTop: 3}}>
+                        <Card key={`room-card-${room.id}`} sx={{ marginTop: 3 }}>
                             <div key={room.id} >
                                 <CardHeader
                                     title={<Typography variant='h4'> {room.name}</Typography>}
@@ -110,15 +72,12 @@ const RoomsList: React.FC = () => {
                                 />
                                 <CardContent>
                                     <Typography variant="body2">{room.description}</Typography>
-                                    {/* {room.locations?.map((location) => (
-                                    renderLocation(location)
-                                ))} */}
                                 </CardContent>
                             </div>
                         </Card>
                     </>
                 ))}
-                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room"/>
+                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
             </Paper>
         </Container>
     );
