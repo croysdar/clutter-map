@@ -13,7 +13,7 @@ if ! command -V pip &> /dev/null; then
 fi
 
 echo "Checking if supervisor is installed..."
-if ! command -v supervisord &> /dev/null; then
+if ! command -v supervisord &> /dev/null && [ ! -f /usr/local/bin/supervisord ]; then
     echo "supervisor not found. Installing supervisor via pip..." || { echo "Failed to install supervisor. Exiting."; exit 1; }
     sudo pip install supervisor &> /dev/null
 fi
