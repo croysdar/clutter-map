@@ -8,15 +8,25 @@ export PATH=$PATH:/usr/local/bin
 # End any existing supervisor processes
 sudo pkill supervisord
 
-# set -a
 source ./set_env_vars.sh
-# set +a
 
 # Start the Spring Boot application using supervisor and the env variables
-# sudo bash -c "source ./set_env_vars.sh && supervisord -c ./supervisord.conf"
+echo "Starting Spring Boot app..."
 supervisord -c ./supervisord.conf
+
+# Check if the Spring Boot app is running by hitting the health endpoint or root path
+echo "Waiting for Spring Boot app to start..."
+while ! curl -s http://localhost:8080 > /dev/null; do
+    echo "Spring Boot app is not ready yet. Waiting..."
+    sleep 5  # Wait for 5 seconds before checking again
+done
+
+# Once the app is running, start Caddy
+echo "Spring Boot app is up. Starting Caddy..."
 
 # Restart caddy (used to reverse proxy for HTTP)
 sudo pkill caddy
 sudo caddy fmt --overwrite
 sudo caddy start --config ./Caddyfile
+
+echo "Caddy started successfully."
