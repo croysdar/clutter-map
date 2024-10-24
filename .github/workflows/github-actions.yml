@@ -84,7 +84,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::390403853758:role/GitHub-Workflow-CodeDeploy-Role
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHub-Workflow-CodeDeploy-Role
     
     - name: Create set env var script
       working-directory: back-end/deploy/scripts
