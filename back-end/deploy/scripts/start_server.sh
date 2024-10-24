@@ -2,6 +2,7 @@
 
 # Define the deployment directory and ensure it exists
 DEPLOY_DIR="/home/ec2-user/deployment"
+SUPERVISOR_CONF="$DEPLOY_DIR/supervisord.conf"
 if [ ! -d "$DEPLOY_DIR" ]; then
     echo "Deployment directory $DEPLOY_DIR does not exist. Exiting."
     exit 1
@@ -23,28 +24,36 @@ fi
 # Ensure the JAR is executable (if needed)
 sudo chmod +x clutter-map-0.0.1-SNAPSHOT.jar
 
-# Check if supervisord is running
-if pgrep -x "supervisord" > /dev/null
-then
-    echo "Running reread and update on running supervisor."
-    sudo supervisorctl reread
-    sudo supervisorctl update
-else
-    echo "Supervisord is not running. Starting supervisord..."
+# --------- SUPERVISOR --------- #
+# Stop Supervisor gracefully (stopping all processes it manages)
+echo "Stopping all Supervisor processes..."
+sudo supervisorctl stop all || { echo "Failed to stop Supervisor processes."; }
 
-    # Start the Spring Boot application using supervisor and the env variables
-    supervisord -c "$DEPLOY_DIR/supervisord.conf"
-    
-    # Verify that supervisord started successfully
-    if pgrep -x "supervisord" > /dev/null
-    then
-        echo "Supervisord started successfully."
-    else
-        echo "Failed to start supervisord."
-        exit 1
-    fi
+# Stop the Supervisor process itself
+echo "Stopping supervisord..."
+sudo pkill supervisord  # Kill supervisord
+
+# Wait a bit to ensure supervisord has stopped completely
+sleep 3
+
+# Start Supervisor again with the latest configuration
+echo "Starting supervisord with the latest configuration..."
+supervisord -c "$SUPERVISOR_CONF"
+
+# Wait for supervisord to fully start
+sleep 3
+
+# Verify that supervisord started successfully
+if pgrep -x "supervisord" > /dev/null; then
+    echo "Supervisord restarted successfully."
+else
+    echo "Failed to start supervisord."
+    exit 1
 fi
 
+echo "Supervisor has been restarted and is running."
+
+# --------- WAIT FOR APP --------- #
 echo "Waiting for Spring Boot app to start..."
 timeout=180  # Max wait time of 3 minutes
 while ! curl -s http://localhost:8080 > /dev/null && [ $timeout -gt 0 ]; do
@@ -62,6 +71,7 @@ if [ $timeout -le 0 ]; then
     exit 1
 fi
 
+# --------- CADDY --------- #
 # Once the app is running, start Caddy
 echo "Spring Boot app is up. Starting Caddy..."
 
@@ -78,10 +88,16 @@ else
 fi
 
 # Format the Caddyfile and start Caddy
-if sudo caddy fmt --overwrite; then
-    echo "Caddyfile formatted successfully."
+if [ -f "$DEPLOY_DIR/Caddyfile" ]; then
+    echo "Formatting the Caddyfile..."
+    if sudo caddy fmt --overwrite; then
+        echo "Caddyfile formatted successfully."
+    else
+        echo "Failed to format Caddyfile. Exiting."
+        exit 1
+    fi
 else
-    echo "Failed to format Caddyfile. Exiting."
+    echo "Caddyfile not found. Exiting."
     exit 1
 fi
 
