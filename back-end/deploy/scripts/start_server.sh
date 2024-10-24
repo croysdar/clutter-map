@@ -5,14 +5,29 @@ cd /home/ec2-user/deployment
 
 export PATH=$PATH:/usr/local/bin
 
-# End any existing supervisor processes
-sudo pkill supervisord
-
 source ./set_env_vars.sh
 
-# Start the Spring Boot application using supervisor and the env variables
-echo "Starting Spring Boot app..."
-supervisord -c ./supervisord.conf
+# Check if supervisord is running
+if pgrep -x "supervisord" > /dev/null
+then
+    echo "Running reread and update on running supervisor."
+    sudo supervisorctl reread
+    sudo supervisorctl update
+else
+    echo "Supervisord is not running. Starting supervisord..."
+
+    # Start the Spring Boot application using supervisor and the env variables
+    supervisord -c ./supervisord.conf
+    
+    # Verify that supervisord started successfully
+    if pgrep -x "supervisord" > /dev/null
+    then
+        echo "Supervisord started successfully."
+    else
+        echo "Failed to start supervisord."
+        exit 1
+    fi
+fi
 
 echo "Waiting for Spring Boot app to start..."
 timeout=180  # Max wait time of 3 minutes
@@ -31,9 +46,26 @@ fi
 # Once the app is running, start Caddy
 echo "Spring Boot app is up. Starting Caddy..."
 
-# Restart caddy (used to reverse proxy for HTTP)
-sudo pkill caddy
+# Gracefully stop Caddy if it's running
+if pgrep -x "caddy" > /dev/null
+then
+    echo "Caddy is already running.  Attempting to stop gracefully..."
+    sudo caddy stop || {
+        echo "Failed to stop Caddy via API, using pkill instead..."
+        sudo pkill caddy
+    }
+else
+    echo "Caddy is not running. Starting Caddy..."
+fi
+
+# Format the Caddyfile and start Caddy
 sudo caddy fmt --overwrite
 sudo caddy start --config ./Caddyfile
 
-echo "Caddy started successfully."
+if pgrep -x "caddy" > /dev/null
+then
+    echo "Caddy started successfully."
+else
+    echo "Failed to start Caddy."
+    exit 1
+fi
