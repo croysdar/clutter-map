@@ -55,7 +55,6 @@ jobs:
         path: back-end/build/reports/tests/test
 
   deploy-on-push:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps: 
