@@ -3,8 +3,5 @@ cmap-api.com:443 {
                 output file /var/log/caddy/access.log
         }
 
-        reverse_proxy http://localhost:8080 {
-                header_up Host {host}
-                header_up X-Real-IP {remote}
-        }
+        reverse_proxy http://localhost:8080 
 }
