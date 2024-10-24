@@ -20,6 +20,9 @@ else
     exit 1
 fi
 
+# Ensure the JAR is executable (if needed)
+sudo chmod +x clutter-map-0.0.1-SNAPSHOT.jar
+
 # Check if supervisord is running
 if pgrep -x "supervisord" > /dev/null
 then
@@ -89,3 +92,6 @@ else
     echo "Failed to start Caddy. Exiting."
     exit 1
 fi
+
+# Ensure the script closes STDOUT properly by exiting with 0
+exit 0
