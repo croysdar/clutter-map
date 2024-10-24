@@ -45,7 +45,7 @@ sleep 3
 
 # Start Supervisor again with the latest configuration
 echo "Starting supervisord with the latest configuration..."
-supervisord -c "$SUPERVISOR_CONF"
+nohup supervisord -c "$SUPERVISOR_CONF" > /dev/null 2>&1 < /dev/null &
 
 # Wait for supervisord to fully start
 sleep 3
@@ -57,8 +57,6 @@ else
     echo "Failed to start supervisord."
     exit 1
 fi
-
-echo "Supervisor has been restarted and is running."
 
 # --------- WAIT FOR APP --------- #
 echo "Waiting for Spring Boot app to start..."
@@ -109,11 +107,17 @@ else
 fi
 
 # Start Caddy
-if sudo caddy start --config "$DEPLOY_DIR/Caddyfile"; then
+if nohup sudo caddy start --config "$DEPLOY_DIR/Caddyfile"  > /dev/null 2>&1 < /dev/null; then
     echo "Caddy started successfully."
 else
     echo "Failed to start Caddy. Exiting."
     exit 1
+fi
+
+# Check if any processes are still holding on to STDOUT
+if lsof +E | grep -q /dev/stdout; then
+    echo "Closing any open file descriptors..."
+    exec 1>&-
 fi
 
 # Ensure the script closes STDOUT properly by exiting with 0
