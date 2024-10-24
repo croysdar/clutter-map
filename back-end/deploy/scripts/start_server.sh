@@ -25,6 +25,13 @@ fi
 sudo chmod +x clutter-map-0.0.1-SNAPSHOT.jar
 
 # --------- SUPERVISOR --------- #
+# Ensure the directory for Supervisor's PID file exists
+SUPERVISOR_DIR="/home/ec2-user/supervisor"
+if [ ! -d "$SUPERVISOR_DIR" ]; then
+    echo "Creating directory for Supervisor PID file..."
+    mkdir -p "$SUPERVISOR_DIR"
+fi
+
 # Stop Supervisor gracefully (stopping all processes it manages)
 echo "Stopping all Supervisor processes..."
 sudo supervisorctl stop all || { echo "Failed to stop Supervisor processes."; }
