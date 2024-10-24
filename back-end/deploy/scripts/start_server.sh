@@ -14,12 +14,19 @@ source ./set_env_vars.sh
 echo "Starting Spring Boot app..."
 supervisord -c ./supervisord.conf
 
-# Check if the Spring Boot app is running by hitting the health endpoint or root path
 echo "Waiting for Spring Boot app to start..."
-while ! curl -s http://localhost:8080 > /dev/null; do
+timeout=180  # Max wait time of 3 minutes
+while ! curl -s http://localhost:8080 > /dev/null && [ $timeout -gt 0 ]; do
     echo "Spring Boot app is not ready yet. Waiting..."
     sleep 5  # Wait for 5 seconds before checking again
+    timeout=$((timeout-5))
 done
+
+# Check if timeout ran out
+if [ $timeout -le 0 ]; then
+    echo "Spring Boot app failed to start within the timeout period."
+    exit 1
+fi
 
 # Once the app is running, start Caddy
 echo "Spring Boot app is up. Starting Caddy..."
