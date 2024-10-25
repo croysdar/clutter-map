@@ -2,13 +2,20 @@ package app.cluttermap.model;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "app_users")
@@ -23,16 +30,20 @@ public class User {
     private String email;
     private String provider; // ex: 'google'
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Project> projects = new ArrayList<>();
+
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
+
     // no-arg constructor for Hibernate
     protected User() {}
 
     public User(String providerId) {
         this.providerId = providerId;
     }
-
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private Date createdAt;
 
     public Date getCreatedAt() {
         return createdAt;
@@ -80,5 +91,23 @@ public class User {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
+    public void addProject(Project project) {
+        projects.add(project);
+        project.setOwner(this);
+    }
+
+    public void removeProject(Project project) {
+        projects.remove(project);
+        project.setOwner(null);
     }
 }
