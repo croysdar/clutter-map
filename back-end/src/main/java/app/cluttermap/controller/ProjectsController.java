@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,7 @@ public class ProjectsController {
     }
 
     @GetMapping("/{id}/rooms")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
     public ResponseEntity<List<Room>> getProjectRooms(@PathVariable("id") Long id) {
         Optional<Project> projectData = projectsRepository.findById(id);
 
@@ -78,6 +80,7 @@ public class ProjectsController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
     public ResponseEntity<Project> getOneProject(@PathVariable("id") Long id) {
         Optional<Project> projectData = projectsRepository.findById(id);
 
@@ -89,6 +92,7 @@ public class ProjectsController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
     public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id, @RequestBody Project project) {
         /*
          * Takes project, returns a project.
@@ -108,6 +112,7 @@ public class ProjectsController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
     public ResponseEntity<Project> deleteOneProject(@PathVariable("id") Long id) {
         Optional<Project> projectData = projectsRepository.findById(id);
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -20,11 +21,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     // Logger is used to log important information and events during the
-    // application's runtime, helping with debugging, auditing, and tracking application flow.
-    // supports different levels (INFO, DEBUG, ERROR, WARN)
+    // application's runtime, helping with debugging, auditing, and tracking
+    // application flow. Supports different levels (INFO, DEBUG, ERROR, WARN)
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     // Used to get the jwt secret token
@@ -32,7 +34,7 @@ public class SecurityConfig {
     private JwtConfig jwtConfig;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Applying security configuration...");
 
         // Configure authorization rules
@@ -82,8 +84,8 @@ public class SecurityConfig {
 
                 // Allow cross-origin requests for all endpoints
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "https://clutter-map.app") // Allow requests from your frontend
-                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
+                        .allowedOrigins("http://localhost:3000", "https://clutter-map.app") 
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true); // Allow cookies and credentials
             }
