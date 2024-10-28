@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -43,11 +44,9 @@ public class SecurityService {
         this.orgUnitsRepository = orgUnitsRepository;
     }
 
-    public Long getUserIdFromAuthentication(Authentication authentication) {
-        return getUserFromAuthentication(authentication).getId();
-    }
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    public User getUserFromAuthentication(Authentication authentication) {
         if (authentication == null || !(authentication instanceof JwtAuthenticationToken)) {
             throw new InvalidAuthenticationException("Authentication does not contain a JWT token.");
         }
@@ -59,7 +58,7 @@ public class SecurityService {
     }
 
     public boolean isResourceOwner(Authentication authentication, Long resourceId, String resourceType) {
-        Long currentUserId = getUserIdFromAuthentication(authentication);
+        Long currentUserId = getCurrentUser().getId();
 
         switch (resourceType) {
             case "project" :

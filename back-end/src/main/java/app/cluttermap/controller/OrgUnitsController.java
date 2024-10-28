@@ -43,7 +43,7 @@ public class OrgUnitsController {
 
     @GetMapping()
     public Iterable<OrgUnit> getOrgUnits(Authentication authentication) {
-        Long owner_id = securityService.getUserIdFromAuthentication(authentication);
+        Long owner_id = securityService.getCurrentUser().getId();
         return orgUnitsRepository.findOrgUnitsByUserId(owner_id);
     }
 
