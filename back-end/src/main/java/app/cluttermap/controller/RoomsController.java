@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.repository.ProjectsRepository;
 import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.service.SecurityService;
 
 @RestController
 @RequestMapping("/rooms")
@@ -32,15 +34,20 @@ public class RoomsController {
     @Autowired
     private final ProjectsRepository projectsRepository;
 
-    public RoomsController(RoomsRepository roomsRepository, ProjectsRepository projectsRepository) {
+    private final SecurityService securityService;
+
+    public RoomsController(RoomsRepository roomsRepository, ProjectsRepository projectsRepository,
+            SecurityService securityService) {
         this.roomsRepository = roomsRepository;
         this.projectsRepository = projectsRepository;
+        this.securityService = securityService;
     }
 
-    // @GetMapping()
-    // public Iterable<Room> getRooms() {
-    //     return this.roomsRepository.findAll();
-    // }
+    @GetMapping()
+    public Iterable<Room> getRooms(Authentication authentication) {
+        Long owner_id = securityService.getUserIdFromAuthentication(authentication);
+        return roomsRepository.findRoomsByProjectOwnerId(owner_id);
+    }
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(authentication, #roomDTO.projectId, 'project')")

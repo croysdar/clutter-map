@@ -44,8 +44,9 @@ public class ProjectsController {
     }
 
     @GetMapping()
-    public Iterable<Project> getProjects() {
-        return this.projectsRepository.findAll();
+    public Iterable<Project> getProjects(Authentication authentication) {
+        User owner = securityService.getUserFromAuthentication(authentication);
+        return projectsRepository.findByOwner(owner);
     }
 
     @GetMapping("/{id}/rooms")
