@@ -1,6 +1,7 @@
 package app.cluttermap.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class NewRoomDTO {
     private String name;
@@ -22,6 +23,8 @@ public class NewRoomDTO {
         return description;
     }
 
+    @NotBlank(message = "Project ID must not be blank.")
+    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     public String getProjectId() {
         return projectId;
     }
@@ -36,5 +39,9 @@ public class NewRoomDTO {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public Long getProjectIdAsLong() {
+        return Long.parseLong(projectId);
     }
 }
