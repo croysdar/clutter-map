@@ -41,7 +41,7 @@ public class ProjectsController {
     @GetMapping("/{id}/rooms")
     @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
     public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(projectService.getProjectRooms(id), HttpStatus.OK);
+        return new ResponseEntity<>(projectService.getProjectById(id).getRooms(), HttpStatus.OK);
     }
 
     @PostMapping()

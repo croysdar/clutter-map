@@ -1,8 +1,6 @@
 package app.cluttermap.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Value;
@@ -12,7 +10,6 @@ import app.cluttermap.dto.UpdateProjectDTO;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.repository.ProjectsRepository;
 import jakarta.transaction.Transactional;
@@ -40,8 +37,7 @@ public class ProjectService {
 
     @Transactional
     public Project createProject(NewProjectDTO projectDTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = securityService.getUserFromAuthentication(authentication);
+        User user = securityService.getCurrentUser();
 
         int num = projectsRepository.findByOwner(user).size();
         if (num >= projectLimit) {
@@ -53,20 +49,17 @@ public class ProjectService {
     }
 
     public Iterable<Project> getUserProjects() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = securityService.getUserFromAuthentication(authentication);
+        User user = securityService.getCurrentUser();
 
         return projectsRepository.findByOwner(user);
     }
 
-    public Iterable<Room> getProjectRooms(Long id) {
-        return getProjectById(id).getRooms();
-    }
-
     public Project updateProject(Long id, UpdateProjectDTO projectDTO) {
-        Project project = getProjectById(id);
+        Project _project = getProjectById(id);
 
-        return projectsRepository.save(project);
+        _project.setName(projectDTO.getName());
+
+        return projectsRepository.save(_project);
     }
 
     public void deleteProject(Long id) {
