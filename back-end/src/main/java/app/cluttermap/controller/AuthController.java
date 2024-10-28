@@ -147,9 +147,9 @@ public class AuthController {
     // Used to both validate a JWT token (typically issued from this backend)
     // as well as get simple user info to return to the frontend
     @GetMapping("/user-info")
-    public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getUserInfo() {
         try {
-            User user = securityService.getUserFromAuthentication(authentication);
+            User user = securityService.getCurrentUser();
 
             // Build the response object
             Map<String, Object> userInfo = new HashMap<>();

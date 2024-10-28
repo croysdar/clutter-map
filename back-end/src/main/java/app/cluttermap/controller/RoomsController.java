@@ -45,7 +45,7 @@ public class RoomsController {
 
     @GetMapping()
     public Iterable<Room> getRooms(Authentication authentication) {
-        Long owner_id = securityService.getUserIdFromAuthentication(authentication);
+        Long owner_id = securityService.getCurrentUser().getId();
         return roomsRepository.findRoomsByProjectOwnerId(owner_id);
     }
 

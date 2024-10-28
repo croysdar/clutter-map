@@ -44,7 +44,7 @@ public class ProjectsController {
 
     @GetMapping()
     public Iterable<Project> getProjects(Authentication authentication) {
-        User owner = securityService.getUserFromAuthentication(authentication);
+        User owner = securityService.getCurrentUser();
         return projectsRepository.findByOwner(owner);
     }
 
@@ -69,7 +69,7 @@ public class ProjectsController {
         }
 
         try {
-            User user = securityService.getUserFromAuthentication(authentication);
+            User user = securityService.getCurrentUser();
 
             int num = projectsRepository.findByOwner(user).size();
             if (num >= projectLimit) {
