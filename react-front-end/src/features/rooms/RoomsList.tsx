@@ -77,7 +77,7 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
+                <ButtonLink to={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
             </Paper>
         </Container>
     );

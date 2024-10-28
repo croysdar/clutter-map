@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.cluttermap.dto.NewProjectDTO;
+import app.cluttermap.dto.ProjectResponseDTO;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.repository.ProjectsRepository;
-import app.cluttermap.repository.UsersRepository;
 import app.cluttermap.service.SecurityService;
 
 @RestController
@@ -31,16 +32,14 @@ public class ProjectsController {
     @Autowired
     private final ProjectsRepository projectsRepository;
 
-    @Autowired
-    private final UsersRepository usersRepository;
-
     private final SecurityService securityService;
 
-    public ProjectsController(ProjectsRepository projectsRepository, UsersRepository usersRepository,
-            SecurityService securityService) {
+    @Value("${project.limit}")
+    private int projectLimit;
+
+    public ProjectsController(ProjectsRepository projectsRepository, SecurityService securityService) {
         this.projectsRepository = projectsRepository;
         this.securityService = securityService;
-        this.usersRepository = usersRepository;
     }
 
     @GetMapping()
@@ -63,21 +62,27 @@ public class ProjectsController {
     }
 
     @PostMapping()
-    public ResponseEntity<Project> addOneProject(@RequestBody NewProjectDTO projectDTO, Authentication authentication) {
+    public ResponseEntity<ProjectResponseDTO> addOneProject(@RequestBody NewProjectDTO projectDTO,
+            Authentication authentication) {
         if (projectDTO.getName() == null || projectDTO.getName().isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ProjectResponseDTO("Project name is required"), HttpStatus.BAD_REQUEST);
         }
 
-        Long userId = securityService.getUserIdFromAuthentication(authentication);
+        try {
+            User user = securityService.getUserFromAuthentication(authentication);
 
-        Optional<User> userData = this.usersRepository.findById(userId);
-        if (!userData.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            int num = projectsRepository.findByOwner(user).size();
+            if (num >= projectLimit) {
+                return new ResponseEntity<>(new ProjectResponseDTO("Maximum project limit reached."),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Project newProject = new Project(projectDTO.getName(), user);
+            return new ResponseEntity<>(new ProjectResponseDTO(this.projectsRepository.save(newProject)),
+                    HttpStatus.CREATED);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(new ProjectResponseDTO(e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
-
-        Project newProject = new Project(projectDTO.getName(), userData.get());
-
-        return new ResponseEntity<>(this.projectsRepository.save(newProject), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

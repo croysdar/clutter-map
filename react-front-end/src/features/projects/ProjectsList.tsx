@@ -12,6 +12,7 @@ import ProjectMenu from '@/features/projects/ProjectMenu';
 import { useGetProjectsQuery } from '@/features/api/apiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
 import { useNavigate } from 'react-router-dom';
+import { PROJECT_LIMIT } from '@/utils/constants';
 
 const ProjectsList: React.FC = () => {
     const {
@@ -47,17 +48,15 @@ const ProjectsList: React.FC = () => {
                 {projects.map((project) => (
                     <>
                         <Card key={`project-card-${project.id}`} sx={{ marginTop: 3 }}>
-                            <div key={project.id} >
-                                <CardHeader
-                                    title={<Typography variant='h4'> {project.name}</Typography>}
-                                    action={<ProjectMenu project={project} />}
-                                    onClick={(e) => handleClick(e, project.id)}
-                                />
-                            </div>
+                            <CardHeader
+                                title={<Typography variant='h4'> {project.name}</Typography>}
+                                action={<ProjectMenu project={project} />}
+                                onClick={(e) => handleClick(e, project.id)}
+                            />
                         </Card>
                     </>
                 ))}
-                <ButtonLink href="/projects/add" label="Create a new Project" />
+                <ButtonLink to="/projects/add" label="Create a new Project" disabled={projects.length >= PROJECT_LIMIT}/>
             </Paper>
         </Container>
     );
