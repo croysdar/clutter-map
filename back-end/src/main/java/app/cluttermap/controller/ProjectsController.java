@@ -34,8 +34,8 @@ public class ProjectsController {
     }
 
     @GetMapping()
-    public Iterable<Project> getProjects() {
-        return projectService.getUserProjects();
+    public ResponseEntity<Iterable<Project>> getProjects() {
+        return new ResponseEntity<>(projectService.getUserProjects(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/rooms")
@@ -46,7 +46,7 @@ public class ProjectsController {
 
     @PostMapping()
     public ResponseEntity<Project> addOneProject(@RequestBody NewProjectDTO projectDTO) {
-        return new ResponseEntity<>(projectService.createProject(projectDTO), HttpStatus.OK);
+        return new ResponseEntity<>(projectService.createProject(projectDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
