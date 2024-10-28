@@ -8,6 +8,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import app.cluttermap.exception.auth.InvalidAuthenticationException;
+import app.cluttermap.exception.auth.UserNotFoundException;
+import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
+import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -44,13 +49,13 @@ public class SecurityService {
 
     public User getUserFromAuthentication(Authentication authentication) {
         if (authentication == null || !(authentication instanceof JwtAuthenticationToken)) {
-            throw new IllegalStateException("Authentication does not contain a JWT token");
+            throw new InvalidAuthenticationException("Authentication does not contain a JWT token.");
         }
 
         Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
         Long user_id = Long.valueOf(jwt.getSubject());
 
-        return usersRepository.findById(user_id).orElseThrow(() -> new IllegalStateException("User does not exist"));
+        return usersRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException("User does not exist"));
     }
 
     public boolean isResourceOwner(Authentication authentication, Long resourceId, String resourceType) {
@@ -60,7 +65,7 @@ public class SecurityService {
             case "project" :
                 Optional <Project> projectData = projectsRepository.findById(resourceId);
                 if (!projectData.isPresent()) {
-                    throw new IllegalStateException("Project does not exist");
+                    throw new ProjectNotFoundException();
                 }
 
                 return projectData.get().getOwner().getId().equals(currentUserId);
@@ -68,7 +73,7 @@ public class SecurityService {
             case "room" :
                 Optional <Room> roomData = roomsRepository.findById(resourceId);
                 if (!roomData.isPresent()) {
-                    throw new IllegalStateException("Room does not exist");
+                    throw new RoomNotFoundException();
                 }
 
                 return roomData.get().getProject().getOwner().getId().equals(currentUserId);
@@ -76,7 +81,7 @@ public class SecurityService {
             case "org-unit" :
                 Optional <OrgUnit> orgUnitData = orgUnitsRepository.findById(resourceId);
                 if (!orgUnitData.isPresent()) {
-                    throw new IllegalStateException("Organization Unit does not exist");
+                    throw new OrgUnitNotFoundException();
                 }
 
                 return orgUnitData.get().getRoom().getProject().getOwner().getId().equals(currentUserId);
