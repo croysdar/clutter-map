@@ -26,7 +26,7 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
     }
 
     const handleEdit = () => {
-        navigate(`/projects/${projectId}/rooms/${roomId}/orgUnits/${orgUnit.id}/edit`)
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnit.id}/edit`)
         handleClose();
     }
 
