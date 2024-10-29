@@ -65,7 +65,7 @@ const EditOrgUnit = () => {
                 <CardHeader
                     title={
                         <Typography variant="h4" component="h2" gutterBottom align="center">
-                            Edit OrgUnit
+                            Edit Organizational Unit
                         </Typography>
                     }
                 />

@@ -46,7 +46,7 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
                 onClose={handleClose}
             >
                 <MenuItem onClick={handleEdit}>
-                    Edit OrgUnit
+                    Edit Unit
                 </MenuItem>
 
             </Menu>

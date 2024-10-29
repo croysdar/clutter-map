@@ -53,7 +53,7 @@ export const AddOrgUnit = () => {
             <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Add a New OrgUnit
+                        Add a New Organizational Unit
                     </Typography>
                     <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
                         {/* OrgUnit Name */}
@@ -95,7 +95,7 @@ export const AddOrgUnit = () => {
                             sx={{ marginTop: 2 }}
                             disabled={isLoading}
                         >
-                            Create OrgUnit
+                            Create Organizational Unit
                         </Button>
                     </form>
                     <Button

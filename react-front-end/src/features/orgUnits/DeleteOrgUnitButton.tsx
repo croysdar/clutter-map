@@ -43,7 +43,7 @@ const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled
                 onClick={handleOpen}
 
             >
-                DELETE ORG UNIT
+                DELETE ORGANIZATIONAL UNIT
                 <DeleteForever />
             </Button>
 
@@ -51,11 +51,11 @@ const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled
             <Dialog open={open} onClose={handleClose} id={`delete-orgUnit-${orgUnit.id}-dialog`}>
                 <DialogTitle>Delete {orgUnit.name}</DialogTitle>
                 <DialogContent>
-                    <Typography > Are you SURE you want to delete this orgUnit? </Typography>
+                    <Typography > Are you SURE you want to delete this unit? </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete} color="error">Delete the orgUnit</Button>
+                    <Button onClick={handleDelete} color="error">Delete the unit</Button>
                 </DialogActions>
             </Dialog>
         </>
