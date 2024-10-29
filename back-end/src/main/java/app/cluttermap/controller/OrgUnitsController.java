@@ -35,26 +35,26 @@ public class OrgUnitsController {
     }
 
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #orgUnitDTO.roomId, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(orgUnitDTO.roomId, 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
         return new ResponseEntity<>(orgUnitService.createOrgUnit(orgUnitDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
         return new ResponseEntity<>(orgUnitService.getOrgUnitById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
             @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
         return new ResponseEntity<>(orgUnitService.updateOrgUnit(id, orgUnitDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> deleteOneOrgUnit(@PathVariable("id") Long id) {
         orgUnitService.deleteOrgUnit(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -57,7 +57,7 @@ public class SecurityService {
         return usersRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException());
     }
 
-    public boolean isResourceOwner(Authentication authentication, Long resourceId, String resourceType) {
+    public boolean isResourceOwner(Long resourceId, String resourceType) {
         Long currentUserId = getCurrentUser().getId();
 
         switch (resourceType) {

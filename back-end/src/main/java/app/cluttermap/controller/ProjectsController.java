@@ -39,7 +39,7 @@ public class ProjectsController {
     }
 
     @GetMapping("/{id}/rooms")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
         return new ResponseEntity<>(projectService.getProjectById(id).getRooms(), HttpStatus.OK);
     }
@@ -50,13 +50,13 @@ public class ProjectsController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> getOneProject(@PathVariable("id") Long id) {
         return new ResponseEntity<>(projectService.getProjectById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id,
             @RequestBody UpdateProjectDTO projectDTO) {
         /*
@@ -67,7 +67,7 @@ public class ProjectsController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Void> deleteOneProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

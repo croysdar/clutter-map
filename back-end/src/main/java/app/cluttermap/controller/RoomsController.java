@@ -35,32 +35,32 @@ public class RoomsController {
     }
 
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #roomDTO.projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#roomDTO.projectId, 'project')")
     public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
         return new ResponseEntity<>(roomService.createRoom(roomDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Room> getOneRoom(@PathVariable("id") Long id) {
         return new ResponseEntity<>(roomService.getRoomById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id, @RequestBody UpdateRoomDTO roomDTO) {
         return new ResponseEntity<>(roomService.updateRoom(id, roomDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Void> deleteOneRoom(@PathVariable("id") Long id) {
         roomService.deleteRoom(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{id}/org-units")
-    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Iterable<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
         return new ResponseEntity<>(roomService.getRoomById(id).getOrgUnits(), HttpStatus.OK);
     }
