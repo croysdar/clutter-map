@@ -54,7 +54,7 @@ public class SecurityService {
         Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
         Long user_id = Long.valueOf(jwt.getSubject());
 
-        return usersRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException("User does not exist"));
+        return usersRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException());
     }
 
     public boolean isResourceOwner(Authentication authentication, Long resourceId, String resourceType) {
