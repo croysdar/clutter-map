@@ -29,12 +29,6 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
         handleClose();
     }
 
-    const handleAddLocation = () => {
-        // TODO add location addition functionality
-        alert(room.id);
-        handleClose();
-    }
-
     return (
         <>
             <Tooltip title="Settings">
@@ -49,18 +43,9 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
                 open={open}
                 id={`room-${room.id}-menu`}
                 onClose={handleClose}
-            // onClick={handleClose}
-
             >
-                {/* 
-                Edit Room - takes you to an edit page?
-                Add location - takes you to 'new location' page?
-            */}
                 <MenuItem onClick={handleEdit}>
                     Edit Room
-                </MenuItem>
-                <MenuItem onClick={handleAddLocation}>
-                    Add Location
                 </MenuItem>
 
             </Menu>

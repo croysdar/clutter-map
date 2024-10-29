@@ -46,17 +46,10 @@ const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
                 open={open}
                 id={`project-${project.id}-menu`}
                 onClose={handleClose}
-            // onClick={handleClose}
-
             >
-                {/* 
-                Edit Project - takes you to an edit page?
-                Add location - takes you to 'new location' page?
-            */}
                 <MenuItem onClick={handleEdit}>
                     Edit Project
                 </MenuItem>
-
             </Menu>
         </>
     );
