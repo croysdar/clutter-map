@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetProjectQuery } from '@/features/api/baseApiSlice';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useParams } from 'react-router-dom';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
+import { useGetProjectQuery } from '../projects/projectApi';
 
 const OrgUnitsList: React.FC = () => {
     const { roomId } = useParams();

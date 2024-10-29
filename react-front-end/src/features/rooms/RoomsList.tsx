@@ -11,10 +11,10 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetProjectQuery } from '@/features/api/baseApiSlice';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetRoomsByProjectQuery } from './roomApi';
+import { useGetProjectQuery } from '../projects/projectApi';
 
 const RoomsList: React.FC = () => {
     const { projectId } = useParams();

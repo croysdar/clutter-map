@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
 import { Project } from './projectsTypes';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteProjectMutation } from '../api/baseApiSlice';
 import { useNavigate } from 'react-router-dom';
+import { useDeleteProjectMutation } from './projectApi';
 
 type DeleteProjectProps = {
     project: Project,
