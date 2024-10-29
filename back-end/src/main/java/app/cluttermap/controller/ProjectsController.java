@@ -2,7 +2,6 @@ package app.cluttermap.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,24 +34,24 @@ public class ProjectsController {
 
     @GetMapping()
     public ResponseEntity<Iterable<Project>> getProjects() {
-        return new ResponseEntity<>(projectService.getUserProjects(), HttpStatus.OK);
+        return ResponseEntity.ok(projectService.getUserProjects());
     }
 
     @GetMapping("/{id}/rooms")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(projectService.getProjectById(id).getRooms(), HttpStatus.OK);
+        return ResponseEntity.ok(projectService.getProjectById(id).getRooms());
     }
 
     @PostMapping()
     public ResponseEntity<Project> addOneProject(@RequestBody NewProjectDTO projectDTO) {
-        return new ResponseEntity<>(projectService.createProject(projectDTO), HttpStatus.CREATED);
+        return ResponseEntity.ok(projectService.createProject(projectDTO));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> getOneProject(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(projectService.getProjectById(id), HttpStatus.OK);
+        return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
     @PutMapping("/{id}")
@@ -63,13 +62,13 @@ public class ProjectsController {
          * Use to change project name.
          * Cannot use to change rooms within project.
          */
-        return new ResponseEntity<>(projectService.updateProject(id, projectDTO), HttpStatus.OK);
+        return ResponseEntity.ok(projectService.updateProject(id, projectDTO));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Void> deleteOneProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

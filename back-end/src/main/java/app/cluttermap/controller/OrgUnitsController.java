@@ -1,7 +1,6 @@
 package app.cluttermap.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,33 +30,33 @@ public class OrgUnitsController {
 
     @GetMapping()
     public ResponseEntity<Iterable<OrgUnit>> getOrgUnits() {
-        return new ResponseEntity<>(orgUnitService.getUserOrgUnits(), HttpStatus.OK);
+        return ResponseEntity.ok(orgUnitService.getUserOrgUnits());
     }
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(orgUnitDTO.roomId, 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
-        return new ResponseEntity<>(orgUnitService.createOrgUnit(orgUnitDTO), HttpStatus.CREATED);
+        return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(orgUnitService.getOrgUnitById(id), HttpStatus.OK);
+        return ResponseEntity.ok(orgUnitService.getOrgUnitById(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
             @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
-        return new ResponseEntity<>(orgUnitService.updateOrgUnit(id, orgUnitDTO), HttpStatus.OK);
+        return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
-    public ResponseEntity<OrgUnit> deleteOneOrgUnit(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {
         orgUnitService.deleteOrgUnit(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
 
