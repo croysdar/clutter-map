@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +32,7 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import app.cluttermap.model.User;
 import app.cluttermap.repository.UsersRepository;
+import app.cluttermap.service.SecurityService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -41,8 +41,8 @@ import io.jsonwebtoken.security.Keys;
 @RequestMapping("/auth")
 public class AuthController {
     // Logger is used to log important information and events during the
-    // application's runtime, helping with debugging, auditing, and tracking application flow.
-    // supports different levels (INFO, DEBUG, ERROR, WARN)
+    // application's runtime, helping with debugging, auditing, and tracking
+    // application flow. Supports different levels (INFO, DEBUG, ERROR, WARN)
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     // Factory for JSON processing, using Gson for serialization and deserialization
@@ -50,6 +50,12 @@ public class AuthController {
 
     // HTTP transport layer, used to send HTTP requests over the network
     private final NetHttpTransport transport = new NetHttpTransport();
+
+    public final SecurityService securityService;
+
+    public AuthController(SecurityService securityService) {
+        this.securityService = securityService;
+    }
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
@@ -117,12 +123,12 @@ public class AuthController {
             // Create our own JWT
             // https://www.baeldung.com/java-json-web-tokens-jjwt
             String jwtToken = Jwts.builder()
-                    .setSubject(user.getId().toString()) // Set the subject as the user's unique ID
-                    .claim("email", user.getEmail()) // Add claims (optional)
+                    .setSubject(user.getId().toString())
+                    .claim("email", user.getEmail())
                     .claim("username", user.getUsername())
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                    .signWith(key, SignatureAlgorithm.HS256) // Use your secret key
+                    .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
             // Building response
@@ -141,25 +147,21 @@ public class AuthController {
     // Used to both validate a JWT token (typically issued from this backend)
     // as well as get simple user info to return to the frontend
     @GetMapping("/user-info")
-    public ResponseEntity<Map<String, Object>> getUserInfo(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
+    public ResponseEntity<Map<String, Object>> getUserInfo() {
+        try {
+            User user = securityService.getCurrentUser();
+
+            // Build the response object
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userEmail", user.getEmail());
+            userInfo.put("userName", user.getUsername());
+
+            return new ResponseEntity<>(userInfo, HttpStatus.OK);
+        } catch (IllegalStateException e) {
             Map<String, Object> response = new HashMap<>();
-            response.put("error", "Invalid JWT Token");
+            response.put("error", e.getMessage());
+
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
-
-        // Get the JWT token from the authentication object
-        Jwt jwtToken = (Jwt) authentication.getPrincipal();
-
-        // Extract claims from JWT
-        String userEmail = jwtToken.getClaim("email");
-        String userName = jwtToken.getClaim("username");
-
-        // Build the response object
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("userEmail", userEmail);
-        userInfo.put("userName", userName);
-
-        return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 }

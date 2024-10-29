@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import app.cluttermap.dto.NewOrgUnitDTO;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.service.SecurityService;
 import app.cluttermap.repository.OrgUnitsRepository;
 
 @RestController
@@ -29,17 +32,23 @@ public class OrgUnitsController {
     @Autowired
     private final RoomsRepository roomsRepository;
 
-    public OrgUnitsController(OrgUnitsRepository orgUnitsRepository, RoomsRepository roomsRepository) {
+    private final SecurityService securityService;
+
+    public OrgUnitsController(OrgUnitsRepository orgUnitsRepository, RoomsRepository roomsRepository,
+            SecurityService securityService) {
         this.orgUnitsRepository = orgUnitsRepository;
         this.roomsRepository = roomsRepository;
+        this.securityService = securityService;
     }
 
     @GetMapping()
-    public Iterable<OrgUnit> getOrgUnits() {
-        return this.orgUnitsRepository.findAll();
+    public Iterable<OrgUnit> getOrgUnits(Authentication authentication) {
+        Long owner_id = securityService.getCurrentUser().getId();
+        return orgUnitsRepository.findOrgUnitsByUserId(owner_id);
     }
 
     @PostMapping()
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #orgUnitDTO.roomId, 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
         if (orgUnitDTO.getName() == null || orgUnitDTO.getName().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -61,6 +70,7 @@ public class OrgUnitsController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
     public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
         Optional<OrgUnit> orgUnitData = orgUnitsRepository.findById(id);
 
@@ -72,6 +82,7 @@ public class OrgUnitsController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id, @RequestBody OrgUnit orgUnit) {
         Optional<OrgUnit> orgUnitData = orgUnitsRepository.findById(id);
 
@@ -87,6 +98,7 @@ public class OrgUnitsController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'org-unit')")
     public ResponseEntity<OrgUnit> deleteOneOrgUnit(@PathVariable("id") Long id) {
         Optional<OrgUnit> orgUnitData = orgUnitsRepository.findById(id);
 
@@ -101,7 +113,6 @@ public class OrgUnitsController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 }
 
 // https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html

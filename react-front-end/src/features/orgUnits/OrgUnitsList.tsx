@@ -84,7 +84,7 @@ const OrgUnitsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink href={`/projects/${projectId}/rooms/${roomId}/org-units/add`} label="Create a new OrgUnit" />
+                <ButtonLink to={`/projects/${projectId}/rooms/${roomId}/org-units/add`} label="Create a new OrgUnit" />
             </Paper>
         </Container>
     );

@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +23,7 @@ import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.repository.ProjectsRepository;
 import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.service.SecurityService;
 
 @RestController
 @RequestMapping("/rooms")
@@ -31,17 +34,23 @@ public class RoomsController {
     @Autowired
     private final ProjectsRepository projectsRepository;
 
-    public RoomsController(RoomsRepository roomsRepository, ProjectsRepository projectsRepository) {
+    private final SecurityService securityService;
+
+    public RoomsController(RoomsRepository roomsRepository, ProjectsRepository projectsRepository,
+            SecurityService securityService) {
         this.roomsRepository = roomsRepository;
         this.projectsRepository = projectsRepository;
+        this.securityService = securityService;
     }
 
     @GetMapping()
-    public Iterable<Room> getRooms() {
-        return this.roomsRepository.findAll();
+    public Iterable<Room> getRooms(Authentication authentication) {
+        Long owner_id = securityService.getCurrentUser().getId();
+        return roomsRepository.findRoomsByProjectOwnerId(owner_id);
     }
 
     @PostMapping()
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #roomDTO.projectId, 'project')")
     public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
         if (roomDTO.getName() == null || roomDTO.getName().isEmpty() || roomDTO.getProjectId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -60,6 +69,7 @@ public class RoomsController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
     public ResponseEntity<Room> getOneRoom(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
 
@@ -71,6 +81,7 @@ public class RoomsController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
     public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id, @RequestBody Room room) {
         Optional<Room> roomData = roomsRepository.findById(id);
 
@@ -86,6 +97,7 @@ public class RoomsController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
     public ResponseEntity<Room> deleteOneRoom(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
 
@@ -102,6 +114,7 @@ public class RoomsController {
     }
 
     @GetMapping("/{id}/org-units")
+    @PreAuthorize("@securityService.isResourceOwner(authentication, #id, 'room')")
     public ResponseEntity<List<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
         Optional<Room> roomData = roomsRepository.findById(id);
         if (roomData.isPresent()) {
@@ -111,7 +124,6 @@ public class RoomsController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 }
 
 // https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html
