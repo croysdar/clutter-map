@@ -54,6 +54,7 @@ public class ProjectService {
         return projectsRepository.findByOwner(user);
     }
 
+    @Transactional
     public Project updateProject(Long id, UpdateProjectDTO projectDTO) {
         Project _project = getProjectById(id);
 
@@ -62,6 +63,7 @@ public class ProjectService {
         return projectsRepository.save(_project);
     }
 
+    @Transactional
     public void deleteProject(Long id) {
         // Make sure project exists first
         getProjectById(id);

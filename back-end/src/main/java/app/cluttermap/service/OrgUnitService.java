@@ -49,6 +49,7 @@ public class OrgUnitService {
         return orgUnitsRepository.findOrgUnitsByUserId(user.getId());
     }
 
+    @Transactional
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = getOrgUnitById(id);
         _orgUnit.setName(orgUnitDTO.getName());
@@ -57,6 +58,7 @@ public class OrgUnitService {
         return orgUnitsRepository.save(_orgUnit);
     }
 
+    @Transactional
     public void deleteOrgUnit(Long id) {
         // Make sure org unit exists first
         getOrgUnitById(id);

@@ -50,6 +50,7 @@ public class RoomService {
         return roomsRepository.findRoomsByProjectOwnerId(user.getId());
     }
 
+    @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = getRoomById(id);
         _room.setName(roomDTO.getName());
@@ -58,6 +59,7 @@ public class RoomService {
         return roomsRepository.save(_room);
     }
 
+    @Transactional
     public void deleteRoom(Long id) {
         // Make sure room exists first
         getRoomById(id);
