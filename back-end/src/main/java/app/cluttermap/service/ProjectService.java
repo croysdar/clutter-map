@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Value;
 
-import app.cluttermap.dto.NewProjectDTO;
-import app.cluttermap.dto.UpdateProjectDTO;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
+import app.cluttermap.model.dto.NewProjectDTO;
+import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectsRepository;
 import jakarta.transaction.Transactional;
 

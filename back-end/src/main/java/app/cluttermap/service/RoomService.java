@@ -3,12 +3,12 @@ package app.cluttermap.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.dto.NewRoomDTO;
-import app.cluttermap.dto.UpdateRoomDTO;
 import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
+import app.cluttermap.model.dto.NewRoomDTO;
+import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomsRepository;
 import jakarta.transaction.Transactional;
 

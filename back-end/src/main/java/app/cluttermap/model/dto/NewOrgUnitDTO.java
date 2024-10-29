@@ -1,4 +1,4 @@
-package app.cluttermap.dto;
+package app.cluttermap.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

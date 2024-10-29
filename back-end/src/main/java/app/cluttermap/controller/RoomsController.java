@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.cluttermap.dto.NewRoomDTO;
-import app.cluttermap.dto.UpdateRoomDTO;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
+import app.cluttermap.model.dto.NewRoomDTO;
+import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.service.RoomService;
 
 @RestController

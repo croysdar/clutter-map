@@ -1,16 +1,16 @@
-package app.cluttermap.dto;
+package app.cluttermap.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class UpdateProjectDTO {
+public class NewProjectDTO {
     @NotBlank(message = "Project name must not be blank.")
     private String name;
 
     @JsonCreator
-    public UpdateProjectDTO(@JsonProperty("name") String name) {
+    public NewProjectDTO(@JsonProperty("name") String name) {
         this.name = name;
     }
 

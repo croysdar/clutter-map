@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.cluttermap.dto.NewOrgUnitDTO;
-import app.cluttermap.dto.UpdateOrgUnitDTO;
 import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.dto.NewOrgUnitDTO;
+import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.service.OrgUnitService;
 
 @RestController

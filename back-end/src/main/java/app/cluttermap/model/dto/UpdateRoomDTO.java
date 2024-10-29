@@ -1,4 +1,4 @@
-package app.cluttermap.dto;
+package app.cluttermap.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
