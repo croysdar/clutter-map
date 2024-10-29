@@ -1,6 +1,7 @@
 package app.cluttermap.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import app.cluttermap.dto.NewOrgUnitDTO;
 import app.cluttermap.dto.UpdateOrgUnitDTO;
@@ -11,6 +12,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.repository.OrgUnitsRepository;
 import jakarta.transaction.Transactional;
 
+@Service("orgUnitService")
 public class OrgUnitService {
     @Autowired
     private final OrgUnitsRepository orgUnitsRepository;

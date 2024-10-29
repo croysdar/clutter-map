@@ -14,7 +14,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.repository.ProjectsRepository;
 import jakarta.transaction.Transactional;
 
-@Service
+@Service("projectService")
 public class ProjectService {
     @Autowired
     private final ProjectsRepository projectsRepository;

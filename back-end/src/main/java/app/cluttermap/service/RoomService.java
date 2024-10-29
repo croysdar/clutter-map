@@ -12,7 +12,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.repository.RoomsRepository;
 import jakarta.transaction.Transactional;
 
-@Service
+@Service("roomService")
 public class RoomService {
     @Autowired
     private final RoomsRepository roomsRepository;
