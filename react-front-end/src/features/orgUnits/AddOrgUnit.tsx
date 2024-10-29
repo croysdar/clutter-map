@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
-import { useAddNewOrgUnitMutation } from '../api/baseApiSlice';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useGetRoomQuery } from '../rooms/roomApi';
+import { useAddNewOrgUnitMutation } from './orgUnitApi';
 
 interface AddOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
