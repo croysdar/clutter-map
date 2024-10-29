@@ -25,17 +25,17 @@ const EditProject = () => {
         { isLoading: updateLoading }
     ] = useUpdateProjectMutation();
 
+    if (projectLoading) {
+        return (
+            <CircularProgress />
+        )
+    }
+
     if (!project) {
         return (
             <section>
                 <Typography variant='h2'>Project not found!</Typography>
             </section>
-        )
-    }
-
-    if (projectLoading) {
-        return (
-            <CircularProgress />
         )
     }
 

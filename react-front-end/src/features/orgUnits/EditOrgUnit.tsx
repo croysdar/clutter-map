@@ -28,17 +28,20 @@ const EditOrgUnit = () => {
         { isLoading: updateLoading }
     ] = useUpdateOrgUnitMutation();
 
-    if (!orgUnit) {
-        return (
-            <section>
-                <Typography variant='h2'>OrgUnit not found!</Typography>
-            </section>
-        )
-    }
-
     if (orgUnitLoading) {
         return (
             <CircularProgress />
+        )
+    }
+
+    if (!orgUnit) {
+        return (
+        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <section>
+                <Typography variant='h2'>OrgUnit not found!</Typography>
+            </section></Card>
+            </Container>
         )
     }
 

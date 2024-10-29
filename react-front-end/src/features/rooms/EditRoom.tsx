@@ -27,17 +27,17 @@ const EditRoom = () => {
         { isLoading: updateLoading }
     ] = useUpdateRoomMutation();
 
+    if (roomLoading) {
+        return (
+            <CircularProgress />
+        )
+    }
+
     if (!room) {
         return (
             <section>
                 <Typography variant='h2'>Room not found!</Typography>
             </section>
-        )
-    }
-
-    if (roomLoading) {
-        return (
-            <CircularProgress />
         )
     }
 
