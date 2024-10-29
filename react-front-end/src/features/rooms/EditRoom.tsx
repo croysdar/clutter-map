@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetRoomQuery, useUpdateRoomMutation } from '../api/apiSlice'
 import DeleteRoomButton from './DeleteRoomButton'
+import { useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,

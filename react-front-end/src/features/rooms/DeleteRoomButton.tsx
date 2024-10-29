@@ -4,8 +4,8 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography }
 
 import { Room } from './roomsSlice';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteRoomMutation } from '../api/apiSlice';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDeleteRoomMutation } from './roomApi';
 
 type DeleteRoomProps = {
     room: Room,

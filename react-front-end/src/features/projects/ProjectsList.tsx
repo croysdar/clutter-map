@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 
 import ProjectMenu from '@/features/projects/ProjectMenu';
-import { useGetProjectsQuery } from '@/features/api/apiSlice';
+import { useGetProjectsQuery } from '@/features/api/baseApiSlice';
 import ButtonLink from '@/components/common/ButtonLink';
 import { useNavigate } from 'react-router-dom';
 import { PROJECT_LIMIT } from '@/utils/constants';

@@ -4,7 +4,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography }
 
 import { OrgUnit } from './orgUnitsSlice';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteOrgUnitMutation } from '../api/apiSlice';
+import { useDeleteOrgUnitMutation } from '../api/baseApiSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
 type DeleteOrgUnitProps = {

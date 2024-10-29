@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
-import { useAddNewProjectMutation } from '../api/apiSlice';
+import { useAddNewProjectMutation } from '../api/baseApiSlice';
 import { useNavigate } from 'react-router-dom';
 
 interface AddProjectFormFields extends HTMLFormControlsCollection {

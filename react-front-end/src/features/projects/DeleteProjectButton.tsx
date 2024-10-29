@@ -4,7 +4,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typogra
 
 import { Project } from './projectsTypes';
 import { DeleteForever } from '@mui/icons-material';
-import { useDeleteProjectMutation } from '../api/apiSlice';
+import { useDeleteProjectMutation } from '../api/baseApiSlice';
 import { useNavigate } from 'react-router-dom';
 
 type DeleteProjectProps = {

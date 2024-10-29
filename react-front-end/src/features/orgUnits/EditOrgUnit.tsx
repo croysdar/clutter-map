@@ -3,7 +3,7 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetOrgUnitQuery, useUpdateOrgUnitMutation } from '../api/apiSlice'
+import { useGetOrgUnitQuery, useUpdateOrgUnitMutation } from '../api/baseApiSlice'
 import DeleteOrgUnitButton from './DeleteOrgUnitButton'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
