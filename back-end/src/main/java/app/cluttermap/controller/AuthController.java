@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,9 +39,7 @@ import io.jsonwebtoken.security.Keys;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    // Logger is used to log important information and events during the
-    // application's runtime, helping with debugging, auditing, and tracking
-    // application flow. Supports different levels (INFO, DEBUG, ERROR, WARN)
+    // Logger supports different levels (INFO, DEBUG, ERROR, WARN)
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     // Factory for JSON processing, using Gson for serialization and deserialization
