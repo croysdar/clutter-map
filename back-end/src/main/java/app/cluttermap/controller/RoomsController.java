@@ -34,7 +34,7 @@ public class RoomsController {
     }
 
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#roomDTO.projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#roomDTO.getProjectId(), 'project')")
     public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.createRoom(roomDTO));
     }

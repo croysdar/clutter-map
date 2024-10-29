@@ -34,7 +34,7 @@ public class OrgUnitsController {
     }
 
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(orgUnitDTO.roomId, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
