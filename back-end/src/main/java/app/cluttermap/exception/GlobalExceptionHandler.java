@@ -1,5 +1,7 @@
 package app.cluttermap.exception;
 
+import java.security.GeneralSecurityException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,7 @@ import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
+import io.jsonwebtoken.io.IOException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,6 +24,17 @@ public class GlobalExceptionHandler {
                 .getFieldError()
                 .getDefaultMessage();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+    }
+
+    @ExceptionHandler({ GeneralSecurityException.class, IOException.class })
+    public ResponseEntity<String> handleGoogleAuthExceptions(Exception ex) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "An error occurred during token verification.";
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
     }
 
     @ExceptionHandler({ InvalidAuthenticationException.class })
