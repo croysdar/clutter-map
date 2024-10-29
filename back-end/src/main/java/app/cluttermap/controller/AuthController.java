@@ -45,14 +45,13 @@ public class AuthController {
     @PostMapping("/verify-token/google")
     public ResponseEntity<?> verifyGoogleToken(@RequestBody String idTokenString)
             throws GeneralSecurityException, IOException {
-        // Verify the token
+
         GoogleIdToken idToken = authService.verifyGoogleToken(idTokenString);
 
         User user = authService.findOrCreateUserFromGoogleToken(idToken);
 
         String jwtToken = authService.generateJwtToken(user);
 
-        // Building response
         Map<String, String> response = new HashMap<>();
         response.put("token", jwtToken);
         response.put("userEmail", user.getEmail());
@@ -67,7 +66,6 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> getUserInfo() {
         User user = securityService.getCurrentUser();
 
-        // Build the response object
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("userEmail", user.getEmail());
         userInfo.put("userName", user.getUsername());
