@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react';
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import Navbar from '@/components/Navbar';
 import { selectAuthStatus } from '@/features/auth/authSlice';
 import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
 import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
@@ -34,6 +35,7 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
 const Pages: React.FC = () => {
     return (
         <BrowserRouter>
+            <Navbar />
             <Container maxWidth="md" sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -43,26 +45,26 @@ const Pages: React.FC = () => {
                 textAlign: 'center',
                 gap: 3,
             }}>
-            <Routes>
-            <Route path="/" Component={HomePage} />
-                <Route path="/*"
-                    element={
-                        <ProtectedRoute>
-                            <Routes>
-                                <Route path="/projects/:projectId/rooms" Component={RoomsList} /> 
-                                <Route path="/projects/:projectId/rooms/add" Component={AddRoom} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
-                                <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} /> 
-                                <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} /> 
-                                <Route path="/projects" Component={ProjectsList} />
-                                <Route path="/projects/add" Component={AddProject} /> 
-                                <Route path="/projects/:projectId/edit" Component={EditProject} /> 
-                            </Routes>
-                        </ProtectedRoute>
-                    }
-                />
-            </Routes>
+                <Routes>
+                    <Route path="/" Component={HomePage} />
+                    <Route path="/*"
+                        element={
+                            <ProtectedRoute>
+                                <Routes>
+                                    <Route path="/projects/:projectId/rooms" Component={RoomsList} />
+                                    <Route path="/projects/:projectId/rooms/add" Component={AddRoom} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
+                                    <Route path="/projects" Component={ProjectsList} />
+                                    <Route path="/projects/add" Component={AddProject} />
+                                    <Route path="/projects/:projectId/edit" Component={EditProject} />
+                                </Routes>
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
             </Container>
         </BrowserRouter>
     );
