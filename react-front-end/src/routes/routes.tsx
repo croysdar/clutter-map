@@ -14,7 +14,6 @@ import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
 import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
-import LoginPage from '@/features/auth/LoginPage';
 import { CircularProgress } from '@mui/material';
 
 
@@ -22,7 +21,7 @@ const ProtectedRoute = ({ children }: { children: ReactElement}) => {
     const authStatus = useAppSelector(selectAuthStatus);
 
     if (authStatus === 'none') {
-        return <Navigate to="/login" replace />
+        return <Navigate to="/" replace />
     }
     if (authStatus === 'pending' || authStatus === 'idle') {
         return <CircularProgress/>
@@ -36,12 +35,11 @@ const Pages: React.FC = () => {
     return (
         <BrowserRouter>
             <Routes>
-            <Route path="/login" Component={LoginPage} />
+            <Route path="/" Component={HomePage} />
                 <Route path="/*"
                     element={
                         <ProtectedRoute>
                             <Routes>
-                                <Route path="/home" Component={HomePage} />
                                 <Route path="/projects/:projectId/rooms" Component={RoomsList} /> 
                                 <Route path="/projects/:projectId/rooms/add" Component={AddRoom} /> 
                                 <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
