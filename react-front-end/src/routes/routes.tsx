@@ -3,28 +3,28 @@ import React, { ReactElement } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { selectAuthStatus } from '@/features/auth/authSlice';
+import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
+import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
+import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
 import { AddProject } from '@/features/projects/AddProject';
 import EditProject from '@/features/projects/EditProject';
 import ProjectsList from '@/features/projects/ProjectsList';
 import { AddRoom } from '@/features/rooms/AddRoom';
 import EditRoom from '@/features/rooms/EditRoom';
 import RoomsList from '@/features/rooms/RoomsList';
-import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
-import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
-import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Container } from '@mui/material';
 
 
-const ProtectedRoute = ({ children }: { children: ReactElement}) => {
+const ProtectedRoute = ({ children }: { children: ReactElement }) => {
     const authStatus = useAppSelector(selectAuthStatus);
 
     if (authStatus === 'none') {
         return <Navigate to="/" replace />
     }
     if (authStatus === 'pending' || authStatus === 'idle') {
-        return <CircularProgress/>
+        return <CircularProgress />
     }
 
     // children is a required prop, so we can have assert with !
@@ -34,6 +34,15 @@ const ProtectedRoute = ({ children }: { children: ReactElement}) => {
 const Pages: React.FC = () => {
     return (
         <BrowserRouter>
+            <Container maxWidth="md" sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                textAlign: 'center',
+                gap: 3,
+            }}>
             <Routes>
             <Route path="/" Component={HomePage} />
                 <Route path="/*"
@@ -54,6 +63,7 @@ const Pages: React.FC = () => {
                     }
                 />
             </Routes>
+            </Container>
         </BrowserRouter>
     );
 };

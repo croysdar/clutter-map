@@ -5,17 +5,16 @@ import {
     Card,
     CardContent,
     CardHeader,
-    Container,
     Paper,
     Typography
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
-import { useParams } from 'react-router-dom';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
-import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
+import { useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
+import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
 const OrgUnitsList: React.FC = () => {
     const { roomId } = useParams();
@@ -51,8 +50,7 @@ const OrgUnitsList: React.FC = () => {
 
 
     return (
-        //Container previous properties: , justifyContent: 'center', alignItems: 'center',
-        <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
+        <>
             <Button
                 href={`/projects`}
                 variant="text"
@@ -88,7 +86,7 @@ const OrgUnitsList: React.FC = () => {
                 ))}
                 <ButtonLink to={`/projects/${projectId}/rooms/${roomId}/org-units/add`} label="Create a new Organizational Unit" />
             </Paper>
-        </Container>
+        </>
     );
 };
 

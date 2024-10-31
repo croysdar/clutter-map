@@ -1,20 +1,19 @@
-import React  from 'react';
+import React from 'react';
 
 import {
     Button,
     Card,
     CardContent,
     CardHeader,
-    Container,
     Paper,
     Typography
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
 import RoomMenu from '@/features/rooms/RoomMenu';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useGetRoomsByProjectQuery } from './roomApi';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
+import { useGetRoomsByProjectQuery } from './roomApi';
 
 const RoomsList: React.FC = () => {
     const { projectId } = useParams();
@@ -49,8 +48,7 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        //Container previous properties: , justifyContent: 'center', alignItems: 'center',
-        <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
+        <>
             <Button
                 href={`/projects`}
                 variant="text"
@@ -59,7 +57,7 @@ const RoomsList: React.FC = () => {
                 Projects List
             </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <Typography variant="h2">
+                <Typography variant="h1">
                     {project.name}
                 </Typography>
                 {rooms.map((room) => (
@@ -80,7 +78,7 @@ const RoomsList: React.FC = () => {
                 ))}
                 <ButtonLink to={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
             </Paper>
-        </Container>
+        </>
     );
 };
 
