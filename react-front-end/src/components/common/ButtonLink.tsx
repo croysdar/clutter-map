@@ -5,14 +5,15 @@ import { Link } from 'react-router-dom';
 
 type ButtonLinkProps = Omit<ButtonProps, 'href'> & {
     to:  string,
-    label: string
+    label?: string
+    element?: React.ReactNode
 }
 
-const ButtonLink: React.FC<ButtonLinkProps> = ({ to, label, ...buttonProps }) => {
+const ButtonLink: React.FC<ButtonLinkProps> = ({ to, label, element, ...buttonProps }) => {
 
     return (
         <Button component={Link} to={to} variant="contained" {...buttonProps}>
-            {label}
+            {element ? element : label}
         </Button>
     )
 }
