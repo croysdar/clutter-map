@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
-import { useAddNewOrgUnitMutation, useGetRoomQuery } from '../api/apiSlice';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import { useGetRoomQuery } from '../rooms/roomApi';
+import { useAddNewOrgUnitMutation } from './orgUnitApi';
 
 interface AddOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -53,7 +54,7 @@ export const AddOrgUnit = () => {
             <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Add a New OrgUnit
+                        Add a New Organizational Unit
                     </Typography>
                     <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
                         {/* OrgUnit Name */}
@@ -95,7 +96,7 @@ export const AddOrgUnit = () => {
                             sx={{ marginTop: 2 }}
                             disabled={isLoading}
                         >
-                            Create OrgUnit
+                            Create Organizational Unit
                         </Button>
                     </form>
                     <Button

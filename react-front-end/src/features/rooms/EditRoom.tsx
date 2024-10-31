@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetRoomQuery, useUpdateRoomMutation } from '../api/apiSlice'
 import DeleteRoomButton from './DeleteRoomButton'
+import { useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -27,17 +27,17 @@ const EditRoom = () => {
         { isLoading: updateLoading }
     ] = useUpdateRoomMutation();
 
+    if (roomLoading) {
+        return (
+            <CircularProgress />
+        )
+    }
+
     if (!room) {
         return (
             <section>
                 <Typography variant='h2'>Room not found!</Typography>
             </section>
-        )
-    }
-
-    if (roomLoading) {
-        return (
-            <CircularProgress />
         )
     }
 

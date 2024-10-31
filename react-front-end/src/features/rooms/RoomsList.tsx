@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React  from 'react';
 
 import {
     Button,
@@ -11,9 +11,10 @@ import {
 } from '@mui/material';
 
 import ButtonLink from '@/components/common/ButtonLink';
-import { useGetProjectQuery, useGetRoomsByProjectQuery } from '@/features/api/apiSlice';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useGetRoomsByProjectQuery } from './roomApi';
+import { useGetProjectQuery } from '../projects/projectApi';
 
 const RoomsList: React.FC = () => {
     const { projectId } = useParams();

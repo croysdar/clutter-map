@@ -41,6 +41,8 @@ dependencies {
 
 	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
 
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+
 	// IN CASE YOU GET AN ERROR AT THE TOP ABOUT THE GRADLE PLUGIN
 	// https://stackoverflow.com/questions/68321708/could-not-run-phased-build-action-using-connection-to-gradle-distribution
 }

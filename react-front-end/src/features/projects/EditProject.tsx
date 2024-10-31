@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetProjectQuery, useUpdateProjectMutation } from '../api/apiSlice'
 import DeleteProjectButton from './DeleteProjectButton'
+import { useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -25,17 +25,17 @@ const EditProject = () => {
         { isLoading: updateLoading }
     ] = useUpdateProjectMutation();
 
+    if (projectLoading) {
+        return (
+            <CircularProgress />
+        )
+    }
+
     if (!project) {
         return (
             <section>
                 <Typography variant='h2'>Project not found!</Typography>
             </section>
-        )
-    }
-
-    if (projectLoading) {
-        return (
-            <CircularProgress />
         )
     }
 

@@ -14,7 +14,7 @@ import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
 import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
-import LoginPage from '@/pages/LoginPage';
+import LoginPage from '@/features/auth/LoginPage';
 import { CircularProgress } from '@mui/material';
 
 

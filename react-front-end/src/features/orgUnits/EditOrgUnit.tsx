@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useGetOrgUnitQuery, useUpdateOrgUnitMutation } from '../api/apiSlice'
 import DeleteOrgUnitButton from './DeleteOrgUnitButton'
+import { useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -28,17 +28,20 @@ const EditOrgUnit = () => {
         { isLoading: updateLoading }
     ] = useUpdateOrgUnitMutation();
 
-    if (!orgUnit) {
-        return (
-            <section>
-                <Typography variant='h2'>OrgUnit not found!</Typography>
-            </section>
-        )
-    }
-
     if (orgUnitLoading) {
         return (
             <CircularProgress />
+        )
+    }
+
+    if (!orgUnit) {
+        return (
+        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <section>
+                <Typography variant='h2'>OrgUnit not found!</Typography>
+            </section></Card>
+            </Container>
         )
     }
 
@@ -62,7 +65,7 @@ const EditOrgUnit = () => {
                 <CardHeader
                     title={
                         <Typography variant="h4" component="h2" gutterBottom align="center">
-                            Edit OrgUnit
+                            Edit Organizational Unit
                         </Typography>
                     }
                 />

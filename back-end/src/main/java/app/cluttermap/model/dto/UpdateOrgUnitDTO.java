@@ -1,27 +1,23 @@
-package app.cluttermap.dto;
+package app.cluttermap.model.dto;
 
-public class NewOrgUnitDTO {
+import jakarta.validation.constraints.NotBlank;
+
+public class UpdateOrgUnitDTO {
     private String name;
     private String description;
-    private String roomId;
 
-
-    public NewOrgUnitDTO(String name, String description, String roomId) {
+    public UpdateOrgUnitDTO(String name, String description) {
         this.name = name;
         this.description = description;
-        this.roomId = roomId;
     }
 
+    @NotBlank(message = "Organization unit name must not be blank.")
     public String getName() {
         return name;
     }
-    
+
     public String getDescription() {
         return description;
-    }
-    
-    public String getRoomId() {
-        return roomId;
     }
 
     public void setName(String name) {
@@ -30,9 +26,5 @@ public class NewOrgUnitDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
     }
 }
