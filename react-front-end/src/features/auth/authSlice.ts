@@ -114,6 +114,7 @@ const authSlice = createAppSlice({
             rejectAuthStatus: create.reducer(
                 (state) => {
                     state.status = 'none';
+                    localStorage.removeItem('jwt')
                 }
             ),
         }
