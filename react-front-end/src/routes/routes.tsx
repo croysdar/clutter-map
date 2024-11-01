@@ -17,6 +17,7 @@ import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
 import { CircularProgress, Container } from '@mui/material';
 import AppBreadcrumbs from '@/components/Breadcrumbs';
+import AboutPage from '@/pages/AboutPage';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -43,12 +44,13 @@ const Pages: React.FC = () => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100vh',
+                minHeight: '100vh',
                 textAlign: 'center',
-                gap: 3,
+                gap: 3
             }}>
                 <Routes>
                     <Route path="/" Component={HomePage} />
+                    <Route path="/about" Component={AboutPage} />
                     <Route path="/*"
                         element={
                             <ProtectedRoute>
