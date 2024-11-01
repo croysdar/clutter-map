@@ -20,7 +20,7 @@ const HomePage: React.FC = () => {
 
     return (
         <>
-            <Typography variant='h3' sx={{ mb: 2, color: appColors.textWhite }}>
+            <Typography variant='h3' sx={{ mb: 2 }}>
                 Welcome to Clutter Map
             </Typography>
             <Typography variant='h6' sx={{ mb: 1, maxWidth: '80%' }}>
