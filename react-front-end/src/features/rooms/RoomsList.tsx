@@ -47,33 +47,29 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        <>
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <Typography variant="h1">
-                    {project.name}
-                </Typography>
-                {rooms.map((room) => (
-                    <>
-                        <Card key={`room-card-${room.id}`} sx={{ marginTop: 3 }}>
-                            <div key={room.id} >
-                                <CardHeader
-                                    title={<Typography variant='h4'> {room.name}</Typography>}
-                                    action={<RoomMenu room={room} />}
-                                    onClick={(e) => handleClick(e, room.id)}
-                                />
-                                <CardContent>
-                                    <Typography variant="body2">{room.description}</Typography>
-                                </CardContent>
-                            </div>
-                        </Card>
-                    </>
-                ))}
-                <CreateNewObjectButton
-                    objectLabel='room'
-                    to={`/projects/${projectId}/rooms/add`}
-                />
-            </Paper>
-        </>
+        <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <Typography variant="h2" key="project-name">
+                {project.name}
+            </Typography>
+            {rooms.map((room) => (
+                <Card key={`room-card-${room.id}`} sx={{ marginTop: 3 }}>
+                    <div key={room.id} >
+                        <CardHeader
+                            title={<Typography variant='h4'> {room.name}</Typography>}
+                            action={<RoomMenu room={room} />}
+                            onClick={(e) => handleClick(e, room.id)}
+                        />
+                        <CardContent>
+                            <Typography variant="body2">{room.description}</Typography>
+                        </CardContent>
+                    </div>
+                </Card>
+            ))}
+            <CreateNewObjectButton
+                objectLabel='room'
+                to={`/projects/${projectId}/rooms/add`}
+            />
+        </Paper>
     );
 };
 

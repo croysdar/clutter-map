@@ -6,7 +6,6 @@ import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Project } from '@/features/projects/projectsTypes';
 import { useNavigate } from 'react-router-dom';
 
-
 type ProjectMenuProps = {
     project: Project
 }

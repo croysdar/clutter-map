@@ -6,7 +6,6 @@ import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Room } from '@/features/rooms/roomsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
-
 type RoomMenuProps = {
     room: Room
 }
@@ -18,13 +17,18 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
     const { projectId } = useParams();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     }
+
     const handleClose = () => {
         setAnchorEl(null);
     }
 
-    const handleEdit = () => {
+    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         navigate(`/projects/${projectId}/rooms/${room.id}/edit`)
         handleClose();
     }
@@ -47,7 +51,6 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
                 <MenuItem onClick={handleEdit}>
                     Edit Room
                 </MenuItem>
-
             </Menu>
         </>
     );

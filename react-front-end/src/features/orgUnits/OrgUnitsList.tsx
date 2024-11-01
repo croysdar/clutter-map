@@ -49,32 +49,28 @@ const OrgUnitsList: React.FC = () => {
 
 
     return (
-        <>
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <Typography variant="h2">
-                    {room.name}
-                </Typography>
-                {orgUnits.map((orgUnit) => (
-                    <>
-                        <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ marginTop: 3 }}>
-                            <div key={orgUnit.id} >
-                                <CardHeader
-                                    title={<Typography variant='h4'> {orgUnit.name}</Typography>}
-                                    action={<OrgUnitMenu orgUnit={orgUnit} />}
-                                />
-                                <CardContent>
-                                    <Typography variant="body2">{orgUnit.description}</Typography>
-                                </CardContent>
-                            </div>
-                        </Card>
-                    </>
-                ))}
-                <CreateNewObjectButton
-                    objectLabel='Organizational Unit'
-                    to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
-                />
-            </Paper>
-        </>
+        <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <Typography variant="h2" key="room-name">
+                {room.name}
+            </Typography>
+            {orgUnits.map((orgUnit) => (
+                <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ marginTop: 3 }}>
+                    <div key={orgUnit.id} >
+                        <CardHeader
+                            title={<Typography variant='h4'> {orgUnit.name}</Typography>}
+                            action={<OrgUnitMenu orgUnit={orgUnit} />}
+                        />
+                        <CardContent>
+                            <Typography variant="body2">{orgUnit.description}</Typography>
+                        </CardContent>
+                    </div>
+                </Card>
+            ))}
+            <CreateNewObjectButton
+                objectLabel='Organizational Unit'
+                to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
+            />
+        </Paper>
     );
 };
 

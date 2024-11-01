@@ -6,7 +6,6 @@ import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { OrgUnit } from '@/features/orgUnits/orgUnitsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
-
 type OrgUnitMenuProps = {
     orgUnit: OrgUnit
 }
@@ -19,13 +18,17 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
     const { projectId } = useParams();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     }
     const handleClose = () => {
         setAnchorEl(null);
     }
 
-    const handleEdit = () => {
+    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
         navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnit.id}/edit`)
         handleClose();
     }
@@ -48,7 +51,6 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
                 <MenuItem onClick={handleEdit}>
                     Edit Unit
                 </MenuItem>
-
             </Menu>
         </>
     );
