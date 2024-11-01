@@ -22,8 +22,7 @@ public class ProjectService {
     @Autowired
     private final SecurityService securityService;
 
-    @Value("${project.limit}")
-    private int projectLimit;
+    private final int PROJECT_LIMIT = 3;
 
     public ProjectService(ProjectsRepository projectsRepository, SecurityService securityService) {
         this.projectsRepository = projectsRepository;
@@ -40,7 +39,7 @@ public class ProjectService {
         User user = securityService.getCurrentUser();
 
         int num = projectsRepository.findByOwner(user).size();
-        if (num >= projectLimit) {
+        if (num >= PROJECT_LIMIT) {
             throw new ProjectLimitReachedException();
         }
 
