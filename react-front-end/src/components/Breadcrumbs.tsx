@@ -16,7 +16,6 @@ const AppBreadcrumbs: React.FC = () => {
 
     const getObjectIdFromPath = (idIndex: number, objectName: string) => {
         let objectId = (pathnames[idIndex - 1] === objectName) ? pathnames[idIndex] : null;
-        console.log(objectId, pathnames[idIndex - 1], objectName, pathnames[idIndex])
 
         if (Number.isNaN(Number(objectId))) {
             objectId = null;
