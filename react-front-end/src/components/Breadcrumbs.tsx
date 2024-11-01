@@ -30,9 +30,9 @@ const AppBreadcrumbs: React.FC = () => {
     const roomId = getObjectIdFromPath(3, 'rooms');
     const orgUnitId = getObjectIdFromPath(5, 'org-units');
 
-    const { data: projectData } = useGetProjectQuery(projectId ?? '', { skip: !projectId });
-    const { data: roomData } = useGetRoomQuery(roomId ?? '', { skip: !roomId });
-    const { data: orgUnitData } = useGetOrgUnitQuery(orgUnitId ?? '', { skip: !orgUnitId });
+    const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(projectId ?? '', { skip: !projectId });
+    const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(roomId ?? '', { skip: !roomId });
+    const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId ?? '', { skip: !orgUnitId });
 
     const getBreadcrumbName = (path: string) => {
         if (matchPath("/projects", path)) {
@@ -41,16 +41,22 @@ const AppBreadcrumbs: React.FC = () => {
 
         if (projectId && path === `/projects/${projectId}`) return null;
         if (matchPath("/projects/:projectId/rooms", path)) {
+            if (projectLoading)
+                return '...'
             return projectData ? projectData.name : `Project ${projectId}`;
         }
 
         if (roomId && path === `/projects/${projectId}/rooms/${roomId}`) return null;
         if (matchPath("/projects/:projectId/rooms/:roomId/org-units", path)) {
+            if (roomLoading)
+                return '...'
             return roomData ? roomData.name : `Room ${roomId}`;
         }
 
         if (orgUnitId && path === `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}`) return null;
         if (matchPath("/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items", path)) {
+            if (orgUnitLoading)
+                return '...'
             return orgUnitData ? orgUnitData.name : `Organizational Unit ${orgUnitId}`;
         }
 
