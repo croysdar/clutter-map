@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-type ButtonLinkProps = Omit<ButtonProps, 'href'> & {
+export type ButtonLinkProps = Omit<ButtonProps, 'href'> & {
     to:  string,
     label?: string
     element?: React.ReactNode

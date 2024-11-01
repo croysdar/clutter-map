@@ -7,7 +7,7 @@ import {
     Typography
 } from '@mui/material';
 
-import ButtonLink from '@/components/common/ButtonLink';
+import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import ProjectMenu from '@/features/projects/ProjectMenu';
 import { PROJECT_LIMIT } from '@/utils/constants';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +54,11 @@ const ProjectsList: React.FC = () => {
                     </Card>
                 </>
             ))}
-            <ButtonLink to="/projects/add" label="Create a new Project" disabled={projects.length >= PROJECT_LIMIT} />
+            <CreateNewObjectButton
+                objectLabel='project'
+                to="/projects/add"
+                disabled={projects.length >= PROJECT_LIMIT}
+            />
         </Paper>
     );
 };

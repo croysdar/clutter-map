@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -9,7 +8,7 @@ import {
     Typography
 } from '@mui/material';
 
-import ButtonLink from '@/components/common/ButtonLink';
+import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
@@ -69,7 +68,10 @@ const RoomsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink to={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
+                <CreateNewObjectButton
+                    objectLabel='room'
+                    to={`/projects/${projectId}/rooms/add`}
+                />
             </Paper>
         </>
     );

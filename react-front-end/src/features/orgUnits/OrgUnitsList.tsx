@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -9,7 +8,7 @@ import {
     Typography
 } from '@mui/material';
 
-import ButtonLink from '@/components/common/ButtonLink';
+import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useParams } from 'react-router-dom';
@@ -70,7 +69,10 @@ const OrgUnitsList: React.FC = () => {
                         </Card>
                     </>
                 ))}
-                <ButtonLink to={`/projects/${projectId}/rooms/${roomId}/org-units/add`} label="Create a new Organizational Unit" />
+                <CreateNewObjectButton
+                    objectLabel='Organizational Unit'
+                    to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
+                />
             </Paper>
         </>
     );
