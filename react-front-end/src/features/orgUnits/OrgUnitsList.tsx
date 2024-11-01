@@ -51,20 +51,6 @@ const OrgUnitsList: React.FC = () => {
 
     return (
         <>
-            <Button
-                href={`/projects`}
-                variant="text"
-                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
-            >
-                Projects List
-            </Button>
-            <Button
-                href={`/projects/${projectId}/rooms`}
-                variant="text"
-                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
-            >
-                Rooms in this project
-            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h2">
                     {room.name}

@@ -21,7 +21,10 @@ const Navbar: React.FC = () => {
             <Toolbar sx={{ justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 
-                    {/* <IconButton
+                    {/* 
+                    // TODO add pages like About and Settings so that this button
+                    // can lead somewhere
+                    <IconButton
                     edge="start"
                     color="inherit"
                     aria-label="menu"
@@ -42,13 +45,7 @@ const Navbar: React.FC = () => {
                     {
                         loggedIn &&
                         <>
-                            <Button color="inherit" component={Link} to="/projects">
-                                Projects
-                            </Button>
-
-                            {/* <Button color="inherit" component={Link} to="/settings">
-                        Settings
-                    </Button> */}
+                            {/*  TODO make this use first name - requires changing backend to store first name as well as full name */}
                             <Typography variant="body1" sx={{ marginRight: 2 }}>
                                 {`Hello, ${userName}`}
                             </Typography>

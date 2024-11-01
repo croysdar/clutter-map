@@ -16,6 +16,7 @@ import RoomsList from '@/features/rooms/RoomsList';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import HomePage from '@/pages/HomePage';
 import { CircularProgress, Container } from '@mui/material';
+import AppBreadcrumbs from '@/components/Breadcrumbs';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -36,6 +37,7 @@ const Pages: React.FC = () => {
     return (
         <BrowserRouter>
             <Navbar />
+            <AppBreadcrumbs/>
             <Container maxWidth="md" sx={{
                 display: 'flex',
                 flexDirection: 'column',

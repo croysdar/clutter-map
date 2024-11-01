@@ -49,13 +49,6 @@ const RoomsList: React.FC = () => {
 
     return (
         <>
-            <Button
-                href={`/projects`}
-                variant="text"
-                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
-            >
-                Projects List
-            </Button>
             <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <Typography variant="h1">
                     {project.name}
