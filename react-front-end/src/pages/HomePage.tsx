@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { appColors } from '@/assets/colors';
 import ButtonLink from '@/components/common/ButtonLink';
-import { selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
+import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import { CircularProgress, Typography } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
@@ -15,6 +14,9 @@ const HomePage: React.FC = () => {
         const idToken = cred.credential
         if (idToken) {
             await dispatch(verifyToken({ idToken, provider: 'google' }));
+            const jwt = localStorage.getItem('jwt');
+            if (jwt)
+                await(dispatch(fetchUserInfo(jwt)));
         }
     }
 
@@ -36,7 +38,7 @@ const HomePage: React.FC = () => {
             </Typography>
             {
                 authStatus !== 'verified' &&
-                <Typography variant='h6' sx={{ color: '#FFFFFF' }}>
+                <Typography variant='h6'>
                     Sign in to get started
                 </Typography>
             }

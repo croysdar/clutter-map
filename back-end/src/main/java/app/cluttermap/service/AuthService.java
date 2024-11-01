@@ -77,13 +77,13 @@ public class AuthService {
         String userGoogleId = payload.getSubject();
         String email = payload.getEmail();
         String name = (String) payload.get("name");
+        String firstName = (String) payload.get("given_name");
+        String lastName = (String) payload.get("family_name");
 
         // OTHER INFORMATION WE COULD STORE IF WE WANT IN THE FUTURE
         // boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
         // String pictureUrl = (String) payload.get("picture");
         // String locale = (String) payload.get("locale");
-        // String familyName = (String) payload.get("family_name");
-        // String givenName = (String) payload.get("given_name");
 
         return usersRepository.findByProviderId(userGoogleId).orElseGet(() -> {
             // If the user does not exist (first login), create a new user
@@ -91,6 +91,8 @@ public class AuthService {
             newUser.setEmail(email);
             newUser.setProvider("google");
             newUser.setUsername(name);
+            newUser.setFirstName(firstName);
+            newUser.setLastName(lastName);
 
             // Log the profile information
             logger.info("\nNewUser:\nGoogle ID: " + userGoogleId + "\nEmail: " + email + "\nName: " + name);

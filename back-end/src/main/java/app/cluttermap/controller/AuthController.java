@@ -54,8 +54,6 @@ public class AuthController {
 
         Map<String, String> response = new HashMap<>();
         response.put("token", jwtToken);
-        response.put("userEmail", user.getEmail());
-        response.put("userName", user.getUsername());
 
         return ResponseEntity.ok(response);
     }
@@ -69,6 +67,8 @@ public class AuthController {
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("userEmail", user.getEmail());
         userInfo.put("userName", user.getUsername());
+        userInfo.put("userFirstName", user.getFirstName());
+        userInfo.put("userLastName", user.getLastName());
 
         return ResponseEntity.ok(userInfo);
     }
