@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { rejectAuthStatus, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
+import NavMenu from './NavMenu';
 
 const Navbar: React.FC = () => {
     const userName = useAppSelector(selectCurrentUserName);
@@ -21,19 +22,7 @@ const Navbar: React.FC = () => {
         <AppBar position="static" >
             <Toolbar sx={{ justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-
-                    {/* 
-                    // TODO add pages like About and Settings so that this button
-                    // can lead somewhere
-                    <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="menu"
-                    sx={{ mr: 2 }}
-                >
-                    <MenuIcon />
-                </IconButton> */}
-
+                    <NavMenu />
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                             Clutter Map
@@ -46,7 +35,6 @@ const Navbar: React.FC = () => {
                     {
                         loggedIn &&
                         <>
-                            {/*  TODO make this use first name - requires changing backend to store first name as well as full name */}
                             <Typography variant="body1" sx={{ marginRight: 2 }}>
                                 {`Hello, ${userFirstName || userName}`}
                             </Typography>
