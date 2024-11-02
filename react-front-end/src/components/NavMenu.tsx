@@ -11,10 +11,14 @@ import {
 
 import MenuIcon from '@mui/icons-material/Menu';
 
+import { selectAuthStatus } from '@/features/auth/authSlice';
+import { useAppSelector } from '@/hooks/useAppHooks';
 import { Link } from 'react-router-dom';
 
 const NavMenu = () => {
     const [open, setOpen] = useState<boolean>(false);
+
+    const loggedIn = useAppSelector(selectAuthStatus) === 'verified';
 
     const toggleDrawer = (isOpen: boolean) => (event: React.MouseEvent<HTMLElement>) => {
         setOpen(isOpen);
@@ -35,10 +39,15 @@ const NavMenu = () => {
                 <List sx={{ width: 250 }} onClick={toggleDrawer(false)} >
                     <NavLink label="Home" to="/" />
                     <NavLink label="About" to="/about" />
-                    <Divider />
-                    <NavLink label="My Projects" to="/projects" />
-                    {/* <NavLink label="Settings" to = "/settings"/>
-                    <NavLink label="My Account" to = "/account"/> */}
+                    {
+                        loggedIn &&
+                        <>
+                            <Divider />
+                            <NavLink label="My Projects" to="/projects" />
+                            {/* <NavLink label="Settings" to = "/settings"/>
+                            <NavLink label="My Account" to = "/account"/> */}
+                        </>
+                    }
                 </List>
             </Drawer>
         </>
