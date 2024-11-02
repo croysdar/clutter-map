@@ -3,6 +3,7 @@ import React from 'react';
 import {
     Card,
     CardHeader,
+    CircularProgress,
     Paper,
     Typography
 } from '@mui/material';
@@ -31,7 +32,11 @@ const ProjectsList: React.FC = () => {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Paper>
+        );
     }
 
     if (isError) {

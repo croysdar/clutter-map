@@ -4,6 +4,7 @@ import {
     Card,
     CardContent,
     CardHeader,
+    CircularProgress,
     Paper,
     Typography
 } from '@mui/material';
@@ -32,7 +33,11 @@ const OrgUnitsList: React.FC = () => {
     } = useGetOrgUnitsByRoomQuery(roomId!);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Paper>
+        );
     }
 
     if (isError) {

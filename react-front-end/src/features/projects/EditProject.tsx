@@ -27,7 +27,9 @@ const EditProject = () => {
 
     if (projectLoading) {
         return (
-            <CircularProgress />
+            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Card>
         )
     }
 
