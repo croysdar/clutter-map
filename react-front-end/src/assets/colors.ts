@@ -11,7 +11,7 @@ export const appColors = {
     backgroundPaper: '#ffffff',
 
     textPrimary: '#000000',
-    textSecondary: '#90A4AE',
+    textSecondary: '#5e6a70',
 
     textWhite: '#ffffff'
 
