@@ -13,6 +13,8 @@ export const appColors = {
     textPrimary: '#000000',
     textSecondary: '#5e6a70',
 
-    textWhite: '#ffffff'
+    textWhite: '#ffffff',
+
+    brandOrange: '#ff5d00',
 
 };
