@@ -33,26 +33,45 @@ const NavMenu = () => {
             </IconButton>
             <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
                 <List sx={{ width: 250 }} onClick={toggleDrawer(false)} >
-                    <ListItem component={Link} to="/">
-                        <ListItemText primary="Home" />
-                    </ListItem>
-                    <ListItem component={Link} to="/about">
-                        <ListItemText primary="About" />
-                    </ListItem>
+                    <NavLink label="Home" to="/" />
+                    <NavLink label="About" to="/about" />
                     <Divider />
-                    <ListItem component={Link} to="/projects">
-                        <ListItemText primary="My Projects" />
-                    </ListItem>
-                    {/* <ListItem component={Link} to="/settings">
-                        <ListItemText primary="Settings" />
-                    </ListItem> */}
-                    {/* <ListItem component={Link} to="/account">
-                        <ListItemText primary="My Account" />
-                    </ListItem> */}
+                    <NavLink label="My Projects" to="/projects" />
+                    {/* <NavLink label="Settings" to = "/settings"/>
+                    <NavLink label="My Account" to = "/account"/> */}
                 </List>
             </Drawer>
         </>
     );
 };
+
+interface NavLinkProps {
+    label: string;
+    to: string;
+}
+
+const NavLink: React.FC<NavLinkProps> = ({ label, to }) => {
+    return (
+        <ListItem
+            component={Link}
+            to={to}
+            sx={{
+                color: 'inherit',
+                textDecoration: 'none',
+                '&:hover': {
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                },
+                '&:active': {
+                    bgcolor: 'primary.dark',
+                    color: 'white',
+                }
+            }}
+        >
+            <ListItemText primary={label} />
+        </ListItem>
+
+    )
+}
 
 export default NavMenu;
