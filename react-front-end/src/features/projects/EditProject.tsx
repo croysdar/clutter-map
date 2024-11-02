@@ -53,6 +53,10 @@ const EditProject = () => {
         }
     }
 
+    const handleCancelClick = () => {
+        navigate(`/projects`)
+    }
+
     return (
         <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
             <CardHeader
@@ -92,6 +96,15 @@ const EditProject = () => {
                         Save Changes
                     </Button>
                 </form>
+
+                <Button
+                    variant='text'
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={handleCancelClick}
+                >
+                    Cancel
+                </Button>
 
                 {/* Delete button with a confirmation dialog */}
                 <DeleteProjectButton project={project} isDisabled={updateLoading} />

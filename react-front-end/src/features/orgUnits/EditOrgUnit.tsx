@@ -60,6 +60,10 @@ const EditOrgUnit = () => {
         }
     }
 
+    const handleCancelClick = () => {
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+    }
+
     return (
         <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
             <CardHeader
@@ -115,6 +119,15 @@ const EditOrgUnit = () => {
                         Save Changes
                     </Button>
                 </form>
+
+                <Button
+                    variant='text'
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={handleCancelClick}
+                >
+                    Cancel
+                </Button>
 
                 {/* Delete button with a confirmation dialog */}
                 <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} />

@@ -99,7 +99,6 @@ export const AddOrgUnit = () => {
                 </form>
                 <Button
                     variant="text"
-                    color="error"
                     fullWidth
                     sx={{ marginTop: 2 }}
                     onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}

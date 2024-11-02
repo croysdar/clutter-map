@@ -57,6 +57,10 @@ const EditRoom = () => {
         }
     }
 
+    const handleCancelClick = () => {
+        navigate(`/projects/${projectId}/rooms`)
+    }
+
     return (
         <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
             <CardHeader
@@ -112,6 +116,15 @@ const EditRoom = () => {
                         Save Changes
                     </Button>
                 </form>
+
+                <Button
+                    variant='text'
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={handleCancelClick}
+                >
+                    Cancel
+                </Button>
 
                 {/* Delete button with a confirmation dialog */}
                 <DeleteRoomButton room={room} isDisabled={updateLoading} />

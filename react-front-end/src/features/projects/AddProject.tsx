@@ -74,7 +74,6 @@ export const AddProject = () => {
 
                 <Button
                     variant="text"
-                    color="error"
                     fullWidth
                     sx={{ marginTop: 2 }}
                     onClick={() => navigate('/projects')}
