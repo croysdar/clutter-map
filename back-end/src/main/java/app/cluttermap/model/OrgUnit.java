@@ -87,14 +87,4 @@ public class OrgUnit {
     public void setItems(List<Item> items) {
         this.items = items;
     }
-
-    public void addItem(Item item) {
-        items.add(item);
-        item.setOrgUnit(this);
-    }
-
-    public void removeItem(Item item) {
-        items.remove(item);
-        item.setOrgUnit(null);
-    }
 }

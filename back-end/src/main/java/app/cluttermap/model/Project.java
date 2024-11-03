@@ -79,15 +79,4 @@ public class Project {
     public void setRooms(List<Room> rooms) {
         this.rooms = rooms;
     }
-
-    // Utility methods for convenience
-    public void addRoom(Room room) {
-        rooms.add(room);
-        room.setProject(this);
-    }
-
-    public void removeRoom(Room room) {
-        rooms.remove(room);
-        room.setProject(null);
-    }
 }

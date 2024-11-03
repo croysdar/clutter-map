@@ -93,14 +93,4 @@ public class Room {
     public void setOrgUnits(List<OrgUnit> orgUnits) {
         this.orgUnits = orgUnits;
     }
-
-    public void addOrgUnit(OrgUnit orgUnit) {
-        orgUnits.add(orgUnit);
-        orgUnit.setRoom(this);
-    }
-
-    public void removeOrgUnit(OrgUnit orgUnit) {
-        orgUnits.remove(orgUnit);
-        orgUnit.setRoom(null);
-    }
 }
