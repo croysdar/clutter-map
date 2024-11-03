@@ -1,5 +1,7 @@
 package app.cluttermap.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
@@ -13,12 +15,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-// table annotation overrides the default table name
-@Table(name = "org_units")
-public class OrgUnit {
+@Table(name="items")
+public class Item {
 
     @Id
-    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -27,25 +27,24 @@ public class OrgUnit {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
-    @JsonBackReference
-    private Room room;
+    private List<String> tags;
 
-    @OneToMany(mappedBy = "orgUnit", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Item> items = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_unit_id")
+    @JsonBackReference
+    private OrgUnit orgUnit;
 
     // no-arg constructor for Hibernate
-    protected OrgUnit() {
+    protected Item() {
     }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public OrgUnit(String name, String description, Room room) {
+    public Item(String name, String description, OrgUnit orgUnit, List<String> tags) {
         this.name = name;
         this.description = description;
-        this.room = room;
+        this.orgUnit = orgUnit;
+        this.tags = tags;
     }
 
     public Long getId() {
@@ -72,29 +71,19 @@ public class OrgUnit {
         this.description = description;
     }
 
-    public Room getRoom() {
-        return room;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
-    public List<Item> getItems() {
-        return items;
+    public OrgUnit getOrgUnit() {
+        return orgUnit;
     }
 
-    public void setItems(List<Item> items) {
-        this.items = items;
-    }
-
-    public void addItem(Item item) {
-        items.add(item);
-        item.setOrgUnit(this);
-    }
-
-    public void removeItem(Item item) {
-        items.remove(item);
-        item.setOrgUnit(null);
+    public void setOrgUnit(OrgUnit orgUnit) {
+        this.orgUnit = orgUnit;
     }
 }

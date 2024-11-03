@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
@@ -43,6 +44,12 @@ public class OrgUnitsController {
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
         return ResponseEntity.ok(orgUnitService.getOrgUnitById(id));
+    }
+
+    @GetMapping("/{id}/items")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
+    public ResponseEntity<Iterable<Item>> getOrgUnitItems(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(orgUnitService.getOrgUnitById(id).getItems());
     }
 
     @PutMapping("/{id}")
