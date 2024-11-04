@@ -20,7 +20,7 @@ export const AddItem = () => {
 
     const navigate = useNavigate()
     const { projectId, roomId, orgUnitId } = useParams();
-    const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`
+    const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 

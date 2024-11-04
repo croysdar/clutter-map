@@ -18,11 +18,11 @@ interface EditItemFormElements extends HTMLFormElement {
 
 const EditItem = () => {
     const navigate = useNavigate();
-    const { itemId, projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`
+    const { itemId, projectId, roomId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
-    const [ updateItem, { isLoading: updateLoading } ] = useUpdateItemMutation();
+    const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
     // State to manage tags
     const [tags, setTags] = useState<string[]>(item?.tags || []);
@@ -124,7 +124,7 @@ const EditItem = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteItemButton item={item} isDisabled={updateLoading} redirectUrl={redirectUrl}/>
+                <DeleteItemButton item={item} isDisabled={updateLoading} redirectUrl={redirectUrl} />
 
             </CardContent>
         </Card>
