@@ -49,3 +49,21 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
         </Box>
     );
 }
+
+interface RenderTagsProps {
+    tags: string[];
+}
+
+export const RenderTags: React.FC<RenderTagsProps> = ({ tags }) => {
+    return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {tags.map((tag, index) => (
+                <Chip
+                    key={index}
+                    label={tag}
+                    color="primary"
+                />
+            ))}
+        </Box>
+    )
+}

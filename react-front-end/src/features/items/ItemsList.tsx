@@ -15,6 +15,7 @@ import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from './itemApi';
 
 import ItemMenu from './ItemMenu';
+import { RenderTags } from '@/components/TagField';
 
 const ItemsList: React.FC = () => {
     const {projectId, roomId, orgUnitId } = useParams();
@@ -62,6 +63,7 @@ const ItemsList: React.FC = () => {
                         />
                         <CardContent>
                             <Typography variant="body2">{item.description}</Typography>
+                            <RenderTags tags={item.tags}/>
                         </CardContent>
                     </div>
                 </Card>
