@@ -18,6 +18,7 @@ import HomePage from '@/pages/HomePage';
 import { CircularProgress, Container } from '@mui/material';
 import AppBreadcrumbs from '@/components/Breadcrumbs';
 import AboutPage from '@/pages/AboutPage';
+import ItemsList from '@/features/items/ItemsList';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -55,15 +56,19 @@ const Pages: React.FC = () => {
                         element={
                             <ProtectedRoute>
                                 <Routes>
-                                    <Route path="/projects/:projectId/rooms" Component={RoomsList} />
-                                    <Route path="/projects/:projectId/rooms/add" Component={AddRoom} />
-                                    <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
-                                    <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} />
-                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
-                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
                                     <Route path="/projects" Component={ProjectsList} />
                                     <Route path="/projects/add" Component={AddProject} />
                                     <Route path="/projects/:projectId/edit" Component={EditProject} />
+
+                                    <Route path="/projects/:projectId/rooms" Component={RoomsList} />
+                                    <Route path="/projects/:projectId/rooms/add" Component={AddRoom} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
+
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
+
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={ItemsList} />
                                 </Routes>
                             </ProtectedRoute>
                         }

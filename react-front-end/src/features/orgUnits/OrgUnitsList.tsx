@@ -12,18 +12,15 @@ import {
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
-import { useParams } from 'react-router-dom';
-import { useGetProjectQuery } from '../projects/projectApi';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
 const OrgUnitsList: React.FC = () => {
-    const { roomId } = useParams();
+    const navigate = useNavigate();
+
+    const { projectId, roomId } = useParams();
 
     const { data: room } = useGetRoomQuery(roomId!);
-
-    const { projectId } = useParams();
-
-    const { data: project } = useGetProjectQuery(projectId!);
 
     const {
         data: orgUnits = [],
@@ -48,10 +45,10 @@ const OrgUnitsList: React.FC = () => {
         return <div>Room not found.</div>
     }
 
-    if (!project) {
-        return <div>Project not found.</div>
+    const handleClick = (e: any, orgUnitId: number) => {
+        e.preventDefault();
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`)
     }
-
 
     return (
         <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
@@ -64,6 +61,7 @@ const OrgUnitsList: React.FC = () => {
                         <CardHeader
                             title={<Typography variant='h4'> {orgUnit.name}</Typography>}
                             action={<OrgUnitMenu orgUnit={orgUnit} />}
+                            onClick={(e) => handleClick(e, orgUnit.id)}
                         />
                         <CardContent>
                             <Typography variant="body2">{orgUnit.description}</Typography>
