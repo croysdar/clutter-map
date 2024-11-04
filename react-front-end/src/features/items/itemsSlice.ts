@@ -1,19 +1,10 @@
-import { createAppSlice } from "@/hooks/useAppHooks";
-
-export interface ItemsState {
-
+export interface Item {
+    id: number;
+    name: string;
+    description: string;
+    tags: string[]
 }
 
-const initialState: ItemsState = {
+export type NewItem = Pick<Item, 'name' | 'description' | 'tags'> | { orgUnitId: string }
 
-}
-
-const itemsSlice = createAppSlice({
-    name: 'items',
-    initialState,
-    reducers: {
-
-    },
-})
-
-export default itemsSlice.reducer
+export type ItemUpdate = Pick<Item, 'id' | 'name' | 'description' | 'tags'>
