@@ -15,6 +15,7 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && inputValue.trim() !== "") {
+            e.preventDefault();
             onTagsChange([...tags, inputValue.trim()]);
             setInputValue(""); // Clear input field
         }
