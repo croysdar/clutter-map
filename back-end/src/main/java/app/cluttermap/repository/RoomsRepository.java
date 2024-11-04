@@ -11,6 +11,8 @@ import app.cluttermap.model.Room;
 
 @Repository
 public interface RoomsRepository extends CrudRepository<Room, Long> {
-    @Query(value = "SELECT r.* FROM rooms r JOIN projects p ON r.project_id = p.id WHERE p.owner_id = :ownerId", nativeQuery = true)
+    @Query(value = "SELECT r.* FROM rooms r " +
+            "JOIN projects p ON r.project_id = p.id " +
+            "WHERE p.owner_id = :ownerId", nativeQuery = true)
     List<Room> findRoomsByProjectOwnerId(@Param("ownerId") Long owner_id);
 }

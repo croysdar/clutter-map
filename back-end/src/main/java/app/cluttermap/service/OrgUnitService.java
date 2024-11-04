@@ -39,7 +39,11 @@ public class OrgUnitService {
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
         Room room = roomService.getRoomById(orgUnitDTO.getRoomIdAsLong());
 
-        OrgUnit newOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), room);
+        OrgUnit newOrgUnit = new OrgUnit(
+                orgUnitDTO.getName(),
+                orgUnitDTO.getDescription(),
+                room,
+                room.getProject());
         return orgUnitsRepository.save(newOrgUnit);
     }
 

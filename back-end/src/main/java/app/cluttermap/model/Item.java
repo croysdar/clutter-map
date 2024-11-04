@@ -15,7 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="items")
+@Table(name = "items")
 public class Item {
 
     @Id
@@ -30,7 +30,12 @@ public class Item {
     private List<String> tags;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "org_unit_id")
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_unit_id", nullable = true)
     @JsonBackReference
     private OrgUnit orgUnit;
 
@@ -40,11 +45,12 @@ public class Item {
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Item(String name, String description, OrgUnit orgUnit, List<String> tags) {
+    public Item(String name, String description, List<String> tags, OrgUnit orgUnit, Project project) {
         this.name = name;
         this.description = description;
-        this.orgUnit = orgUnit;
         this.tags = tags;
+        this.orgUnit = orgUnit;
+        this.project = project;
     }
 
     public Long getId() {
@@ -77,6 +83,14 @@ public class Item {
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public OrgUnit getOrgUnit() {

@@ -19,12 +19,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-// table annotation overrides the default table name
 @Table(name = "org_units")
 public class OrgUnit {
 
     @Id
-    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -34,11 +32,16 @@ public class OrgUnit {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = true)
     @JsonBackReference
     private Room room;
 
-    @OneToMany(mappedBy = "orgUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orgUnit", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
 
@@ -48,10 +51,11 @@ public class OrgUnit {
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public OrgUnit(String name, String description, Room room) {
+    public OrgUnit(String name, String description, Room room, Project project) {
         this.name = name;
         this.description = description;
         this.room = room;
+        this.project = project;
     }
 
     public Long getId() {
@@ -76,6 +80,14 @@ public class OrgUnit {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public Room getRoom() {

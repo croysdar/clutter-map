@@ -33,24 +33,24 @@ public class Room {
 
     private String description;
 
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     @JsonBackReference
     private Project project;
 
     // no-arg constructor for Hibernate
-    protected Room() { }
+    protected Room() {
+    }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Room(String name, String description, Project project){
+    public Room(String name, String description, Project project) {
         this.name = name;
         this.description = description;
         this.project = project;
     }
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonManagedReference
     private List<OrgUnit> orgUnits = new ArrayList<>();
 

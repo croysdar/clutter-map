@@ -12,8 +12,7 @@ import app.cluttermap.model.OrgUnit;
 @Repository
 public interface OrgUnitsRepository extends CrudRepository<OrgUnit, Long> {
     @Query(value = "SELECT ou.* FROM org_units ou " +
-            "JOIN rooms r ON ou.room_id = r.id " +
-            "JOIN projects p ON r.project_id = p.id " +
+            "JOIN projects p ON ou.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
     List<OrgUnit> findOrgUnitsByUserId(@Param("ownerId") Long ownerId);
 }

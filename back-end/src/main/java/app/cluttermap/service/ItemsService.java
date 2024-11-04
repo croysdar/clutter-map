@@ -39,7 +39,12 @@ public class ItemsService {
     public Item createItem(NewItemDTO itemDTO) {
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());
 
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), orgUnit, itemDTO.getTags());
+        Item newItem = new Item(
+                itemDTO.getName(),
+                itemDTO.getDescription(),
+                itemDTO.getTags(),
+                orgUnit,
+                orgUnit.getProject());
         return itemsRepository.save(newItem);
     }
 
@@ -65,5 +70,4 @@ public class ItemsService {
         getItemById(id);
         itemsRepository.deleteById(id);
     }
-    
 }
