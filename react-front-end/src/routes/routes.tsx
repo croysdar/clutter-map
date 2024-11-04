@@ -76,7 +76,7 @@ const Pages: React.FC = () => {
 
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={ItemsList} />
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/add" Component={AddItem} />
-                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/edit" Component={EditItem} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId/edit" Component={EditItem} />
                                 </Routes>
                             </ProtectedRoute>
                         }
