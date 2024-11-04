@@ -16,9 +16,9 @@ interface EditRoomFormElements extends HTMLFormElement {
 }
 
 const EditRoom = () => {
-    const { roomId } = useParams();
     const navigate = useNavigate();
-    const { projectId } = useParams();
+    const { roomId, projectId } = useParams();
+    const sourcePageUrl = `/projects/${projectId}/rooms`;
 
     const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
 
@@ -52,13 +52,12 @@ const EditRoom = () => {
 
         if (room && name) {
             await updateRoom({ id: room.id, name: name, description: description })
-            // redirect to [this project]/rooms
-            navigate(`/projects/${projectId}/rooms`)
+            navigate(sourcePageUrl)
         }
     }
 
     const handleCancelClick = () => {
-        navigate(`/projects/${projectId}/rooms`)
+        navigate(sourcePageUrl)
     }
 
     return (
@@ -127,7 +126,7 @@ const EditRoom = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteRoomButton room={room} isDisabled={updateLoading} />
+                <DeleteRoomButton room={room} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
 
             </CardContent>
         </Card>

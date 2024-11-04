@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Project } from './projectsTypes';
 import { DeleteForever } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDeleteProjectMutation } from './projectApi';
+import { Project } from './projectsTypes';
 
 type DeleteProjectProps = {
-    project: Project,
+    project: Project
     isDisabled: boolean | undefined
+    redirectUrl: string
 }
 
-const DeleteProjectButton: React.FC<DeleteProjectProps> = ({ project, isDisabled }) => {
+const DeleteProjectButton: React.FC<DeleteProjectProps> = ({ project, isDisabled, redirectUrl }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
@@ -24,7 +25,7 @@ const DeleteProjectButton: React.FC<DeleteProjectProps> = ({ project, isDisabled
     
     const handleDelete = async () => {
         await deleteProject(project.id);
-        navigate('/projects');
+        navigate(redirectUrl);
     }
 
     return (

@@ -2,32 +2,30 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { OrgUnit } from './orgUnitsSlice';
 import { DeleteForever } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDeleteOrgUnitMutation } from './orgUnitApi';
+import { OrgUnit } from './orgUnitsSlice';
 
 type DeleteOrgUnitProps = {
-    orgUnit: OrgUnit,
+    orgUnit: OrgUnit
     isDisabled: boolean | undefined
+    redirectUrl: string
 }
 
-const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled }) => {
+const DeleteOrgUnitButton: React.FC<DeleteOrgUnitProps> = ({ orgUnit, isDisabled, redirectUrl }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
 
     const navigate = useNavigate();
-    const { roomId } = useParams();
-    const { projectId } = useParams();
 
     const [deleteOrgUnit] = useDeleteOrgUnitMutation();
 
     const handleDelete = async () => {
         await deleteOrgUnit(orgUnit.id);
-        // redirect to [this room]/org-units
-        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+        navigate(redirectUrl)
     }
 
     return (

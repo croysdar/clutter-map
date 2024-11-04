@@ -2,31 +2,30 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Room } from './roomsSlice';
 import { DeleteForever } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDeleteRoomMutation } from './roomApi';
+import { Room } from './roomsSlice';
 
 type DeleteRoomProps = {
-    room: Room,
+    room: Room
     isDisabled: boolean | undefined
+    redirectUrl: string
 }
 
-const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled }) => {
+const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled, redirectUrl }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
 
     const navigate = useNavigate();
-    const { projectId } = useParams();
 
     const [deleteRoom] = useDeleteRoomMutation();
 
     const handleDelete = async () => {
         await deleteRoom(room.id);
-        // redirect to [this project]/rooms
-        navigate(`/projects/${projectId}/rooms`)
+        navigate(redirectUrl)
     }
 
     return (

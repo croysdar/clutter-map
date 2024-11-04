@@ -15,8 +15,9 @@ interface EditProjectFormElements extends HTMLFormElement {
 }
 
 const EditProject = () => {
-    const { projectId } = useParams();
     const navigate = useNavigate();
+    const { projectId } = useParams();
+    const sourcePageUrl = '/projects';
 
     const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 
@@ -49,12 +50,12 @@ const EditProject = () => {
 
         if (project && name) {
             await updateProject({ id: project.id, name: name })
-            navigate(`/projects`)
+            navigate(sourcePageUrl)
         }
     }
 
     const handleCancelClick = () => {
-        navigate(`/projects`)
+        navigate(sourcePageUrl)
     }
 
     return (
@@ -107,7 +108,7 @@ const EditProject = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteProjectButton project={project} isDisabled={updateLoading} />
+                <DeleteProjectButton project={project} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
 
             </CardContent>
         </Card>
