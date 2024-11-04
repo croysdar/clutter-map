@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
     Card,
+    CardActions,
     CardContent,
     CardHeader,
     CircularProgress,
@@ -58,8 +59,10 @@ const OrgUnitsList: React.FC = () => {
                         />
                         <CardContent>
                             <Typography variant="body2" sx={{ mb: 1 }}>{orgUnit.description}</Typography>
-                            <ItemsAccordion orgUnitId={orgUnit.id.toString()} />
                         </CardContent>
+                        <CardActions>
+                            <ItemsAccordion orgUnitId={orgUnit.id.toString()} />
+                        </CardActions>
                     </div>
                 </Card>
             ))}

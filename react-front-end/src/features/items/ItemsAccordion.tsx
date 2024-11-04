@@ -5,9 +5,11 @@ import {
     AccordionDetails,
     AccordionSummary,
     Card,
+    CardActions,
     CardContent,
     CardHeader,
     CircularProgress,
+    Container,
     Typography
 } from '@mui/material';
 
@@ -53,32 +55,36 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
     }
 
     return (
-        <>
+        <Container sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+        }}>
             {
                 items.length > 0 &&
-                <Accordion>
+                <Accordion sx={{ boxShadow: 'none' }}>
                     <AccordionSummary
                         expandIcon={<ArrowDropDownIcon />}
                         id={`org-unit-${orgUnitId}-items-accordion-header`}
                     >
-                        <Typography variant='body1'> Items </Typography>
+                        <Typography variant='body1'> Contents </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         {items.map((item) => (
-                            <Card key={`item-card-${item.id}`} sx={{ marginTop: 1 }}>
-                                <div key={item.id} >
-                                    <CardHeader
-                                        title={<Typography variant='h6'> {item.name}</Typography>}
-                                        action={<ItemMenu item={item} />}
-                                    />
-                                    <CardContent>
-                                        <Typography variant="body2">{item.description}</Typography>
-                                        <RenderTags tags={item.tags} />
-                                    </CardContent>
-                                </div>
+                            <Card key={`item-card-${item.id}`} sx={{mt: 1}}>
+                                <CardHeader
+                                    title={<Typography variant='h6'> {item.name}</Typography>}
+                                    action={<ItemMenu item={item} />}
+                                    sx={{py: 1}}
+                                />
+                                <CardContent sx={{py: 1}}>
+                                    <Typography variant="body2">{item.description}</Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <RenderTags tags={item.tags} />
+                                </CardActions>
                             </Card>
                         ))}
-
                     </AccordionDetails>
                 </Accordion>
             }
@@ -86,7 +92,7 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
                 objectLabel='item'
                 to={`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`}
             />
-        </>
+        </Container>
     );
 };
 
