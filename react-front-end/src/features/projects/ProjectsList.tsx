@@ -3,15 +3,15 @@ import React from 'react';
 import {
     Card,
     CardHeader,
-    Container,
+    CircularProgress,
     Paper,
     Typography
 } from '@mui/material';
 
+import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import ProjectMenu from '@/features/projects/ProjectMenu';
-import ButtonLink from '@/components/common/ButtonLink';
-import { useNavigate } from 'react-router-dom';
 import { PROJECT_LIMIT } from '@/utils/constants';
+import { useNavigate } from 'react-router-dom';
 import { useGetProjectsQuery } from './projectApi';
 
 const ProjectsList: React.FC = () => {
@@ -32,7 +32,11 @@ const ProjectsList: React.FC = () => {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Paper>
+        );
     }
 
     if (isError) {
@@ -40,25 +44,25 @@ const ProjectsList: React.FC = () => {
     }
 
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <Typography variant="h2">
-                    Project List
-                </Typography>
-                {projects.map((project) => (
-                    <>
-                        <Card key={`project-card-${project.id}`} sx={{ marginTop: 3 }}>
-                            <CardHeader
-                                title={<Typography variant='h4'> {project.name}</Typography>}
-                                action={<ProjectMenu project={project} />}
-                                onClick={(e) => handleClick(e, project.id)}
-                            />
-                        </Card>
-                    </>
-                ))}
-                <ButtonLink to="/projects/add" label="Create a new Project" disabled={projects.length >= PROJECT_LIMIT}/>
-            </Paper>
-        </Container>
+        <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <Typography variant="h2" key="my-projects">
+                My Projects
+            </Typography>
+            {projects.map((project) => (
+                <Card key={`project-card-${project.id}`} sx={{ marginTop: 3 }}>
+                    <CardHeader
+                        title={<Typography variant='h4'> {project.name}</Typography>}
+                        action={<ProjectMenu project={project} />}
+                        onClick={(e) => handleClick(e, project.id)}
+                    />
+                </Card>
+            ))}
+            <CreateNewObjectButton
+                objectLabel='project'
+                to="/projects/add"
+                disabled={projects.length >= PROJECT_LIMIT}
+            />
+        </Paper>
     );
 };
 

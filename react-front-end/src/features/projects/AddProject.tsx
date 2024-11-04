@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Card, CardContent, Container, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
 
@@ -38,55 +38,51 @@ export const AddProject = () => {
     }
 
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <CardContent>
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Add a New Project
-                    </Typography>
-                    <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                        {/* Project Name */}
-                        <TextField
-                            label="Project Name"
+        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <CardContent>
+                <Typography variant="h4" component="h2" gutterBottom align="center">
+                    Add a New Project
+                </Typography>
+                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+                    {/* Project Name */}
+                    <TextField
+                        label="Project Name"
 
-                            id="projectName"
-                            name="name"
+                        id="projectName"
+                        name="name"
 
-                            required
+                        required
 
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{shrink: true}}
-                        />
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: 2 }}
-                            disabled={isLoading}
-                        >
-                            Create Project
-                        </Button>
-                    </form>
-
+                    {/* Submit Button */}
                     <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ marginTop: 2 }}
+                        disabled={isLoading}
+                    >
+                        Create Project
+                    </Button>
+                </form>
+
+                <Button
                     variant="text"
-                    color="error"
                     fullWidth
                     sx={{ marginTop: 2 }}
                     onClick={() => navigate('/projects')}
 
-                    >
+                >
                     Cancel
-                    </Button>
+                </Button>
 
-                </CardContent>
-            </Card>
-        </Container>
-
+            </CardContent>
+        </Card>
     )
 }

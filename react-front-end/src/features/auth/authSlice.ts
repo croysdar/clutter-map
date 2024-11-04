@@ -3,26 +3,28 @@ import { RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
 import { API_BASE_URL } from "@/utils/constants";
 
-export interface AuthState {
+interface UserInfo {
     userEmail: string | null,
-    userName: string | null,
+    userName: string | null
+    userFirstName: string | null
+    userLastName: string | null
+}
+
+export interface AuthState extends UserInfo {
     status: AuthStatus
 }
 
 const initialState: AuthState = {
     userEmail: null,
     userName: null,
+    userFirstName: null,
+    userLastName: null,
     status: 'idle',
 }
 
 type AuthStatus = 'idle' | 'pending' | 'verified' | 'none'
 
-interface UserInfoReturn {
-    userEmail: string,
-    userName: string
-}
-
-type VerifyTokenReturn = Pick<AuthState, 'userEmail' | 'userName'> & { 'token': string }
+type VerifyTokenReturn = { 'token': string }
 
 
 const authSlice = createAppSlice({
@@ -47,8 +49,7 @@ const authSlice = createAppSlice({
                         state.status = 'pending'
                     },
                     fulfilled: (state, action) => {
-                        state.userEmail = action.payload.userEmail
-                        state.userName = action.payload.userName
+
                         state.status = 'verified'
                     },
                     rejected: (state) => {
@@ -59,7 +60,7 @@ const authSlice = createAppSlice({
             fetchUserInfo: create.asyncThunk(
                 async (token: string, { rejectWithValue }) => {
                     try {
-                        const response = await client.get<UserInfoReturn>(`${API_BASE_URL}/auth/user-info`, {
+                        const response = await client.get<UserInfo>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
 
@@ -82,6 +83,8 @@ const authSlice = createAppSlice({
                     fulfilled: (state, action) => {
                         state.userEmail = action.payload.userEmail;
                         state.userName = action.payload.userName;
+                        state.userFirstName = action.payload.userFirstName;
+                        state.userLastName = action.payload.userLastName;
                         state.status = 'verified'
                     },
                     rejected: (state, action) => {
@@ -103,6 +106,8 @@ const authSlice = createAppSlice({
                             localStorage.removeItem('jwt')
                             state.userEmail = null;
                             state.userName = null;
+                            state.userFirstName = null;
+                            state.userLastName = null;
                             state.status = 'none'
                         }
                         else {
@@ -113,7 +118,12 @@ const authSlice = createAppSlice({
             ),
             rejectAuthStatus: create.reducer(
                 (state) => {
-                    state.status = 'none';
+                    localStorage.removeItem('jwt')
+                    state.userEmail = null;
+                    state.userName = null;
+                    state.userFirstName = null;
+                    state.userLastName = null;
+                    state.status = 'none'
                 }
             ),
         }
@@ -123,6 +133,7 @@ const authSlice = createAppSlice({
 export const { verifyToken, fetchUserInfo, rejectAuthStatus } = authSlice.actions
 
 export const selectCurrentUserName = (state: RootState) => state.auth.userName
+export const selectCurrentUserFirstName = (state: RootState) => state.auth.userFirstName
 export const selectCurrentUserEmail = (state: RootState) => state.auth.userEmail
 export const selectAuthStatus = (state: RootState) => state.auth.status
 

@@ -1,20 +1,19 @@
-import React  from 'react';
+import React from 'react';
 
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
-    Container,
+    CircularProgress,
     Paper,
     Typography
 } from '@mui/material';
 
-import ButtonLink from '@/components/common/ButtonLink';
+import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import RoomMenu from '@/features/rooms/RoomMenu';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useGetRoomsByProjectQuery } from './roomApi';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
+import { useGetRoomsByProjectQuery } from './roomApi';
 
 const RoomsList: React.FC = () => {
     const { projectId } = useParams();
@@ -37,7 +36,11 @@ const RoomsList: React.FC = () => {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Paper>
+        );
     }
 
     if (isError) {
@@ -49,38 +52,29 @@ const RoomsList: React.FC = () => {
     }
 
     return (
-        //Container previous properties: , justifyContent: 'center', alignItems: 'center',
-        <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', height: '100vh' }}>
-            <Button
-                href={`/projects`}
-                variant="text"
-                sx={{ marginBottom: 2, fontSize: '0.875rem' }}
-            >
-                Projects List
-            </Button>
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <Typography variant="h2">
-                    {project.name}
-                </Typography>
-                {rooms.map((room) => (
-                    <>
-                        <Card key={`room-card-${room.id}`} sx={{ marginTop: 3 }}>
-                            <div key={room.id} >
-                                <CardHeader
-                                    title={<Typography variant='h4'> {room.name}</Typography>}
-                                    action={<RoomMenu room={room} />}
-                                    onClick={(e) => handleClick(e, room.id)}
-                                />
-                                <CardContent>
-                                    <Typography variant="body2">{room.description}</Typography>
-                                </CardContent>
-                            </div>
-                        </Card>
-                    </>
-                ))}
-                <ButtonLink to={`/projects/${projectId}/rooms/add`} label="Create a new Room" />
-            </Paper>
-        </Container>
+        <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <Typography variant="h2" key="project-name">
+                {project.name}
+            </Typography>
+            {rooms.map((room) => (
+                <Card key={`room-card-${room.id}`} sx={{ marginTop: 3 }}>
+                    <div key={room.id} >
+                        <CardHeader
+                            title={<Typography variant='h4'> {room.name}</Typography>}
+                            action={<RoomMenu room={room} />}
+                            onClick={(e) => handleClick(e, room.id)}
+                        />
+                        <CardContent>
+                            <Typography variant="body2">{room.description}</Typography>
+                        </CardContent>
+                    </div>
+                </Card>
+            ))}
+            <CreateNewObjectButton
+                objectLabel='room'
+                to={`/projects/${projectId}/rooms/add`}
+            />
+        </Paper>
     );
 };
 

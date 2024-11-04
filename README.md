@@ -92,11 +92,11 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 - **POST `/verify-token/google`**  
   Verifies a Google ID token and returns a JWT token and user information.  
   **Request Body**: `{ "idTokenString": "string" }`  
-  **Response**: `{ "token": "JWT token", "userEmail": "string", "userName": "string" }`
+  **Response**: `{ "token": "JWT token" }`
 
 - **GET `/user-info`**  
   Retrieves the current user's email and username.  
-  **Response**: `{ "userEmail": "string", "userName": "string" }`
+  **Response**: `{ "userEmail": "string", "userName": "string", "userFirstName": "string", "userLastName": "string }`
 
 ---
 

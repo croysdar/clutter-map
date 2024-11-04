@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
+import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import DeleteRoomButton from './DeleteRoomButton'
@@ -29,7 +29,9 @@ const EditRoom = () => {
 
     if (roomLoading) {
         return (
-            <CircularProgress />
+            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Card>
         )
     }
 
@@ -55,69 +57,80 @@ const EditRoom = () => {
         }
     }
 
+    const handleCancelClick = () => {
+        navigate(`/projects/${projectId}/rooms`)
+    }
+
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <CardHeader
-                    title={
-                        <Typography variant="h4" component="h2" gutterBottom align="center">
-                            Edit Room
-                        </Typography>
-                    }
-                />
-                <CardContent>
-                    <form onSubmit={handleSubmit}>
-                        {/* Room Name */}
-                        <TextField
-                            label="Room Name"
+        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <CardHeader
+                title={
+                    <Typography variant="h4" component="h2" gutterBottom align="center">
+                        Edit Room
+                    </Typography>
+                }
+            />
+            <CardContent>
+                <form onSubmit={handleSubmit}>
+                    {/* Room Name */}
+                    <TextField
+                        label="Room Name"
 
-                            id="roomName"
-                            name="name"
-                            defaultValue={room.name}
+                        id="roomName"
+                        name="name"
+                        defaultValue={room.name}
 
-                            required
+                        required
 
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* Room Description */}
-                        <TextField
-                            label="Room Description"
+                    {/* Room Description */}
+                    <TextField
+                        label="Room Description"
 
-                            id="roomDescription"
-                            name="description"
-                            defaultValue={room.description}
+                        id="roomDescription"
+                        name="description"
+                        defaultValue={room.description}
 
-                            fullWidth
-                            multiline
-                            rows={4}
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        fullWidth
+                        multiline
+                        rows={4}
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: 2 }}
-                            disabled={updateLoading}
-                        >
-                            Save Changes
-                        </Button>
-                    </form>
+                    {/* Submit Button */}
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ marginTop: 2 }}
+                        disabled={updateLoading}
+                    >
+                        Save Changes
+                    </Button>
+                </form>
 
-                    {/* Delete button with a confirmation dialog */}
-                    <DeleteRoomButton room={room} isDisabled={updateLoading}/>
+                <Button
+                    variant='text'
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={handleCancelClick}
+                >
+                    Cancel
+                </Button>
 
-                </CardContent>
-            </Card>
-        </Container>
+                {/* Delete button with a confirmation dialog */}
+                <DeleteRoomButton room={room} isDisabled={updateLoading} />
+
+            </CardContent>
+        </Card>
     )
 }
 

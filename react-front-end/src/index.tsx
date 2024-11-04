@@ -2,15 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 
-import { GoogleOAuthProvider } from '@react-oauth/google'
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import './assets/styles/index.css';
 
 import App from './app/App';
 import { store } from './app/store';
 
-import reportWebVitals from './utils/reportWebVitals';
+import { ThemeProvider } from '@emotion/react';
+import { CssBaseline } from '@mui/material';
+import theme from './contexts/theme';
 import { AUTH_CLIENT_ID } from './utils/constants';
+import reportWebVitals from './utils/reportWebVitals';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,9 +21,12 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <GoogleOAuthProvider clientId={AUTH_CLIENT_ID}>
-        <App />
-      </GoogleOAuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <GoogleOAuthProvider clientId={AUTH_CLIENT_ID}>
+          <App />
+        </GoogleOAuthProvider>
+      </ThemeProvider>
     </Provider>
   </React.StrictMode>
 );

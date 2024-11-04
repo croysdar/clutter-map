@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, Container, TextField, Typography } from '@mui/material'
+import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import DeleteOrgUnitButton from './DeleteOrgUnitButton'
@@ -30,18 +30,19 @@ const EditOrgUnit = () => {
 
     if (orgUnitLoading) {
         return (
-            <CircularProgress />
+            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+                <CircularProgress />
+            </Card>
         )
     }
 
     if (!orgUnit) {
         return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <section>
-                <Typography variant='h2'>OrgUnit not found!</Typography>
-            </section></Card>
-            </Container>
+                <section>
+                    <Typography variant='h2'>OrgUnit not found!</Typography>
+                </section>
+            </Card>
         )
     }
 
@@ -59,69 +60,80 @@ const EditOrgUnit = () => {
         }
     }
 
+    const handleCancelClick = () => {
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+    }
+
     return (
-        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <CardHeader
-                    title={
-                        <Typography variant="h4" component="h2" gutterBottom align="center">
-                            Edit Organizational Unit
-                        </Typography>
-                    }
-                />
-                <CardContent>
-                    <form onSubmit={handleSubmit}>
-                        {/* OrgUnit Name */}
-                        <TextField
-                            label="OrgUnit Name"
+        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <CardHeader
+                title={
+                    <Typography variant="h4" component="h2" gutterBottom align="center">
+                        Edit Organizational Unit
+                    </Typography>
+                }
+            />
+            <CardContent>
+                <form onSubmit={handleSubmit}>
+                    {/* OrgUnit Name */}
+                    <TextField
+                        label="OrgUnit Name"
 
-                            id="orgUnitName"
-                            name="name"
-                            defaultValue={orgUnit.name}
+                        id="orgUnitName"
+                        name="name"
+                        defaultValue={orgUnit.name}
 
-                            required
+                        required
 
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* OrgUnit Description */}
-                        <TextField
-                            label="OrgUnit Description"
+                    {/* OrgUnit Description */}
+                    <TextField
+                        label="OrgUnit Description"
 
-                            id="orgUnitDescription"
-                            name="description"
-                            defaultValue={orgUnit.description}
+                        id="orgUnitDescription"
+                        name="description"
+                        defaultValue={orgUnit.description}
 
-                            fullWidth
-                            multiline
-                            rows={4}
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        fullWidth
+                        multiline
+                        rows={4}
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
 
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: 2 }}
-                            disabled={updateLoading}
-                        >
-                            Save Changes
-                        </Button>
-                    </form>
+                    {/* Submit Button */}
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ marginTop: 2 }}
+                        disabled={updateLoading}
+                    >
+                        Save Changes
+                    </Button>
+                </form>
 
-                    {/* Delete button with a confirmation dialog */}
-                    <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} />
+                <Button
+                    variant='text'
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    onClick={handleCancelClick}
+                >
+                    Cancel
+                </Button>
 
-                </CardContent>
-            </Card>
-        </Container>
+                {/* Delete button with a confirmation dialog */}
+                <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} />
+
+            </CardContent>
+        </Card>
     )
 }
 

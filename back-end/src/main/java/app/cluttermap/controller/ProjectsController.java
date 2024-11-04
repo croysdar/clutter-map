@@ -25,9 +25,6 @@ public class ProjectsController {
     @Autowired
     private final ProjectService projectService;
 
-    @Value("${project.limit}")
-    private int projectLimit;
-
     public ProjectsController(ProjectService projectService) {
         this.projectService = projectService;
     }
