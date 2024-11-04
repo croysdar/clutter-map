@@ -21,7 +21,7 @@ export const baseApiSlice = createApi({
         }
     }),
 
-    tagTypes: ['Room', 'Project', 'OrgUnit'],
+    tagTypes: ['Room', 'Project', 'OrgUnit', 'Item'],
 
     endpoints: builder => ({
 
