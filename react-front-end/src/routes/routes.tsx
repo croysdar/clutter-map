@@ -2,8 +2,16 @@ import React, { ReactElement } from 'react';
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { useAppSelector } from '@/hooks/useAppHooks';
+import { CircularProgress, Container } from '@mui/material';
+
+import AppBreadcrumbs from '@/components/Breadcrumbs';
 import Navbar from '@/components/Navbar';
+
 import { selectAuthStatus } from '@/features/auth/authSlice';
+
+import EditItem from '@/features/items/EditItem';
+import ItemsList from '@/features/items/ItemsList';
 import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
 import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
 import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
@@ -13,12 +21,9 @@ import ProjectsList from '@/features/projects/ProjectsList';
 import { AddRoom } from '@/features/rooms/AddRoom';
 import EditRoom from '@/features/rooms/EditRoom';
 import RoomsList from '@/features/rooms/RoomsList';
-import { useAppSelector } from '@/hooks/useAppHooks';
-import HomePage from '@/pages/HomePage';
-import { CircularProgress, Container } from '@mui/material';
-import AppBreadcrumbs from '@/components/Breadcrumbs';
+
 import AboutPage from '@/pages/AboutPage';
-import ItemsList from '@/features/items/ItemsList';
+import HomePage from '@/pages/HomePage';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -69,6 +74,8 @@ const Pages: React.FC = () => {
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
 
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={ItemsList} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/add" Component={AddOrgUnit} />
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/edit" Component={EditItem} />
                                 </Routes>
                             </ProtectedRoute>
                         }
