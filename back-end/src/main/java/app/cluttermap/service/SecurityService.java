@@ -11,13 +11,16 @@ import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
+import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
+import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
+import app.cluttermap.repository.ItemsRepository;
 import app.cluttermap.repository.OrgUnitsRepository;
 import app.cluttermap.repository.ProjectsRepository;
 import app.cluttermap.repository.RoomsRepository;
@@ -25,6 +28,9 @@ import app.cluttermap.repository.UsersRepository;
 
 @Service("securityService")
 public class SecurityService {
+    @Autowired
+    private final UsersRepository usersRepository;
+
     @Autowired
     private final ProjectsRepository projectsRepository;
 
@@ -35,13 +41,19 @@ public class SecurityService {
     private final OrgUnitsRepository orgUnitsRepository;
 
     @Autowired
-    private final UsersRepository usersRepository;
+    private final ItemsRepository itemsRepository;
 
-    public SecurityService(UsersRepository usersRepository, ProjectsRepository projectsRepository, RoomsRepository roomsRepository, OrgUnitsRepository orgUnitsRepository) {
+    public SecurityService(
+            UsersRepository usersRepository,
+            ProjectsRepository projectsRepository,
+            RoomsRepository roomsRepository,
+            OrgUnitsRepository orgUnitsRepository,
+            ItemsRepository itemsRepository) {
         this.usersRepository = usersRepository;
         this.projectsRepository = projectsRepository;
         this.roomsRepository = roomsRepository;
         this.orgUnitsRepository = orgUnitsRepository;
+        this.itemsRepository = itemsRepository;
     }
 
     public User getCurrentUser() {
@@ -61,29 +73,37 @@ public class SecurityService {
         Long currentUserId = getCurrentUser().getId();
 
         switch (resourceType) {
-            case "project" :
-                Optional <Project> projectData = projectsRepository.findById(resourceId);
+            case "project":
+                Optional<Project> projectData = projectsRepository.findById(resourceId);
                 if (!projectData.isPresent()) {
                     throw new ProjectNotFoundException();
                 }
 
                 return projectData.get().getOwner().getId().equals(currentUserId);
 
-            case "room" :
-                Optional <Room> roomData = roomsRepository.findById(resourceId);
+            case "room":
+                Optional<Room> roomData = roomsRepository.findById(resourceId);
                 if (!roomData.isPresent()) {
                     throw new RoomNotFoundException();
                 }
 
                 return roomData.get().getProject().getOwner().getId().equals(currentUserId);
 
-            case "org-unit" :
-                Optional <OrgUnit> orgUnitData = orgUnitsRepository.findById(resourceId);
+            case "org-unit":
+                Optional<OrgUnit> orgUnitData = orgUnitsRepository.findById(resourceId);
                 if (!orgUnitData.isPresent()) {
                     throw new OrgUnitNotFoundException();
                 }
 
                 return orgUnitData.get().getRoom().getProject().getOwner().getId().equals(currentUserId);
+
+            case "item":
+                Optional<Item> itemData = itemsRepository.findById(resourceId);
+                if (!itemData.isPresent()) {
+                    throw new ItemNotFoundException();
+                }
+
+                return itemData.get().getOrgUnit().getRoom().getProject().getOwner().getId().equals(currentUserId);
         }
 
         return false;
