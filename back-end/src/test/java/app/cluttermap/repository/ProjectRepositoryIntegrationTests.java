@@ -29,39 +29,66 @@ public class ProjectRepositoryIntegrationTests {
 
     @Test
     void findByOwner_ShouldReturnOnlyProjectsOwnedBySpecifiedUser() {
-        /*
-         * Test that findByOwner returns only the projects owned by the specified user.
-         * Ensures that the query filters projects based on the owner and does not
-         * include projects owned by others.
-         */
+        // Arrange: Set up two users, each with their own project
         User owner1 = new User("owner1ProviderId");
-        // created_at,email,first_name,last_name,provider,provider_id,username
         Project project1 = new Project("Project Owned by Owner 1", owner1);
 
         User owner2 = new User("owner2ProviderId");
         Project project2 = new Project("Project Owned by Owner 2", owner2);
 
+        // Arrange: Save the users and their projects to the repositories
         userRepository.saveAll(List.of(owner1, owner2));
         projectRepository.saveAll(List.of(project1, project2));
 
-        // Find projects by owner1
+        // Act: Retrieve projects associated with owner1
         List<Project> owner1Projects = projectRepository.findByOwner(owner1);
+
+        // Assert: Verify that only the project owned by owner1 is returned
         assertThat(owner1Projects).hasSize(1);
         assertThat(owner1Projects.get(0).getName()).isEqualTo("Project Owned by Owner 1");
 
-        // Verify that only owner1's project is returned
+        // Assert: Confirm that the project list does not contain a project owned by
+        // owner2
         assertThat(owner1Projects).doesNotContain(project2);
+    }
+
+    @Test
+    void findByOwner_ShouldReturnAllProjectsOwnedByUser() {
+        // Arrange: Set up a user with multiple projects
+        User owner = new User("ownerProviderId");
+        Project project1 = new Project("Project 1", owner);
+        Project project2 = new Project("Project 2", owner);
+        Project project3 = new Project("Project 3", owner);
+
+        // Arrange: Save the user and their projects to the repositories
+        userRepository.save(owner);
+        projectRepository.saveAll(List.of(project1, project2, project3));
+
+        // Act: Retrieve all projects associated with the user
+        List<Project> ownerProjects = projectRepository.findByOwner(owner);
+
+        // Assert: Verify that all projects owned by the user are returned
+        assertThat(ownerProjects).hasSize(3);
+        assertThat(ownerProjects).containsExactlyInAnyOrder(project1, project2, project3);
+    }
+
+    @Test
+    void findByOwner_ShouldReturnEmptyList_WhenUserHasNoProjects() {
+        // Arrange: Set up a user with no projects
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner); // Save the user without any projects
+
+        // Act: Retrieve projects associated with the user
+        List<Project> ownerProjects = projectRepository.findByOwner(owner);
+
+        // Assert: Verify that the returned list is empty
+        assertThat(ownerProjects).isEmpty();
     }
 
     @Test
     @Transactional
     void deletingProject_ShouldAlsoDeleteRooms() {
-        /*
-         * Test that deleting a Project also deletes associated Room entities due to
-         * cascading delete.
-         * Ensures that removing a Project will not leave orphaned Room records in the
-         * database. *
-         */
+        // Arrange: Set up a user and create a project with an associated room
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
@@ -69,22 +96,21 @@ public class ProjectRepositoryIntegrationTests {
         Room room = new Room("Living Room", "This is the living room", project);
         project.getRooms().add(room);
 
+        // Arrange: Save the project (and implicitly the room) to the repository
         projectRepository.save(project);
-        assertThat(roomRepository.findAll()).hasSize(1);
+        assertThat(roomRepository.findAll()).hasSize(1); // Verify that the room saved
 
-        // Delete the project and check cascading delete
+        // Act: Delete the project, triggering cascade deletion for the associated room
         projectRepository.delete(project);
-        assertThat(roomRepository.findAll()).isEmpty(); // Room should be deleted as orphan
+
+        // Assert: Verify that the room was deleted as an orphan when the project was
+        // removed
+        assertThat(roomRepository.findAll()).isEmpty();
     }
 
     @Test
     void removingRoomFromProject_ShouldTriggerOrphanRemoval() {
-        /*
-         * Test that removing a Room from a Project's rooms collection triggers
-         * orphan removal.
-         * Ensures that disassociating a Room from its Project will delete it from
-         * the database.
-         */
+        // Arrange: Set up a user and create a project with an associated room
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
@@ -92,14 +118,17 @@ public class ProjectRepositoryIntegrationTests {
         Room room = new Room("Living Room", "This is the living room", project);
         project.getRooms().add(room);
 
+        // Arrange: Save the project (and implicitly the room) to the repository
         projectRepository.save(project);
         assertThat(roomRepository.findAll()).hasSize(1); // Room should exist in DB
 
-        // Remove room and save project to trigger orphan removal
+        // Act: Remove the room from the project's room list and save the project to
+        // trigger orphan removal
         project.getRooms().remove(room);
         projectRepository.save(project);
 
-        assertThat(roomRepository.findAll()).isEmpty(); // Room should be deleted
+        // Assert: Verify that the room was deleted as an orphan when removed from the
+        // project
+        assertThat(roomRepository.findAll()).isEmpty();
     }
-
 }
