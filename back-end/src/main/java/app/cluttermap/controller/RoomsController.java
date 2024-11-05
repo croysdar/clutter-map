@@ -17,6 +17,7 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.service.RoomService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/rooms")
@@ -35,7 +36,7 @@ public class RoomsController {
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#roomDTO.getProjectId(), 'project')")
-    public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
+    public ResponseEntity<Room> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.createRoom(roomDTO));
     }
 
@@ -53,7 +54,8 @@ public class RoomsController {
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
-    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id, @RequestBody UpdateRoomDTO roomDTO) {
+    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id,
+            @Valid @RequestBody UpdateRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
     }
 

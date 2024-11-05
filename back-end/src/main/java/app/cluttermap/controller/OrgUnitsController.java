@@ -17,6 +17,7 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.service.OrgUnitService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/org-units")
@@ -36,7 +37,7 @@ public class OrgUnitsController {
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
-    public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
+    public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
@@ -55,7 +56,7 @@ public class OrgUnitsController {
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
-            @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
+            @Valid @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 

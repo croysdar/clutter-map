@@ -1,7 +1,6 @@
 package app.cluttermap.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +17,7 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.service.ProjectService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/projects")
@@ -41,7 +41,7 @@ public class ProjectsController {
     }
 
     @PostMapping()
-    public ResponseEntity<Project> addOneProject(@RequestBody NewProjectDTO projectDTO) {
+    public ResponseEntity<Project> addOneProject(@Valid @RequestBody NewProjectDTO projectDTO) {
         return ResponseEntity.ok(projectService.createProject(projectDTO));
     }
 
@@ -54,7 +54,7 @@ public class ProjectsController {
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id,
-            @RequestBody UpdateProjectDTO projectDTO) {
+            @Valid @RequestBody UpdateProjectDTO projectDTO) {
         /*
          * Use to change project name.
          * Cannot use to change rooms within project.
