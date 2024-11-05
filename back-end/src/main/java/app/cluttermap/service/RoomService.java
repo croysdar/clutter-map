@@ -20,7 +20,8 @@ public class RoomService {
     @Autowired
     private final SecurityService securityService;
 
-    @Autowired ProjectService projectService;
+    @Autowired
+    ProjectService projectService;
 
     // TODO add limit of rooms per project
 
@@ -54,7 +55,9 @@ public class RoomService {
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = getRoomById(id);
         _room.setName(roomDTO.getName());
-        _room.setDescription(roomDTO.getDescription());
+        if (roomDTO.getDescription() != null) {
+            _room.setDescription(roomDTO.getDescription());
+        }
 
         return roomsRepository.save(_room);
     }
