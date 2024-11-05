@@ -53,6 +53,10 @@ public class ProjectServiceTests {
 
     @Test
     void getProjectById_ShouldReturnProject_WhenProjectExists() {
+        /*
+         * Ensures that getProjectById returns the correct project when it exists in the
+         * repository.
+         */
         Project project = new Project("Sample Project", mockUser);
         when(projectsRepository.findById(1L)).thenReturn(Optional.of(project));
 
@@ -63,6 +67,10 @@ public class ProjectServiceTests {
 
     @Test
     void getProjectById_ShouldThrowException_WhenProjectDoesNotExist() {
+        /*
+         * Verifies that getProjectById throws ProjectNotFoundException when attempting
+         * to retrieve a non-existent project.
+         */
         when(projectsRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ProjectNotFoundException.class, () -> projectService.getProjectById(1L));
@@ -70,6 +78,10 @@ public class ProjectServiceTests {
 
     @Test
     void createProject_ShouldCreateProject_WhenLimitNotReached() {
+        /*
+         * Confirms that a new project can be created when the user has not reached the
+         * project limit.
+         */
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(projectsRepository.findByOwner(mockUser)).thenReturn(Collections.emptyList());
 
@@ -89,6 +101,10 @@ public class ProjectServiceTests {
 
     @Test
     void createProject_ShouldThrowException_WhenLimitReached() {
+        /*
+         * Tests that createProject throws ProjectLimitReachedException when the user
+         * has reached the maximum project limit.
+         */
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         // Mock the number of projects to be one less than the limit
@@ -123,6 +139,10 @@ public class ProjectServiceTests {
 
     @Test
     void getUserProjects_ShouldReturnProjectsOwnedByUser() {
+        /*
+         * Checks that getUserProjects returns only the projects associated with the
+         * current user.
+         */
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         Project project1 = new Project("Project 1", mockUser);
@@ -136,6 +156,10 @@ public class ProjectServiceTests {
 
     @Test
     void getUserProjects_ShouldReturnEmptyList_WhenNoProjectsExist() {
+        /*
+         * Ensures that getUserProjects returns an empty list if the user has no
+         * projects.
+         */
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(projectsRepository.findByOwner(mockUser)).thenReturn(Collections.emptyList());
 
@@ -146,6 +170,10 @@ public class ProjectServiceTests {
 
     @Test
     void updateProject_ShouldUpdateProject_WhenProjectExists() {
+        /*
+         * Verifies that updateProject updates the project’s name when the specified
+         * project exists.
+         */
         Project project = new Project("Old Name", mockUser);
         when(projectsRepository.findById(1L)).thenReturn(Optional.of(project));
 
@@ -161,6 +189,10 @@ public class ProjectServiceTests {
 
     @Test
     void updateProject_ShouldThrowException_WhenProjectDoesNotExist() {
+        /*
+         * Ensures that updateProject throws ProjectNotFoundException when trying to
+         * update a non-existent project.
+         */
         when(projectsRepository.findById(1L)).thenReturn(Optional.empty());
 
         UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Name");
@@ -170,6 +202,10 @@ public class ProjectServiceTests {
 
     @Test
     void deleteProject_ShouldDeleteProject_WhenProjectExists() {
+        /*
+         * Tests that deleteProject successfully deletes the specified project when it
+         * exists.
+         */
         Project project = new Project("Sample Project", mockUser);
         when(projectsRepository.findById(1L)).thenReturn(Optional.of(project));
 
@@ -180,6 +216,10 @@ public class ProjectServiceTests {
 
     @Test
     void deleteProject_ShouldThrowException_WhenProjectDoesNotExist() {
+        /*
+         * Verifies that deleteProject throws ProjectNotFoundException if attempting to
+         * delete a non-existent project and doesn’t call the delete method.
+         */
         when(projectsRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ProjectNotFoundException.class, () -> projectService.deleteProject(1L));
