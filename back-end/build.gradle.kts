@@ -35,9 +35,11 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa") // Spring Data JPA for database access and ORM functionality.
 	implementation("org.postgresql:postgresql:42.2.23") // PostgreSQL JDBC driver for connecting to a PostgreSQL database.
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test") // Spring Boot test utilities, including JUnit and Mockito.
-	testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher") // JUnit platform launcher for running tests.
+	testImplementation("org.testcontainers:postgresql:1.20.3")
+	testImplementation("org.testcontainers:junit-jupiter:1.17.0")
 
 	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
 
