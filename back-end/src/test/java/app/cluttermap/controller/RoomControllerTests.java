@@ -313,7 +313,7 @@ class RoomControllerTests {
         room.setOrgUnits(Collections.singletonList(orgUnit));
         when(roomService.getRoomById(1L)).thenReturn(room);
 
-        // Act: Perform a GET request to the /rooms/1/orgUnits endpoint
+        // Act: Perform a GET request to the /rooms/1/org-units endpoint
         mockMvc.perform(get("/rooms/1/org-units"))
                 .andExpect(status().isOk())
 
@@ -331,7 +331,7 @@ class RoomControllerTests {
         // orgUnits for a non-existent room
         when(roomService.getRoomById(1L)).thenThrow(new RoomNotFoundException());
 
-        // Act: Perform a GET request to the /rooms/1/orgUnits endpoint
+        // Act: Perform a GET request to the /rooms/1/org-units endpoint
         mockMvc.perform(get("/rooms/1/org-units"))
                 .andExpect(status().isNotFound());
 
