@@ -1,33 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteRoomButton from './DeleteRoomButton'
-import { useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
+import { TagField } from '@/components/TagField'
+import DeleteItemButton from './DeleteItemButton'
+import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
 
-interface EditRoomFormFields extends HTMLFormControlsCollection {
-    roomName: HTMLInputElement,
-    roomDescription: HTMLTextAreaElement
+interface EditItemFormFields extends HTMLFormControlsCollection {
+    itemName: HTMLInputElement,
+    itemDescription: HTMLTextAreaElement
 }
 
-interface EditRoomFormElements extends HTMLFormElement {
-    readonly elements: EditRoomFormFields
+interface EditItemFormElements extends HTMLFormElement {
+    readonly elements: EditItemFormFields
 }
 
-const EditRoom = () => {
+const EditItem = () => {
     const navigate = useNavigate();
-    const { roomId, projectId } = useParams();
-    const sourcePageUrl = `/projects/${projectId}/rooms`;
+    const { itemId, projectId, roomId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
-    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
+    const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
+    const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
-    const [
-        updateRoom,
-        { isLoading: updateLoading }
-    ] = useUpdateRoomMutation();
+    // State to manage tags
+    const [tags, setTags] = useState<string[]>(item?.tags || []);
 
-    if (roomLoading) {
+    if (itemLoading) {
         return (
             <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
                 <CircularProgress />
@@ -35,29 +35,30 @@ const EditRoom = () => {
         )
     }
 
-    if (!room) {
+    if (!item) {
         return (
             <section>
-                <Typography variant='h2'>Room not found!</Typography>
+                <Typography variant='h2'>Item not found!</Typography>
             </section>
         )
     }
 
-    const handleSubmit = async (e: React.FormEvent<EditRoomFormElements>) => {
+    const handleSubmit = async (e: React.FormEvent<EditItemFormElements>) => {
         e.preventDefault()
 
         const { elements } = e.currentTarget
-        const name = elements.roomName.value
-        const description = elements.roomDescription.value
+        const name = elements.itemName.value
+        const description = elements.itemDescription.value
 
-        if (room && name) {
-            await updateRoom({ id: room.id, name: name, description: description })
-            navigate(sourcePageUrl)
+        if (item && name) {
+            await updateItem({ id: item.id, name: name, description: description, tags: tags })
+            // redirect to ...[this org unit]/items
+            navigate(redirectUrl)
         }
     }
 
     const handleCancelClick = () => {
-        navigate(sourcePageUrl)
+        navigate(redirectUrl)
     }
 
     return (
@@ -65,36 +66,31 @@ const EditRoom = () => {
             <CardHeader
                 title={
                     <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Room
+                        Edit Item
                     </Typography>
                 }
             />
             <CardContent>
                 <form onSubmit={handleSubmit}>
-                    {/* Room Name */}
+                    {/* Item Name */}
                     <TextField
-                        label="Room Name"
-
-                        id="roomName"
+                        label="Item Name"
+                        id="itemName"
                         name="name"
-                        defaultValue={room.name}
-
+                        defaultValue={item.name}
                         required
-
                         fullWidth
                         margin="normal"
                         variant="outlined"
                         InputLabelProps={{ shrink: true }}
                     />
 
-                    {/* Room Description */}
+                    {/* Item Description */}
                     <TextField
-                        label="Room Description"
-
-                        id="roomDescription"
+                        label="Item Description"
+                        id="itemDescription"
                         name="description"
-                        defaultValue={room.description}
-
+                        defaultValue={item.description}
                         fullWidth
                         multiline
                         rows={4}
@@ -102,6 +98,8 @@ const EditRoom = () => {
                         variant="outlined"
                         InputLabelProps={{ shrink: true }}
                     />
+
+                    <TagField tags={tags} onTagsChange={setTags} />
 
                     {/* Submit Button */}
                     <Button
@@ -126,11 +124,11 @@ const EditRoom = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteRoomButton room={room} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
+                <DeleteItemButton item={item} isDisabled={updateLoading} redirectUrl={redirectUrl} />
 
             </CardContent>
         </Card>
     )
 }
 
-export default EditRoom
+export default EditItem

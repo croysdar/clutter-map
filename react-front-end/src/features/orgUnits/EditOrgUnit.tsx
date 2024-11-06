@@ -18,8 +18,8 @@ interface EditOrgUnitFormElements extends HTMLFormElement {
 const EditOrgUnit = () => {
     const { orgUnitId } = useParams();
     const navigate = useNavigate();
-    const { roomId } = useParams();
-    const { projectId } = useParams();
+    const { roomId, projectId } = useParams();
+    const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units`;
 
     const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
 
@@ -55,13 +55,12 @@ const EditOrgUnit = () => {
 
         if (orgUnit && name) {
             await updateOrgUnit({ id: orgUnit.id, name: name, description: description })
-            // redirect to [this room]/org-units
-            navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+            navigate(sourcePageUrl)
         }
     }
 
     const handleCancelClick = () => {
-        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+        navigate(sourcePageUrl)
     }
 
     return (
@@ -130,7 +129,7 @@ const EditOrgUnit = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} />
+                <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
 
             </CardContent>
         </Card>

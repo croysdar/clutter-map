@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
+import { Item } from './itemsSlice';
 import { DeleteForever } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useDeleteRoomMutation } from './roomApi';
-import { Room } from './roomsSlice';
+import { useDeleteItemMutation } from './itemApi';
 
-type DeleteRoomProps = {
-    room: Room
+type DeleteItemProps = {
+    item: Item,
     isDisabled: boolean | undefined
     redirectUrl: string
 }
 
-const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled, redirectUrl }) => {
+const DeleteItemButton: React.FC<DeleteItemProps> = ({ item, isDisabled, redirectUrl }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
@@ -21,16 +21,15 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled, redirec
 
     const navigate = useNavigate();
 
-    const [deleteRoom] = useDeleteRoomMutation();
+    const [deleteItem] = useDeleteItemMutation();
 
     const handleDelete = async () => {
-        await deleteRoom(room.id);
+        await deleteItem(item.id);
         navigate(redirectUrl)
     }
 
     return (
         <>
-
             {/* DELETE Button */}
             <Button
                 variant="text"
@@ -41,23 +40,23 @@ const DeleteRoomButton: React.FC<DeleteRoomProps> = ({ room, isDisabled, redirec
                 onClick={handleOpen}
 
             >
-                DELETE ROOM
+                DELETE ITEM
                 <DeleteForever />
             </Button>
 
             {/* Confirmation dialog */}
-            <Dialog open={open} onClose={handleClose} id={`delete-room-${room.id}-dialog`}>
-                <DialogTitle>Delete {room.name}</DialogTitle>
+            <Dialog open={open} onClose={handleClose} id={`delete-room-${item.id}-dialog`}>
+                <DialogTitle>Delete {item.name}</DialogTitle>
                 <DialogContent>
-                    <Typography > Are you SURE you want to delete this room? This will delete all of its organizational units. </Typography>
+                    <Typography > Are you SURE you want to delete this item? </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleDelete} color="error">Delete the room</Button>
+                    <Button onClick={handleDelete} color="error">Delete the item</Button>
                 </DialogActions>
             </Dialog>
         </>
     )
 }
 
-export default DeleteRoomButton
+export default DeleteItemButton

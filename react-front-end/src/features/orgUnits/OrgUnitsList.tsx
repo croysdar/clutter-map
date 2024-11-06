@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
     Card,
+    CardActions,
     CardContent,
     CardHeader,
     CircularProgress,
@@ -13,17 +14,13 @@ import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useParams } from 'react-router-dom';
-import { useGetProjectQuery } from '../projects/projectApi';
+import ItemsAccordion from '../items/ItemsAccordion';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
 const OrgUnitsList: React.FC = () => {
-    const { roomId } = useParams();
+    const { projectId, roomId } = useParams();
 
     const { data: room } = useGetRoomQuery(roomId!);
-
-    const { projectId } = useParams();
-
-    const { data: project } = useGetProjectQuery(projectId!);
 
     const {
         data: orgUnits = [],
@@ -48,11 +45,6 @@ const OrgUnitsList: React.FC = () => {
         return <div>Room not found.</div>
     }
 
-    if (!project) {
-        return <div>Project not found.</div>
-    }
-
-
     return (
         <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
             <Typography variant="h2" key="room-name">
@@ -66,8 +58,11 @@ const OrgUnitsList: React.FC = () => {
                             action={<OrgUnitMenu orgUnit={orgUnit} />}
                         />
                         <CardContent>
-                            <Typography variant="body2">{orgUnit.description}</Typography>
+                            <Typography variant="body2" sx={{ mb: 1 }}>{orgUnit.description}</Typography>
                         </CardContent>
+                        <CardActions>
+                            <ItemsAccordion orgUnitId={orgUnit.id.toString()} />
+                        </CardActions>
                     </div>
                 </Card>
             ))}

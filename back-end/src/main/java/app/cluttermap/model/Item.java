@@ -1,12 +1,9 @@
 package app.cluttermap.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,16 +12,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-// table annotation overrides the default table name
-@Table(name = "rooms")
-public class Room {
+@Table(name="items")
+public class Item {
 
     @Id
-    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -33,26 +27,25 @@ public class Room {
 
     private String description;
 
-    
+    private List<String> tags;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "org_unit_id")
     @JsonBackReference
-    private Project project;
+    private OrgUnit orgUnit;
 
     // no-arg constructor for Hibernate
-    protected Room() { }
+    protected Item() {
+    }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Room(String name, String description, Project project){
+    public Item(String name, String description, OrgUnit orgUnit, List<String> tags) {
         this.name = name;
         this.description = description;
-        this.project = project;
+        this.orgUnit = orgUnit;
+        this.tags = tags;
     }
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<OrgUnit> orgUnits = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -78,19 +71,19 @@ public class Room {
         this.description = description;
     }
 
-    public Project getProject() {
-        return project;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
-    public List<OrgUnit> getOrgUnits() {
-        return orgUnits;
+    public OrgUnit getOrgUnit() {
+        return orgUnit;
     }
 
-    public void setOrgUnits(List<OrgUnit> orgUnits) {
-        this.orgUnits = orgUnits;
+    public void setOrgUnit(OrgUnit orgUnit) {
+        this.orgUnit = orgUnit;
     }
 }
