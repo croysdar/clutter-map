@@ -3,6 +3,7 @@ package app.cluttermap.model.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class UpdateOrgUnitDTO {
+    @NotBlank(message = "Organization unit name must not be blank.")
     private String name;
     private String description;
 
@@ -11,7 +12,6 @@ public class UpdateOrgUnitDTO {
         this.description = description;
     }
 
-    @NotBlank(message = "Organization unit name must not be blank.")
     public String getName() {
         return name;
     }

@@ -223,6 +223,7 @@ public class OrgUnitServiceTests {
 
         // Assert: Verify that the orgUnit's name was updated correctly
         assertThat(updatedOrgUnit.getName()).isEqualTo("Updated Name");
+        assertThat(updatedOrgUnit.getDescription()).isEqualTo("Updated Description");
         verify(orgUnitRepository).save(orgUnit);
     }
 

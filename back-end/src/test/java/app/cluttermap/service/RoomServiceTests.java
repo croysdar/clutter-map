@@ -207,6 +207,7 @@ public class RoomServiceTests {
 
         // Assert: Verify that the room's name was updated correctly
         assertThat(updatedRoom.getName()).isEqualTo("Updated Name");
+        assertThat(updatedRoom.getDescription()).isEqualTo("Updated Description");
         verify(roomRepository).save(room);
     }
 
