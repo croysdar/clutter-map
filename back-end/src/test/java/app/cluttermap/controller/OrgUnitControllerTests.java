@@ -319,7 +319,7 @@ class OrgUnitControllerTests {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", mockRoom);
-        Item item = new Item("Item", "Item Description", orgUnit, List.of("tag1"));
+        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
         orgUnit.setItems(Collections.singletonList(item));
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
 
