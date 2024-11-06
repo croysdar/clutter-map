@@ -1,11 +1,19 @@
 package app.cluttermap.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class NewRoomDTO {
+    @NotBlank(message = "Room name must not be blank.")
     private String name;
+
     private String description;
+
+    @NotNull(message = "Project ID must not be blank.")
+    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     private String projectId;
 
     public NewRoomDTO(String name, String description, String projectId) {
@@ -14,7 +22,6 @@ public class NewRoomDTO {
         this.projectId = projectId;
     }
 
-    @NotBlank(message = "Room name must not be blank.")
     public String getName() {
         return name;
     }
@@ -23,8 +30,6 @@ public class NewRoomDTO {
         return description;
     }
 
-    @NotBlank(message = "Project ID must not be blank.")
-    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     public String getProjectId() {
         return projectId;
     }
@@ -41,6 +46,7 @@ public class NewRoomDTO {
         this.projectId = projectId;
     }
 
+    @JsonIgnore
     public Long getProjectIdAsLong() {
         return Long.parseLong(projectId);
     }
