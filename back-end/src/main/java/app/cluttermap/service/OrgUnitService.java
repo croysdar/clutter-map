@@ -53,7 +53,9 @@ public class OrgUnitService {
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = getOrgUnitById(id);
         _orgUnit.setName(orgUnitDTO.getName());
-        _orgUnit.setDescription(orgUnitDTO.getDescription());
+        if (orgUnitDTO.getDescription() != null) {
+            _orgUnit.setDescription(orgUnitDTO.getDescription());
+        }
 
         return orgUnitsRepository.save(_orgUnit);
     }
