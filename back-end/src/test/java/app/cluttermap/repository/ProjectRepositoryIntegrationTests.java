@@ -109,6 +109,7 @@ public class ProjectRepositoryIntegrationTests {
     }
 
     @Test
+    @Transactional
     void removingRoomFromProject_ShouldTriggerOrphanRemoval() {
         // Arrange: Set up a user and create a project with an associated room
         User owner = new User("ownerProviderId");

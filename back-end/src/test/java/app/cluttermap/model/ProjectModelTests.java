@@ -32,6 +32,7 @@ public class ProjectModelTests {
         // Assert: Verify that the room was added to the project's rooms collection
         assertThat(project.getRooms()).hasSize(1);
         assertThat(project.getRooms().get(0).getName()).isEqualTo("Living Room");
+        assertThat(project.getRooms().get(0).getProject()).isEqualTo(project);
 
         // Act: Remove the room from the project
         project.getRooms().remove(room);
