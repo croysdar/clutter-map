@@ -10,7 +10,6 @@ import javax.crypto.SecretKey;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,15 +39,15 @@ public class AuthService {
 
     public final SecurityService securityService;
 
-    public AuthService(SecurityService securityService) {
+    private UsersRepository userRepository;
+
+    public AuthService(SecurityService securityService, UsersRepository userRepository) {
         this.securityService = securityService;
+        this.userRepository = userRepository;
     }
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
-
-    @Autowired
-    private UsersRepository usersRepository;
 
     @Value("${security.jwt.secret-key}")
     private String JWT_SECRET;
@@ -56,19 +55,23 @@ public class AuthService {
     private final long EXPIRATION_TIME = 86400000; // 1 day
 
     public GoogleIdToken verifyGoogleToken(String idTokenString) throws GeneralSecurityException, IOException {
-        // Create the google id token verifier
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                // Set the audience to our client id
-                // this verifies that the token was issued for our app
-                .setAudience(Collections.singletonList(clientId))
-                .build();
+        try {
+            // Create the google id token verifier
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                    // Set the audience to our client id
+                    // this verifies that the token was issued for our app
+                    .setAudience(Collections.singletonList(clientId))
+                    .build();
 
-        // Verify the token
-        GoogleIdToken idToken = verifier.verify(idTokenString);
-        if (idToken == null) {
-            throw new InvalidAuthenticationException("Invalid ID token.");
+            // Verify the token
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken == null) {
+                throw new InvalidAuthenticationException("Invalid ID token.");
+            }
+            return idToken;
+        } catch (GeneralSecurityException | IOException | IllegalArgumentException e) {
+            throw new InvalidAuthenticationException("Invalid ID Token.");
         }
-        return idToken;
     }
 
     public User findOrCreateUserFromGoogleToken(GoogleIdToken idToken) {
@@ -85,7 +88,7 @@ public class AuthService {
         // String pictureUrl = (String) payload.get("picture");
         // String locale = (String) payload.get("locale");
 
-        return usersRepository.findByProviderId(userGoogleId).orElseGet(() -> {
+        return userRepository.findByProviderId(userGoogleId).orElseGet(() -> {
             // If the user does not exist (first login), create a new user
             User newUser = new User(userGoogleId);
             newUser.setEmail(email);
@@ -98,7 +101,7 @@ public class AuthService {
             logger.info("\nNewUser:\nGoogle ID: " + userGoogleId + "\nEmail: " + email + "\nName: " + name);
             // TODO email admin about new user
 
-            return usersRepository.save(newUser);
+            return userRepository.save(newUser);
         });
     }
 
