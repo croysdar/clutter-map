@@ -90,7 +90,9 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the response contains the expected orgUnit names
                 .andExpect(jsonPath("$[0].name").value("Test OrgUnit 1"))
-                .andExpect(jsonPath("$[1].name").value("Test OrgUnit 2"));
+                .andExpect(jsonPath("$[0].description").value("Description 1"))
+                .andExpect(jsonPath("$[1].name").value("Test OrgUnit 2"))
+                .andExpect(jsonPath("$[1].description").value("Description 2"));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getUserOrgUnits();
@@ -123,7 +125,8 @@ class OrgUnitControllerTests {
         mockMvc.perform(get("/org-units/1"))
                 .andExpect(status().isOk())
                 // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$.name").value("Test OrgUnit"));
+                .andExpect(jsonPath("$.name").value("Test OrgUnit"))
+                .andExpect(jsonPath("$.description").value("OrgUnit description"));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getOrgUnitById(1L);
@@ -158,7 +161,8 @@ class OrgUnitControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$.name").value("New OrgUnit"));
+                .andExpect(jsonPath("$.name").value("New OrgUnit"))
+                .andExpect(jsonPath("$.description").value("OrgUnit Description"));
 
         // Assert: Ensure the service method was called to create the orgUnit
         verify(orgUnitService).createOrgUnit(any(NewOrgUnitDTO.class));
@@ -336,7 +340,7 @@ class OrgUnitControllerTests {
     }
 
     @Test
-    void getOrgUnitOrgUnits_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
+    void getOrgUnitItems_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw OrgUnitNotFoundException when retrieving
         // orgUnits for a non-existent orgUnit
         when(orgUnitService.getOrgUnitById(1L)).thenThrow(new OrgUnitNotFoundException());

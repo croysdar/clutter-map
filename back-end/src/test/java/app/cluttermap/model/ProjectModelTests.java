@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 public class ProjectModelTests {
-
     @Test
     void project_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project with a name and owner

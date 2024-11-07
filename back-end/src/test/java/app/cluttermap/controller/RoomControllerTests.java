@@ -83,7 +83,9 @@ class RoomControllerTests {
 
                 // Assert: Verify the response contains the expected room names
                 .andExpect(jsonPath("$[0].name").value("Test Room 1"))
-                .andExpect(jsonPath("$[1].name").value("Test Room 2"));
+                .andExpect(jsonPath("$[0].description").value("Description 1"))
+                .andExpect(jsonPath("$[1].name").value("Test Room 2"))
+                .andExpect(jsonPath("$[1].description").value("Description 2"));
 
         // Assert: Ensure that the service method was called
         verify(roomService).getUserRooms();
