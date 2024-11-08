@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
@@ -38,6 +39,7 @@ import app.cluttermap.repository.RoomsRepository;
 import app.cluttermap.repository.UsersRepository;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class SecurityServiceTests {
 
     @Mock

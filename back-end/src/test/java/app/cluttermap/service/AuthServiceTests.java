@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -33,6 +34,7 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class AuthServiceTests {
 
     @Mock

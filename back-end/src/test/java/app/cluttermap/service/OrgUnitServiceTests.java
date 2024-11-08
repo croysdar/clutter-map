@@ -34,8 +34,8 @@ import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitsRepository;
 import app.cluttermap.repository.RoomsRepository;
 
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 public class OrgUnitServiceTests {
     @Mock
     private OrgUnitsRepository orgUnitRepository;

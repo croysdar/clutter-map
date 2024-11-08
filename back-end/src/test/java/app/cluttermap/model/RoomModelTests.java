@@ -1,8 +1,11 @@
 package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
+
+@ActiveProfiles("test")
 public class RoomModelTests {
     @Test
     void room_ShouldSetFieldsCorrectly_WhenConstructed() {

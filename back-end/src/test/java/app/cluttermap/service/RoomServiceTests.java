@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
@@ -32,6 +33,7 @@ import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomsRepository;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 public class RoomServiceTests {
     @Mock
     private RoomsRepository roomRepository;

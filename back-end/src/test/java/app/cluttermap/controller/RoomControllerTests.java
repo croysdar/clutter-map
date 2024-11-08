@@ -24,15 +24,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.room.RoomNotFoundException;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
+import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
@@ -42,6 +43,7 @@ import app.cluttermap.service.SecurityService;
 @WebMvcTest(RoomsController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 class RoomControllerTests {
 
     @Autowired
