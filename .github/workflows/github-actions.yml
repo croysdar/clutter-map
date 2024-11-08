@@ -33,25 +33,26 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '21'
-    
+
     - name: Set environment variables
       run: |
         echo "JWT_SECRET=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
-        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-        echo "DB_SOURCE_URL=${{ secrets.DB_SOURCE_URL }}" >> $GITHUB_ENV
         echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
         echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
-    
-    # This confirms that the application built properly
-    - name: Build Application
-      run: cd back-end && chmod +x ./gradlew && ./gradlew build
-    
+
+    - name: Run tests with Testcontainers
+      env:
+        TESTCONTAINERS_RYUK_DISABLED: true
+        TESTCONTAINERS_CHECKS_DISABLE: true
+        TESTCONTAINERS_VERBOSE_LOGGING: true
+        SPRING_PROFILES_ACTIVE: test
+      run: cd back-end && chmod +x ./gradlew && ./gradlew test --info
+
     - name: Archive test results
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: test-report-build
+        name: test-report
         path: back-end/build/reports/tests/test
 
   deploy-on-push:

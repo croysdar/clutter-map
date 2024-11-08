@@ -11,6 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 @SpringBootTest
 @ContextConfiguration(initializers = TestcontainersInitializer.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 public class TestContainerConfigCheck {
 
     @Value("${spring.datasource.url}")
