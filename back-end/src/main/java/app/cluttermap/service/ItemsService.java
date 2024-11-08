@@ -1,6 +1,5 @@
 package app.cluttermap.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
@@ -14,13 +13,8 @@ import jakarta.transaction.Transactional;
 
 @Service("itemService")
 public class ItemsService {
-    @Autowired
     private final ItemsRepository itemsRepository;
-
-    @Autowired
     private final SecurityService securityService;
-
-    @Autowired
     private final OrgUnitService orgUnitService;
 
     public ItemsService(ItemsRepository itemsRepository, SecurityService securityService,

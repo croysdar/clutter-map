@@ -1,6 +1,5 @@
 package app.cluttermap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +21,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/projects")
 public class ProjectsController {
-    @Autowired
     private final ProjectService projectService;
 
     public ProjectsController(ProjectService projectService) {

@@ -1,6 +1,5 @@
 package app.cluttermap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +23,6 @@ import jakarta.validation.Valid;
 @RequestMapping("/rooms")
 @Validated
 public class RoomsController {
-    @Autowired
     private final RoomService roomService;
 
     public RoomsController(RoomService roomService) {

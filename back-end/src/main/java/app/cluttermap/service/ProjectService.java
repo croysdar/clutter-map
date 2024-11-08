@@ -1,6 +1,5 @@
 package app.cluttermap.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.project.ProjectLimitReachedException;
@@ -14,10 +13,7 @@ import jakarta.transaction.Transactional;
 
 @Service("projectService")
 public class ProjectService {
-    @Autowired
     private final ProjectsRepository projectsRepository;
-
-    @Autowired
     private final SecurityService securityService;
 
     private final int PROJECT_LIMIT = 3;

@@ -1,6 +1,5 @@
 package app.cluttermap.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.room.RoomNotFoundException;
@@ -14,14 +13,9 @@ import jakarta.transaction.Transactional;
 
 @Service("roomService")
 public class RoomService {
-    @Autowired
     private final RoomsRepository roomsRepository;
-
-    @Autowired
     private final SecurityService securityService;
-
-    @Autowired
-    ProjectService projectService;
+    private final ProjectService projectService;
 
     // TODO add limit of rooms per project
 
