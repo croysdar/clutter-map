@@ -4,24 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.TestContainerConfig;
+import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import jakarta.transaction.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 public class RoomRepositoryIntegrationTests {
 
     @Autowired
@@ -35,6 +35,14 @@ public class RoomRepositoryIntegrationTests {
 
     @Autowired
     private OrgUnitsRepository orgUnitRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
+        roomRepository.deleteAll();
+        orgUnitRepository.deleteAll();
+    }
 
     @Test
     void findByOwner_ShouldReturnOnlyRoomsOwnedBySpecifiedUser() {
@@ -81,7 +89,8 @@ public class RoomRepositoryIntegrationTests {
 
         // Assert: Verify that all rooms owned by the user are returned
         assertThat(ownerRooms).hasSize(3);
-        assertThat(ownerRooms).containsExactlyInAnyOrder(room1, room2, room3);
+        assertThat(ownerRooms).extracting(Room::getName).containsExactlyInAnyOrder("Room 1", "Room 2",
+                "Room 3");
     }
 
     @Test

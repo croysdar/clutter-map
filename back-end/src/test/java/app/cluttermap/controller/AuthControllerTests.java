@@ -25,7 +25,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 
-import app.cluttermap.TestContainerConfig;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.model.User;
 import app.cluttermap.service.AuthService;

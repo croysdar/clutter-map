@@ -4,14 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.TestContainerConfig;
+import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -19,10 +19,10 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import jakarta.transaction.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 public class OrgUnitRepositoryIntegrationTests {
 
     @Autowired
@@ -39,6 +39,15 @@ public class OrgUnitRepositoryIntegrationTests {
 
     @Autowired
     private ItemsRepository itemRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
+        roomRepository.deleteAll();
+        orgUnitRepository.deleteAll();
+        itemRepository.deleteAll();
+    }
 
     @Test
     void findByOwner_ShouldReturnOnlyOrgUnitsOwnedBySpecifiedUser() {
@@ -93,7 +102,8 @@ public class OrgUnitRepositoryIntegrationTests {
 
         // Assert: Verify that all orgUnits owned by the user are returned
         assertThat(ownerOrgUnits).hasSize(3);
-        assertThat(ownerOrgUnits).containsExactlyInAnyOrder(orgUnit1, orgUnit2, orgUnit3);
+        assertThat(ownerOrgUnits).extracting(OrgUnit::getName).containsExactlyInAnyOrder("OrgUnit 1", "OrgUnit 2",
+                "OrgUnit 3");
     }
 
     @Test

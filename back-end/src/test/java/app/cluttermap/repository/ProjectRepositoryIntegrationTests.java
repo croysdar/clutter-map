@@ -4,25 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.TestContainerConfig;
+import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import jakarta.transaction.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 public class ProjectRepositoryIntegrationTests {
-
     @Autowired
     private ProjectsRepository projectRepository;
 
@@ -31,6 +30,13 @@ public class ProjectRepositoryIntegrationTests {
 
     @Autowired
     private UsersRepository userRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
+        roomRepository.deleteAll();
+    }
 
     @Test
     void findByOwner_ShouldReturnOnlyProjectsOwnedBySpecifiedUser() {
@@ -74,7 +80,8 @@ public class ProjectRepositoryIntegrationTests {
 
         // Assert: Verify that all projects owned by the user are returned
         assertThat(ownerProjects).hasSize(3);
-        assertThat(ownerProjects).containsExactlyInAnyOrder(project1, project2, project3);
+        assertThat(ownerProjects).extracting(Project::getName).containsExactlyInAnyOrder("Project 1", "Project 2",
+                "Project 3");
     }
 
     @Test

@@ -39,7 +39,6 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test") // Spring Boot test utilities, including JUnit and Mockito.
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher") // JUnit platform launcher for running tests.
 	testImplementation("org.testcontainers:postgresql:1.20.3")
-	testImplementation("org.testcontainers:junit-jupiter:1.17.0")
 
 	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
 

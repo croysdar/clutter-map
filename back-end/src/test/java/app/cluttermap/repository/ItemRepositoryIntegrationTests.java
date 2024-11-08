@@ -4,24 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.TestContainerConfig;
+import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 public class ItemRepositoryIntegrationTests {
 
     @Autowired
@@ -38,6 +38,15 @@ public class ItemRepositoryIntegrationTests {
 
     @Autowired
     private ItemsRepository itemRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
+        roomRepository.deleteAll();
+        orgUnitRepository.deleteAll();
+        itemRepository.deleteAll();
+    }
 
     @Test
     void findByOwner_ShouldReturnOnlyItemsOwnedBySpecifiedUser() {
@@ -99,7 +108,7 @@ public class ItemRepositoryIntegrationTests {
 
         // Assert: Verify that all items owned by the user are returned
         assertThat(ownerItems).hasSize(3);
-        assertThat(ownerItems).containsExactlyInAnyOrder(item1, item2, item3);
+        assertThat(ownerItems).extracting(Item::getName).containsExactlyInAnyOrder("Item 1", "Item 2", "Item 3");
     }
 
     @Test

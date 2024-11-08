@@ -3,22 +3,22 @@ package app.cluttermap.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.TestContainerConfig;
+import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import jakarta.transaction.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
+@EnableTestcontainers
 class UserRepositoryIntegrationTests {
 
     @Autowired
@@ -26,6 +26,12 @@ class UserRepositoryIntegrationTests {
 
     @Autowired
     private ProjectsRepository projectRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
+    }
 
     @Test
     void user_ShouldHaveNonNullCreatedAt_WhenSaved() {
