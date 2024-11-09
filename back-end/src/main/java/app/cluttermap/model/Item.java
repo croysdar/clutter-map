@@ -15,7 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="items")
+@Table(name = "items")
 public class Item {
 
     @Id
@@ -40,7 +40,7 @@ public class Item {
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Item(String name, String description, OrgUnit orgUnit, List<String> tags) {
+    public Item(String name, String description, List<String> tags, OrgUnit orgUnit) {
         this.name = name;
         this.description = description;
         this.orgUnit = orgUnit;

@@ -1,6 +1,5 @@
 package app.cluttermap.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
@@ -14,13 +13,8 @@ import jakarta.transaction.Transactional;
 
 @Service("orgUnitService")
 public class OrgUnitService {
-    @Autowired
     private final OrgUnitsRepository orgUnitsRepository;
-
-    @Autowired
     private final SecurityService securityService;
-
-    @Autowired
     private final RoomService roomService;
 
     public OrgUnitService(OrgUnitsRepository orgUnitsRepository, SecurityService securityService,
@@ -53,7 +47,9 @@ public class OrgUnitService {
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = getOrgUnitById(id);
         _orgUnit.setName(orgUnitDTO.getName());
-        _orgUnit.setDescription(orgUnitDTO.getDescription());
+        if (orgUnitDTO.getDescription() != null) {
+            _orgUnit.setDescription(orgUnitDTO.getDescription());
+        }
 
         return orgUnitsRepository.save(_orgUnit);
     }

@@ -1,6 +1,5 @@
 package app.cluttermap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,12 +16,11 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.service.OrgUnitService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/org-units")
 public class OrgUnitsController {
-
-    @Autowired
     private final OrgUnitService orgUnitService;
 
     public OrgUnitsController(OrgUnitService orgUnitService) {
@@ -36,7 +34,7 @@ public class OrgUnitsController {
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
-    public ResponseEntity<OrgUnit> addOneOrgUnit(@RequestBody NewOrgUnitDTO orgUnitDTO) {
+    public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
@@ -55,7 +53,7 @@ public class OrgUnitsController {
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
-            @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
+            @Valid @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 

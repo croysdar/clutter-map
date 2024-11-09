@@ -5,16 +5,18 @@ import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 
 public class UpdateItemDTO {
+    @NotBlank(message = "Item name must not be blank.")
     private String name;
+
     private String description;
     private List<String> tags;
 
-    public UpdateItemDTO(String name, String description) {
+    public UpdateItemDTO(String name, String description, List<String> tags) {
         this.name = name;
         this.description = description;
+        this.tags = tags;
     }
 
-    @NotBlank(message = "Item name must not be blank.")
     public String getName() {
         return name;
     }

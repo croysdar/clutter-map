@@ -41,7 +41,8 @@ public class User {
     private Date createdAt;
 
     // no-arg constructor for Hibernate
-    protected User() {}
+    protected User() {
+    }
 
     public User(String providerId) {
         this.providerId = providerId;
@@ -117,15 +118,5 @@ public class User {
 
     public void setProjects(List<Project> projects) {
         this.projects = projects;
-    }
-
-    public void addProject(Project project) {
-        projects.add(project);
-        project.setOwner(this);
-    }
-
-    public void removeProject(Project project) {
-        projects.remove(project);
-        project.setOwner(null);
     }
 }
