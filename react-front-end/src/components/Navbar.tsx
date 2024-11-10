@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { logoutUser, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import NavMenu from './NavMenu';
+import OnlineIndicator from './common/OnlineIndicator';
 
 const Navbar: React.FC = () => {
     const userName = useAppSelector(selectCurrentUserName);
@@ -34,6 +35,8 @@ const Navbar: React.FC = () => {
                     {
                         loggedIn &&
                         <>
+                            <OnlineIndicator />
+
                             <Typography variant="body1" sx={{ marginRight: 2 }}>
                                 {`Hello, ${userFirstName || userName}`}
                             </Typography>
