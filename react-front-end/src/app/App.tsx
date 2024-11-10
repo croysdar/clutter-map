@@ -1,32 +1,57 @@
-import React, { useEffect } from 'react';
+import { fetchUserInfo, logoutUser } from '@/features/auth/authSlice';
+import { useAppDispatch } from '@/hooks/useAppHooks';
+import { useEffect } from 'react';
 import '../assets/styles/App.css';
 import Pages from '../routes/routes';
-import { fetchUserInfo, rejectAuthStatus } from '@/features/auth/authSlice';
-import { useAppDispatch } from '@/hooks/useAppHooks';
 
 function App() {
-  const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    const token = localStorage.getItem('jwt')
+    useEffect(() => {
+        const token = localStorage.getItem('jwt')
+        const cachedUserInfo = localStorage.getItem('userInfo');
+        const isOffline = !navigator.onLine;
 
-    // Check if user has previously logged in
-    if (token) {
-      // send token to backend to fetch user data
-      dispatch(fetchUserInfo(token));
-    }
-    else {
-      // Set auth status to 'none' because there is no jwt
-      dispatch(rejectAuthStatus());
-    }
-  }, [dispatch]);
+        // Check if user has previously logged in
+        if (token) {
+            if (isOffline && cachedUserInfo) {
+                // Offline: Use cached user info if available
+                const userInfo = JSON.parse(cachedUserInfo);
+                dispatch({
+                    type: 'auth/fetchUserInfo/fulfilled',
+                    payload: userInfo,
+                });
+            }
+            else {
+                // Online: Send token to backend to fetch user data
+                dispatch(fetchUserInfo(token));
+            }
+        }
+        else {
+            // Set auth status to 'none' because there is no jwt
+            logoutUser();
+        }
+
+        // Listen for online/offline status changes to handle reconnecting logic
+        const handleOnline = () => {
+            if (token) {
+                dispatch(fetchUserInfo(token));
+            }
+        };
+
+        window.addEventListener('online', handleOnline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+        };
+    }, [dispatch]);
 
 
-  return (
-    <div className="App">
-        <Pages />
-    </div>
-  );
+    return (
+        <div className="App">
+            <Pages />
+        </div>
+    );
 }
 
 export default App;

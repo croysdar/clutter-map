@@ -3,19 +3,18 @@ import React from 'react';
 import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { rejectAuthStatus, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
+import { logoutUser, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
+import { useAppSelector } from '@/hooks/useAppHooks';
 import NavMenu from './NavMenu';
 
 const Navbar: React.FC = () => {
     const userName = useAppSelector(selectCurrentUserName);
     const userFirstName = useAppSelector(selectCurrentUserFirstName);
-    const dispatch = useAppDispatch();
 
     const loggedIn = useAppSelector(selectAuthStatus) === 'verified';
 
     const handleLogout = () => {
-        dispatch(rejectAuthStatus());
+        logoutUser();
     }
 
     return (

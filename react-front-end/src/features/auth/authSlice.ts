@@ -1,5 +1,5 @@
 import { client } from "@/api/client";
-import { RootState } from "@/app/store";
+import { AppDispatch, RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
 import { API_BASE_URL } from "@/utils/constants";
 
@@ -64,6 +64,9 @@ const authSlice = createAppSlice({
                             headers: { Authorization: `Bearer ${token}` }
                         });
 
+                        // Store user info locally for offline access
+                        localStorage.setItem('userInfo', JSON.stringify(response.data));
+
                         return response.data
                     }
                     catch (error: any) {
@@ -98,12 +101,19 @@ const authSlice = createAppSlice({
 
                         const statusCode = errorPayload?.status
 
+                        if (!navigator.onLine) {
+                            // If offline, keep the cached user info in state
+                            console.warn('Fetch user info failed due to offline status');
+                            return;
+                        }
+
                         if (statusCode === 500) {
                             console.error('Server error: ', action.error)
                         }
                         else if (statusCode === 401 || statusCode === 403) {
                             // Invalid token
-                            localStorage.removeItem('jwt')
+                            localStorage.removeItem('jwt');
+                            localStorage.removeItem('userInfo');
                             state.userEmail = null;
                             state.userName = null;
                             state.userFirstName = null;
@@ -118,7 +128,6 @@ const authSlice = createAppSlice({
             ),
             rejectAuthStatus: create.reducer(
                 (state) => {
-                    localStorage.removeItem('jwt')
                     state.userEmail = null;
                     state.userName = null;
                     state.userFirstName = null;
@@ -129,6 +138,17 @@ const authSlice = createAppSlice({
         }
     },
 })
+
+
+// Additional action to handle local storage cleanup when the user logs out
+export const logoutUser = () => (dispatch: AppDispatch) => {
+    // Clear local storage
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('userInfo');
+
+    // Update state
+    dispatch(rejectAuthStatus());
+};
 
 export const { verifyToken, fetchUserInfo, rejectAuthStatus } = authSlice.actions
 
