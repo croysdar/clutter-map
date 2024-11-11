@@ -39,7 +39,7 @@ import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.service.ProjectService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(ProjectsController.class)
+@WebMvcTest(ProjectController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")

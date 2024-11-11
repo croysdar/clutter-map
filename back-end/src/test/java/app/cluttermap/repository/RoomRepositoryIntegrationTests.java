@@ -25,16 +25,16 @@ import jakarta.transaction.Transactional;
 public class RoomRepositoryIntegrationTests {
 
     @Autowired
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    private ProjectsRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
-    private RoomsRepository roomRepository;
+    private RoomRepository roomRepository;
 
     @Autowired
-    private OrgUnitsRepository orgUnitRepository;
+    private OrgUnitRepository orgUnitRepository;
 
     @BeforeEach
     void setUp() {

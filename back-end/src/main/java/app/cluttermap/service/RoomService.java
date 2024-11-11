@@ -8,26 +8,26 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
-import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 
 @Service("roomService")
 public class RoomService {
-    private final RoomsRepository roomsRepository;
+    private final RoomRepository roomRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
 
     // TODO add limit of rooms per project
 
-    public RoomService(RoomsRepository roomsRepository, SecurityService securityService,
+    public RoomService(RoomRepository roomRepository, SecurityService securityService,
             ProjectService projectService) {
-        this.roomsRepository = roomsRepository;
+        this.roomRepository = roomRepository;
         this.securityService = securityService;
         this.projectService = projectService;
     }
 
     public Room getRoomById(Long id) {
-        return roomsRepository.findById(id)
+        return roomRepository.findById(id)
                 .orElseThrow(() -> new RoomNotFoundException());
     }
 
@@ -36,13 +36,13 @@ public class RoomService {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 
         Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);
-        return roomsRepository.save(newRoom);
+        return roomRepository.save(newRoom);
     }
 
     public Iterable<Room> getUserRooms() {
         User user = securityService.getCurrentUser();
 
-        return roomsRepository.findRoomsByProjectOwnerId(user.getId());
+        return roomRepository.findRoomsByProjectOwnerId(user.getId());
     }
 
     @Transactional
@@ -53,13 +53,13 @@ public class RoomService {
             _room.setDescription(roomDTO.getDescription());
         }
 
-        return roomsRepository.save(_room);
+        return roomRepository.save(_room);
     }
 
     @Transactional
     public void deleteRoom(Long id) {
         // Make sure room exists first
         getRoomById(id);
-        roomsRepository.deleteById(id);
+        roomRepository.deleteById(id);
     }
 }

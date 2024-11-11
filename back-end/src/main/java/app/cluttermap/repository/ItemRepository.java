@@ -7,16 +7,14 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.Item;
 
 @Repository
-public interface OrgUnitsRepository extends CrudRepository<OrgUnit, Long> {
-    @Query(value = "SELECT ou.* FROM org_units ou " +
+public interface ItemRepository extends CrudRepository<Item, Long> {
+    @Query(value = "SELECT i.* FROM items i " +
+            "JOIN org_units ou ON i.org_unit_id = ou.id " +
             "JOIN rooms r ON ou.room_id = r.id " +
             "JOIN projects p ON r.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
-    List<OrgUnit> findOrgUnitsByUserId(@Param("ownerId") Long ownerId);
-
-    @Query(value = "SELECT r.* FROM rooms r WHERE r.project_id =:projectId", nativeQuery = true)
-    List<OrgUnit> findByProjectId(@Param("projectId") Long project_id);
+    List<Item> findItemsByUserId(@Param("ownerId") Long ownerId);
 }

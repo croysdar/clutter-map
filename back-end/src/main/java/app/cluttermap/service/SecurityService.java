@@ -19,31 +19,31 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
-import app.cluttermap.repository.ItemsRepository;
-import app.cluttermap.repository.OrgUnitsRepository;
-import app.cluttermap.repository.ProjectsRepository;
-import app.cluttermap.repository.RoomsRepository;
-import app.cluttermap.repository.UsersRepository;
+import app.cluttermap.repository.ItemRepository;
+import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.repository.UserRepository;
 
 @Service("securityService")
 public class SecurityService {
-    private final UsersRepository usersRepository;
-    private final ProjectsRepository projectsRepository;
-    private final RoomsRepository roomsRepository;
-    private final OrgUnitsRepository orgUnitsRepository;
-    private final ItemsRepository itemsRepository;
+    private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
+    private final RoomRepository roomRepository;
+    private final OrgUnitRepository orgUnitRepository;
+    private final ItemRepository itemRepository;
 
     public SecurityService(
-            UsersRepository usersRepository,
-            ProjectsRepository projectsRepository,
-            RoomsRepository roomsRepository,
-            OrgUnitsRepository orgUnitsRepository,
-            ItemsRepository itemsRepository) {
-        this.usersRepository = usersRepository;
-        this.projectsRepository = projectsRepository;
-        this.roomsRepository = roomsRepository;
-        this.orgUnitsRepository = orgUnitsRepository;
-        this.itemsRepository = itemsRepository;
+            UserRepository userRepository,
+            ProjectRepository projectRepository,
+            RoomRepository roomRepository,
+            OrgUnitRepository orgUnitRepository,
+            ItemRepository itemRepository) {
+        this.userRepository = userRepository;
+        this.projectRepository = projectRepository;
+        this.roomRepository = roomRepository;
+        this.orgUnitRepository = orgUnitRepository;
+        this.itemRepository = itemRepository;
     }
 
     public User getCurrentUser() {
@@ -56,7 +56,7 @@ public class SecurityService {
         Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
         Long user_id = Long.valueOf(jwt.getSubject());
 
-        return usersRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException());
+        return userRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException());
     }
 
     public boolean isResourceOwner(Long resourceId, String resourceType) {
@@ -64,7 +64,7 @@ public class SecurityService {
 
         switch (resourceType) {
             case "project":
-                Optional<Project> projectData = projectsRepository.findById(resourceId);
+                Optional<Project> projectData = projectRepository.findById(resourceId);
                 if (!projectData.isPresent()) {
                     throw new ProjectNotFoundException();
                 }
@@ -72,7 +72,7 @@ public class SecurityService {
                 return projectData.get().getOwner().getId().equals(currentUserId);
 
             case "room":
-                Optional<Room> roomData = roomsRepository.findById(resourceId);
+                Optional<Room> roomData = roomRepository.findById(resourceId);
                 if (!roomData.isPresent()) {
                     throw new RoomNotFoundException();
                 }
@@ -80,7 +80,7 @@ public class SecurityService {
                 return roomData.get().getProject().getOwner().getId().equals(currentUserId);
 
             case "org-unit":
-                Optional<OrgUnit> orgUnitData = orgUnitsRepository.findById(resourceId);
+                Optional<OrgUnit> orgUnitData = orgUnitRepository.findById(resourceId);
                 if (!orgUnitData.isPresent()) {
                     throw new OrgUnitNotFoundException();
                 }
@@ -88,7 +88,7 @@ public class SecurityService {
                 return orgUnitData.get().getRoom().getProject().getOwner().getId().equals(currentUserId);
 
             case "item":
-                Optional<Item> itemData = itemsRepository.findById(resourceId);
+                Optional<Item> itemData = itemRepository.findById(resourceId);
                 if (!itemData.isPresent()) {
                     throw new ItemNotFoundException();
                 }

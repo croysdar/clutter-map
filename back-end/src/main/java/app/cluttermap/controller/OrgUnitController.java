@@ -20,10 +20,10 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/org-units")
-public class OrgUnitsController {
+public class OrgUnitController {
     private final OrgUnitService orgUnitService;
 
-    public OrgUnitsController(OrgUnitService orgUnitService) {
+    public OrgUnitController(OrgUnitService orgUnitService) {
         this.orgUnitService = orgUnitService;
     }
 

@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
-import app.cluttermap.service.ItemsService;
+import app.cluttermap.service.ItemService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/items")
-public class ItemsController {
-    private final ItemsService itemService;
+public class ItemController {
+    private final ItemService itemService;
 
-    public ItemsController(ItemsService itemService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
