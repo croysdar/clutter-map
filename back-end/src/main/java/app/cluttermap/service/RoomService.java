@@ -57,9 +57,9 @@ public class RoomService {
     }
 
     @Transactional
-    public void deleteRoom(Long id) {
-        // Make sure room exists first
-        getRoomById(id);
-        roomRepository.deleteById(id);
+    public void deleteRoom(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+        roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 }

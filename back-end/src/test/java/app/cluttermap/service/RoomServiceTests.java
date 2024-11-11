@@ -257,7 +257,7 @@ public class RoomServiceTests {
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(roomRepository).deleteById(roomId);
+        verify(roomRepository).delete(room);
     }
 
     @Test

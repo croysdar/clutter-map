@@ -58,9 +58,9 @@ public class OrgUnitService {
     }
 
     @Transactional
-    public void deleteOrgUnit(Long id) {
-        // Make sure org unit exists first
-        getOrgUnitById(id);
-        orgUnitRepository.deleteById(id);
+    public void deleteOrgUnit(Long orgUnitId) {
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+        orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }
 }

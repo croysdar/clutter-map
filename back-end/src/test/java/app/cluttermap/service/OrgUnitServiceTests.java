@@ -274,7 +274,7 @@ public class OrgUnitServiceTests {
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(orgUnitRepository).deleteById(orgUnitId);
+        verify(orgUnitRepository).delete(orgUnit);
     }
 
     @Test
