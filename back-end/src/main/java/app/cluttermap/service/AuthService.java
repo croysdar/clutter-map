@@ -21,7 +21,7 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.model.User;
-import app.cluttermap.repository.UsersRepository;
+import app.cluttermap.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -39,9 +39,9 @@ public class AuthService {
 
     public final SecurityService securityService;
 
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
-    public AuthService(SecurityService securityService, UsersRepository userRepository) {
+    public AuthService(SecurityService securityService, UserRepository userRepository) {
         this.securityService = securityService;
         this.userRepository = userRepository;
     }

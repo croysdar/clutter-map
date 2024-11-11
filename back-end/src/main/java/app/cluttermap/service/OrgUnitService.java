@@ -8,24 +8,24 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
-import app.cluttermap.repository.OrgUnitsRepository;
+import app.cluttermap.repository.OrgUnitRepository;
 import jakarta.transaction.Transactional;
 
 @Service("orgUnitService")
 public class OrgUnitService {
-    private final OrgUnitsRepository orgUnitsRepository;
+    private final OrgUnitRepository orgUnitRepository;
     private final SecurityService securityService;
     private final RoomService roomService;
 
-    public OrgUnitService(OrgUnitsRepository orgUnitsRepository, SecurityService securityService,
+    public OrgUnitService(OrgUnitRepository orgUnitRepository, SecurityService securityService,
             RoomService roomService) {
-        this.orgUnitsRepository = orgUnitsRepository;
+        this.orgUnitRepository = orgUnitRepository;
         this.securityService = securityService;
         this.roomService = roomService;
     }
 
     public OrgUnit getOrgUnitById(Long id) {
-        return orgUnitsRepository.findById(id)
+        return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
     }
 
@@ -37,13 +37,13 @@ public class OrgUnitService {
                 orgUnitDTO.getName(),
                 orgUnitDTO.getDescription(),
                 room);
-        return orgUnitsRepository.save(newOrgUnit);
+        return orgUnitRepository.save(newOrgUnit);
     }
 
     public Iterable<OrgUnit> getUserOrgUnits() {
         User user = securityService.getCurrentUser();
 
-        return orgUnitsRepository.findOrgUnitsByUserId(user.getId());
+        return orgUnitRepository.findOrgUnitsByUserId(user.getId());
     }
 
     @Transactional
@@ -54,13 +54,13 @@ public class OrgUnitService {
             _orgUnit.setDescription(orgUnitDTO.getDescription());
         }
 
-        return orgUnitsRepository.save(_orgUnit);
+        return orgUnitRepository.save(_orgUnit);
     }
 
     @Transactional
     public void deleteOrgUnit(Long id) {
         // Make sure org unit exists first
         getOrgUnitById(id);
-        orgUnitsRepository.deleteById(id);
+        orgUnitRepository.deleteById(id);
     }
 }

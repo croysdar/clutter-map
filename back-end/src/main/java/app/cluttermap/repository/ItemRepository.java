@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import app.cluttermap.model.Item;
 
 @Repository
-public interface ItemsRepository extends CrudRepository<Item, Long> {
+public interface ItemRepository extends CrudRepository<Item, Long> {
     @Query(value = "SELECT i.* FROM items i " +
             "JOIN projects p ON i.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)

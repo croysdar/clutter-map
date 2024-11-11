@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import app.cluttermap.model.OrgUnit;
 
 @Repository
-public interface OrgUnitsRepository extends CrudRepository<OrgUnit, Long> {
+public interface OrgUnitRepository extends CrudRepository<OrgUnit, Long> {
     @Query(value = "SELECT ou.* FROM org_units ou " +
             "JOIN projects p ON ou.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)

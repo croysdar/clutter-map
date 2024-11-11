@@ -20,10 +20,10 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/projects")
-public class ProjectsController {
+public class ProjectController {
     private final ProjectService projectService;
 
-    public ProjectsController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService) {
         this.projectService = projectService;
     }
 
