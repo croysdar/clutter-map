@@ -4,7 +4,7 @@ import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { Item } from './itemsSlice';
+import { Item } from './itemTypes';
 
 type ItemMenuProps = {
     item: Item
