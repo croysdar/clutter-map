@@ -121,8 +121,8 @@ public class OrgUnitRepositoryIntegrationTests {
 
     @Test
     @Transactional
-    void deletingOrgUnit_ShouldAlsoDeleteItems() {
-        // Arrange: Set up a user and create a orgUnit with an associated item
+    void deletingOrgUnit_ShouldNotDeleteItemsButUnassignThem() {
+        // Arrange: Set up a user and create an orgUnit with an associated item
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
@@ -134,52 +134,50 @@ public class OrgUnitRepositoryIntegrationTests {
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
         Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
-        orgUnit.getItems().add(item);
+        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 
         assertThat(itemRepository.findAll()).hasSize(1);
 
-        // Act: Delete the orgUnit, triggering cascade deletion for the associated item
+        // Act: Delete the orgUnit
         orgUnitRepository.delete(orgUnit);
 
-        // Assert: Verify that the item was deleted as an orphan when the orgUnit was
-        // removed
-        assertThat(itemRepository.findAll()).isEmpty();
+        // Assert: Verify that the item still exists and is now "unassigned" (i.e., its
+        // orgUnit is null)
+        Item fetchedItem = itemRepository.findById(item.getId()).orElse(null);
+        assertThat(fetchedItem).isNotNull();
+        assertThat(fetchedItem.getOrgUnit()).isNull();
     }
 
-    /*
-     * TODO make this be for project instead
-     * 
-     * @Test
-     * 
-     * @Transactional
-     * void removingItemFromOrgUnit_ShouldTriggerOrphanRemoval() {
-     * // Arrange: Set up a user and create a orgUnit with an associated item
-     * User owner = new User("ownerProviderId");
-     * userRepository.save(owner);
-     * 
-     * Project project = new Project("Project", owner);
-     * projectRepository.save(project);
-     * 
-     * Room room = new Room("Room", "Room Description", project);
-     * roomRepository.save(room);
-     * 
-     * OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-     * Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
-     * orgUnit.getItems().add(item);
-     * orgUnitRepository.save(orgUnit);
-     * 
-     * assertThat(itemRepository.findAll()).hasSize(1);
-     * 
-     * // Act: Remove the item from the orgUnit's item list and save the orgUnit to
-     * // trigger orphan removal
-     * orgUnit.getItems().remove(item);
-     * orgUnitRepository.save(orgUnit);
-     * 
-     * // Assert: Verify that the item was deleted as an orphan when removed from
-     * // the orgUnit
-     * assertThat(itemRepository.findAll()).isEmpty();
-     * }
-     * 
-     */
+    @Test
+    @Transactional
+    void removingItemFromOrgUnit_ShouldNotTriggerOrphanRemoval() {
+        // Arrange: Set up a user and create an orgUnit with an associated item
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Project", owner);
+        projectRepository.save(project);
+
+        Room room = new Room("Room", "Room Description", project);
+        roomRepository.save(room);
+
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
+        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
+        orgUnitRepository.save(orgUnit);
+
+        assertThat(itemRepository.findAll()).hasSize(1);
+
+        // Act: Remove the item from the orgUnit's item list and save the orgUnit
+        orgUnit.removeItem(item);
+        orgUnitRepository.save(orgUnit);
+
+        // Assert: Verify that the item was not deleted but is unassigned (i.e., its
+        // orgUnit is null)
+        Item fetchedItem = itemRepository.findById(item.getId()).orElse(null);
+        assertThat(fetchedItem).isNotNull();
+        assertThat(fetchedItem.getOrgUnit()).isNull();
+    }
+
 }

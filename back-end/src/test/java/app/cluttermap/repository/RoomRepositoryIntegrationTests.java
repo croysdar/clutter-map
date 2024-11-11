@@ -108,7 +108,7 @@ public class RoomRepositoryIntegrationTests {
 
     @Test
     @Transactional
-    void deletingRoom_ShouldAlsoDeleteOrgUnits() {
+    void deletingRoom_ShouldNotDeleteOrgUnitsButUnassignThem() {
         // Arrange: Set up a user and create a room with an associated orgUnit
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
@@ -117,7 +117,8 @@ public class RoomRepositoryIntegrationTests {
         projectRepository.save(project);
 
         Room room = new Room("Test Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "This is a shelving unit", room);
+        OrgUnit orgUnit = new OrgUnit("White Shelving Unit",
+                "This is a shelving unit", room);
         room.getOrgUnits().add(orgUnit);
         roomRepository.save(room);
 
@@ -126,42 +127,39 @@ public class RoomRepositoryIntegrationTests {
         // Act: Delete the room, triggering cascade deletion for the associated orgUnit
         roomRepository.delete(room);
 
-        // Assert: Verify that the orgUnit was deleted as an orphan when the room was
-        // removed
-        assertThat(orgUnitRepository.findAll()).isEmpty();
+        // Assert: Verify that the orgUnit still exists and is now "unassigned" (i.e.,
+        // its room is null)
+        OrgUnit fetchedOrgUnit = orgUnitRepository.findById(orgUnit.getId()).orElse(null);
+        assertThat(fetchedOrgUnit).isNotNull();
+        assertThat(fetchedOrgUnit.getRoom()).isNull();
     }
 
-    /*
-     * TODO make this be for project instead
-     * 
-     * @Test
-     * 
-     * @Transactional
-     * void removingOrgUnitFromRoom_ShouldTriggerOrphanRemoval() {
-     * // Arrange: Set up a user and create a room with an associated orgUnit
-     * User owner = new User("ownerProviderId");
-     * userRepository.save(owner);
-     * 
-     * Project project = new Project("Project", owner);
-     * projectRepository.save(project);
-     * 
-     * Room room = new Room("Test Room", "Room Description", project);
-     * OrgUnit orgUnit = new OrgUnit("White Shelving Unit",
-     * "This is a shelving unit", room);
-     * room.getOrgUnits().add(orgUnit);
-     * roomRepository.save(room);
-     * 
-     * assertThat(orgUnitRepository.findAll()).hasSize(1);
-     * 
-     * // Act: Remove the orgUnit from the room's orgUnit list and save the room to
-     * // trigger orphan removal
-     * room.getOrgUnits().remove(orgUnit);
-     * roomRepository.save(room);
-     * 
-     * // Assert: Verify that the orgUnit was deleted as an orphan when removed from
-     * // the room
-     * assertThat(orgUnitRepository.findAll()).isEmpty();
-     * }
-     * 
-     */
+    @Test
+    @Transactional
+    void removingOrgUnitFromRoom_ShouldNotTriggerOrphanRemoval() {
+        // Arrange: Set up a user and create a room with an associated orgUnit
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Project", owner);
+        projectRepository.save(project);
+
+        Room room = new Room("Test Room", "Room Description", project);
+        OrgUnit orgUnit = new OrgUnit("White Shelving Unit",
+                "This is a shelving unit", room);
+        room.getOrgUnits().add(orgUnit);
+        roomRepository.save(room);
+
+        assertThat(orgUnitRepository.findAll()).hasSize(1);
+
+        // Act: Remove the orgUnit from the room's orgUnit list and save the room
+        // room.getOrgUnits().remove(orgUnit);
+        room.removeOrgUnit(orgUnit);
+        roomRepository.save(room);
+
+        // Assert: Verify that the orgUnit was not deleted
+        OrgUnit fetchedOrgUnit = orgUnitRepository.findById(orgUnit.getId()).orElse(null);
+        assertThat(fetchedOrgUnit).isNotNull();
+        assertThat(fetchedOrgUnit.getRoom()).isNull();
+    }
 }

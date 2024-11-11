@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.model.Item;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
@@ -23,13 +25,19 @@ import jakarta.transaction.Transactional;
 @EnableTestcontainers
 public class ProjectRepositoryIntegrationTests {
     @Autowired
+    private UsersRepository userRepository;
+
+    @Autowired
     private ProjectsRepository projectRepository;
 
     @Autowired
     private RoomsRepository roomRepository;
 
     @Autowired
-    private UsersRepository userRepository;
+    private OrgUnitsRepository orgUnitRepository;
+
+    @Autowired
+    private ItemsRepository itemRepository;
 
     @BeforeEach
     void setUp() {
@@ -143,5 +151,102 @@ public class ProjectRepositoryIntegrationTests {
         // Assert: Verify that the room was deleted as an orphan when removed from the
         // project
         assertThat(roomRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void deletingProject_ShouldAlsoDeleteOrgUnits() {
+        // Arrange: Set up a user and create a project with an associated orgUnit
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Test Project", owner);
+        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "For storage", project);
+        project.getOrgUnits().add(orgUnit);
+
+        // Arrange: Save the project (and implicitly the orgUnit) to the repository
+        projectRepository.save(project);
+        assertThat(orgUnitRepository.findAll()).hasSize(1); // Verify that the orgUnit was saved
+
+        // Act: Delete the project, triggering cascade deletion for the associated
+        // orgUnit
+        projectRepository.delete(project);
+
+        // Assert: Verify that the orgUnit was deleted as an orphan when the project was
+        // removed
+        assertThat(orgUnitRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void removingOrgUnitFromProject_ShouldTriggerOrphanRemoval() {
+        // Arrange: Set up a user and create a project with an associated orgUnit
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Test Project", owner);
+        OrgUnit orgUnit = new OrgUnit("Test Org Unit", "Org Unit Description", project);
+        project.getOrgUnits().add(orgUnit);
+
+        // Arrange: Save the project (and implicitly the orgUnit) to the repository
+        projectRepository.save(project);
+        assertThat(orgUnitRepository.findAll()).hasSize(1); // Verify that the orgUnit exists in DB
+
+        // Act: Remove the orgUnit from the project's orgUnit list and save the project
+        // to trigger orphan removal
+        project.getOrgUnits().remove(orgUnit);
+        projectRepository.save(project);
+
+        // Assert: Verify that the orgUnit was deleted as an orphan when removed from
+        // the project
+        assertThat(orgUnitRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void deletingProject_ShouldAlsoDeleteItems() {
+        // Arrange: Set up a user and create a project with an associated item
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Test Project", owner);
+        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), project);
+        project.getItems().add(item);
+
+        // Arrange: Save the project (and implicitly the item) to the repository
+        projectRepository.save(project);
+        assertThat(itemRepository.findAll()).hasSize(1); // Verify that the item was saved
+
+        // Act: Delete the project, triggering cascade deletion for the associated item
+        projectRepository.delete(project);
+
+        // Assert: Verify that the item was deleted as an orphan when the project was
+        // removed
+        assertThat(itemRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void removingItemFromProject_ShouldTriggerOrphanRemoval() {
+        // Arrange: Set up a user and create a project with an associated item
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+
+        Project project = new Project("Test Project", owner);
+        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), project);
+        project.getItems().add(item);
+
+        // Arrange: Save the project (and implicitly the item) to the repository
+        projectRepository.save(project);
+        assertThat(itemRepository.findAll()).hasSize(1); // Verify that the item exists in DB
+
+        // Act: Remove the item from the project's item list and save the project to
+        // trigger orphan removal
+        project.getItems().remove(item);
+        projectRepository.save(project);
+
+        // Assert: Verify that the item was deleted as an orphan when removed from the
+        // project
+        assertThat(itemRepository.findAll()).isEmpty();
     }
 }
