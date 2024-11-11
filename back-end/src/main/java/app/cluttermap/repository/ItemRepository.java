@@ -14,5 +14,5 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
     @Query(value = "SELECT i.* FROM items i " +
             "JOIN projects p ON i.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
-    List<Item> findItemsByUserId(@Param("ownerId") Long ownerId);
+    List<Item> findByOwnerId(@Param("ownerId") Long ownerId);
 }

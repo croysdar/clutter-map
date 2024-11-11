@@ -148,7 +148,7 @@ public class ItemServiceTests {
 
         // Stub the repository to return the room and items
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
-        when(itemRepository.findItemsByUserId(1L)).thenReturn(items);
+        when(itemRepository.findByOwnerId(1L)).thenReturn(items);
 
         NewItemDTO itemDTO = new NewItemDTO("Extra Item", "Description", List.of(), String.valueOf(1L));
 
@@ -164,7 +164,7 @@ public class ItemServiceTests {
 
         Item item1 = new Item("Item 1", "Item description 1", List.of(), mockOrgUnit);
         Item item2 = new Item("Item 2", "Item description 2", List.of(), mockOrgUnit);
-        when(itemRepository.findItemsByUserId(mockUser.getId())).thenReturn(List.of(item1, item2));
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
 
         // Act: Retrieve the items owned by the user
         Iterable<Item> userItems = itemService.getUserItems();
@@ -189,7 +189,7 @@ public class ItemServiceTests {
         Item item2 = new Item("Item 2", "Description 2", List.of(), orgUnit2);
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(itemRepository.findItemsByUserId(mockUser.getId())).thenReturn(List.of(item1, item2));
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
 
         // Act: Fetch items for the user
         Iterable<Item> userItems = itemService.getUserItems();
@@ -202,7 +202,7 @@ public class ItemServiceTests {
     void getUserItems_ShouldReturnEmptyList_WhenNoItemsExist() {
         // Arrange: Set up mock user and stub the repository to return an empty list
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(itemRepository.findItemsByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Act: Retrieve the items owned by the user
         Iterable<Item> userItems = itemService.getUserItems();

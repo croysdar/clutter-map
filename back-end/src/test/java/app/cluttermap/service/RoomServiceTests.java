@@ -148,7 +148,7 @@ public class RoomServiceTests {
 
         Room room1 = new Room("Room 1", "Room description 1", mockProject);
         Room room2 = new Room("Room 2", "Room description 2", mockProject);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
         // Act: Retrieve the rooms owned by the user
         Iterable<Room> userRooms = roomService.getUserRooms();
@@ -167,7 +167,7 @@ public class RoomServiceTests {
         Room room2 = new Room("Room 2", "Description 2", project2);
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
         // Act: Fetch rooms for the user
         Iterable<Room> userRooms = roomService.getUserRooms();
@@ -180,7 +180,7 @@ public class RoomServiceTests {
     void getUserRooms_ShouldReturnEmptyList_WhenNoRoomsExist() {
         // Arrange: Set up mock user and stub the repository to return an empty list
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Act: Retrieve the rooms owned by the user
         Iterable<Room> userRooms = roomService.getUserRooms();

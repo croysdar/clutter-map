@@ -60,7 +60,7 @@ public class RoomRepositoryIntegrationTests {
         roomRepository.saveAll(List.of(room1, room2));
 
         // Act: Retrieve rooms associated with owner1
-        List<Room> owner1Rooms = roomRepository.findRoomsByProjectOwnerId(owner1.getId());
+        List<Room> owner1Rooms = roomRepository.findByOwnerId(owner1.getId());
 
         // Assert: Verify that only the room owned by owner1 is returned
         assertThat(owner1Rooms).hasSize(1);
@@ -85,7 +85,7 @@ public class RoomRepositoryIntegrationTests {
         roomRepository.saveAll(List.of(room1, room2, room3));
 
         // Act: Retrieve all rooms associated with the user
-        List<Room> ownerRooms = roomRepository.findRoomsByProjectOwnerId(owner.getId());
+        List<Room> ownerRooms = roomRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all rooms owned by the user are returned
         assertThat(ownerRooms).hasSize(3);
@@ -100,7 +100,7 @@ public class RoomRepositoryIntegrationTests {
         userRepository.save(owner); // Save the user without any rooms
 
         // Act: Retrieve rooms associated with the user
-        List<Room> ownerRooms = roomRepository.findRoomsByProjectOwnerId(owner.getId());
+        List<Room> ownerRooms = roomRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that the returned list is empty
         assertThat(ownerRooms).isEmpty();

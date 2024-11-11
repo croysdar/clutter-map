@@ -69,7 +69,7 @@ public class OrgUnitRepositoryIntegrationTests {
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
         // Act: Retrieve orgUnits associated with owner1
-        List<OrgUnit> owner1OrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner1.getId());
+        List<OrgUnit> owner1OrgUnits = orgUnitRepository.findByOwnerId(owner1.getId());
 
         // Assert: Verify that only the orgUnit owned by owner1 is returned
         assertThat(owner1OrgUnits).hasSize(1);
@@ -98,7 +98,7 @@ public class OrgUnitRepositoryIntegrationTests {
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2, orgUnit3));
 
         // Act: Retrieve all orgUnits associated with the user
-        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner.getId());
+        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all orgUnits owned by the user are returned
         assertThat(ownerOrgUnits).hasSize(3);
@@ -113,7 +113,7 @@ public class OrgUnitRepositoryIntegrationTests {
         userRepository.save(owner); // Save the user without any orgUnits
 
         // Act: Retrieve orgUnits associated with the user
-        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner.getId());
+        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that the returned list is empty
         assertThat(ownerOrgUnits).isEmpty();

@@ -43,7 +43,7 @@ public class OrgUnitService {
     public Iterable<OrgUnit> getUserOrgUnits() {
         User user = securityService.getCurrentUser();
 
-        return orgUnitRepository.findOrgUnitsByUserId(user.getId());
+        return orgUnitRepository.findByOwnerId(user.getId());
     }
 
     @Transactional

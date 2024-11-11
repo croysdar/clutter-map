@@ -161,7 +161,7 @@ public class OrgUnitServiceTests {
 
         OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "OrgUnit description 1", mockRoom);
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "OrgUnit description 2", mockRoom);
-        when(orgUnitRepository.findOrgUnitsByUserId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
 
         // Act: Retrieve the orgUnits owned by the user
         Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
@@ -183,7 +183,7 @@ public class OrgUnitServiceTests {
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description 2", room2);
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(orgUnitRepository.findOrgUnitsByUserId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
 
         // Act: Fetch orgUnits for the user
         Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
@@ -196,7 +196,7 @@ public class OrgUnitServiceTests {
     void getUserOrgUnits_ShouldReturnEmptyList_WhenNoOrgUnitsExist() {
         // Arrange: Set up mock user and stub the repository to return an empty list
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(orgUnitRepository.findOrgUnitsByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Act: Retrieve the orgUnits owned by the user
         Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();

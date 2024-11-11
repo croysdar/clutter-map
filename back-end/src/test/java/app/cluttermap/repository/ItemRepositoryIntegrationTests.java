@@ -72,7 +72,7 @@ public class ItemRepositoryIntegrationTests {
         itemRepository.saveAll(List.of(item1, item2));
 
         // Act: Retrieve items associated with owner1
-        List<Item> owner1Items = itemRepository.findItemsByUserId(owner1.getId());
+        List<Item> owner1Items = itemRepository.findByOwnerId(owner1.getId());
 
         // Assert: Verify that only the item owned by owner1 is returned
         assertThat(owner1Items).hasSize(1);
@@ -104,7 +104,7 @@ public class ItemRepositoryIntegrationTests {
         itemRepository.saveAll(List.of(item1, item2, item3));
 
         // Act: Retrieve all items associated with the user
-        List<Item> ownerItems = itemRepository.findItemsByUserId(owner.getId());
+        List<Item> ownerItems = itemRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all items owned by the user are returned
         assertThat(ownerItems).hasSize(3);
@@ -118,7 +118,7 @@ public class ItemRepositoryIntegrationTests {
         userRepository.save(owner); // Save the user without any items
 
         // Act: Retrieve items associated with the user
-        List<Item> ownerItems = itemRepository.findItemsByUserId(owner.getId());
+        List<Item> ownerItems = itemRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that the returned list is empty
         assertThat(ownerItems).isEmpty();

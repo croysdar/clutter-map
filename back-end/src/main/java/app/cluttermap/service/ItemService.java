@@ -44,7 +44,7 @@ public class ItemService {
     public Iterable<Item> getUserItems() {
         User user = securityService.getCurrentUser();
 
-        return itemRepository.findItemsByUserId(user.getId());
+        return itemRepository.findByOwnerId(user.getId());
     }
 
     @Transactional

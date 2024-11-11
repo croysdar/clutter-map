@@ -42,7 +42,7 @@ public class RoomService {
     public Iterable<Room> getUserRooms() {
         User user = securityService.getCurrentUser();
 
-        return roomRepository.findRoomsByProjectOwnerId(user.getId());
+        return roomRepository.findByOwnerId(user.getId());
     }
 
     @Transactional

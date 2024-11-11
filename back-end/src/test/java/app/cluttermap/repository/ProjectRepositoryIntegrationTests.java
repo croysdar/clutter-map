@@ -60,7 +60,7 @@ public class ProjectRepositoryIntegrationTests {
         projectRepository.saveAll(List.of(project1, project2));
 
         // Act: Retrieve projects associated with owner1
-        List<Project> owner1Projects = projectRepository.findByOwner(owner1);
+        List<Project> owner1Projects = projectRepository.findByOwnerId(owner1.getId());
 
         // Assert: Verify that only the project owned by owner1 is returned
         assertThat(owner1Projects).hasSize(1);
@@ -84,7 +84,7 @@ public class ProjectRepositoryIntegrationTests {
         projectRepository.saveAll(List.of(project1, project2, project3));
 
         // Act: Retrieve all projects associated with the user
-        List<Project> ownerProjects = projectRepository.findByOwner(owner);
+        List<Project> ownerProjects = projectRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all projects owned by the user are returned
         assertThat(ownerProjects).hasSize(3);
@@ -99,7 +99,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner); // Save the user without any projects
 
         // Act: Retrieve projects associated with the user
-        List<Project> ownerProjects = projectRepository.findByOwner(owner);
+        List<Project> ownerProjects = projectRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that the returned list is empty
         assertThat(ownerProjects).isEmpty();
