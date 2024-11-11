@@ -249,14 +249,15 @@ public class RoomServiceTests {
     void deleteRoom_ShouldDeleteRoom_WhenRoomExists() {
         // Arrange: Set up a room and stub the repository to return the room by ID
         Room room = new Room("Sample Room", "Room Description", mockProject);
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        Long roomId = room.getId();
+        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
 
         // Act: Delete the room using the service
-        roomService.deleteRoom(1L);
+        roomService.deleteRoom(roomId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(roomRepository).deleteById(1L);
+        verify(roomRepository).deleteById(roomId);
     }
 
     @Test

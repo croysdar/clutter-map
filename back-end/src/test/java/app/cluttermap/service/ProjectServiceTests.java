@@ -208,14 +208,15 @@ public class ProjectServiceTests {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
         Project project = new Project("Sample Project", mockUser);
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        Long projectId = project.getId();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         // Act: Call the service to delete the project by ID
-        projectService.deleteProject(1L);
+        projectService.deleteProject(projectId);
 
         // Assert: Verify that the repository's deleteById method was called with the
         // correct ID
-        verify(projectRepository).deleteById(1L);
+        verify(projectRepository).deleteById(projectId);
     }
 
     @Test

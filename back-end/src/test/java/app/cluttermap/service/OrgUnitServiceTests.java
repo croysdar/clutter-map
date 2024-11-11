@@ -266,14 +266,15 @@ public class OrgUnitServiceTests {
     void deleteOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up a orgUnit and stub the repository to return the orgUnit by ID
         OrgUnit orgUnit = new OrgUnit("Sample OrgUnit", "OrgUnit Description", mockRoom);
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
+        Long orgUnitId = orgUnit.getId();
+        when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
 
         // Act: Delete the orgUnit using the service
-        orgUnitService.deleteOrgUnit(1L);
+        orgUnitService.deleteOrgUnit(orgUnitId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(orgUnitRepository).deleteById(1L);
+        verify(orgUnitRepository).deleteById(orgUnitId);
     }
 
     @Test

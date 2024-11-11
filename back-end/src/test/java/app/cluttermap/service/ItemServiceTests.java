@@ -297,14 +297,15 @@ public class ItemServiceTests {
     void deleteItem_ShouldDeleteItem_WhenItemExists() {
         // Arrange: Set up a item and stub the repository to return the item by ID
         Item item = new Item("Sample Item", "Item Description", List.of(), mockOrgUnit);
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        Long itemId = item.getId();
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         // Act: Delete the item using the service
-        itemService.deleteItem(1L);
+        itemService.deleteItem(itemId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(itemRepository).deleteById(1L);
+        verify(itemRepository).deleteById(itemId);
     }
 
     @Test
