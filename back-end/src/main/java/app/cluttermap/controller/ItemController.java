@@ -50,6 +50,18 @@ public class ItemController {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
     }
 
+    @PutMapping("/{itemId}/move-org-unit/{orgUnitId}")
+    @PreAuthorize("@securityService.isResourceOwner(#itemId, 'item')")
+    public ResponseEntity<Item> moveItemBetweenOrgUnits(@PathVariable Long itemId,
+            @PathVariable(name = "orgUnitId") Long targetOrgUnitId) {
+        if (targetOrgUnitId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Item updatedItem = itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId);
+        return ResponseEntity.ok(updatedItem);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Void> deleteOneItem(@PathVariable("id") Long id) {

@@ -304,6 +304,55 @@ class ItemControllerTests {
     }
 
     @Test
+    void moveItemBetweenOrgUnits_Success() throws Exception {
+        // Arrange: Set up mock item and service behavior to simulate a successful move.
+        Long itemId = 1L;
+        Long targetOrgUnitId = 2L;
+        Item item = new Item("Test Item", "Item Description", List.of("tag1"), mockOrgUnit);
+
+        when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId)).thenReturn(item);
+
+        // Act & Assert: Perform the PUT request and verify that it returns status 200
+        // OK and correct item data.
+        mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test Item"));
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_OrgUnitNotInSameProject_ShouldReturnBadRequest() throws Exception {
+        // Arrange: Set up item ID, target OrgUnit ID, and simulate service throwing
+        // IllegalArgumentException.
+        Long itemId = 1L;
+        Long targetOrgUnitId = 2L;
+
+        when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
+                .thenThrow(new IllegalArgumentException("Cannot move item to a different project's OrgUnit"));
+
+        // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
+        // error message.
+        mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Cannot move item to a different project's OrgUnit"));
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up item ID, target OrgUnit ID, and simulate service throwing
+        // ItemNotFoundException.
+        Long itemId = 1L;
+        Long targetOrgUnitId = 2L;
+
+        when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
+                .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found.
+        mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void deleteOneItem_ShouldDeleteItem_WhenItemExists() throws Exception {
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
