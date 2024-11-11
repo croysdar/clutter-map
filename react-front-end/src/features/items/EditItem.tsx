@@ -10,6 +10,7 @@ import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
     itemDescription: HTMLTextAreaElement
+    itemQuantity: HTMLInputElement;
 }
 
 interface EditItemFormElements extends HTMLFormElement {
@@ -55,9 +56,10 @@ const EditItem = () => {
         const { elements } = e.currentTarget
         const name = elements.itemName.value
         const description = elements.itemDescription.value
+        const quantity = parseInt(elements.itemQuantity.value, 10);
 
         if (item && name) {
-            await updateItem({ id: item.id, name: name, description: description, tags: tags })
+            await updateItem({ id: item.id, name: name, description: description, tags: tags, quantity: quantity })
             // redirect to ...[this org unit]/items
             navigate(redirectUrl)
         }
@@ -104,6 +106,22 @@ const EditItem = () => {
                         variant="outlined"
                         InputLabelProps={{ shrink: true }}
                     />
+                    <Typography gutterBottom align="left">
+                        {/* Item Quantity */}
+                        <TextField
+                            label="Quantity"
+
+                            id="itemQuantity"
+                            name="quantity"
+
+                            defaultValue={item.quantity}
+                            margin="normal"
+                            variant="outlined"
+                            InputLabelProps={{ shrink: true }}
+                            sx={{ width: '90px', marginLeft: 0 }}
+                            
+                        />
+                    </Typography>
 
                     <TagField tags={tags} onTagsChange={setTags} />
 

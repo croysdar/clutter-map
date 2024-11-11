@@ -9,6 +9,7 @@ import { useAddNewItemMutation } from './itemApi';
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
     itemDescription: HTMLTextAreaElement
+    itemQuantity: HTMLInputElement;
 }
 
 interface AddItemFormElements extends HTMLFormElement {
@@ -33,6 +34,7 @@ export const AddItem = () => {
         const { elements } = e.currentTarget
         const name = elements.itemName.value
         const description = elements.itemDescription.value
+        const quantity = parseInt(elements.itemQuantity.value, 10);
 
         const form = e.currentTarget
 
@@ -42,7 +44,7 @@ export const AddItem = () => {
         }
 
         try {
-            await addNewItem({ name, description, tags, orgUnitId }).unwrap()
+            await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
             form.reset()
 
             navigate(sourcePageUrl);
@@ -85,6 +87,18 @@ export const AddItem = () => {
                         fullWidth
                         multiline
                         rows={4}
+                        margin="normal"
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                    />
+
+                    {/* Item Quantity */}
+                    <TextField
+                        label="Quantity"
+
+                        id="itemQuantity"
+                        name="quantity"
+
                         margin="normal"
                         variant="outlined"
                         InputLabelProps={{ shrink: true }}
