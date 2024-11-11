@@ -19,11 +19,14 @@ public class NewItemDTO {
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
-    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
+    private Integer quantity;
+
+    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId, Integer quantity) {
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.orgUnitId = orgUnitId;
+        this.quantity = quantity;
     }
 
     public String getName() {
@@ -61,6 +64,14 @@ public class NewItemDTO {
     @JsonIgnore
     public Long getOrgUnitIdAsLong() {
         return Long.parseLong(orgUnitId);
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
 }

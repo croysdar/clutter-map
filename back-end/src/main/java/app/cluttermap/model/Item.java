@@ -34,17 +34,20 @@ public class Item {
     @JsonBackReference
     private OrgUnit orgUnit;
 
+    private Integer quantity;
+
     // no-arg constructor for Hibernate
     protected Item() {
     }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Item(String name, String description, List<String> tags, OrgUnit orgUnit) {
+    public Item(String name, String description, List<String> tags, OrgUnit orgUnit, Integer quantity) {
         this.name = name;
         this.description = description;
         this.orgUnit = orgUnit;
         this.tags = tags;
+        this.quantity = quantity;
     }
 
     public Long getId() {
@@ -85,5 +88,13 @@ public class Item {
 
     public void setOrgUnit(OrgUnit orgUnit) {
         this.orgUnit = orgUnit;
+    }
+    
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

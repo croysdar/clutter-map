@@ -10,11 +10,13 @@ public class UpdateItemDTO {
 
     private String description;
     private List<String> tags;
+    private Integer quantity;
 
-    public UpdateItemDTO(String name, String description, List<String> tags) {
+    public UpdateItemDTO(String name, String description, List<String> tags, Integer quantity) {
         this.name = name;
         this.description = description;
         this.tags = tags;
+        this.quantity = quantity;
     }
 
     public String getName() {
@@ -39,5 +41,13 @@ public class UpdateItemDTO {
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }
