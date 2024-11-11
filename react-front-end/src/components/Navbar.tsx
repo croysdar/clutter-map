@@ -31,12 +31,11 @@ const Navbar: React.FC = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <OnlineIndicator />
 
                     {
                         loggedIn &&
                         <>
-                            <OnlineIndicator />
-
                             <Typography variant="body1" sx={{ marginRight: 2 }}>
                                 {`Hello, ${userFirstName || userName}`}
                             </Typography>
