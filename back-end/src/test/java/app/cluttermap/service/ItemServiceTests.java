@@ -33,6 +33,8 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.repository.ItemRepository;
+import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +44,13 @@ public class ItemServiceTests {
     private ItemRepository itemRepository;
 
     @Mock
+    private OrgUnitRepository orgUnitRepository;
+
+    @Mock
     private RoomRepository roomRepository;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Mock
     private SecurityService securityService;
@@ -291,6 +299,75 @@ public class ItemServiceTests {
         assertThat(updatedItem.getDescription()).isEqualTo("Updated Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("tag 1", "tag 2"));
         verify(itemRepository).save(item);
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_Success() {
+        // Arrange: Create a project, orgUnits, and an item
+        OrgUnit sourceOrgUnit = new OrgUnit("Source OrgUnit", "Description", mockProject);
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+
+        Item item = new Item("Test Item", "Item Description", List.of("tag1"), sourceOrgUnit);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(orgUnitRepository.findById(targetOrgUnit.getId())).thenReturn(Optional.of(targetOrgUnit));
+
+        // Act: Move the item from sourceOrgUnit to targetOrgUnit
+        Item updatedItem = itemService.moveItemBetweenOrgUnits(item.getId(), targetOrgUnit.getId());
+
+        // Assert: Verify the item is now associated with the targetOrgUnit
+        assertThat(updatedItem.getOrgUnit()).isEqualTo(targetOrgUnit);
+        assertThat(sourceOrgUnit.getItems()).doesNotContain(item);
+        assertThat(targetOrgUnit.getItems()).contains(item);
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_DifferentProjects_ShouldThrowIllegalArgumentException() {
+        // Arrange: Create two projects, each with its own orgUnit
+        Project project1 = new Project("Project 1", mockUser);
+        Project project2 = new Project("Project 2", mockUser);
+
+        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", project1);
+        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", project2);
+
+        Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit1);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(orgUnitRepository.findById(orgUnit2.getId())).thenReturn(Optional.of(orgUnit2));
+
+        // Act & Assert: Attempt to move the item to an orgUnit in a different project
+        assertThrows(IllegalArgumentException.class, () -> {
+            itemService.moveItemBetweenOrgUnits(item.getId(), orgUnit2.getId());
+        });
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_ItemNotFound_ShouldThrowItemNotFoundException() {
+        // Arrange: Ensure no item exists with the given ID
+        Long nonExistentItemId = 999L;
+
+        // Act & Assert: Attempt to move a non-existent item
+        assertThrows(ItemNotFoundException.class, () -> {
+            itemService.moveItemBetweenOrgUnits(nonExistentItemId, 1L);
+        });
+    }
+
+    @Test
+    void moveItemBetweenOrgUnits_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Create an item
+        Project project = new Project("Test Project", mockUser);
+
+        OrgUnit orgUnit = new OrgUnit("Source OrgUnit", "Description", project);
+
+        Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+
+        // Act & Assert: Attempt to move the item to a non-existent orgUnit
+        Long nonExistentOrgUnitId = 999L;
+        assertThrows(OrgUnitNotFoundException.class, () -> {
+            itemService.moveItemBetweenOrgUnits(item.getId(), nonExistentOrgUnitId);
+        });
     }
 
     @Test
