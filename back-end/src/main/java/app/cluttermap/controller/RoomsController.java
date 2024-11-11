@@ -1,8 +1,8 @@
 package app.cluttermap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,11 +17,12 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.service.RoomService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/rooms")
+@Validated
 public class RoomsController {
-    @Autowired
     private final RoomService roomService;
 
     public RoomsController(RoomService roomService) {
@@ -35,7 +36,7 @@ public class RoomsController {
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#roomDTO.getProjectId(), 'project')")
-    public ResponseEntity<Room> addOneRoom(@RequestBody NewRoomDTO roomDTO) {
+    public ResponseEntity<Room> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.createRoom(roomDTO));
     }
 
@@ -53,7 +54,8 @@ public class RoomsController {
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
-    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id, @RequestBody UpdateRoomDTO roomDTO) {
+    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id,
+            @Valid @RequestBody UpdateRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
     }
 

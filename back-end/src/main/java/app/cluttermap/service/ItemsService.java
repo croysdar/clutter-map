@@ -1,9 +1,8 @@
 package app.cluttermap.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
+import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.User;
@@ -14,13 +13,8 @@ import jakarta.transaction.Transactional;
 
 @Service("itemService")
 public class ItemsService {
-    @Autowired
     private final ItemsRepository itemsRepository;
-
-    @Autowired
     private final SecurityService securityService;
-
-    @Autowired
     private final OrgUnitService orgUnitService;
 
     public ItemsService(ItemsRepository itemsRepository, SecurityService securityService,
@@ -32,7 +26,7 @@ public class ItemsService {
 
     public Item getItemById(Long id) {
         return itemsRepository.findById(id)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
+                .orElseThrow(() -> new ItemNotFoundException());
     }
 
     @Transactional
@@ -43,8 +37,7 @@ public class ItemsService {
                 itemDTO.getName(),
                 itemDTO.getDescription(),
                 itemDTO.getTags(),
-                orgUnit,
-                orgUnit.getProject());
+                orgUnit);
         return itemsRepository.save(newItem);
     }
 
@@ -58,8 +51,12 @@ public class ItemsService {
     public Item updateItem(Long id, UpdateItemDTO itemDTO) {
         Item _item = getItemById(id);
         _item.setName(itemDTO.getName());
-        _item.setDescription(itemDTO.getDescription());
-        _item.setTags(itemDTO.getTags());
+        if (itemDTO.getDescription() != null) {
+            _item.setDescription(itemDTO.getDescription());
+        }
+        if (itemDTO.getTags() != null) {
+            _item.setTags(itemDTO.getTags());
+        }
 
         return itemsRepository.save(_item);
     }

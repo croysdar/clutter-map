@@ -51,11 +51,11 @@ public class OrgUnit {
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public OrgUnit(String name, String description, Room room, Project project) {
+    public OrgUnit(String name, String description, Room room) {
         this.name = name;
         this.description = description;
         this.room = room;
-        this.project = project;
+        this.project = room.getProject();
     }
 
     public Long getId() {

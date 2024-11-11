@@ -1,6 +1,7 @@
 package app.cluttermap.exception;
 
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
+import app.cluttermap.exception.item.ItemLimitReachedException;
+import app.cluttermap.exception.item.ItemNotFoundException;
+import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.exception.room.RoomLimitReachedException;
 import app.cluttermap.exception.room.RoomNotFoundException;
 import io.jsonwebtoken.io.IOException;
 
@@ -24,11 +29,13 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<ValidationErrorResponse.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> new ValidationErrorResponse.FieldError(error.getField(), error.getDefaultMessage()))
+                .toList();
+
+        ValidationErrorResponse errorResponse = new ValidationErrorResponse(fieldErrors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -68,9 +75,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({ RoomLimitReachedException.class })
+    public ResponseEntity<Object> handleRoomLimitReachedException(RoomLimitReachedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler({ OrgUnitNotFoundException.class })
     public ResponseEntity<Object> handleOrgUnitNotFoundException(OrgUnitNotFoundException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ OrgUnitLimitReachedException.class })
+    public ResponseEntity<Object> handleOrgUnitLimitReachedException(OrgUnitLimitReachedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ ItemNotFoundException.class })
+    public ResponseEntity<Object> handleItemNotFoundException(ItemNotFoundException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ ItemLimitReachedException.class })
+    public ResponseEntity<Object> handleItemLimitReachedException(ItemLimitReachedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
 

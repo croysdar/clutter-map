@@ -15,4 +15,7 @@ public interface OrgUnitsRepository extends CrudRepository<OrgUnit, Long> {
             "JOIN projects p ON ou.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
     List<OrgUnit> findOrgUnitsByUserId(@Param("ownerId") Long ownerId);
+
+    @Query(value = "SELECT r.* FROM rooms r WHERE r.project_id =:projectId", nativeQuery = true)
+    List<OrgUnit> findByProjectId(@Param("projectId") Long project_id);
 }

@@ -1,5 +1,5 @@
 import { baseApiSlice } from "@/features/api/baseApiSlice";
-import { NewRoom, Room, RoomUpdate } from "./roomsSlice";
+import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
 
 export const roomsApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

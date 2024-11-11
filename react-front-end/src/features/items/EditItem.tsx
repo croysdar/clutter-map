@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -26,6 +26,12 @@ const EditItem = () => {
 
     // State to manage tags
     const [tags, setTags] = useState<string[]>(item?.tags || []);
+
+    useEffect(() => {
+        if (item?.tags) {
+            setTags(item.tags);
+        }
+    }, [item]);
 
     if (itemLoading) {
         return (

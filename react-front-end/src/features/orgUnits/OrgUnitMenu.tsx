@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
-import { OrgUnit } from '@/features/orgUnits/orgUnitsSlice';
+import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
 import { useNavigate, useParams } from 'react-router-dom';
 
 type OrgUnitMenuProps = {

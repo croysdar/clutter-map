@@ -12,8 +12,9 @@ public class UpdateRoomDTO {
     private String description;
 
     @JsonCreator
-    public UpdateRoomDTO(@JsonProperty("name") String name) {
+    public UpdateRoomDTO(@JsonProperty("name") String name, @JsonProperty("description") String description) {
         this.name = name;
+        this.description = description;
     }
 
     public String getName() {

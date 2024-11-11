@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
-import { Room } from '@/features/rooms/roomsSlice';
+import { Room } from '@/features/rooms/roomsTypes';
 import { useNavigate, useParams } from 'react-router-dom';
 
 type RoomMenuProps = {

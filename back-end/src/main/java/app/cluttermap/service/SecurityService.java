@@ -2,7 +2,6 @@ package app.cluttermap.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -28,19 +27,10 @@ import app.cluttermap.repository.UsersRepository;
 
 @Service("securityService")
 public class SecurityService {
-    @Autowired
     private final UsersRepository usersRepository;
-
-    @Autowired
     private final ProjectsRepository projectsRepository;
-
-    @Autowired
     private final RoomsRepository roomsRepository;
-
-    @Autowired
     private final OrgUnitsRepository orgUnitsRepository;
-
-    @Autowired
     private final ItemsRepository itemsRepository;
 
     public SecurityService(

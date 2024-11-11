@@ -45,12 +45,12 @@ public class Item {
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Item(String name, String description, List<String> tags, OrgUnit orgUnit, Project project) {
+    public Item(String name, String description, List<String> tags, OrgUnit orgUnit) {
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.orgUnit = orgUnit;
-        this.project = project;
+        this.project = orgUnit.getProject();
     }
 
     public Long getId() {

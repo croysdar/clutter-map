@@ -1,4 +1,4 @@
-import { Box, TextField, Chip } from "@mui/material";
+import { Box, Chip, TextField } from "@mui/material";
 import { useState } from "react";
 
 interface TagFieldProps {
@@ -16,13 +16,23 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && inputValue.trim() !== "") {
             e.preventDefault();
-            onTagsChange([...tags, inputValue.trim()]);
-            setInputValue(""); // Clear input field
+            addTag();
         }
     };
 
     const removeTag = (tagToRemove: string) => {
         onTagsChange(tags.filter(tag => tag !== tagToRemove));
+    };
+
+    const handleBlur = () => {
+        if (inputValue.trim() !== "") {
+            addTag();
+        }
+    };
+
+    const addTag = () => {
+        onTagsChange([...tags, inputValue.trim()]);
+        setInputValue(""); // Clear input field
     };
 
     return (
@@ -33,6 +43,7 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
                 placeholder="Press Enter to add tag"
             />
 

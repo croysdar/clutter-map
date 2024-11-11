@@ -2,23 +2,30 @@ package app.cluttermap.model.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class NewItemDTO {
+    @NotBlank(message = "Item name must not be blank.")
     private String name;
+
     private String description;
-    private String orgUnitId;
     private List<String> tags;
 
-    public NewItemDTO(String name, String description, String orgUnitId, List<String> tags) {
+    @NotNull(message = "OrgUnit ID must not be blank.")
+    @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
+    private String orgUnitId;
+
+    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
         this.name = name;
         this.description = description;
-        this.orgUnitId = orgUnitId;
         this.tags = tags;
+        this.orgUnitId = orgUnitId;
     }
 
-    @NotBlank(message = "Item name must not be blank.")
     public String getName() {
         return name;
     }
@@ -27,8 +34,14 @@ public class NewItemDTO {
         return description;
     }
 
-    @NotBlank(message = "OrgUnit ID must not be blank.")
-    @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     public String getOrgUnitId() {
         return orgUnitId;
     }
@@ -45,16 +58,9 @@ public class NewItemDTO {
         this.orgUnitId = orgUnitId;
     }
 
+    @JsonIgnore
     public Long getOrgUnitIdAsLong() {
         return Long.parseLong(orgUnitId);
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 
 }

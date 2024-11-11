@@ -1,6 +1,5 @@
 package app.cluttermap.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,12 +15,11 @@ import app.cluttermap.model.Item;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.service.ItemsService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/items")
 public class ItemsController {
-
-    @Autowired
     private final ItemsService itemService;
 
     public ItemsController(ItemsService itemService) {
@@ -35,7 +33,7 @@ public class ItemsController {
 
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#itemDTO.getOrgUnitId(), 'org-unit')")
-    public ResponseEntity<Item> addOneItem(@RequestBody NewItemDTO itemDTO) {
+    public ResponseEntity<Item> addOneItem(@Valid @RequestBody NewItemDTO itemDTO) {
         return ResponseEntity.ok(itemService.createItem(itemDTO));
     }
 
@@ -48,7 +46,7 @@ public class ItemsController {
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,
-            @RequestBody UpdateItemDTO itemDTO) {
+            @Valid @RequestBody UpdateItemDTO itemDTO) {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
     }
 
