@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 
 @Entity
@@ -50,9 +51,16 @@ public class Room {
         this.project = project;
     }
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
     @JsonManagedReference
     private List<OrgUnit> orgUnits = new ArrayList<>();
+
+    @PreRemove
+    private void preRemove() {
+        for (OrgUnit orgUnit : orgUnits) {
+            orgUnit.setRoom(null); // Unassign each orgUnit before Room deletion
+        }
+    }
 
     public Long getId() {
         return id;
@@ -92,5 +100,15 @@ public class Room {
 
     public void setOrgUnits(List<OrgUnit> orgUnits) {
         this.orgUnits = orgUnits;
+    }
+
+    public void addOrgUnit(OrgUnit orgUnit) {
+        orgUnits.add(orgUnit);
+        orgUnit.setRoom(this); // Set the room reference in OrgUnit
+    }
+
+    public void removeOrgUnit(OrgUnit orgUnit) {
+        orgUnits.remove(orgUnit);
+        orgUnit.setRoom(null); // Unassign the room reference in OrgUnit
     }
 }

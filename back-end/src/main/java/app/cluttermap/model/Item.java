@@ -53,6 +53,14 @@ public class Item {
         this.project = orgUnit.getProject();
     }
 
+    // This item is unassigned
+    public Item(String name, String description, List<String> tags, Project project) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.project = project;
+    }
+
     public Long getId() {
         return id;
     }
@@ -99,5 +107,8 @@ public class Item {
 
     public void setOrgUnit(OrgUnit orgUnit) {
         this.orgUnit = orgUnit;
+        if (orgUnit != null && !orgUnit.getItems().contains(this)) {
+            orgUnit.addItem(this);
+        }
     }
 }

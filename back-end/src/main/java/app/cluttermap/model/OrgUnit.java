@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 
 @Entity
@@ -41,21 +42,33 @@ public class OrgUnit {
     @JsonBackReference
     private Room room;
 
-    @OneToMany(mappedBy = "orgUnit", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToMany(mappedBy = "orgUnit", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
+
+    @PreRemove
+    private void preRemove() {
+        for (Item item : items) {
+            item.setOrgUnit(null); // Unassign each item before OrgUnit deletion
+        }
+    }
 
     // no-arg constructor for Hibernate
     protected OrgUnit() {
     }
 
-    // public constructor
-    // ID is not required because Postgres generates the ID
     public OrgUnit(String name, String description, Room room) {
         this.name = name;
         this.description = description;
         this.room = room;
         this.project = room.getProject();
+    }
+
+    // This org unit is unassigned
+    public OrgUnit(String name, String description, Project project) {
+        this.name = name;
+        this.description = description;
+        this.project = project;
     }
 
     public Long getId() {
@@ -96,6 +109,9 @@ public class OrgUnit {
 
     public void setRoom(Room room) {
         this.room = room;
+        if (room != null && !room.getOrgUnits().contains(this)) {
+            room.addOrgUnit(this);
+        }
     }
 
     public List<Item> getItems() {
@@ -104,5 +120,17 @@ public class OrgUnit {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    // Method to add an Item to this OrgUnit
+    public void addItem(Item item) {
+        items.add(item);
+        item.setOrgUnit(this); // Set the orgUnit reference in Item
+    }
+
+    // Method to remove an Item from this OrgUnit
+    public void removeItem(Item item) {
+        items.remove(item);
+        item.setOrgUnit(null); // Unassign the orgUnit reference in Item
     }
 }
