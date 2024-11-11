@@ -35,7 +35,7 @@ public class OrgUnitModelTests {
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Add a item to the orgUnit
-        Item item = new Item("White Shelving Unit", "This is a shelving unit", List.of("tag1"), orgUnit);
+        Item item = new Item("White Shelving Unit", "This is a shelving unit", List.of("tag1"), orgUnit, 1);
         orgUnit.getItems().add(item);
 
         // Assert: Verify that the item was added to the orgUnit's items
