@@ -356,9 +356,7 @@ public class ItemServiceTests {
     void moveItemBetweenOrgUnits_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
         // Arrange: Create an item
         Project project = new Project("Test Project", mockUser);
-
         OrgUnit orgUnit = new OrgUnit("Source OrgUnit", "Description", project);
-
         Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit);
 
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));

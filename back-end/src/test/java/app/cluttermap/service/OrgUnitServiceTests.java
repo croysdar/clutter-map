@@ -263,6 +263,73 @@ public class OrgUnitServiceTests {
     }
 
     @Test
+    void moveOrgUnitBetweenRooms_Success() {
+        // Arrange: Create a project, rooms, and an orgUnit
+        Room sourceRoom = new Room("Source Room", "Room Description", mockProject);
+        Room targetRoom = new Room("Target Room", "Room Description", mockProject);
+
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", sourceRoom);
+
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+        when(roomRepository.findById(targetRoom.getId())).thenReturn(Optional.of(targetRoom));
+
+        // Act: Move the orgUnit from sourceRoom to targetRoom
+        OrgUnit updatedOrgUnit = orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), targetRoom.getId());
+
+        // Assert: Verify the orgUnit is now associated with the targetRoom
+        assertThat(updatedOrgUnit.getRoom()).isEqualTo(targetRoom);
+        assertThat(sourceRoom.getOrgUnits()).doesNotContain(orgUnit);
+        assertThat(targetRoom.getOrgUnits()).contains(orgUnit);
+    }
+
+    @Test
+    void moveOrgUnitBetweenRooms_DifferentProjects_ShouldThrowIllegalArgumentException() {
+        // Arrange: Create two projects, each with its own room
+        Project project1 = new Project("Project 1", mockUser);
+        Project project2 = new Project("Project 2", mockUser);
+
+        Room room1 = new Room("Room 1", "Description", project1);
+        Room room2 = new Room("Room 2", "Description", project2);
+
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room1);
+
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+        when(roomRepository.findById(room2.getId())).thenReturn(Optional.of(room2));
+
+        // Act & Assert: Attempt to move the orgUnit to a room in a different project
+        assertThrows(IllegalArgumentException.class, () -> {
+            orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), room2.getId());
+        });
+    }
+
+    @Test
+    void moveOrgUnitBetweenRooms_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Ensure no orgUnit exists with the given ID
+        Long nonExistentOrgUnitId = 999L;
+
+        // Act & Assert: Attempt to move a non-existent orgUnit
+        assertThrows(OrgUnitNotFoundException.class, () -> {
+            orgUnitService.moveOrgUnitBetweenRooms(nonExistentOrgUnitId, 1L);
+        });
+    }
+
+    @Test
+    void moveOrgUnitBetweenRooms_RoomNotFound_ShouldThrowRoomNotFoundException() {
+        // Arrange: Create an orgUnit and assign it to a source room
+        Project project = new Project("Test Project", mockUser);
+        Room sourceRoom = new Room("Source Room", "Room Description", project);
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", sourceRoom);
+
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+
+        // Act & Assert: Attempt to move the orgUnit to a non-existent room
+        Long nonExistentRoomId = 999L;
+        assertThrows(RoomNotFoundException.class, () -> {
+            orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), nonExistentRoomId);
+        });
+    }
+
+    @Test
     void deleteOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up a orgUnit and stub the repository to return the orgUnit by ID
         OrgUnit orgUnit = new OrgUnit("Sample OrgUnit", "OrgUnit Description", mockRoom);

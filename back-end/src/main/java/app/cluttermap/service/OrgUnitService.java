@@ -3,22 +3,29 @@ package app.cluttermap.service;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
+import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 
 @Service("orgUnitService")
 public class OrgUnitService {
+    private final RoomRepository roomRepository;
     private final OrgUnitRepository orgUnitRepository;
     private final SecurityService securityService;
     private final RoomService roomService;
 
-    public OrgUnitService(OrgUnitRepository orgUnitRepository, SecurityService securityService,
+    public OrgUnitService(
+            RoomRepository roomRepository,
+            OrgUnitRepository orgUnitRepository,
+            SecurityService securityService,
             RoomService roomService) {
+        this.roomRepository = roomRepository;
         this.orgUnitRepository = orgUnitRepository;
         this.securityService = securityService;
         this.roomService = roomService;
@@ -55,6 +62,31 @@ public class OrgUnitService {
         }
 
         return orgUnitRepository.save(_orgUnit);
+    }
+
+    @Transactional
+    public OrgUnit moveOrgUnitBetweenRooms(Long orgUnitId, Long targetRoomId) {
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+
+        Room currentRoom = orgUnit.getRoom();
+        Room targetRoom = roomRepository.findById(targetRoomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+
+        // Ensure that current and target Rooms are in the same Project
+        if (currentRoom != null && !currentRoom.getProject().equals(targetRoom.getProject())) {
+            throw new IllegalArgumentException("Cannot move org unit to a different project's Room");
+        }
+
+        // Remove from the current room (if any) and add to the new room
+        if (orgUnit.getRoom() != null) {
+            orgUnit.getRoom().removeOrgUnit(orgUnit);
+        }
+        targetRoom.addOrgUnit(orgUnit);
+
+        roomRepository.save(targetRoom);
+
+        return orgUnit;
     }
 
     @Transactional

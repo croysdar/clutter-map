@@ -158,7 +158,8 @@ class ItemControllerTests {
     void addOneItem_ShouldCreateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewItemDTO with valid data and mock the service to
         // return a new item
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"),
+                String.valueOf(1L));
         Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
@@ -247,8 +248,10 @@ class ItemControllerTests {
     void updateOneItem_ShouldUpdateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up an UpdateItemDTO with a new name and mock the service to
         // return the updated item
-        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description", List.of("Updated Tag"));
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description",
+                List.of("Updated Tag"));
+        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                mockOrgUnit);
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items/1 endpoint with the update data
@@ -327,7 +330,8 @@ class ItemControllerTests {
         Long targetOrgUnitId = 2L;
 
         when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
-                .thenThrow(new IllegalArgumentException("Cannot move item to a different project's OrgUnit"));
+                .thenThrow(new IllegalArgumentException(
+                        "Cannot move item to a different project's OrgUnit"));
 
         // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
         // error message.
