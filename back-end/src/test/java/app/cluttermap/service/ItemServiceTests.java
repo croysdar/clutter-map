@@ -307,8 +307,9 @@ public class ItemServiceTests {
         OrgUnit sourceOrgUnit = new OrgUnit("Source OrgUnit", "Description", mockProject);
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
 
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), sourceOrgUnit);
+        Item item = new Item("Test Item", "Item Description", List.of("tag1"), mockProject);
 
+        sourceOrgUnit.addItem(item);
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(orgUnitRepository.findById(targetOrgUnit.getId())).thenReturn(Optional.of(targetOrgUnit));
 

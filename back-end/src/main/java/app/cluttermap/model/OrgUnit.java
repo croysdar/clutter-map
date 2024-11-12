@@ -130,6 +130,9 @@ public class OrgUnit {
 
     // Method to remove an Item from this OrgUnit
     public void removeItem(Item item) {
+        if (!items.contains(item)) {
+            throw new IllegalArgumentException("Item does not belong to this OrgUnit");
+        }
         items.remove(item);
         item.setOrgUnit(null); // Unassign the orgUnit reference in Item
     }
