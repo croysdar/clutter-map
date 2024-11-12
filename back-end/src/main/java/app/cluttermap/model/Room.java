@@ -108,6 +108,9 @@ public class Room {
     }
 
     public void removeOrgUnit(OrgUnit orgUnit) {
+        if (!orgUnits.contains(orgUnit)) {
+            throw new IllegalArgumentException("OrgUnit does not belong to this Room");
+        }
         orgUnits.remove(orgUnit);
         orgUnit.setRoom(null); // Unassign the room reference in OrgUnit
     }

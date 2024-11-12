@@ -316,9 +316,10 @@ public class OrgUnitServiceTests {
     @Test
     void moveOrgUnitBetweenRooms_RoomNotFound_ShouldThrowRoomNotFoundException() {
         // Arrange: Create an orgUnit and assign it to a source room
-        Project project = new Project("Test Project", mockUser);
-        Room sourceRoom = new Room("Source Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", sourceRoom);
+        Room sourceRoom = new Room("Source Room", "Room Description", mockProject);
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
+
+        sourceRoom.addOrgUnit(orgUnit);
 
         when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
 
