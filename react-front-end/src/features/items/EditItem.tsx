@@ -115,6 +115,7 @@ const EditItem = () => {
                             name="quantity"
 
                             defaultValue={item.quantity}
+                            required
                             margin="normal"
                             variant="outlined"
                             InputLabelProps={{ shrink: true }}
