@@ -200,7 +200,7 @@ class SecurityServiceTests {
         Project project = new Project("Test Project", mockUser);
         Room room = new Room("Test Room", "", project);
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
-        Item item = new Item("Test Item", "Item description", List.of("Tag"), orgUnit, 1);
+        Item item = new Item("Test Item", "Item description", List.of("Tag"), orgUnit);
         item.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
