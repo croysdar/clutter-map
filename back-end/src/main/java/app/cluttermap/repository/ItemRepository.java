@@ -16,6 +16,6 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
     List<Item> findByOwnerId(@Param("ownerId") Long ownerId);
 
-    @Query("SELECT i FROM Item i WHERE i.project.id = :projectId AND i.orgUnit IS NULL")
+    @Query(value = "SELECT * FROM items i WHERE i.project_id = :projectId AND i.org_unit_id IS NULL", nativeQuery = true)
     List<Item> findUnassignedItemsByProjectId(@Param("projectId") Long projectId);
 }
