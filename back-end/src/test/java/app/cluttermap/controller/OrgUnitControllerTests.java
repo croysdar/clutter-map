@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.Item;
@@ -362,30 +363,6 @@ class OrgUnitControllerTests {
     }
 
     @Test
-    void deleteOneOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() throws Exception {
-        // Act: Perform a DELETE request to the /org-units/1 endpoint
-        mockMvc.perform(delete("/org-units/1"))
-                .andExpect(status().isNoContent());
-
-        // Assert: Ensure the service method was called to delete the orgUnit by ID
-        verify(orgUnitService).deleteOrgUnit(1L);
-    }
-
-    @Test
-    void deleteOneOrgUnit_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
-        // non-existent orgUnit
-        doThrow(new OrgUnitNotFoundException()).when(orgUnitService).deleteOrgUnit(1L);
-
-        // Act: Perform a DELETE request to the /org-units/1 endpoint
-        mockMvc.perform(delete("/org-units/1"))
-                .andExpect(status().isNotFound());
-
-        // Assert: Ensure the service method was called to attempt to delete the orgUnit
-        verify(orgUnitService).deleteOrgUnit(1L);
-    }
-
-    @Test
     void getOrgUnitItems_ShouldReturnItems_WhenOrgUnitExists() throws Exception {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit
@@ -419,5 +396,138 @@ class OrgUnitControllerTests {
         // Assert: Ensure the service method was called to attempt to retrieve the
         // orgUnit
         verify(orgUnitService).getOrgUnitById(1L);
+    }
+
+    @Test
+    void addItemToOrgUnit_Success() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate a successful addition
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockRoom);
+
+        when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId)).thenReturn(orgUnit);
+
+        // Act & Assert: Perform the POST request and verify status 200 OK and correct
+        // orgUnit data
+        mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test OrgUnit"));
+    }
+
+    @Test
+    void addItemToOrgUnit_DifferentProjects_ShouldReturnBadRequest() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate service throwing
+        // IllegalArgumentException
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+
+        when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId))
+                .thenThrow(new IllegalArgumentException("Cannot add item to a different project's org unit"));
+
+        // Act & Assert: Perform the POST request and verify status 400 Bad Request and
+        // error message
+        mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Cannot add item to a different project's org unit"));
+    }
+
+    @Test
+    void addItemToOrgUnit_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate service throwing
+        // OrgUnitNotFoundException
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+
+        when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform the POST request and verify status 404 Not Found
+        mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addItemToOrgUnit_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate service throwing
+        // ItemNotFoundException
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+
+        when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId))
+                .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform the POST request and verify status 404 Not Found
+        mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void removeItemFromOrgUnit_Success() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate a successful removal
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockRoom);
+
+        when(orgUnitService.removeItemFromOrgUnit(orgUnitId, itemId)).thenReturn(orgUnit);
+
+        // Act & Assert: Perform the DELETE request and verify status 200 OK and correct
+        // orgUnit data
+        mockMvc.perform(delete("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test OrgUnit"));
+    }
+
+    @Test
+    void removeItemFromOrgUnit_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate service throwing
+        // OrgUnitNotFoundException
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+
+        when(orgUnitService.removeItemFromOrgUnit(orgUnitId, itemId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform the DELETE request and verify status 404 Not Found
+        mockMvc.perform(delete("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void removeItemFromOrgUnit_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, itemId, and simulate service throwing
+        // ItemNotFoundException
+        Long orgUnitId = 1L;
+        Long itemId = 2L;
+
+        when(orgUnitService.removeItemFromOrgUnit(orgUnitId, itemId))
+                .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform the DELETE request and verify status 404 Not Found
+        mockMvc.perform(delete("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteOneOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() throws Exception {
+        // Act: Perform a DELETE request to the /org-units/1 endpoint
+        mockMvc.perform(delete("/org-units/1"))
+                .andExpect(status().isNoContent());
+
+        // Assert: Ensure the service method was called to delete the orgUnit by ID
+        verify(orgUnitService).deleteOrgUnit(1L);
+    }
+
+    @Test
+    void deleteOneOrgUnit_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
+        // non-existent orgUnit
+        doThrow(new OrgUnitNotFoundException()).when(orgUnitService).deleteOrgUnit(1L);
+
+        // Act: Perform a DELETE request to the /org-units/1 endpoint
+        mockMvc.perform(delete("/org-units/1"))
+                .andExpect(status().isNotFound());
+
+        // Assert: Ensure the service method was called to attempt to delete the orgUnit
+        verify(orgUnitService).deleteOrgUnit(1L);
     }
 }

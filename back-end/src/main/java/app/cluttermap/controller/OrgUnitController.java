@@ -71,6 +71,20 @@ public class OrgUnitController {
         return ResponseEntity.ok(updatedOrgUnit);
     }
 
+    @PostMapping("/{orgUnitId}/items/{itemId}")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    public ResponseEntity<OrgUnit> addItemToOrgUnit(@PathVariable Long orgUnitId, @PathVariable Long itemId) {
+        OrgUnit updatedOrgUnit = orgUnitService.addItemToOrgUnit(orgUnitId, itemId);
+        return ResponseEntity.ok(updatedOrgUnit);
+    }
+
+    @DeleteMapping("/{orgUnitId}/items/{itemId}")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    public ResponseEntity<OrgUnit> removeItemFromOrgUnit(@PathVariable Long orgUnitId, @PathVariable Long itemId) {
+        OrgUnit updatedOrgUnit = orgUnitService.removeItemFromOrgUnit(orgUnitId, itemId);
+        return ResponseEntity.ok(updatedOrgUnit);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {
