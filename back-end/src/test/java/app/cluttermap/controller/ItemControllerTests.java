@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -149,7 +150,8 @@ class ItemControllerTests {
 
         // Act: Perform a GET request to the /items/1 endpoint
         mockMvc.perform(get("/items/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getItemById(1L);
@@ -354,7 +356,8 @@ class ItemControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found.
         mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
     }
 
     @Test
@@ -369,7 +372,8 @@ class ItemControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found.
         mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
     }
 
     @Test
@@ -390,7 +394,8 @@ class ItemControllerTests {
 
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the item
         verify(itemService).deleteItem(1L);

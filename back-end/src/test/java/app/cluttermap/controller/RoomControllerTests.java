@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -135,7 +136,8 @@ class RoomControllerTests {
 
         // Act: Perform a GET request to the /rooms/1 endpoint
         mockMvc.perform(get("/rooms/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure that the service method was called
         verify(roomService).getRoomById(1L);
@@ -303,7 +305,8 @@ class RoomControllerTests {
 
         // Act: Perform a DELETE request to the /rooms/1 endpoint
         mockMvc.perform(delete("/rooms/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the room
         verify(roomService).deleteRoom(1L);
@@ -338,7 +341,8 @@ class RoomControllerTests {
 
         // Act: Perform a GET request to the /rooms/1/org-units endpoint
         mockMvc.perform(get("/rooms/1/org-units"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // room
@@ -369,13 +373,15 @@ class RoomControllerTests {
         Long orgUnitId = 2L;
 
         when(roomService.addOrgUnitToRoom(roomId, orgUnitId))
-                .thenThrow(new IllegalArgumentException("Cannot add org unit to a different project's room"));
+                .thenThrow(new IllegalArgumentException(
+                        "Cannot add org unit to a different project's room"));
 
         // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
         // error message
         mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cannot add org unit to a different project's room"));
+                .andExpect(jsonPath("$.message")
+                        .value("Cannot add org unit to a different project's room"));
     }
 
     @Test
@@ -390,7 +396,8 @@ class RoomControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found
         mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
     }
 
     @Test
@@ -405,7 +412,8 @@ class RoomControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found
         mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
     }
 
     @Test
@@ -436,7 +444,8 @@ class RoomControllerTests {
 
         // Act & Assert: Perform the DELETE request and verify status 404 Not Found
         mockMvc.perform(delete("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
     }
 
     @Test

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -144,7 +145,8 @@ class OrgUnitControllerTests {
 
         // Act: Perform a GET request to the /org-units/1 endpoint
         mockMvc.perform(get("/org-units/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getOrgUnitById(1L);
@@ -186,7 +188,8 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
@@ -203,7 +206,8 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
@@ -277,7 +281,8 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
@@ -295,7 +300,8 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
@@ -322,7 +328,8 @@ class OrgUnitControllerTests {
         Long targetRoomId = 2L;
 
         when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId))
-                .thenThrow(new IllegalArgumentException("Cannot move org unit to a different project's Room"));
+                .thenThrow(new IllegalArgumentException(
+                        "Cannot move org unit to a different project's Room"));
 
         // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
         // error message.
@@ -344,7 +351,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found.
         mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
     }
 
     @Test
@@ -359,7 +367,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found.
         mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
     }
 
     @Test
@@ -391,7 +400,8 @@ class OrgUnitControllerTests {
 
         // Act: Perform a GET request to the /org-units/1/org-units endpoint
         mockMvc.perform(get("/org-units/1/items"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // orgUnit
@@ -422,13 +432,15 @@ class OrgUnitControllerTests {
         Long itemId = 2L;
 
         when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId))
-                .thenThrow(new IllegalArgumentException("Cannot add item to a different project's org unit"));
+                .thenThrow(new IllegalArgumentException(
+                        "Cannot add item to a different project's org unit"));
 
         // Act & Assert: Perform the POST request and verify status 400 Bad Request and
         // error message
         mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cannot add item to a different project's org unit"));
+                .andExpect(jsonPath("$.message")
+                        .value("Cannot add item to a different project's org unit"));
     }
 
     @Test
@@ -443,7 +455,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the POST request and verify status 404 Not Found
         mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
     }
 
     @Test
@@ -458,7 +471,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the POST request and verify status 404 Not Found
         mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
     }
 
     @Test
@@ -489,7 +503,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the DELETE request and verify status 404 Not Found
         mockMvc.perform(delete("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
     }
 
     @Test
@@ -504,7 +519,8 @@ class OrgUnitControllerTests {
 
         // Act & Assert: Perform the DELETE request and verify status 404 Not Found
         mockMvc.perform(delete("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
     }
 
     @Test
@@ -525,7 +541,8 @@ class OrgUnitControllerTests {
 
         // Act: Perform a DELETE request to the /org-units/1 endpoint
         mockMvc.perform(delete("/org-units/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the orgUnit
         verify(orgUnitService).deleteOrgUnit(1L);

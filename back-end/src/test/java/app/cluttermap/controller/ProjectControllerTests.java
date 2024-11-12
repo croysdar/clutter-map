@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -131,7 +132,8 @@ class ProjectControllerTests {
 
         // Act: Perform a GET request to the /projects/1 endpoint
         mockMvc.perform(get("/projects/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure that the service method was called
         verify(projectService).getProjectById(1L);
@@ -282,7 +284,8 @@ class ProjectControllerTests {
 
         // Act: Perform a DELETE request to the /projects/1 endpoint
         mockMvc.perform(delete("/projects/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the project
         verify(projectService).deleteProject(1L);
@@ -316,7 +319,8 @@ class ProjectControllerTests {
 
         // Act: Perform a GET request to the /projects/1/rooms endpoint
         mockMvc.perform(get("/projects/1/rooms"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // project
