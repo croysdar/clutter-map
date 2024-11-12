@@ -31,11 +31,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.model.Item;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.ProjectService;
 import app.cluttermap.service.SecurityService;
 
@@ -50,6 +52,9 @@ class ProjectControllerTests {
 
     @MockBean
     private ProjectService projectService;
+
+    @MockBean
+    private ItemService itemService;
 
     @MockBean
     private SecurityService securityService;
@@ -130,6 +135,21 @@ class ProjectControllerTests {
 
         // Assert: Ensure that the service method was called
         verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_Success() throws Exception {
+        // Arrange: Set up projectId and simulate unassigned items
+        Project project = new Project("Test Project", mockUser);
+        Long projectId = 1L;
+        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), project);
+        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+
+        // Act & Assert: Perform the GET request on the new path and verify status 200
+        // OK and correct data
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Unassigned Item"));
     }
 
     @Test

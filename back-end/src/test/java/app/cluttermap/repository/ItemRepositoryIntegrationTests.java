@@ -123,4 +123,41 @@ public class ItemRepositoryIntegrationTests {
         // Assert: Verify that the returned list is empty
         assertThat(ownerItems).isEmpty();
     }
+
+    @Test
+    void findUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
+        // Arrange: Create a project and items with and without an assigned orgUnit
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+        Project project = new Project("Test Project", owner);
+        projectRepository.save(project);
+        Item unassignedItem1 = new Item("Unassigned Item 1", "Description", List.of("tag1"), project);
+        Item unassignedItem2 = new Item("Unassigned Item 2", "Description", List.of("tag2"), project);
+
+        OrgUnit orgUnit = new OrgUnit("OrgUnit", "Description", project);
+        orgUnitRepository.save(orgUnit);
+        Item assignedItem = new Item("Assigned Item", "Description", List.of("tag3"), project);
+        assignedItem.setOrgUnit(orgUnit);
+
+        itemRepository.saveAll(List.of(unassignedItem1, unassignedItem2, assignedItem));
+
+        // Act: Retrieve unassigned items
+        List<Item> unassignedItems = itemRepository.findUnassignedItemsByProjectId(project.getId());
+
+        // Assert: Verify only unassigned items are returned
+        assertThat(unassignedItems).extracting(Item::getName).containsExactlyInAnyOrder("Unassigned Item 1",
+                "Unassigned Item 2");
+    }
+
+    @Test
+    void findUnassignedItemsByNonExistentProjectId_ShouldReturnEmptyList() {
+        // Arrange: Use a project ID that does not exist in the database
+        Long nonExistentProjectId = 999L;
+
+        // Act: Retrieve unassigned items for the non-existent project
+        List<Item> unassignedItems = itemRepository.findUnassignedItemsByProjectId(nonExistentProjectId);
+
+        // Assert: Verify that the result is an empty list
+        assertThat(unassignedItems).isEmpty();
+    }
 }

@@ -220,6 +220,33 @@ public class ItemServiceTests {
     }
 
     @Test
+    void getUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
+        // Arrange: Mock repository method
+        Long projectId = 1L;
+        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), mockProject);
+        when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+
+        // Act: Call service method
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
+
+        // Assert: Verify correct items are returned
+        assertThat(unassignedItems).containsExactly(unassignedItem);
+    }
+
+    @Test
+    void getUnassignedItemsByNonExistentProjectId_ShouldReturnEmptyList() {
+        // Arrange: Use a project ID that does not exist
+        Long nonExistentProjectId = 999L;
+        when(itemRepository.findUnassignedItemsByProjectId(nonExistentProjectId)).thenReturn(List.of());
+
+        // Act: Call the service method
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(nonExistentProjectId);
+
+        // Assert: Verify that the result is an empty list
+        assertThat(unassignedItems).isEmpty();
+    }
+
+    @Test
     void updateItem_ShouldUpdateItem_WhenItemExists() {
         // Arrange: Set up mock item with initial values and stub the repository to
         // return the item by ID

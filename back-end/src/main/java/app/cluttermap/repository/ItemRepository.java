@@ -15,4 +15,7 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
             "JOIN projects p ON i.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
     List<Item> findByOwnerId(@Param("ownerId") Long ownerId);
+
+    @Query("SELECT i FROM Item i WHERE i.project.id = :projectId AND i.orgUnit IS NULL")
+    List<Item> findUnassignedItemsByProjectId(@Param("projectId") Long projectId);
 }

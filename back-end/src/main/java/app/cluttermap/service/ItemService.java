@@ -1,5 +1,7 @@
 package app.cluttermap.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
@@ -36,7 +38,9 @@ public class ItemService {
                 .orElseThrow(() -> new ItemNotFoundException());
     }
 
-    // TODO add get unassigned items
+    public List<Item> getUnassignedItemsByProjectId(Long projectId) {
+        return itemRepository.findUnassignedItemsByProjectId(projectId);
+    }
 
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
