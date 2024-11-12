@@ -43,6 +43,8 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getItemById(id));
     }
 
+    // TODO Add get unassigned items route
+
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,

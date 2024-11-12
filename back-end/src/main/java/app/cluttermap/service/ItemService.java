@@ -36,6 +36,8 @@ public class ItemService {
                 .orElseThrow(() -> new ItemNotFoundException());
     }
 
+    // TODO add get unassigned items
+
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());

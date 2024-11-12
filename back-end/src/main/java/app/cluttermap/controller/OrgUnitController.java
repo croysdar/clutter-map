@@ -50,6 +50,8 @@ public class OrgUnitController {
         return ResponseEntity.ok(orgUnitService.getOrgUnitById(id).getItems());
     }
 
+    // TODO add get unassigned org units route
+
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
