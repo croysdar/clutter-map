@@ -29,6 +29,14 @@ public class NewItemDTO {
         this.quantity = quantity;
     }
 
+    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.orgUnitId = orgUnitId;
+        this.quantity = 1;
+    }
+
     public String getName() {
         return name;
     }

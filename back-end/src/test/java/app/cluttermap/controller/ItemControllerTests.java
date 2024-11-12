@@ -85,8 +85,8 @@ class ItemControllerTests {
     @Test
     void getUserItems_ShouldReturnAllUserItems() throws Exception {
         // Arrange: Set up mock user items and mock the service to return them
-        Item item1 = new Item("Test Item 1", "Description 1", List.of("Tag 11", "Tag 12"), mockOrgUnit, 1);
-        Item item2 = new Item("Test Item 2", "Description 2", List.of("Tag 21", "Tag 22"), mockOrgUnit, 1);
+        Item item1 = new Item("Test Item 1", "Description 1", List.of("Tag 11", "Tag 12"), mockOrgUnit);
+        Item item2 = new Item("Test Item 2", "Description 2", List.of("Tag 21", "Tag 22"), mockOrgUnit);
         when(itemService.getUserItems()).thenReturn(List.of(item1, item2));
 
         // Act: Perform a GET request to the /items endpoint
@@ -127,7 +127,7 @@ class ItemControllerTests {
     void getOneItem_ShouldReturnItem_WhenItemExists() throws Exception {
         // Arrange: Set up a mock item and stub the service to return it when
         // searched by ID
-        Item item = new Item("Test Item", "Item description", List.of("tag 1"), mockOrgUnit, 1);
+        Item item = new Item("Test Item", "Item description", List.of("tag 1"), mockOrgUnit);
         when(itemService.getItemById(1L)).thenReturn(item);
 
         // Act: Perform a GET request to the /items/1 endpoint
@@ -161,8 +161,8 @@ class ItemControllerTests {
     void addOneItem_ShouldCreateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewItemDTO with valid data and mock the service to
         // return a new item
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), String.valueOf(1L), 1);
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit, 1);
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), String.valueOf(1L));
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
         // Act: Perform a POST request to the /items endpoint with the item data
@@ -181,7 +181,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenItemNameIsBlank() throws Exception {
         // Arrange: Set up a NewItemDTO with a blank name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L), 1);
+        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L));
 
         // Act: Perform a POST request to the /items endpoint with the blank item
         // name
@@ -198,7 +198,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L), 1);
+        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L));
 
         // Act: Perform a POST request to the /items endpoint with the null item
         // name
@@ -215,7 +215,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null, 1);
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null);
 
         // Act: Perform a POST request to the /items endpoint with the null item
         // ID
@@ -232,7 +232,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
         // Arrange: Set up a NewItemDTO with a NaN item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string", 1);
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string");
 
         // Act: Perform a POST request to the /items endpoint with the NaN item
         // ID
@@ -251,7 +251,7 @@ class ItemControllerTests {
         // Arrange: Set up an UpdateItemDTO with a new name and mock the service to
         // return the updated item
         UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description", List.of("Updated Tag"), 2);
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit, 1);
+        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit, itemDTO.getQuantity());
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items/1 endpoint with the update data

@@ -50,6 +50,15 @@ public class Item {
         this.quantity = quantity;
     }
 
+    // constructor that doesn't require quantity
+    public Item(String name, String description, List<String> tags, OrgUnit orgUnit) {
+        this.name = name;
+        this.description = description;
+        this.orgUnit = orgUnit;
+        this.tags = tags;
+        this.quantity = 1;
+    }
+
     public Long getId() {
         return id;
     }

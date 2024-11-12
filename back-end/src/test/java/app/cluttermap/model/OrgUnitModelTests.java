@@ -44,6 +44,7 @@ public class OrgUnitModelTests {
         assertThat(orgUnit.getItems().get(0).getName()).isEqualTo("White Shelving Unit");
         assertThat(orgUnit.getItems().get(0).getTags()).isEqualTo(List.of("tag1"));
         assertThat(orgUnit.getItems().get(0).getOrgUnit()).isEqualTo(orgUnit);
+        assertThat(orgUnit.getItems().get(0).getQuantity()).isEqualTo(1);
 
         // Act: Remove the item from the orgUnit
         orgUnit.getItems().remove(item);

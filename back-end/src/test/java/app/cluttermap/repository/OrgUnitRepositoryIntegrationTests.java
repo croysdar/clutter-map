@@ -133,7 +133,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit, 1);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
         orgUnit.getItems().add(item);
         orgUnitRepository.save(orgUnit);
 
@@ -161,7 +161,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit, 1);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
         orgUnit.getItems().add(item);
         orgUnitRepository.save(orgUnit);
 
