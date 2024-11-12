@@ -59,6 +59,20 @@ public class RoomController {
         return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
     }
 
+    @PutMapping("/{roomId}/org-units/{orgUnitId}")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
+    public ResponseEntity<Room> addOrgUnitToRoom(@PathVariable Long roomId, @PathVariable Long orgUnitId) {
+        Room updatedRoom = roomService.addOrgUnitToRoom(roomId, orgUnitId);
+        return ResponseEntity.ok(updatedRoom);
+    }
+
+    @DeleteMapping("/{roomId}/org-units/{orgUnitId}")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
+    public ResponseEntity<Room> removeOrgUnitFromRoom(@PathVariable Long roomId, @PathVariable Long orgUnitId) {
+        Room updatedRoom = roomService.removeOrgUnitFromRoom(roomId, orgUnitId);
+        return ResponseEntity.ok(updatedRoom);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Void> deleteOneRoom(@PathVariable("id") Long id) {
