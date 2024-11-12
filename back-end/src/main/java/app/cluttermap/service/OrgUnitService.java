@@ -2,13 +2,16 @@ package app.cluttermap.service;
 
 import org.springframework.stereotype.Service;
 
+import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
+import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
+import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
 import jakarta.transaction.Transactional;
@@ -17,16 +20,19 @@ import jakarta.transaction.Transactional;
 public class OrgUnitService {
     private final RoomRepository roomRepository;
     private final OrgUnitRepository orgUnitRepository;
+    private final ItemRepository itemRepository;
     private final SecurityService securityService;
     private final RoomService roomService;
 
     public OrgUnitService(
             RoomRepository roomRepository,
             OrgUnitRepository orgUnitRepository,
+            ItemRepository itemRepository,
             SecurityService securityService,
             RoomService roomService) {
         this.roomRepository = roomRepository;
         this.orgUnitRepository = orgUnitRepository;
+        this.itemRepository = itemRepository;
         this.securityService = securityService;
         this.roomService = roomService;
     }
@@ -35,6 +41,8 @@ public class OrgUnitService {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
     }
+
+    // TODO add get unassigned org units
 
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
@@ -62,6 +70,33 @@ public class OrgUnitService {
         }
 
         return orgUnitRepository.save(_orgUnit);
+    }
+
+    public OrgUnit addItemToOrgUnit(Long orgUnitId, Long itemId) {
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException());
+
+        // Ensure that item and orgUnit are in the same Project
+        if (!item.getProject().equals(orgUnit.getProject())) {
+            throw new IllegalArgumentException("Cannot add item to a different project's org unit");
+        }
+
+        orgUnit.addItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
+    }
+
+    public OrgUnit removeItemFromOrgUnit(Long orgUnitId, Long itemId) {
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException());
+
+        orgUnit.removeItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
     }
 
     @Transactional
