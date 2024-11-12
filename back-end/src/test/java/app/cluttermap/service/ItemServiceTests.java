@@ -3,6 +3,7 @@ package app.cluttermap.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -393,6 +394,59 @@ public class ItemServiceTests {
         Long nonExistentOrgUnitId = 999L;
         assertThrows(OrgUnitNotFoundException.class, () -> {
             itemService.moveItemBetweenOrgUnits(item.getId(), nonExistentOrgUnitId);
+        });
+    }
+
+    @Test
+    void batchMoveItems_Success() {
+        // Arrange: Create target OrgUnit and mock items to move
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        when(orgUnitRepository.findById(10L)).thenReturn(Optional.of(targetOrgUnit));
+
+        Item item1 = new Item("Item 1", "Description", List.of("tag1"), mockProject);
+        Item item2 = new Item("Item 2", "Description", List.of("tag2"), mockProject);
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
+        when(itemRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act: Move items in batch
+        Iterable<Item> movedItems = itemService.batchMoveItems(List.of(1L, 2L),
+                10L);
+
+        // Assert: Verify items are updated
+        assertThat(movedItems).allMatch(item -> item.getOrgUnit().equals(targetOrgUnit));
+    }
+
+    @Test
+    void batchMoveItems_ItemNotFound_ShouldThrowItemNotFoundException() {
+        // Arrange: Set up target OrgUnit ID and non-existent item ID
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        when(orgUnitRepository.findById(targetOrgUnit.getId())).thenReturn(Optional.of(targetOrgUnit));
+
+        Long nonExistentItemId = 999L;
+        when(itemRepository.findById(nonExistentItemId)).thenReturn(Optional.empty());
+
+        // Act & Assert: Expect ItemNotFoundException
+        assertThrows(ItemNotFoundException.class, () -> {
+            itemService.batchMoveItems(List.of(nonExistentItemId), targetOrgUnit.getId());
+        });
+    }
+
+    @Test
+    void batchMoveItems_DifferentProject_ShouldThrowIllegalArgumentException() {
+        // Arrange: Create items with different project than target OrgUnit
+        Project differentProject = new Project("Different Project", mockUser);
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        Item itemWithDifferentProject = new Item("Item", "Description", List.of("tag1"), differentProject);
+
+        when(orgUnitRepository.findById(10L)).thenReturn(Optional.of(targetOrgUnit));
+        when(itemRepository.findById(20L))
+                .thenReturn(Optional.of(itemWithDifferentProject));
+
+        // Act & Assert: Expect IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> {
+            itemService.batchMoveItems(List.of(20L), 10L);
         });
     }
 

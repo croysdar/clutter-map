@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -85,7 +86,7 @@ public class ItemService {
 
         // Ensure the current and target OrgUnit are in the same Project
         if (currentOrgUnit != null && !currentOrgUnit.getProject().equals(targetOrgUnit.getProject())) {
-            throw new IllegalArgumentException("Cannot move item to a different project's OrgUnit");
+            throw new IllegalArgumentException("Cannot move item to a different project's Organization Unit.");
         }
 
         // Remove the item from the current OrgUnit (if any) and add it to the target
@@ -98,6 +99,28 @@ public class ItemService {
         orgUnitRepository.save(targetOrgUnit);
 
         return item;
+    }
+
+    @Transactional
+    public Iterable<Item> batchMoveItems(List<Long> itemIds, Long targetOrgUnitId) {
+        OrgUnit targetOrgUnit = orgUnitRepository.findById(targetOrgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+
+        List<Item> updatedItems = new ArrayList<>();
+        for (Long itemId : itemIds) {
+            Item item = itemRepository.findById(itemId)
+                    .orElseThrow(() -> new ItemNotFoundException());
+
+            // Ensure the item and target OrgUnit belong to the same project
+            if (!item.getProject().equals(targetOrgUnit.getProject())) {
+                throw new IllegalArgumentException("Cannot move item to a different project's Organization Unit.");
+            }
+
+            // Move item to the target OrgUnit
+            item.setOrgUnit(targetOrgUnit);
+            updatedItems.add(item);
+        }
+        return itemRepository.saveAll(updatedItems);
     }
 
     @Transactional

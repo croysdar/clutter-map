@@ -329,14 +329,14 @@ class OrgUnitControllerTests {
 
         when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId))
                 .thenThrow(new IllegalArgumentException(
-                        "Cannot move org unit to a different project's Room"));
+                        "Cannot move org unit to a different project's Room."));
 
         // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
         // error message.
         mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Cannot move org unit to a different project's Room"));
+                        .value("Cannot move org unit to a different project's Room."));
     }
 
     @Test
@@ -433,14 +433,14 @@ class OrgUnitControllerTests {
 
         when(orgUnitService.addItemToOrgUnit(orgUnitId, itemId))
                 .thenThrow(new IllegalArgumentException(
-                        "Cannot add item to a different project's org unit"));
+                        "Cannot add item to a different project's Organization Unit."));
 
         // Act & Assert: Perform the POST request and verify status 400 Bad Request and
         // error message
         mockMvc.perform(post("/org-units/{orgUnitId}/items/{itemId}", orgUnitId, itemId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Cannot add item to a different project's org unit"));
+                        .value("Cannot add item to a different project's Organization Unit."));
     }
 
     @Test

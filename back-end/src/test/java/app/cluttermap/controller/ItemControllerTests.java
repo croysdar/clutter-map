@@ -334,14 +334,14 @@ class ItemControllerTests {
 
         when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
                 .thenThrow(new IllegalArgumentException(
-                        "Cannot move item to a different project's OrgUnit"));
+                        "Cannot move item to a different project's Organization Unit."));
 
         // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
         // error message.
         mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Cannot move item to a different project's OrgUnit"));
+                        .value("Cannot move item to a different project's Organization Unit."));
     }
 
     @Test
@@ -374,6 +374,85 @@ class ItemControllerTests {
         mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void batchMoveItems_Success() throws Exception {
+        // Arrange: Set up itemIds and Org Unit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 10L;
+
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        List<Item> movedItems = List.of(
+                new Item("Item 1", "Description", List.of("tag1"), targetOrgUnit),
+                new Item("Item 2", "Description", List.of("tag2"), targetOrgUnit),
+                new Item("Item 3", "Description", List.of("tag3"), targetOrgUnit));
+
+        when(itemService.batchMoveItems(itemIds, targetOrgUnitId))
+                .thenReturn(movedItems);
+
+        // Act & Assert: Perform PUT request and verify status 200 OK with updated items
+        mockMvc.perform(put("/items/batch-move-org-unit/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Item 1"))
+                .andExpect(jsonPath("$[1].name").value("Item 2"))
+                .andExpect(jsonPath("$[2].name").value("Item 3"));
+    }
+
+    @Test
+    void batchMoveItems_TargetOrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up itemIds and non existent Org Unit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 999L;
+
+        when(itemService.batchMoveItems(itemIds, targetOrgUnitId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/items/batch-move-org-unit/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void batchMoveItems_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up Org Unit ID and list with a non-existent item ID
+        List<Long> itemIds = List.of(1L, 999L, 3L);
+        Long targetOrgUnitId = 10L;
+
+        when(itemService.batchMoveItems(itemIds, targetOrgUnitId))
+                .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/items/batch-move-org-unit/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
+    }
+
+    @Test
+    void batchMoveItems_ItemInDifferentProject_ShouldReturnBadRequest() throws Exception {
+        // Arrange: Set up a item IDs and target OrgUnit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 10L;
+
+        when(itemService.batchMoveItems(itemIds, targetOrgUnitId))
+                .thenThrow(new IllegalArgumentException(
+                        "Cannot move item to a different project's Organization Unit."));
+
+        // Act & Assert: Perform PUT request and verify status 400 Bad Request
+        mockMvc.perform(put("/items/batch-move-org-unit/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(
+                                "Cannot move item to a different project's Organization Unit."));
     }
 
     @Test

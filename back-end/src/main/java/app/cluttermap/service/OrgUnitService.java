@@ -86,7 +86,7 @@ public class OrgUnitService {
 
         // Ensure that item and orgUnit are in the same Project
         if (!item.getProject().equals(orgUnit.getProject())) {
-            throw new IllegalArgumentException("Cannot add item to a different project's org unit");
+            throw new IllegalArgumentException("Cannot add item to a different project's Organization Unit.");
         }
 
         orgUnit.addItem(item); // Manages both sides of the relationship
@@ -118,7 +118,7 @@ public class OrgUnitService {
 
         // Ensure that current and target Rooms are in the same Project
         if (currentRoom != null && !currentRoom.getProject().equals(targetRoom.getProject())) {
-            throw new IllegalArgumentException("Cannot move org unit to a different project's Room");
+            throw new IllegalArgumentException("Cannot move org unit to a different project's Room.");
         }
 
         // Remove from the current room (if any) and add to the new room

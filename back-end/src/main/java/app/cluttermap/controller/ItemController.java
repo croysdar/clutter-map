@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,6 +62,16 @@ public class ItemController {
 
         Item updatedItem = itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId);
         return ResponseEntity.ok(updatedItem);
+    }
+
+    @PutMapping("/batch-move-org-unit/{orgUnitId}")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    public ResponseEntity<Iterable<Item>> batchMoveItems(
+            @PathVariable Long orgUnitId,
+            @RequestBody List<Long> itemIds) {
+
+        Iterable<Item> updatedItems = itemService.batchMoveItems(itemIds, orgUnitId);
+        return ResponseEntity.ok(updatedItems);
     }
 
     @DeleteMapping("/{id}")
