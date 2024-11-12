@@ -79,8 +79,6 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
                                 />
                                 <CardContent sx={{py: 1}}>
                                     <Typography variant="body2" gutterBottom align="left">{item.description}</Typography>
-                                </CardContent>
-                                <CardContent sx={{py: 1}}>
                                     <Typography variant="body2" gutterBottom align="left">Quantity: {item.quantity}</Typography>
                                 </CardContent>
                                 <CardActions>
