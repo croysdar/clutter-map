@@ -61,6 +61,10 @@ public class OrgUnitService {
         return orgUnitRepository.findByOwnerId(user.getId());
     }
 
+    public Iterable<OrgUnit> getUnassignedOrgUnitsByProjectId(Long projectId) {
+        return orgUnitRepository.findUnassignedOrgUnitsByProjectId(projectId);
+    }
+
     @Transactional
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = getOrgUnitById(id);
@@ -72,6 +76,7 @@ public class OrgUnitService {
         return orgUnitRepository.save(_orgUnit);
     }
 
+    @Transactional
     public OrgUnit addItemToOrgUnit(Long orgUnitId, Long itemId) {
         OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
@@ -88,6 +93,7 @@ public class OrgUnitService {
         return orgUnitRepository.save(orgUnit);
     }
 
+    @Transactional
     public OrgUnit removeItemFromOrgUnit(Long orgUnitId, Long itemId) {
         OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
@@ -98,6 +104,8 @@ public class OrgUnitService {
         orgUnit.removeItem(item); // Manages both sides of the relationship
         return orgUnitRepository.save(orgUnit);
     }
+
+    // TODO add batch move
 
     @Transactional
     public OrgUnit moveOrgUnitBetweenRooms(Long orgUnitId, Long targetRoomId) {

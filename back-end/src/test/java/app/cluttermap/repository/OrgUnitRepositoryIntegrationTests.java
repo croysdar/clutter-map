@@ -180,4 +180,41 @@ public class OrgUnitRepositoryIntegrationTests {
         assertThat(fetchedItem.getOrgUnit()).isNull();
     }
 
+    @Test
+    void findUnassignedOrgUnitsByProjectId_ShouldReturnOnlyUnassignedOrgUnits() {
+        // Arrange: Create a project and orgUnits with and without an assigned room
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+        Project project = new Project("Test Project", owner);
+        projectRepository.save(project);
+
+        OrgUnit unassignedOrgUnit1 = new OrgUnit("Unassigned OrgUnit 1", "Description", project);
+        OrgUnit unassignedOrgUnit2 = new OrgUnit("Unassigned OrgUnit 2", "Description", project);
+
+        Room room = new Room("Room", "Room Description", project);
+        roomRepository.save(room);
+        OrgUnit assignedOrgUnit = new OrgUnit("Assigned OrgUnit", "Description", project);
+        assignedOrgUnit.setRoom(room);
+
+        orgUnitRepository.saveAll(List.of(unassignedOrgUnit1, unassignedOrgUnit2, assignedOrgUnit));
+
+        // Act: Retrieve unassigned orgUnits
+        List<OrgUnit> unassignedOrgUnits = orgUnitRepository.findUnassignedOrgUnitsByProjectId(project.getId());
+
+        // Assert: Verify only unassigned orgUnits are returned
+        assertThat(unassignedOrgUnits).extracting(OrgUnit::getName)
+                .containsExactlyInAnyOrder("Unassigned OrgUnit 1", "Unassigned OrgUnit 2");
+    }
+
+    @Test
+    void findUnassignedOrgUnitsByNonExistentProjectId_ShouldReturnEmptyList() {
+        // Arrange: Use a project ID that does not exist in the database
+        Long nonExistentProjectId = 999L;
+
+        // Act: Retrieve unassigned orgUnits for the non-existent project
+        List<OrgUnit> unassignedOrgUnits = orgUnitRepository.findUnassignedOrgUnitsByProjectId(nonExistentProjectId);
+
+        // Assert: Verify that the result is an empty list
+        assertThat(unassignedOrgUnits).isEmpty();
+    }
 }

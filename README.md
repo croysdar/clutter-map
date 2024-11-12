@@ -229,6 +229,13 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Path Variable**: `id` (Long)  
   **Response**: `Iterable<Room>`
 
+- **GET `/{projectId}/org-units/unassigned`**  
+  Retrieves a list of unassigned organization units within a project (OrgUnits not linked to any room).  
+  **Path Variable**:
+
+  - `projectId` (Long): ID of the project.  
+    **Response**: `List<OrgUnit>`
+
 - **GET `/{projectId}/items/unassigned`**  
   Retrieves a list of unassigned items within a project (items not linked to any organization unit).  
   **Path Variable**:
