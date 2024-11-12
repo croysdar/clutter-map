@@ -50,7 +50,7 @@ public class ItemsService {
         if (itemDTO.getDescription() != null) {
             _item.setDescription(itemDTO.getDescription());
         }
-        if (itemDTO.getQuantity() != null) {
+        if (itemDTO.getQuantity() >= 1) {
             _item.setQuantity(itemDTO.getQuantity());
         }
         if (itemDTO.getTags() != null) {
