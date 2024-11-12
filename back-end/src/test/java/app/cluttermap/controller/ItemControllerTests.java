@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
+import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -323,7 +324,7 @@ class ItemControllerTests {
     }
 
     @Test
-    void moveItemBetweenOrgUnits_OrgUnitNotInSameProject_ShouldReturnBadRequest() throws Exception {
+    void moveItem_DifferentProjects_ShouldReturnBadRequest() throws Exception {
         // Arrange: Set up item ID, target OrgUnit ID, and simulate service throwing
         // IllegalArgumentException.
         Long itemId = 1L;
@@ -342,7 +343,7 @@ class ItemControllerTests {
     }
 
     @Test
-    void moveItemBetweenOrgUnits_ItemNotFound_ShouldReturnNotFound() throws Exception {
+    void moveItem_ItemNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up item ID, target OrgUnit ID, and simulate service throwing
         // ItemNotFoundException.
         Long itemId = 1L;
@@ -350,6 +351,21 @@ class ItemControllerTests {
 
         when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
                 .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found.
+        mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void moveItem_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up item ID, target OrgUnit ID, and simulate service throwing
+        // OrgUnitNotFoundException.
+        Long itemId = 1L;
+        Long targetOrgUnitId = 2L;
+
+        when(itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId))
+                .thenThrow(new OrgUnitNotFoundException());
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found.
         mockMvc.perform(put("/items/{itemId}/move-org-unit/{orgUnitId}", itemId, targetOrgUnitId))

@@ -57,6 +57,18 @@ public class OrgUnitController {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 
+    @PutMapping("/{orgUnitId}/move-room/{roomId}")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
+    public ResponseEntity<OrgUnit> moveOrgUnit(@PathVariable Long orgUnitId,
+            @PathVariable(name = "roomId") Long targetRoomId) {
+        if (targetRoomId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        OrgUnit updatedOrgUnit = orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId);
+        return ResponseEntity.ok(updatedOrgUnit);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {

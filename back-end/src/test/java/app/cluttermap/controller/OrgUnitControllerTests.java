@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
+import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -294,6 +295,70 @@ class OrgUnitControllerTests {
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
                 .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+    }
+
+    @Test
+    void moveOrgUnit_Success() throws Exception {
+        // Arrange: Set up orgUnitId, targetRoomId, and simulate a successful move.
+        Long orgUnitId = 1L;
+        Long targetRoomId = 2L;
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockRoom);
+
+        when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId)).thenReturn(orgUnit);
+
+        // Act & Assert: Perform the PUT request and verify status 200 OK and correct
+        // orgUnit data.
+        mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test OrgUnit"));
+    }
+
+    @Test
+    void moveOrgUnit_DifferentProjects_ShouldReturnBadRequest() throws Exception {
+        // Arrange: Set up orgUnitId, targetRoomId, and simulate service throwing
+        // IllegalArgumentException.
+        Long orgUnitId = 1L;
+        Long targetRoomId = 2L;
+
+        when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId))
+                .thenThrow(new IllegalArgumentException("Cannot move org unit to a different project's Room"));
+
+        // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
+        // error message.
+        mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Cannot move org unit to a different project's Room"));
+    }
+
+    @Test
+    void moveOrgUnit_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, targetRoomId, and simulate service throwing
+        // OrgUnitNotFoundException.
+        Long orgUnitId = 1L;
+        Long targetRoomId = 2L;
+
+        when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found.
+        mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void moveOrgUnit_RoomNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up orgUnitId, targetRoomId, and simulate service throwing
+        // RoomNotFoundException.
+        Long orgUnitId = 1L;
+        Long targetRoomId = 2L;
+
+        when(orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId))
+                .thenThrow(new RoomNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found.
+        mockMvc.perform(put("/org-units/{orgUnitId}/move-room/{roomId}", orgUnitId, targetRoomId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
