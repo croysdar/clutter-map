@@ -66,23 +66,22 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
                     <AccordionSummary
                         expandIcon={<ArrowDropDownIcon />}
                         id={`org-unit-${orgUnitId}-items-accordion-header`}
+                        sx={{ my: 0 }}
                     >
                         <Typography variant='body1'> Contents </Typography>
                     </AccordionSummary>
-                    <AccordionDetails>
+                    <AccordionDetails sx={{ px: 0, pt: 0 }}>
                         {items.map((item) => (
-                            <Card key={`item-card-${item.id}`} sx={{mt: 1}}>
+                            <Card key={`item-card-${item.id}`} sx={{ mt: 1, px: 0 }}>
                                 <CardHeader
-                                    title={<Typography variant='h6'> {item.name}</Typography>}
-                                    action={<ItemMenu item={item} />}
-                                    sx={{py: 1}}
+                                    title={<Typography variant='body2'> {item.name}</Typography>}
+                                    // action={<ItemMenu item={item} />}
+                                    sx={{ py: 1, px: 0 }}
                                 />
-                                <CardContent sx={{py: 1}}>
+                                {/* <CardContent sx={{ py: 1 }}>
                                     <Typography variant="body2">{item.description}</Typography>
-                                </CardContent>
-                                <CardActions>
                                     <RenderTags tags={item.tags} />
-                                </CardActions>
+                                </CardContent> */}
                             </Card>
                         ))}
                     </AccordionDetails>

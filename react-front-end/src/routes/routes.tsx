@@ -44,16 +44,17 @@ const Pages: React.FC = () => {
     return (
         <BrowserRouter>
             <Navbar />
-            <AppBreadcrumbs/>
-            <Container maxWidth="md" sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '100vh',
-                textAlign: 'center',
-                gap: 3
-            }}>
+            <AppBreadcrumbs />
+            <Container
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    textAlign: 'center',
+                    gap: 3
+                }}>
                 <Routes>
                     <Route path="/" Component={HomePage} />
                     <Route path="/about" Component={AboutPage} />
