@@ -19,6 +19,6 @@ public interface OrgUnitRepository extends CrudRepository<OrgUnit, Long> {
     @Query(value = "SELECT r.* FROM rooms r WHERE r.project_id =:projectId", nativeQuery = true)
     List<OrgUnit> findByProjectId(@Param("projectId") Long project_id);
 
-    @Query(value = "SELECT * FROM org_units o WHERE o.project_id = :projectId AND o.room_id IS NULL", nativeQuery = true)
+    @Query(value = "SELECT ou.* FROM org_units ou WHERE ou.project_id = :projectId AND ou.room_id IS NULL", nativeQuery = true)
     List<OrgUnit> findUnassignedOrgUnitsByProjectId(@Param("projectId") Long projectId);
 }
