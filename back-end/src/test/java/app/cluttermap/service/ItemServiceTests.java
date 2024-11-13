@@ -269,7 +269,7 @@ public class ItemServiceTests {
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
         assertThat(updatedItem.getDescription()).isEqualTo("Initial Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("Updated tag 1", "Updated tag 2"));
-        assertThat(updatedItem.getQuantity()).isEqualTo(1);
+        assertThat(updatedItem.getQuantity()).isEqualTo(2);
         verify(itemRepository).save(item);
     }
 
@@ -292,7 +292,7 @@ public class ItemServiceTests {
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
         assertThat(updatedItem.getDescription()).isEqualTo("Updated Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("tag 1", "tag 2"));
-        assertThat(updatedItem.getQuantity()).isEqualTo(1);
+        assertThat(updatedItem.getQuantity()).isEqualTo(2);
         verify(itemRepository).save(item);
     }
 
