@@ -28,18 +28,18 @@ export const ListViewTileWrap: React.FC<ListViewTileWrapProps> = ({ title, subti
     }
 
     return (
-        <Paper sx={{ width: '100%', boxShadow: 3 }}>
+        <Paper sx={{ width: '100%', boxShadow: 3, pb: 6 }}>
             <Box sx={{ position: 'relative', padding: 4 }}>
                 {/* Menu positioned in the top right corner */}
                 {menu && (
-                    <Box sx={{ position: 'absolute', top: 20, right: 20 }}>
+                    <Box sx={{ position: 'absolute', top: 50, right: 40 }}>
                         {menu}
                     </Box>
                 )}
 
                 {/* Centered title and subtitle */}
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h2" key="page-title">
+                <Box sx={{ textAlign: 'center', pt: 2, pb: 4 }}>
+                    <Typography variant="h2" key="page-title" sx={{ pr: 4 }}>
                         {title}
                     </Typography>
                     {subtitle && (
