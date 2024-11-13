@@ -1,5 +1,8 @@
 package app.cluttermap.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
@@ -41,8 +44,6 @@ public class OrgUnitService {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
     }
-
-    // TODO add get unassigned org units
 
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
@@ -105,8 +106,6 @@ public class OrgUnitService {
         return orgUnitRepository.save(orgUnit);
     }
 
-    // TODO add batch move
-
     @Transactional
     public OrgUnit moveOrgUnitBetweenRooms(Long orgUnitId, Long targetRoomId) {
         OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
@@ -130,6 +129,28 @@ public class OrgUnitService {
         roomRepository.save(targetRoom);
 
         return orgUnit;
+    }
+
+    @Transactional
+    public Iterable<OrgUnit> batchMoveOrgUnits(List<Long> orgUnitIds, Long targetRoomId) {
+        Room targetRoom = roomRepository.findById(targetRoomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+
+        List<OrgUnit> updatedOrgUnits = new ArrayList<>();
+        for (Long orgUnitId : orgUnitIds) {
+            OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                    .orElseThrow(() -> new OrgUnitNotFoundException());
+
+            // Ensure the orgUnit and target Room belong to the same project
+            if (!orgUnit.getProject().equals(targetRoom.getProject())) {
+                throw new IllegalArgumentException("Cannot move org unit to a different project's room.");
+            }
+
+            // Move org unit to the target room
+            orgUnit.setRoom(targetRoom);
+            updatedOrgUnits.add(orgUnit);
+        }
+        return orgUnitRepository.saveAll(updatedOrgUnits);
     }
 
     @Transactional

@@ -372,6 +372,73 @@ class OrgUnitControllerTests {
     }
 
     @Test
+    void batchMoveOrgUnits_Success() throws Exception {
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+        List<OrgUnit> movedOrgUnits = List.of(
+                new OrgUnit("OrgUnit 1", "Description", targetRoom),
+                new OrgUnit("OrgUnit 2", "Description", targetRoom),
+                new OrgUnit("OrgUnit 3", "Description", targetRoom));
+
+        when(orgUnitService.batchMoveOrgUnits(orgUnitIds, targetRoomId)).thenReturn(movedOrgUnits);
+
+        mockMvc.perform(put("/org-units/batch-move-room/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("OrgUnit 1"))
+                .andExpect(jsonPath("$[1].name").value("OrgUnit 2"))
+                .andExpect(jsonPath("$[2].name").value("OrgUnit 3"));
+    }
+
+    @Test
+    void batchMoveOrgUnits_TargetRoomNotFound_ShouldReturnNotFound() throws Exception {
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 999L;
+
+        when(orgUnitService.batchMoveOrgUnits(orgUnitIds, targetRoomId))
+                .thenThrow(new RoomNotFoundException());
+
+        mockMvc.perform(put("/org-units/batch-move-room/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
+    }
+
+    @Test
+    void batchMoveOrgUnits_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        List<Long> orgUnitIds = List.of(1L, 999L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.batchMoveOrgUnits(orgUnitIds, targetRoomId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        mockMvc.perform(put("/org-units/batch-move-room/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void batchMoveOrgUnits_OrgUnitInDifferentProject_ShouldReturnBadRequest() throws Exception {
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.batchMoveOrgUnits(orgUnitIds, targetRoomId))
+                .thenThrow(new IllegalArgumentException("Cannot move org unit to a different project's room."));
+
+        mockMvc.perform(put("/org-units/batch-move-room/10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Cannot move org unit to a different project's room."));
+    }
+
+    @Test
     void getOrgUnitItems_ShouldReturnItems_WhenOrgUnitExists() throws Exception {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit

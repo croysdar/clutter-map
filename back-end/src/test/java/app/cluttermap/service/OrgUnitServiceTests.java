@@ -3,6 +3,7 @@ package app.cluttermap.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -334,6 +335,50 @@ public class OrgUnitServiceTests {
         Long nonExistentRoomId = 999L;
         assertThrows(RoomNotFoundException.class, () -> {
             orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), nonExistentRoomId);
+        });
+    }
+
+    @Test
+    void batchMoveOrgUnits_Success() {
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(targetRoom));
+
+        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", mockProject);
+        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", mockProject);
+
+        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
+        when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnit2));
+        when(orgUnitRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Iterable<OrgUnit> movedOrgUnits = orgUnitService.batchMoveOrgUnits(List.of(1L, 2L), 10L);
+
+        assertThat(movedOrgUnits).allMatch(orgUnit -> orgUnit.getRoom().equals(targetRoom));
+    }
+
+    @Test
+    void batchMoveOrgUnits_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+        when(roomRepository.findById(targetRoom.getId())).thenReturn(Optional.of(targetRoom));
+
+        Long nonExistentOrgUnitId = 999L;
+        when(orgUnitRepository.findById(nonExistentOrgUnitId)).thenReturn(Optional.empty());
+
+        assertThrows(OrgUnitNotFoundException.class, () -> {
+            orgUnitService.batchMoveOrgUnits(List.of(nonExistentOrgUnitId), targetRoom.getId());
+        });
+    }
+
+    @Test
+    void batchMoveOrgUnits_DifferentProject_ShouldThrowIllegalArgumentException() {
+        Project differentProject = new Project("Different Project", mockUser);
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+        OrgUnit orgUnitWithDifferentProject = new OrgUnit("OrgUnit", "Description", differentProject);
+
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(targetRoom));
+        when(orgUnitRepository.findById(20L)).thenReturn(Optional.of(orgUnitWithDifferentProject));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            orgUnitService.batchMoveOrgUnits(List.of(20L), 10L);
         });
     }
 
