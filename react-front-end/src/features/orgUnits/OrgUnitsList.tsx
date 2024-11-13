@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
     Card,
-    CardActions,
     CardHeader,
     CircularProgress,
     Paper,
@@ -10,11 +9,9 @@ import {
 } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { ListViewTileWrap } from '@/pages/ListViewPage';
-import { useParams } from 'react-router-dom';
-import ItemsAccordion from '../items/ItemsAccordion';
+import { useNavigate, useParams } from 'react-router-dom';
 import RoomMenu from '../rooms/RoomMenu';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
@@ -29,6 +26,12 @@ const OrgUnitsList: React.FC = () => {
         isError,
         error
     } = useGetOrgUnitsByRoomQuery(roomId!);
+
+    const navigate = useNavigate();
+    const handleClick = (e: any, orgUnitId: number) => {
+        e.preventDefault();
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`)
+    }
 
     if (isLoading) {
         return (
@@ -54,14 +57,8 @@ const OrgUnitsList: React.FC = () => {
                         <div key={orgUnit.id} >
                             <CardHeader
                                 title={<Typography variant='h6'> {orgUnit.name}</Typography>}
-                                action={<OrgUnitMenu orgUnit={orgUnit} />}
+                                onClick={(e) => handleClick(e, orgUnit.id)}
                             />
-                            {/* <CardContent>
-                                <Typography variant="body2" sx={{ mb: 1 }}>{orgUnit.description}</Typography>
-                            </CardContent> */}
-                            <CardActions>
-                                <ItemsAccordion orgUnitId={orgUnit.id.toString()} />
-                            </CardActions>
                         </div>
                     </Card>
                 ))}

@@ -24,7 +24,6 @@ const ProjectsList: React.FC = () => {
 
     const navigate = useNavigate();
 
-
     const handleClick = (e: any, projectId: number) => {
         e.preventDefault();
 

@@ -24,6 +24,7 @@ import RoomsList from '@/features/rooms/RoomsList';
 import { AddItem } from '@/features/items/AddItem';
 import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
+import ItemsList from '@/features/items/ItemsList';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -74,6 +75,7 @@ const Pages: React.FC = () => {
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
 
+                                    <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={ItemsList} />
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/add" Component={AddItem} />
                                     <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId/edit" Component={EditItem} />
                                 </Routes>
