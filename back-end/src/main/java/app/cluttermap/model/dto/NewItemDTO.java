@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class NewItemDTO {
@@ -15,17 +15,23 @@ public class NewItemDTO {
     private String description;
     private List<String> tags;
 
-    @NotNull(message = "OrgUnit ID must not be blank.")
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
-    // TODO see if we can allow *either* org unit or project id as parent
+    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
+    private String projectId;
 
-    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
+    @AssertTrue(message = "Either OrgUnitId or ProjectId must be provided.")
+    public boolean isOrgUnitOrProjectValid() {
+        return orgUnitId != null || projectId != null;
+    }
+
+    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId, String projectId) {
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.orgUnitId = orgUnitId;
+        this.projectId = projectId;
     }
 
     public String getName() {
@@ -40,12 +46,16 @@ public class NewItemDTO {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
     public String getOrgUnitId() {
         return orgUnitId;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public void setName(String name) {
@@ -60,9 +70,17 @@ public class NewItemDTO {
         this.orgUnitId = orgUnitId;
     }
 
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
     @JsonIgnore
     public Long getOrgUnitIdAsLong() {
         return Long.parseLong(orgUnitId);
     }
 
+    @JsonIgnore
+    public Long getProjectIdAsLong() {
+        return Long.parseLong(projectId);
+    }
 }
