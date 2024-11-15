@@ -66,33 +66,6 @@ public class RoomService {
     }
 
     @Transactional
-    public Room addOrgUnitToRoom(Long roomId, Long orgUnitId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RoomNotFoundException());
-
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-
-        if (!orgUnit.getProject().equals(room.getProject())) {
-            throw new IllegalArgumentException("Cannot add org unit to a different project's room");
-        }
-
-        room.addOrgUnit(orgUnit); // Manages both sides of the relationship
-        return roomRepository.save(room);
-    }
-
-    @Transactional
-    public Room removeOrgUnitFromRoom(Long roomId, Long orgUnitId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RoomNotFoundException());
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-        room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
-        roomRepository.save(room);
-        return room;
-    }
-
-    @Transactional
     public void deleteRoom(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RoomNotFoundException());
