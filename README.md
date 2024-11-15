@@ -53,15 +53,6 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 1. **Backend (Spring Boot)**:
 
    - Navigate to the `back-end/` directory.
-   - Create .env file containing ...
-   - Run the following command to start the Spring Boot server:
-     ```
-     ./gradlew bootRun
-     ```
-
-1. **Backend (Spring Boot)**:
-
-   - Navigate to the `back-end/` directory.
    - Create a `.env` file with the following environment variables. Make sure to replace `{DATABASE_NAME}` and other placeholders with your own values:
 
      ```plaintext
