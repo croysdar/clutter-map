@@ -26,7 +26,7 @@ export const AddItem = () => {
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 
-    // States to special input
+    // States to manage special input
     const [tags, setTags] = useState<string[]>([]);
     const [quantity, setQuantity] = useState<number>(1);
 

@@ -26,7 +26,7 @@ const EditItem = () => {
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
-    // States to special input
+    // States to manage special input
     const [tags, setTags] = useState<string[]>(item?.tags || []);
     const [quantity, setQuantity] = useState<number>(item?.quantity || 1);
 
