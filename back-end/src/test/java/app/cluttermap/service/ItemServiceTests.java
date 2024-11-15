@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.exception.item.ItemLimitReachedException;
@@ -79,6 +81,18 @@ public class ItemServiceTests {
         mockProject = new Project("Mock Project", mockUser);
         mockOrgUnit = new OrgUnit("Mock Org Unit", "", new Room("Mock Room", "Room Description", mockProject));
         mockOrgUnit.setId(1L);
+    }
+
+    @Test
+    void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnItem() {
+        // Overwrite the default stub for `isResourceOwner` to deny access to the item
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(false);
+
+        // Act & Assert:
+        assertThrows(AccessDeniedException.class, () -> {
+            itemService.checkOwnershipForItems(itemIds);
+        });
     }
 
     @Test

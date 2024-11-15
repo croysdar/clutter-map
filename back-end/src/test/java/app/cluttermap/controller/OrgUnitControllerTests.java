@@ -25,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -421,6 +422,24 @@ class OrgUnitControllerTests {
                 .content(objectMapper.writeValueAsString(orgUnitIds)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void unassignOrgUnits_UserDoesNotOwnOrgUnit_ShouldThrowAccessDenied() throws Exception {
+        // Arrange: Set up orgUnitIds
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+
+        String message = String.format(OrgUnitService.ACCESS_DENIED_STRING, 1L);
+
+        doThrow(new AccessDeniedException(message)).when(orgUnitService).checkOwnershipForOrgUnits(orgUnitIds);
+
+        // Act & Assert: Expect an AccessDeniedException when attempting to unassign
+        // org units
+        mockMvc.perform(put("/org-units/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Access Denied"));
     }
 
     @Test

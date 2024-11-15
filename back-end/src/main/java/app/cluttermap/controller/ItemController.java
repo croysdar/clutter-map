@@ -54,7 +54,7 @@ public class ItemController {
 
     @PutMapping("/unassign")
     public ResponseEntity<Iterable<Item>> unassignItems(@RequestBody List<Long> itemIds) {
-        // TODO figure out how to enforce resource ownership here
+        itemService.checkOwnershipForItems(itemIds);
         return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 

@@ -26,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,7 +34,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -311,7 +311,7 @@ class ItemControllerTests {
 
     @Test
     void unassignItems_Success() throws Exception {
-        // Arrange: Set up orgUnitId, itemIds, and simulate a successful removal
+        // Arrange: Set up itemIds, and simulate a successful unassign
         List<Long> itemIds = List.of(1L, 2L, 3L);
         List<Item> unassignedItems = List.of(
                 new Item("Item 1", "Description", List.of("tag1"), mockOrgUnit),
@@ -346,6 +346,24 @@ class ItemControllerTests {
                 .content(objectMapper.writeValueAsString(itemIds)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Item not found."));
+    }
+
+    @Test
+    void unassignItems_UserDoesNotOwnItem_ShouldThrowAccessDenied() throws Exception {
+        // Arrange: Set up itemIds
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+
+        String message = String.format(ItemService.ACCESS_DENIED_STRING, 1L);
+
+        doThrow(new AccessDeniedException(message)).when(itemService).checkOwnershipForItems(itemIds);
+
+        // Act & Assert: Expect an AccessDeniedException when attempting to unassign
+        // items
+        mockMvc.perform(put("/items/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Access Denied"));
     }
 
     @Test

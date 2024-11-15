@@ -3,12 +3,10 @@ package app.cluttermap.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
-import app.cluttermap.exception.room.RoomNotFoundException;
-import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
@@ -41,6 +39,15 @@ public class OrgUnitService {
     }
 
     public static final String PROJECT_MISMATCH_ERROR = "Cannot move organization unit to a different project's room.";
+    public static final String ACCESS_DENIED_STRING = "You do not have permission to access org unit with ID: %d";
+
+    public void checkOwnershipForOrgUnits(List<Long> orgUnitIds) {
+        for (Long id : orgUnitIds) {
+            if (!securityService.isResourceOwner(id, "org-unit")) {
+                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
+            }
+        }
+    }
 
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)

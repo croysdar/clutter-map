@@ -75,9 +75,8 @@ public class OrgUnitController {
     }
 
     @PutMapping("/unassign")
-    // @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Iterable<OrgUnit>> unassignOrgUnits(@RequestBody List<Long> orgUnitIds) {
-        // TODO figure out how to enforce ownership here
+        orgUnitService.checkOwnershipForOrgUnits(orgUnitIds);
         return ResponseEntity.ok(orgUnitService.unassignOrgUnits(orgUnitIds));
     }
 

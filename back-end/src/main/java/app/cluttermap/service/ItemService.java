@@ -3,6 +3,7 @@ package app.cluttermap.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
@@ -34,6 +35,15 @@ public class ItemService {
     }
 
     public static final String PROJECT_MISMATCH_ERROR = "Cannot move item to a different project's organization unit.";
+    public static final String ACCESS_DENIED_STRING = "You do not have permission to access item with ID: %d";
+
+    public void checkOwnershipForItems(List<Long> itemIds) {
+        for (Long id : itemIds) {
+            if (!securityService.isResourceOwner(id, "item")) {
+                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
+            }
+        }
+    }
 
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
