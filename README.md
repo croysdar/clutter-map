@@ -121,35 +121,30 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Path Variable**: `id` (Long)  
   **Response**: `OrgUnit`
 
+- **GET `/{id}/items`**  
+  Retrieves all items within a specific organization unit by organization unit ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Iterable<Item>`
+
 - **PUT `/{id}`**  
   Updates an existing organization unit.  
   **Path Variable**: `id` (Long)  
   **Request Body**: `UpdateOrgUnitDTO`  
   **Response**: `OrgUnit`
 
-- **PUT `/{orgUnitId}/move-room/{roomId}`**  
-  Moves an organization unit to a different room within the same project.  
-  **Path Variables**:
+- **PUT `/{id}/items`**  
+  Updates the items assigned to an existing organization unit.  
+  Items must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> itemIds`  
+  **Response**: `Iterable<Item>`
 
-  - `orgUnitId` (Long): ID of the organization unit to be moved.
-  - `roomId` (Long): Target room ID.  
-    **Response**: `OrgUnit`
-
-- **POST `/{orgUnitId}/items/{itemId}`**  
-  Adds an item to a specific organization unit.  
-  **Path Variables**:
-
-  - `orgUnitId` (Long): ID of the organization unit.
-  - `itemId` (Long): ID of the item to add.  
-    **Response**: `OrgUnit`
-
-- **DELETE `/{orgUnitId}/items/{itemId}`**  
-  Removes an item from a specific organization unit.  
-  **Path Variables**:
-
-  - `orgUnitId` (Long): ID of the organization unit.
-  - `itemId` (Long): ID of the item to remove.  
-    **Response**: `OrgUnit`
+- **PUT `/unassign`**  
+  Unassigns the specified org units from their rooms.
+  Org Units must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Iterable<OrgUnit>`
 
 - **DELETE `/{id}`**  
   Deletes an organization unit by ID.  
@@ -185,21 +180,11 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Request Body**: `UpdateRoomDTO`  
   **Response**: `Room`
 
-- **PUT `/{roomId}/org-units/{orgUnitId}`**  
-  Adds an organization unit to a specific room.  
-  **Path Variables**:
-
-  - `roomId` (Long): ID of the room.
-  - `orgUnitId` (Long): ID of the organization unit to add.  
-    **Response**: `Room`
-
-- **DELETE `/{roomId}/org-units/{orgUnitId}`**  
-  Removes an organization unit from a specific room.  
-  **Path Variables**:
-
-  - `roomId` (Long): ID of the room.
-  - `orgUnitId` (Long): ID of the organization unit to remove.  
-    **Response**: `Room`
+- **PUT `/{roomId}/org-units`**  
+  Assigns organization units to a specific room.  
+  **Path Variable**: `roomId` (Long): ID of the room.
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Room`
 
 - **DELETE `/{id}`**  
   Deletes a room by ID.  
@@ -258,7 +243,6 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/items`
 
-- **PUT `/{itemId}/move-org-unit/{orgUnitId}`**
 - **GET `/`**  
   Retrieves a list of all items.  
   **Response**: `Iterable<Item>`
@@ -270,25 +254,21 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 - **GET `/{id}`**  
   Retrieves a specific item by ID.  
-  **Path Variable**:
-
-  - `id` (Long): ID of the item to retrieve.  
-    **Response**: `Item`
+  **Path Variable**: `id` (Long): ID of the item to retrieve.  
+   **Response**: `Item`
 
 - **PUT `/{id}`**  
   Updates an existing item.  
-  **Path Variable**:
+  **Path Variable**: `id` (Long): ID of the item to update.  
+  **Request Body**: `UpdateItemDTO`  
+  **Response**: `Item`
 
-  - `id` (Long): ID of the item to update.  
-    **Request Body**: `UpdateItemDTO`  
-    **Response**: `Item`
-
-  **Path Variables**:
-  Moves an item to a different organization unit within the same project.
-
-  - `itemId` (Long): ID of the item to be moved.
-  - `orgUnitId` (Long): Target organization unit ID.  
-    **Response**: `Item`
+- **PUT `/unassign`**  
+  Unassigns the specified items from their org units.
+  Items must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> itemIds`  
+  **Response**: `Iterable<Item>`
 
 - **DELETE `/{id}`**  
   Deletes an item by ID.  
