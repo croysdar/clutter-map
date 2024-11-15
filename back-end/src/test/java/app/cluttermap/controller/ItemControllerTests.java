@@ -85,8 +85,8 @@ class ItemControllerTests {
     @Test
     void getUserItems_ShouldReturnAllUserItems() throws Exception {
         // Arrange: Set up mock user items and mock the service to return them
-        Item item1 = new Item("Test Item 1", "Description 1", List.of("Tag 11", "Tag 12"), mockOrgUnit);
-        Item item2 = new Item("Test Item 2", "Description 2", List.of("Tag 21", "Tag 22"), mockOrgUnit);
+        Item item1 = new Item("Test Item 1", "Description 1", List.of("Tag 11", "Tag 12"), 1, mockOrgUnit);
+        Item item2 = new Item("Test Item 2", "Description 2", List.of("Tag 21", "Tag 22"), 2, mockOrgUnit);
         when(itemService.getUserItems()).thenReturn(List.of(item1, item2));
 
         // Act: Perform a GET request to the /items endpoint
@@ -101,7 +101,7 @@ class ItemControllerTests {
                 .andExpect(jsonPath("$[1].name").value("Test Item 2"))
                 .andExpect(jsonPath("$[1].description").value("Description 2"))
                 .andExpect(jsonPath("$[1].tags").value(contains("Tag 21", "Tag 22")))
-                .andExpect(jsonPath("$[1].quantity").value(1));
+                .andExpect(jsonPath("$[1].quantity").value(2));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getUserItems();
@@ -127,7 +127,7 @@ class ItemControllerTests {
     void getOneItem_ShouldReturnItem_WhenItemExists() throws Exception {
         // Arrange: Set up a mock item and stub the service to return it when
         // searched by ID
-        Item item = new Item("Test Item", "Item description", List.of("tag 1"), mockOrgUnit);
+        Item item = new Item("Test Item", "Item description", List.of("tag 1"), 1, mockOrgUnit);
         when(itemService.getItemById(1L)).thenReturn(item);
 
         // Act: Perform a GET request to the /items/1 endpoint
@@ -161,8 +161,8 @@ class ItemControllerTests {
     void addOneItem_ShouldCreateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewItemDTO with valid data and mock the service to
         // return a new item
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), String.valueOf(1L));
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), 1, String.valueOf(1L));
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), 1, mockOrgUnit);
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
         // Act: Perform a POST request to the /items endpoint with the item data
@@ -181,7 +181,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenItemNameIsBlank() throws Exception {
         // Arrange: Set up a NewItemDTO with a blank name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), 1, String.valueOf(1L));
 
         // Act: Perform a POST request to the /items endpoint with the blank item
         // name
@@ -196,9 +196,9 @@ class ItemControllerTests {
     }
 
     @Test
-    void addOneItem_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
+    void addOneItem_ShouldReturnBadRequest_WhenItemNameIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), 1, String.valueOf(1L));
 
         // Act: Perform a POST request to the /items endpoint with the null item
         // name
@@ -215,9 +215,9 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null);
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), 1, null);
 
-        // Act: Perform a POST request to the /items endpoint with the null item
+        // Act: Perform a POST request to the /items endpoint with the null org unit
         // ID
         mockMvc.perform(post("/items")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -232,9 +232,9 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
         // Arrange: Set up a NewItemDTO with a NaN item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string");
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), 1, "string");
 
-        // Act: Perform a POST request to the /items endpoint with the NaN item
+        // Act: Perform a POST request to the /items endpoint with the NaN org unit
         // ID
         mockMvc.perform(post("/items")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -247,11 +247,50 @@ class ItemControllerTests {
     }
 
     @Test
+    void addOneItem_ShouldReturnBadRequest_WhenQuantityIsLessThan1() throws Exception {
+        // Arrange: Set up a NewItemDTO with a 0 quantity to trigger validation
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), 0, String.valueOf(1L));
+
+        // Act: Perform a POST request to the /items endpoint with the 0 quantity
+        mockMvc.perform(post("/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDTO)))
+                .andExpect(status().isBadRequest())
+
+                // Assert: Verify the validation error response for the quantity field
+                .andExpect(jsonPath("$.errors[0].field").value("quantity"))
+                .andExpect(jsonPath("$.errors[0].message").value("Quantity must be a least 1."));
+    }
+
+    @Test
+    void addOneItem_ShouldSetQuantity1_WhenQuantityNull() throws Exception {
+        // Arrange: Set up a NewItemDTO with a null quantity
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null, String.valueOf(1L));
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), itemDTO.getQuantity(),
+                mockOrgUnit);
+        when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
+
+        // Act: Perform a POST request to the /items endpoint with the null quantity
+        mockMvc.perform(post("/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDTO)))
+
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected item quantity
+                .andExpect(jsonPath("$.quantity").value(1));
+
+        // Assert: Ensure the service method was called to create the item
+        verify(itemService).createItem(any(NewItemDTO.class));
+    }
+
+    @Test
     void updateOneItem_ShouldUpdateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up an UpdateItemDTO with a new name and mock the service to
         // return the updated item
         UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description", List.of("Updated Tag"), 2);
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit, itemDTO.getQuantity());
+        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                itemDTO.getQuantity(), mockOrgUnit);
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items/1 endpoint with the update data
@@ -305,6 +344,44 @@ class ItemControllerTests {
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
                 .andExpect(jsonPath("$.errors[0].message").value("Item name must not be blank."));
+    }
+
+    @Test
+    void updateOneItem_ShouldReturnBadRequest_WhenQuantityIsLessThan1() throws Exception {
+        // Arrange: Set up an UpdateItemDTO with a 0 quantity
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated name", "Updated Description", List.of("Updated Tag"), 0);
+
+        // Act: Perform a POST request to the /items endpoint with the 0 quantity
+        mockMvc.perform(put("/items/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDTO)))
+                .andExpect(status().isBadRequest())
+
+                // Assert: Verify the validation error response for the quantity field
+                .andExpect(jsonPath("$.errors[0].field").value("quantity"))
+                .andExpect(jsonPath("$.errors[0].message").value("Quantity must be a least 1."));
+    }
+
+    @Test
+    void updateOneItem_ShouldSetQuantity1_WhenQuantityNull() throws Exception {
+        // Arrange: Set up a UpdateItemDTO with a null quantity
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated name", "Updated Description", List.of("Updated Tag"), null);
+        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                itemDTO.getQuantity(), mockOrgUnit);
+        when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
+
+        // Act: Perform a PUT request to the /items endpoint with the null quantity
+        mockMvc.perform(put("/items/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDTO)))
+
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected item quantity
+                .andExpect(jsonPath("$.quantity").value(1));
+
+        // Assert: Ensure the service method was called to update the item
+        verify(itemService).updateItem(eq(1L), any(UpdateItemDTO.class));
     }
 
     @Test

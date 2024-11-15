@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -19,22 +20,15 @@ public class NewItemDTO {
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
+    @Min(value = 1, message = "Quantity must be a least 1.")
     private Integer quantity;
 
-    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId, Integer quantity) {
+    public NewItemDTO(String name, String description, List<String> tags, Integer quantity, String orgUnitId) {
         this.name = name;
         this.description = description;
         this.tags = tags;
+        this.quantity = (quantity != null) ? quantity : 1;
         this.orgUnitId = orgUnitId;
-        this.quantity = quantity;
-    }
-
-    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
-        this.name = name;
-        this.description = description;
-        this.tags = tags;
-        this.orgUnitId = orgUnitId;
-        this.quantity = 1;
     }
 
     public String getName() {

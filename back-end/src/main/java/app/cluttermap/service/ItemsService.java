@@ -33,7 +33,8 @@ public class ItemsService {
     public Item createItem(NewItemDTO itemDTO) {
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());
 
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), orgUnit, itemDTO.getQuantity());
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), itemDTO.getQuantity(),
+                orgUnit);
         return itemsRepository.save(newItem);
     }
 
