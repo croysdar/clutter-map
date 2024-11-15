@@ -32,30 +32,30 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
-import app.cluttermap.repository.ItemsRepository;
-import app.cluttermap.repository.OrgUnitsRepository;
-import app.cluttermap.repository.ProjectsRepository;
-import app.cluttermap.repository.RoomsRepository;
-import app.cluttermap.repository.UsersRepository;
+import app.cluttermap.repository.ItemRepository;
+import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 class SecurityServiceTests {
 
     @Mock
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
     @Mock
-    private ProjectsRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @Mock
-    private RoomsRepository roomRepository;
+    private RoomRepository roomRepository;
 
     @Mock
-    private OrgUnitsRepository orgUnitRepository;
+    private OrgUnitRepository orgUnitRepository;
 
     @Mock
-    private ItemsRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @InjectMocks
     private SecurityService securityService;

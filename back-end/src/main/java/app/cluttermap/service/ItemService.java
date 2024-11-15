@@ -8,24 +8,24 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
-import app.cluttermap.repository.ItemsRepository;
+import app.cluttermap.repository.ItemRepository;
 import jakarta.transaction.Transactional;
 
 @Service("itemService")
-public class ItemsService {
-    private final ItemsRepository itemsRepository;
+public class ItemService {
+    private final ItemRepository itemRepository;
     private final SecurityService securityService;
     private final OrgUnitService orgUnitService;
 
-    public ItemsService(ItemsRepository itemsRepository, SecurityService securityService,
+    public ItemService(ItemRepository itemRepository, SecurityService securityService,
             OrgUnitService orgUnitService) {
-        this.itemsRepository = itemsRepository;
+        this.itemRepository = itemRepository;
         this.securityService = securityService;
         this.orgUnitService = orgUnitService;
     }
 
     public Item getItemById(Long id) {
-        return itemsRepository.findById(id)
+        return itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException());
     }
 
@@ -35,13 +35,13 @@ public class ItemsService {
 
         Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), itemDTO.getQuantity(),
                 orgUnit);
-        return itemsRepository.save(newItem);
+        return itemRepository.save(newItem);
     }
 
     public Iterable<Item> getUserItems() {
         User user = securityService.getCurrentUser();
 
-        return itemsRepository.findItemsByUserId(user.getId());
+        return itemRepository.findItemsByUserId(user.getId());
     }
 
     @Transactional
@@ -58,14 +58,14 @@ public class ItemsService {
             _item.setTags(itemDTO.getTags());
         }
 
-        return itemsRepository.save(_item);
+        return itemRepository.save(_item);
     }
 
     @Transactional
     public void deleteItem(Long id) {
         // Make sure item exists first
         getItemById(id);
-        itemsRepository.deleteById(id);
+        itemRepository.deleteById(id);
     }
 
 }

@@ -23,13 +23,13 @@ import jakarta.transaction.Transactional;
 @EnableTestcontainers
 public class ProjectRepositoryIntegrationTests {
     @Autowired
-    private ProjectsRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
-    private RoomsRepository roomRepository;
+    private RoomRepository roomRepository;
 
     @Autowired
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {

@@ -42,7 +42,7 @@ import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(OrgUnitsController.class)
+@WebMvcTest(OrgUnitController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
