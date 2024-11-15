@@ -39,6 +39,7 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
@@ -53,6 +54,9 @@ class RoomControllerTests {
 
     @MockBean
     private RoomService roomService;
+
+    @MockBean
+    private OrgUnitService orgUnitService;
 
     @MockBean
     private SecurityService securityService;
@@ -288,6 +292,90 @@ class RoomControllerTests {
     }
 
     @Test
+    void assignOrgUnitsToRoom_Success() throws Exception {
+        // Arrange: Set up orgUnitIds and Room ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+
+        List<OrgUnit> movedOrgUnits = List.of(
+                new OrgUnit("Org Unit 1", "Description", targetRoom),
+                new OrgUnit("Org Unit 2", "Description", targetRoom),
+                new OrgUnit("Org Unit 3", "Description", targetRoom));
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenReturn(movedOrgUnits);
+
+        // Act & Assert: Perform PUT request and verify status 200 OK with updated org
+        // Units
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Org Unit 1"))
+                .andExpect(jsonPath("$[1].name").value("Org Unit 2"))
+                .andExpect(jsonPath("$[2].name").value("Org Unit 3"));
+    }
+
+    @Test
+    void assignOrgUnitsToRoom_TargetRoomNotFound_ShouldReturnNotFound()
+            throws Exception {
+        // Arrange: Set up orgUnitIds and non existent Room ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 999L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new RoomNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
+    }
+
+    // TODO allow partial success
+    @Test
+    void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up Room ID and list with a non-existent Org Unit ID
+        List<Long> orgUnitIds = List.of(1L, 999L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void assignOrgUnitsToRoom_OrgUnitInDifferentProject_ShouldReturnBadRequest()
+            throws Exception {
+        // Arrange: Set up a item IDs and target OrgUnit ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new IllegalArgumentException(
+                        OrgUnitService.PROJECT_MISMATCH_ERROR));
+
+        // Act & Assert: Perform PUT request and verify status 400 Bad Request
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(
+                                OrgUnitService.PROJECT_MISMATCH_ERROR));
+    }
+
+    @Test
     void deleteOneRoom_ShouldDeleteRoom_WhenRoomExists() throws Exception {
         // Act: Perform a DELETE request to the /rooms/1 endpoint
         mockMvc.perform(delete("/rooms/1"))
@@ -347,119 +435,5 @@ class RoomControllerTests {
         // Assert: Ensure the service method was called to attempt to retrieve the
         // room
         verify(roomService).getRoomById(1L);
-    }
-
-    @Test
-    void addOrgUnitToRoom_Success() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate a successful addition
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-        Room room = new Room("Test Room", "Room Description", mockProject);
-
-        when(roomService.addOrgUnitToRoom(roomId, orgUnitId)).thenReturn(room);
-
-        // Act & Assert: Perform the PUT request and verify status 200 OK and correct
-        // room data
-        mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Test Room"));
-    }
-
-    @Test
-    void addOrgUnitToRoom_DifferentProjects_ShouldReturnBadRequest() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate service throwing
-        // IllegalArgumentException
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-
-        when(roomService.addOrgUnitToRoom(roomId, orgUnitId))
-                .thenThrow(new IllegalArgumentException(
-                        "Cannot add org unit to a different project's room"));
-
-        // Act & Assert: Perform the PUT request and verify status 400 Bad Request and
-        // error message
-        mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("Cannot add org unit to a different project's room"));
-    }
-
-    @Test
-    void addOrgUnitToRoom_RoomNotFound_ShouldReturnNotFound() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate service throwing
-        // RoomNotFoundException
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-
-        when(roomService.addOrgUnitToRoom(roomId, orgUnitId))
-                .thenThrow(new RoomNotFoundException());
-
-        // Act & Assert: Perform the PUT request and verify status 404 Not Found
-        mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Room not found."));
-    }
-
-    @Test
-    void addOrgUnitToRoom_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate service throwing
-        // OrgUnitNotFoundException
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-
-        when(roomService.addOrgUnitToRoom(roomId, orgUnitId))
-                .thenThrow(new OrgUnitNotFoundException());
-
-        // Act & Assert: Perform the PUT request and verify status 404 Not Found
-        mockMvc.perform(put("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Organization unit not found."));
-    }
-
-    @Test
-    void removeOrgUnitFromRoom_Success() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate a successful removal
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-        Room room = new Room("Test Room", "Room Description", mockProject);
-
-        when(roomService.removeOrgUnitFromRoom(roomId, orgUnitId)).thenReturn(room);
-
-        // Act & Assert: Perform the DELETE request and verify status 200 OK and correct
-        // room data
-        mockMvc.perform(delete("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Test Room"));
-    }
-
-    @Test
-    void removeOrgUnitFromRoom_RoomNotFound_ShouldReturnNotFound() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate service throwing
-        // RoomNotFoundException
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-
-        when(roomService.removeOrgUnitFromRoom(roomId, orgUnitId))
-                .thenThrow(new RoomNotFoundException());
-
-        // Act & Assert: Perform the DELETE request and verify status 404 Not Found
-        mockMvc.perform(delete("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Room not found."));
-    }
-
-    @Test
-    void removeOrgUnitFromRoom_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
-        // Arrange: Set up roomId, orgUnitId, and simulate service throwing
-        // OrgUnitNotFoundException
-        Long roomId = 1L;
-        Long orgUnitId = 2L;
-
-        when(roomService.removeOrgUnitFromRoom(roomId, orgUnitId))
-                .thenThrow(new OrgUnitNotFoundException());
-
-        // Act & Assert: Perform the DELETE request and verify status 404 Not Found
-        mockMvc.perform(delete("/rooms/{roomId}/org-units/{orgUnitId}", roomId, orgUnitId))
-                .andExpect(status().isNotFound());
     }
 }

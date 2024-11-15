@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.item.ItemNotFoundException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.User;
@@ -33,6 +32,8 @@ public class ItemService {
         this.securityService = securityService;
         this.orgUnitService = orgUnitService;
     }
+
+    public static final String PROJECT_MISMATCH_ERROR = "Cannot move item to a different project's organization unit.";
 
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
@@ -75,52 +76,71 @@ public class ItemService {
         return itemRepository.save(_item);
     }
 
-    @Transactional
-    public Item moveItemBetweenOrgUnits(Long itemId, Long targetOrgUnitId) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException());
-
-        OrgUnit currentOrgUnit = item.getOrgUnit();
-        OrgUnit targetOrgUnit = orgUnitRepository.findById(targetOrgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-
-        // Ensure the current and target OrgUnit are in the same Project
-        if (currentOrgUnit != null && !currentOrgUnit.getProject().equals(targetOrgUnit.getProject())) {
-            throw new IllegalArgumentException("Cannot move item to a different project's Organization Unit.");
+    private void validateSameProject(Item item, OrgUnit targetOrgUnit) {
+        if (targetOrgUnit == null || targetOrgUnit.getProject() == null) {
+            throw new IllegalArgumentException("Target OrgUnit or its Project is null");
         }
-
-        // Remove the item from the current OrgUnit (if any) and add it to the target
-        // OrgUnit
-        if (currentOrgUnit != null) {
-            currentOrgUnit.removeItem(item);
+        if (item == null || item.getProject() == null) {
+            throw new IllegalArgumentException("Item or its Project is null");
         }
-        targetOrgUnit.addItem(item);
+        if (!item.getProject().equals(targetOrgUnit.getProject())) {
+            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
+        }
+    }
 
-        orgUnitRepository.save(targetOrgUnit);
+    private OrgUnit assignItemToOrgUnit(Item item, OrgUnit orgUnit) {
+        orgUnit.addItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
+    }
 
-        return item;
+    private OrgUnit unassignItemFromOrgUnit(Item item, OrgUnit orgUnit) {
+        orgUnit.removeItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
     }
 
     @Transactional
-    public Iterable<Item> batchMoveItems(List<Long> itemIds, Long targetOrgUnitId) {
-        OrgUnit targetOrgUnit = orgUnitRepository.findById(targetOrgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
+    public Iterable<Item> assignItemsToOrgUnit(List<Long> itemIds, Long targetOrgUnitId) {
+        OrgUnit targetOrgUnit = orgUnitService.getOrgUnitById(targetOrgUnitId);
+
+        List<Item> updatedItems = new ArrayList<>();
+
+        for (Long itemId : itemIds) {
+            Item item = getItemById(itemId);
+
+            validateSameProject(item, targetOrgUnit);
+
+            // Check if item is already assigned to an org unit
+            if (item.getOrgUnit() != null) {
+                unassignItemFromOrgUnit(item, item.getOrgUnit());
+            }
+            assignItemToOrgUnit(item, targetOrgUnit);
+            updatedItems.add(item);
+        }
+        return updatedItems;
+    }
+
+    @Transactional
+    public Iterable<Item> unassignItems(List<Long> itemIds) {
+        // TODO allow for partial success
 
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
-            Item item = itemRepository.findById(itemId)
-                    .orElseThrow(() -> new ItemNotFoundException());
-
-            // Ensure the item and target OrgUnit belong to the same project
-            if (!item.getProject().equals(targetOrgUnit.getProject())) {
-                throw new IllegalArgumentException("Cannot move item to a different project's Organization Unit.");
+            Item item = getItemById(itemId);
+            if (item.getOrgUnit() != null) {
+                unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
-
-            // Move item to the target OrgUnit
-            item.setOrgUnit(targetOrgUnit);
             updatedItems.add(item);
         }
-        return itemRepository.saveAll(updatedItems);
+        return updatedItems;
+
+        // Fetch all items at once for the provided IDs
+        // Iterable<Item> items = itemRepository.findAllById(itemIds);
+
+        // If no items are found, throw an exception
+        // if (items.isEmpty()) {
+        // throw new ItemsNotFoundException("None of the specified items were found: " +
+        // itemIds);
+        // }
     }
 
     @Transactional

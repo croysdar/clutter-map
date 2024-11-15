@@ -104,14 +104,13 @@ public class Room {
 
     public void addOrgUnit(OrgUnit orgUnit) {
         orgUnits.add(orgUnit);
-        orgUnit.setRoom(this); // Set the room reference in OrgUnit
+        orgUnit.setRoom(this);
     }
 
     public void removeOrgUnit(OrgUnit orgUnit) {
-        if (!orgUnits.contains(orgUnit)) {
-            throw new IllegalArgumentException("OrgUnit does not belong to this Room");
+        if (orgUnits.contains(orgUnit)) {
+            orgUnits.remove(orgUnit);
         }
-        orgUnits.remove(orgUnit);
-        orgUnit.setRoom(null); // Unassign the room reference in OrgUnit
+        orgUnit.setRoom(null);
     }
 }

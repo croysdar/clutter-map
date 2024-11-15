@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +18,7 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import jakarta.validation.Valid;
 
@@ -24,9 +27,13 @@ import jakarta.validation.Valid;
 @Validated
 public class RoomController {
     private final RoomService roomService;
+    private final OrgUnitService orgUnitService;
 
-    public RoomController(RoomService roomService) {
+    public RoomController(
+            RoomService roomService,
+            OrgUnitService orgUnitService) {
         this.roomService = roomService;
+        this.orgUnitService = orgUnitService;
     }
 
     @GetMapping()
@@ -59,18 +66,14 @@ public class RoomController {
         return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
     }
 
-    @PutMapping("/{roomId}/org-units/{orgUnitId}")
-    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
-    public ResponseEntity<Room> addOrgUnitToRoom(@PathVariable Long roomId, @PathVariable Long orgUnitId) {
-        Room updatedRoom = roomService.addOrgUnitToRoom(roomId, orgUnitId);
-        return ResponseEntity.ok(updatedRoom);
-    }
+    @PutMapping("/{roomId}/org-units")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'roomId')")
+    public ResponseEntity<Iterable<OrgUnit>> assignOrgUnitsToRoom(
+            @PathVariable Long roomId,
+            @RequestBody List<Long> orgUnitIds) {
 
-    @DeleteMapping("/{roomId}/org-units/{orgUnitId}")
-    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
-    public ResponseEntity<Room> removeOrgUnitFromRoom(@PathVariable Long roomId, @PathVariable Long orgUnitId) {
-        Room updatedRoom = roomService.removeOrgUnitFromRoom(roomId, orgUnitId);
-        return ResponseEntity.ok(updatedRoom);
+        Iterable<OrgUnit> updatedOrgUnits = orgUnitService.assignOrgUnitsToRoom(orgUnitIds, roomId);
+        return ResponseEntity.ok(updatedOrgUnits);
     }
 
     @DeleteMapping("/{id}")

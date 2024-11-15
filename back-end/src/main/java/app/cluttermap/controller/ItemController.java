@@ -52,26 +52,10 @@ public class ItemController {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
     }
 
-    @PutMapping("/{itemId}/move-org-unit/{orgUnitId}")
-    @PreAuthorize("@securityService.isResourceOwner(#itemId, 'item')")
-    public ResponseEntity<Item> moveItemBetweenOrgUnits(@PathVariable Long itemId,
-            @PathVariable(name = "orgUnitId") Long targetOrgUnitId) {
-        if (targetOrgUnitId == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Item updatedItem = itemService.moveItemBetweenOrgUnits(itemId, targetOrgUnitId);
-        return ResponseEntity.ok(updatedItem);
-    }
-
-    @PutMapping("/batch-move-org-unit/{orgUnitId}")
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
-    public ResponseEntity<Iterable<Item>> batchMoveItems(
-            @PathVariable Long orgUnitId,
-            @RequestBody List<Long> itemIds) {
-
-        Iterable<Item> updatedItems = itemService.batchMoveItems(itemIds, orgUnitId);
-        return ResponseEntity.ok(updatedItems);
+    @PutMapping("/unassign")
+    public ResponseEntity<Iterable<Item>> unassignItems(@RequestBody List<Long> itemIds) {
+        // TODO figure out how to enforce resource ownership here
+        return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 
     @DeleteMapping("/{id}")

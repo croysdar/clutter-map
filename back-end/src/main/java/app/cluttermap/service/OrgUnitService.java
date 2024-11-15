@@ -40,6 +40,8 @@ public class OrgUnitService {
         this.roomService = roomService;
     }
 
+    public static final String PROJECT_MISMATCH_ERROR = "Cannot move organization unit to a different project's room.";
+
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
@@ -77,80 +79,60 @@ public class OrgUnitService {
         return orgUnitRepository.save(_orgUnit);
     }
 
-    @Transactional
-    public OrgUnit addItemToOrgUnit(Long orgUnitId, Long itemId) {
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException());
-
-        // Ensure that item and orgUnit are in the same Project
-        if (!item.getProject().equals(orgUnit.getProject())) {
-            throw new IllegalArgumentException("Cannot add item to a different project's Organization Unit.");
+    private void validateSameProject(OrgUnit orgUnit, Room targetRoom) {
+        if (targetRoom == null || targetRoom.getProject() == null) {
+            throw new IllegalArgumentException("Target Room or its Project is null");
         }
+        if (orgUnit == null || orgUnit.getProject() == null) {
+            throw new IllegalArgumentException("Org Unit or its Project is null");
+        }
+        if (!orgUnit.getProject().equals(targetRoom.getProject())) {
+            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
+        }
+    }
 
-        orgUnit.addItem(item); // Manages both sides of the relationship
-        return orgUnitRepository.save(orgUnit);
+    private Room assignOrgUnitToRoom(OrgUnit orgUnit, Room room) {
+        room.addOrgUnit(orgUnit); // Manages both sides of the relationship
+        return roomRepository.save(room);
+    }
+
+    private Room unassignOrgUnitFromRoom(OrgUnit orgUnit, Room room) {
+        room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
+        return roomRepository.save(room);
     }
 
     @Transactional
-    public OrgUnit removeItemFromOrgUnit(Long orgUnitId, Long itemId) {
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException());
-
-        orgUnit.removeItem(item); // Manages both sides of the relationship
-        return orgUnitRepository.save(orgUnit);
-    }
-
-    @Transactional
-    public OrgUnit moveOrgUnitBetweenRooms(Long orgUnitId, Long targetRoomId) {
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-
-        Room currentRoom = orgUnit.getRoom();
-        Room targetRoom = roomRepository.findById(targetRoomId)
-                .orElseThrow(() -> new RoomNotFoundException());
-
-        // Ensure that current and target Rooms are in the same Project
-        if (currentRoom != null && !currentRoom.getProject().equals(targetRoom.getProject())) {
-            throw new IllegalArgumentException("Cannot move org unit to a different project's Room.");
-        }
-
-        // Remove from the current room (if any) and add to the new room
-        if (orgUnit.getRoom() != null) {
-            orgUnit.getRoom().removeOrgUnit(orgUnit);
-        }
-        targetRoom.addOrgUnit(orgUnit);
-
-        roomRepository.save(targetRoom);
-
-        return orgUnit;
-    }
-
-    @Transactional
-    public Iterable<OrgUnit> batchMoveOrgUnits(List<Long> orgUnitIds, Long targetRoomId) {
-        Room targetRoom = roomRepository.findById(targetRoomId)
-                .orElseThrow(() -> new RoomNotFoundException());
+    public Iterable<OrgUnit> assignOrgUnitsToRoom(List<Long> orgUnitIds, Long targetRoomId) {
+        Room targetRoom = roomService.getRoomById(targetRoomId);
 
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
+
         for (Long orgUnitId : orgUnitIds) {
-            OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                    .orElseThrow(() -> new OrgUnitNotFoundException());
+            OrgUnit orgUnit = getOrgUnitById(orgUnitId);
 
-            // Ensure the orgUnit and target Room belong to the same project
-            if (!orgUnit.getProject().equals(targetRoom.getProject())) {
-                throw new IllegalArgumentException("Cannot move org unit to a different project's room.");
+            validateSameProject(orgUnit, targetRoom);
+
+            // Check if org unit is already assigned to an room
+            if (orgUnit.getRoom() != null) {
+                unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
             }
-
-            // Move org unit to the target room
-            orgUnit.setRoom(targetRoom);
+            assignOrgUnitToRoom(orgUnit, targetRoom);
             updatedOrgUnits.add(orgUnit);
         }
-        return orgUnitRepository.saveAll(updatedOrgUnits);
+        return updatedOrgUnits;
+    }
+
+    @Transactional
+    public Iterable<OrgUnit> unassignOrgUnits(List<Long> orgUnitIds) {
+        List<OrgUnit> updatedOrgUnits = new ArrayList<>();
+        for (Long orgUnitId : orgUnitIds) {
+            OrgUnit orgUnit = getOrgUnitById(orgUnitId);
+            if (orgUnit.getRoom() != null) {
+                unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
+            }
+            updatedOrgUnits.add(orgUnit);
+        }
+        return updatedOrgUnits;
     }
 
     @Transactional

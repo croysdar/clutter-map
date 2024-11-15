@@ -122,18 +122,15 @@ public class OrgUnit {
         this.items = items;
     }
 
-    // Method to add an Item to this OrgUnit
     public void addItem(Item item) {
         items.add(item);
-        item.setOrgUnit(this); // Set the orgUnit reference in Item
+        item.setOrgUnit(this);
     }
 
-    // Method to remove an Item from this OrgUnit
     public void removeItem(Item item) {
-        if (!items.contains(item)) {
-            throw new IllegalArgumentException("Item does not belong to this OrgUnit");
+        if (items.contains(item)) {
+            items.remove(item);
         }
-        items.remove(item);
-        item.setOrgUnit(null); // Unassign the orgUnit reference in Item
+        item.setOrgUnit(null);
     }
 }

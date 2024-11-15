@@ -3,7 +3,6 @@ package app.cluttermap.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,11 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
-import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -270,226 +267,90 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void moveOrgUnitBetweenRooms_Success() {
-        // Arrange: Create a project, rooms, and an orgUnit
-        Room sourceRoom = new Room("Source Room", "Room Description", mockProject);
-        Room targetRoom = new Room("Target Room", "Room Description", mockProject);
-
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", sourceRoom);
-
-        sourceRoom.addOrgUnit(orgUnit);
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-        when(roomRepository.findById(targetRoom.getId())).thenReturn(Optional.of(targetRoom));
-
-        // Act: Move the orgUnit from sourceRoom to targetRoom
-        OrgUnit updatedOrgUnit = orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), targetRoom.getId());
-
-        // Assert: Verify the orgUnit is now associated with the targetRoom
-        assertThat(updatedOrgUnit.getRoom()).isEqualTo(targetRoom);
-        assertThat(sourceRoom.getOrgUnits()).doesNotContain(orgUnit);
-        assertThat(targetRoom.getOrgUnits()).contains(orgUnit);
-    }
-
-    @Test
-    void moveOrgUnitBetweenRooms_DifferentProjects_ShouldThrowIllegalArgumentException() {
-        // Arrange: Create two projects, each with its own room
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
-
-        Room room1 = new Room("Room 1", "Description", project1);
-        Room room2 = new Room("Room 2", "Description", project2);
-
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room1);
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-        when(roomRepository.findById(room2.getId())).thenReturn(Optional.of(room2));
-
-        // Act & Assert: Attempt to move the orgUnit to a room in a different project
-        assertThrows(IllegalArgumentException.class, () -> {
-            orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), room2.getId());
-        });
-    }
-
-    @Test
-    void moveOrgUnitBetweenRooms_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
-        // Arrange: Ensure no orgUnit exists with the given ID
-        Long nonExistentOrgUnitId = 999L;
-
-        // Act & Assert: Attempt to move a non-existent orgUnit
-        assertThrows(OrgUnitNotFoundException.class, () -> {
-            orgUnitService.moveOrgUnitBetweenRooms(nonExistentOrgUnitId, 1L);
-        });
-    }
-
-    @Test
-    void moveOrgUnitBetweenRooms_RoomNotFound_ShouldThrowRoomNotFoundException() {
-        // Arrange: Create an orgUnit and assign it to a source room
-        Room sourceRoom = new Room("Source Room", "Room Description", mockProject);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
-
-        sourceRoom.addOrgUnit(orgUnit);
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-
-        // Act & Assert: Attempt to move the orgUnit to a non-existent room
-        Long nonExistentRoomId = 999L;
-        assertThrows(RoomNotFoundException.class, () -> {
-            orgUnitService.moveOrgUnitBetweenRooms(orgUnit.getId(), nonExistentRoomId);
-        });
-    }
-
-    @Test
-    void batchMoveOrgUnits_Success() {
+    void assignOrgUnitsToRoom_Success() {
+        // Arrange: Set up target Room and mock org units to be assigned
         Room targetRoom = new Room("Target Room", "Description", mockProject);
-        when(roomRepository.findById(10L)).thenReturn(Optional.of(targetRoom));
+        when(roomService.getRoomById(10L)).thenReturn(targetRoom);
 
         OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", mockProject);
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", mockProject);
 
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
         when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnit2));
-        when(orgUnitRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Iterable<OrgUnit> movedOrgUnits = orgUnitService.batchMoveOrgUnits(List.of(1L, 2L), 10L);
+        // Act: Assign org units to the target room
+        Iterable<OrgUnit> assignedOrgUnits = orgUnitService.assignOrgUnitsToRoom(List.of(1L, 2L), 10L);
 
-        assertThat(movedOrgUnits).allMatch(orgUnit -> orgUnit.getRoom().equals(targetRoom));
+        // Assert: Verify org units are now associated with the target room
+        assertThat(assignedOrgUnits).allMatch(orgUnit -> orgUnit.getRoom().equals(targetRoom));
     }
 
     @Test
-    void batchMoveOrgUnits_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+    void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Set up target Room ID and a non-existent org unit ID
         Room targetRoom = new Room("Target Room", "Description", mockProject);
-        when(roomRepository.findById(targetRoom.getId())).thenReturn(Optional.of(targetRoom));
-
         Long nonExistentOrgUnitId = 999L;
         when(orgUnitRepository.findById(nonExistentOrgUnitId)).thenReturn(Optional.empty());
 
+        // Act & Assert: Expect OrgUnitNotFoundException for the non-existent org unit
         assertThrows(OrgUnitNotFoundException.class, () -> {
-            orgUnitService.batchMoveOrgUnits(List.of(nonExistentOrgUnitId), targetRoom.getId());
+            orgUnitService.assignOrgUnitsToRoom(List.of(nonExistentOrgUnitId), targetRoom.getId());
         });
     }
 
     @Test
-    void batchMoveOrgUnits_DifferentProject_ShouldThrowIllegalArgumentException() {
+    void assignOrgUnitsToRoom_DifferentProject_ShouldThrowIllegalArgumentException() {
+        // Arrange: Create org units with a different project than the target room
         Project differentProject = new Project("Different Project", mockUser);
         Room targetRoom = new Room("Target Room", "Description", mockProject);
         OrgUnit orgUnitWithDifferentProject = new OrgUnit("OrgUnit", "Description", differentProject);
 
-        when(roomRepository.findById(10L)).thenReturn(Optional.of(targetRoom));
+        when(roomService.getRoomById(10L)).thenReturn(targetRoom);
         when(orgUnitRepository.findById(20L)).thenReturn(Optional.of(orgUnitWithDifferentProject));
 
+        // Act & Assert: Expect IllegalArgumentException due to project mismatch
         assertThrows(IllegalArgumentException.class, () -> {
-            orgUnitService.batchMoveOrgUnits(List.of(20L), 10L);
+            orgUnitService.assignOrgUnitsToRoom(List.of(20L), 10L);
         });
     }
 
     @Test
-    void addItemToOrgUnit_Success() {
-        // Arrange: Create a project, an orgUnit, and an item
-        Project project = new Project("Test Project", mockUser);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", project);
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), project);
+    void unassignOrgUnitsFromRoom_Success() {
+        // Arrange: Set up org units currently assigned to a room
+        Room mockRoom = new Room("Mock Room", "Description", mockProject);
+        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", mockProject);
+        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", mockProject);
+        orgUnit1.setRoom(mockRoom);
+        orgUnit2.setRoom(mockRoom);
 
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
+        when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnit2));
 
-        when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
+        // Act: Unassign the org units from the room
+        Iterable<OrgUnit> unassignedOrgUnits = orgUnitService.unassignOrgUnits(List.of(1L, 2L));
 
-        // Act: Add the item to the orgUnit
-        OrgUnit updatedOrgUnit = orgUnitService.addItemToOrgUnit(orgUnit.getId(), item.getId());
-
-        // Assert: Verify that the item is now associated with the orgUnit
-        assertThat(updatedOrgUnit.getItems()).contains(item);
-        assertThat(item.getOrgUnit()).isEqualTo(orgUnit);
+        // Assert: Verify that each org unit is now unassigned
+        for (OrgUnit orgUnit : unassignedOrgUnits) {
+            assertThat(orgUnit.getRoom()).isNull();
+        }
     }
 
-    @Test
-    void addItemToOrgUnit_DifferentProjects_ShouldThrowIllegalArgumentException() {
-        // Arrange: Create two projects, each with its own orgUnit and item
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
-
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", project1);
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), project2);
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-
-        // Act & Assert: Attempt to add the item to the orgUnit in a different project
-        assertThrows(IllegalArgumentException.class, () -> {
-            orgUnitService.addItemToOrgUnit(orgUnit.getId(), item.getId());
-        });
-    }
+    // when(orgUnitService.getOrgUnitById(999L)).thenThrow(new
+    // OrgUnitNotFoundException());
 
     @Test
-    void addItemToOrgUnit_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
-        // Arrange: Ensure no orgUnit exists with the given ID
-        Long nonExistentOrgUnitId = 999L;
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), mockProject);
+    void unassignOrgUnitsFromRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Set up org unit IDs, including a non-existent org unit ID
+        List<Long> orgUnitIds = List.of(1L, 999L, 3L); // Assuming 999L does not exist
+        OrgUnit orgUnit1 = new OrgUnit("Org Unit 1", "Description", mockProject);
 
-        // Act & Assert: Attempt to add the item to a non-existent orgUnit
+        // Simulate OrgUnitNotFoundException for the non-existent org unit
+        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
+        when(orgUnitRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert: Expect OrgUnitNotFoundException for the missing org unit
         assertThrows(OrgUnitNotFoundException.class, () -> {
-            orgUnitService.addItemToOrgUnit(nonExistentOrgUnitId, item.getId());
-        });
-    }
-
-    @Test
-    void addItemToOrgUnit_ItemNotFound_ShouldThrowItemNotFoundException() {
-        // Arrange: Create an orgUnit and ensure no item exists with the given ID
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
-        Long nonExistentItemId = 999L;
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-
-        // Act & Assert: Attempt to add a non-existent item to the orgUnit
-        assertThrows(ItemNotFoundException.class, () -> {
-            orgUnitService.addItemToOrgUnit(orgUnit.getId(), nonExistentItemId);
-        });
-    }
-
-    @Test
-    void removeItemFromOrgUnit_Success() {
-        // Arrange: Create an orgUnit and add an item to it
-        Project project = new Project("Test Project", mockUser);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", project);
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit);
-        orgUnit.addItem(item);
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-
-        when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
-
-        // Act: Remove the item from the orgUnit
-        OrgUnit updatedOrgUnit = orgUnitService.removeItemFromOrgUnit(orgUnit.getId(), item.getId());
-
-        // Assert: Verify that the item is no longer associated with the orgUnit
-        assertThat(updatedOrgUnit.getItems()).doesNotContain(item);
-        assertThat(item.getOrgUnit()).isNull();
-    }
-
-    @Test
-    void removeItemFromOrgUnit_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
-        // Arrange: Ensure no orgUnit exists with the given ID
-        Long nonExistentOrgUnitId = 999L;
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), mockProject);
-
-        // Act & Assert: Attempt to remove an item from a non-existent orgUnit
-        assertThrows(OrgUnitNotFoundException.class, () -> {
-            orgUnitService.removeItemFromOrgUnit(nonExistentOrgUnitId, item.getId());
-        });
-    }
-
-    @Test
-    void removeItemFromOrgUnit_ItemNotFound_ShouldThrowItemNotFoundException() {
-        // Arrange: Create an orgUnit and ensure no item exists with the given ID
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
-        Long nonExistentItemId = 999L;
-
-        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
-
-        // Act & Assert: Attempt to remove a non-existent item from the orgUnit
-        assertThrows(ItemNotFoundException.class, () -> {
-            orgUnitService.removeItemFromOrgUnit(orgUnit.getId(), nonExistentItemId);
+            orgUnitService.unassignOrgUnits(orgUnitIds);
         });
     }
 

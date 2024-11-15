@@ -17,6 +17,7 @@ import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
 import jakarta.validation.Valid;
 
@@ -24,9 +25,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/org-units")
 public class OrgUnitController {
     private final OrgUnitService orgUnitService;
+    private final ItemService itemService;
 
-    public OrgUnitController(OrgUnitService orgUnitService) {
+    public OrgUnitController(
+            OrgUnitService orgUnitService,
+            ItemService itemService) {
         this.orgUnitService = orgUnitService;
+        this.itemService = itemService;
     }
 
     @GetMapping()
@@ -59,40 +64,21 @@ public class OrgUnitController {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 
-    @PutMapping("/{orgUnitId}/move-room/{roomId}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
-    public ResponseEntity<OrgUnit> moveOrgUnit(@PathVariable Long orgUnitId,
-            @PathVariable(name = "roomId") Long targetRoomId) {
-        if (targetRoomId == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        OrgUnit updatedOrgUnit = orgUnitService.moveOrgUnitBetweenRooms(orgUnitId, targetRoomId);
-        return ResponseEntity.ok(updatedOrgUnit);
-    }
-
-    @PutMapping("/batch-move-room/{roomId}")
-    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
-    public ResponseEntity<Iterable<OrgUnit>> batchMoveOrgUnits(
-            @PathVariable Long roomId,
-            @RequestBody List<Long> orgUnitIds) {
-
-        Iterable<OrgUnit> updatedOrgUnits = orgUnitService.batchMoveOrgUnits(orgUnitIds, roomId);
-        return ResponseEntity.ok(updatedOrgUnits);
-    }
-
-    @PostMapping("/{orgUnitId}/items/{itemId}")
+    @PutMapping("/{orgUnitId}/items")
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
-    public ResponseEntity<OrgUnit> addItemToOrgUnit(@PathVariable Long orgUnitId, @PathVariable Long itemId) {
-        OrgUnit updatedOrgUnit = orgUnitService.addItemToOrgUnit(orgUnitId, itemId);
-        return ResponseEntity.ok(updatedOrgUnit);
+    public ResponseEntity<Iterable<Item>> assignItemsToOrgUnit(
+            @PathVariable Long orgUnitId,
+            @RequestBody List<Long> itemIds) {
+
+        Iterable<Item> updatedItems = itemService.assignItemsToOrgUnit(itemIds, orgUnitId);
+        return ResponseEntity.ok(updatedItems);
     }
 
-    @DeleteMapping("/{orgUnitId}/items/{itemId}")
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
-    public ResponseEntity<OrgUnit> removeItemFromOrgUnit(@PathVariable Long orgUnitId, @PathVariable Long itemId) {
-        OrgUnit updatedOrgUnit = orgUnitService.removeItemFromOrgUnit(orgUnitId, itemId);
-        return ResponseEntity.ok(updatedOrgUnit);
+    @PutMapping("/unassign")
+    // @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
+    public ResponseEntity<Iterable<OrgUnit>> unassignOrgUnits(@RequestBody List<Long> orgUnitIds) {
+        // TODO figure out how to enforce ownership here
+        return ResponseEntity.ok(orgUnitService.unassignOrgUnits(orgUnitIds));
     }
 
     @DeleteMapping("/{id}")

@@ -3,7 +3,6 @@ package app.cluttermap.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -330,88 +329,19 @@ public class ItemServiceTests {
     }
 
     @Test
-    void moveItemBetweenOrgUnits_Success() {
-        // Arrange: Create a project, orgUnits, and an item
-        OrgUnit sourceOrgUnit = new OrgUnit("Source OrgUnit", "Description", mockProject);
-        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
-
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), mockProject);
-
-        sourceOrgUnit.addItem(item);
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-        when(orgUnitRepository.findById(targetOrgUnit.getId())).thenReturn(Optional.of(targetOrgUnit));
-
-        // Act: Move the item from sourceOrgUnit to targetOrgUnit
-        Item updatedItem = itemService.moveItemBetweenOrgUnits(item.getId(), targetOrgUnit.getId());
-
-        // Assert: Verify the item is now associated with the targetOrgUnit
-        assertThat(updatedItem.getOrgUnit()).isEqualTo(targetOrgUnit);
-        assertThat(sourceOrgUnit.getItems()).doesNotContain(item);
-        assertThat(targetOrgUnit.getItems()).contains(item);
-    }
-
-    @Test
-    void moveItemBetweenOrgUnits_DifferentProjects_ShouldThrowIllegalArgumentException() {
-        // Arrange: Create two projects, each with its own orgUnit
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
-
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", project1);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", project2);
-
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit1);
-
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-        when(orgUnitRepository.findById(orgUnit2.getId())).thenReturn(Optional.of(orgUnit2));
-
-        // Act & Assert: Attempt to move the item to an orgUnit in a different project
-        assertThrows(IllegalArgumentException.class, () -> {
-            itemService.moveItemBetweenOrgUnits(item.getId(), orgUnit2.getId());
-        });
-    }
-
-    @Test
-    void moveItemBetweenOrgUnits_ItemNotFound_ShouldThrowItemNotFoundException() {
-        // Arrange: Ensure no item exists with the given ID
-        Long nonExistentItemId = 999L;
-
-        // Act & Assert: Attempt to move a non-existent item
-        assertThrows(ItemNotFoundException.class, () -> {
-            itemService.moveItemBetweenOrgUnits(nonExistentItemId, 1L);
-        });
-    }
-
-    @Test
-    void moveItemBetweenOrgUnits_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
-        // Arrange: Create an item
-        Project project = new Project("Test Project", mockUser);
-        OrgUnit orgUnit = new OrgUnit("Source OrgUnit", "Description", project);
-        Item item = new Item("Test Item", "Item Description", List.of("tag1"), orgUnit);
-
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-
-        // Act & Assert: Attempt to move the item to a non-existent orgUnit
-        Long nonExistentOrgUnitId = 999L;
-        assertThrows(OrgUnitNotFoundException.class, () -> {
-            itemService.moveItemBetweenOrgUnits(item.getId(), nonExistentOrgUnitId);
-        });
-    }
-
-    @Test
-    void batchMoveItems_Success() {
+    void assignItemsToOrgUnit_Success() {
         // Arrange: Create target OrgUnit and mock items to move
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
-        when(orgUnitRepository.findById(10L)).thenReturn(Optional.of(targetOrgUnit));
+        when(orgUnitService.getOrgUnitById(10L)).thenReturn(targetOrgUnit);
 
         Item item1 = new Item("Item 1", "Description", List.of("tag1"), mockProject);
         Item item2 = new Item("Item 2", "Description", List.of("tag2"), mockProject);
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
         when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
-        when(itemRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act: Move items in batch
-        Iterable<Item> movedItems = itemService.batchMoveItems(List.of(1L, 2L),
+        Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(List.of(1L, 2L),
                 10L);
 
         // Assert: Verify items are updated
@@ -419,34 +349,73 @@ public class ItemServiceTests {
     }
 
     @Test
-    void batchMoveItems_ItemNotFound_ShouldThrowItemNotFoundException() {
+    void assignItemsToOrgUnit_ItemNotFound_ShouldThrowItemNotFoundException() {
         // Arrange: Set up target OrgUnit ID and non-existent item ID
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
-        when(orgUnitRepository.findById(targetOrgUnit.getId())).thenReturn(Optional.of(targetOrgUnit));
+        when(orgUnitService.getOrgUnitById(targetOrgUnit.getId())).thenReturn(targetOrgUnit);
 
         Long nonExistentItemId = 999L;
         when(itemRepository.findById(nonExistentItemId)).thenReturn(Optional.empty());
 
         // Act & Assert: Expect ItemNotFoundException
         assertThrows(ItemNotFoundException.class, () -> {
-            itemService.batchMoveItems(List.of(nonExistentItemId), targetOrgUnit.getId());
+            itemService.assignItemsToOrgUnit(List.of(nonExistentItemId), targetOrgUnit.getId());
         });
     }
 
     @Test
-    void batchMoveItems_DifferentProject_ShouldThrowIllegalArgumentException() {
-        // Arrange: Create items with different project than target OrgUnit
-        Project differentProject = new Project("Different Project", mockUser);
-        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
-        Item itemWithDifferentProject = new Item("Item", "Description", List.of("tag1"), differentProject);
+    void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
+        // Arrange: Stub the org unit to return mockOrgUnit when queried by ID
+        when(orgUnitService.getOrgUnitById(mockOrgUnit.getId())).thenReturn(mockOrgUnit);
 
-        when(orgUnitRepository.findById(10L)).thenReturn(Optional.of(targetOrgUnit));
-        when(itemRepository.findById(20L))
+        // Arrange: Create an item with a different project than mockOrgUnit
+        Project differentProject = new Project("Different Project", mockUser);
+        Item itemWithDifferentProject = new Item("Item", "Description", List.of("tag1"), differentProject);
+        itemWithDifferentProject.setId(2L);
+        when(itemRepository.findById(itemWithDifferentProject.getId()))
                 .thenReturn(Optional.of(itemWithDifferentProject));
 
         // Act & Assert: Expect IllegalArgumentException
         assertThrows(IllegalArgumentException.class, () -> {
-            itemService.batchMoveItems(List.of(20L), 10L);
+            itemService.assignItemsToOrgUnit(List.of(itemWithDifferentProject.getId()),
+                    mockOrgUnit.getId());
+        });
+    }
+
+    @Test
+    void unassignItem_Success() {
+        // Arrange: Create items and associate items with the mock orgUnit
+        Item item1 = new Item("Item 1", "Description", List.of("tag1"), mockOrgUnit);
+        mockOrgUnit.addItem(item1);
+        Item item2 = new Item("Item 2", "Description", List.of("tag2"), mockOrgUnit);
+        mockOrgUnit.addItem(item2);
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
+
+        // Act: Unassign the items from the orgUnit
+        Iterable<Item> updatedItems = itemService.unassignItems(List.of(1L, 2L));
+
+        // Assert: Verify that each item is no longer associated with the orgUnit
+        for (Item updatedItem : updatedItems) {
+            assertThat(updatedItem.getOrgUnit()).isNull();
+        }
+    }
+
+    // TODO allow partial success
+    @Test
+    void unassignItems_ItemNotFound_ShouldThrowItemNotFoundException() {
+        // Arrange: Set up item IDs, including a non-existent item ID
+        List<Long> itemIds = List.of(1L, 999L, 3L); // Assuming 999L does not exist
+        Item item1 = new Item("Item 1", "Item Description", List.of(), mockOrgUnit);
+
+        // Simulate ItemNotFoundException for the non-existent item
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(999L)).thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Expect ItemNotFoundException
+        assertThrows(ItemNotFoundException.class, () -> {
+            itemService.unassignItems(itemIds);
         });
     }
 
