@@ -103,7 +103,9 @@ public class Room {
     }
 
     public void addOrgUnit(OrgUnit orgUnit) {
-        orgUnits.add(orgUnit);
+        if (!orgUnits.contains(orgUnit)) {
+            orgUnits.add(orgUnit);
+        }
         orgUnit.setRoom(this);
     }
 

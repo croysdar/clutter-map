@@ -123,7 +123,9 @@ public class OrgUnit {
     }
 
     public void addItem(Item item) {
-        items.add(item);
+        if (!items.contains(item)) {
+            items.add(item);
+        }
         item.setOrgUnit(this);
     }
 
