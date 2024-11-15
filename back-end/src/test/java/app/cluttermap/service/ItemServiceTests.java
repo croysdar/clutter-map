@@ -377,6 +377,7 @@ public class ItemServiceTests {
         });
     }
 
+    // TODO Allow partial success
     @Test
     void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Stub the org unit to return mockOrgUnit when queried by ID

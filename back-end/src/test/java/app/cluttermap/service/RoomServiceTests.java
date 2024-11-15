@@ -270,6 +270,7 @@ public class RoomServiceTests {
         assertThat(orgUnit.getRoom()).isEqualTo(room);
     }
 
+    // TODO allow partial success
     @Test
     void addOrgUnitToRoom_DifferentProjects_ShouldThrowIllegalArgumentException() {
         // Arrange: Create two projects, each with its own room and orgUnit

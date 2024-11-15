@@ -114,6 +114,8 @@ public class OrgUnitService {
 
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
 
+        // TODO allow partial success
+
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = getOrgUnitById(orgUnitId);
 
@@ -132,6 +134,7 @@ public class OrgUnitService {
     @Transactional
     public Iterable<OrgUnit> unassignOrgUnits(List<Long> orgUnitIds) {
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
+        // TODO Allow partial success
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = getOrgUnitById(orgUnitId);
             if (orgUnit.getRoom() != null) {

@@ -19,6 +19,8 @@ public class NewItemDTO {
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
+    // TODO see if we can allow *either* org unit or project id as parent
+
     public NewItemDTO(String name, String description, List<String> tags, String orgUnitId) {
         this.name = name;
         this.description = description;

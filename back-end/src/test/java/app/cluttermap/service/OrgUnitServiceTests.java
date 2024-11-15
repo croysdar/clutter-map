@@ -300,6 +300,7 @@ public class OrgUnitServiceTests {
         assertThat(assignedOrgUnits).allMatch(orgUnit -> orgUnit.getRoom().equals(targetRoom));
     }
 
+    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
         // Arrange: Set up target Room ID and a non-existent org unit ID
@@ -313,6 +314,7 @@ public class OrgUnitServiceTests {
         });
     }
 
+    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Create org units with a different project than the target room

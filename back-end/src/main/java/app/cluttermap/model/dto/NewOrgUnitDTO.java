@@ -16,6 +16,8 @@ public class NewOrgUnitDTO {
     @Pattern(regexp = "\\d+", message = "Room ID must be a valid number.")
     private String roomId;
 
+    // TODO see if we can allow *either* room or project id as parent
+
     public NewOrgUnitDTO(String name, String description, String roomId) {
         this.name = name;
         this.description = description;

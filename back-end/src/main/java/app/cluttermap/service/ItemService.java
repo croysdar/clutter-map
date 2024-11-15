@@ -143,6 +143,7 @@ public class ItemService {
         }
         return updatedItems;
 
+        // Potential partial success code:
         // Fetch all items at once for the provided IDs
         // Iterable<Item> items = itemRepository.findAllById(itemIds);
 
@@ -151,6 +152,16 @@ public class ItemService {
         // throw new ItemsNotFoundException("None of the specified items were found: " +
         // itemIds);
         // }
+
+        // List<Item> updatedItems = new ArrayList<>();
+        // for (Item item : items) {
+        // if (item.getOrgUnit() != null) {
+        // unassignItemFromOrgUnit(item, item.getOrgUnit());
+        // }
+        // updatedItems.add(item);
+        // }
+
+        // return updatedItems;
     }
 
     @Transactional
