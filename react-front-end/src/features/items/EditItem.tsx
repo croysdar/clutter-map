@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { TagField } from '@/components/TagField'
 import DeleteItemButton from './DeleteItemButton'
 import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import { QuantityField } from '@/components/QuantityField'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -25,12 +26,16 @@ const EditItem = () => {
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
-    // State to manage tags
+    // States to special input
     const [tags, setTags] = useState<string[]>(item?.tags || []);
+    const [quantity, setQuantity] = useState<number>(item?.quantity || 1);
 
     useEffect(() => {
         if (item?.tags) {
             setTags(item.tags);
+        }
+        if (item?.quantity) {
+            setQuantity(item.quantity);
         }
     }, [item]);
 
@@ -56,7 +61,6 @@ const EditItem = () => {
         const { elements } = e.currentTarget
         const name = elements.itemName.value
         const description = elements.itemDescription.value
-        const quantity = parseInt(elements.itemQuantity.value, 10);
 
         if (item && name) {
             await updateItem({ id: item.id, name: name, description: description, tags: tags, quantity: quantity })
@@ -106,24 +110,14 @@ const EditItem = () => {
                         variant="outlined"
                         InputLabelProps={{ shrink: true }}
                     />
-                    <Typography gutterBottom align="left">
-                        {/* Item Quantity */}
-                        <TextField
-                            label="Quantity"
 
-                            id="itemQuantity"
-                            name="quantity"
+                    {/* Item Quantity */}
+                    <QuantityField
+                        quantity={quantity}
+                        onQuantityChange={setQuantity}
+                    />
 
-                            defaultValue={item.quantity}
-                            required
-                            margin="normal"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ width: '90px', marginLeft: 0 }}
-                            
-                        />
-                    </Typography>
-
+                    {/* Item Tags */}
                     <TagField tags={tags} onTagsChange={setTags} />
 
                     {/* Submit Button */}
