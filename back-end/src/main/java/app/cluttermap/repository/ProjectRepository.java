@@ -9,6 +9,6 @@ import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 
 @Repository
-public interface ProjectsRepository extends CrudRepository<Project, Long> {
+public interface ProjectRepository extends CrudRepository<Project, Long> {
     List<Project> findByOwner(User owner);
 }

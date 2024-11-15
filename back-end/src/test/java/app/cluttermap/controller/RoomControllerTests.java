@@ -40,7 +40,7 @@ import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(RoomsController.class)
+@WebMvcTest(RoomController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")

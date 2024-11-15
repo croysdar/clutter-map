@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import app.cluttermap.model.User;
 
 @Repository
-public interface UsersRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends CrudRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByProviderId(String providerId);

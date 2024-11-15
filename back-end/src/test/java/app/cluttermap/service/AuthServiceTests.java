@@ -25,7 +25,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.model.User;
-import app.cluttermap.repository.UsersRepository;
+import app.cluttermap.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -38,7 +38,7 @@ import io.jsonwebtoken.security.Keys;
 class AuthServiceTests {
 
     @Mock
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
     @Mock
     private SecurityService securityService;

@@ -39,11 +39,11 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
-import app.cluttermap.service.ItemsService;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(ItemsController.class)
+@WebMvcTest(ItemController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
@@ -56,7 +56,7 @@ class ItemControllerTests {
     private RoomService roomService;
 
     @MockBean
-    private ItemsService itemService;
+    private ItemService itemService;
 
     @MockBean
     private SecurityService securityService;

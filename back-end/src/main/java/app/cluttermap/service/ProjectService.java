@@ -8,23 +8,23 @@ import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
-import app.cluttermap.repository.ProjectsRepository;
+import app.cluttermap.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 
 @Service("projectService")
 public class ProjectService {
-    private final ProjectsRepository projectsRepository;
+    private final ProjectRepository projectRepository;
     private final SecurityService securityService;
 
     private final int PROJECT_LIMIT = 3;
 
-    public ProjectService(ProjectsRepository projectsRepository, SecurityService securityService) {
-        this.projectsRepository = projectsRepository;
+    public ProjectService(ProjectRepository projectRepository, SecurityService securityService) {
+        this.projectRepository = projectRepository;
         this.securityService = securityService;
     }
 
     public Project getProjectById(Long id) {
-        return projectsRepository.findById(id)
+        return projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException());
     }
 
@@ -32,19 +32,19 @@ public class ProjectService {
     public Project createProject(NewProjectDTO projectDTO) {
         User user = securityService.getCurrentUser();
 
-        int num = projectsRepository.findByOwner(user).size();
+        int num = projectRepository.findByOwner(user).size();
         if (num >= PROJECT_LIMIT) {
             throw new ProjectLimitReachedException();
         }
 
         Project newProject = new Project(projectDTO.getName(), user);
-        return this.projectsRepository.save(newProject);
+        return this.projectRepository.save(newProject);
     }
 
     public Iterable<Project> getUserProjects() {
         User user = securityService.getCurrentUser();
 
-        return projectsRepository.findByOwner(user);
+        return projectRepository.findByOwner(user);
     }
 
     @Transactional
@@ -53,13 +53,13 @@ public class ProjectService {
 
         _project.setName(projectDTO.getName());
 
-        return projectsRepository.save(_project);
+        return projectRepository.save(_project);
     }
 
     @Transactional
     public void deleteProject(Long id) {
         // Make sure project exists first
         getProjectById(id);
-        projectsRepository.deleteById(id);
+        projectRepository.deleteById(id);
     }
 }

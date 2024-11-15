@@ -22,10 +22,10 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/rooms")
 @Validated
-public class RoomsController {
+public class RoomController {
     private final RoomService roomService;
 
-    public RoomsController(RoomService roomService) {
+    public RoomController(RoomService roomService) {
         this.roomService = roomService;
     }
 
