@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
@@ -21,8 +22,8 @@ import jakarta.transaction.Transactional;
 public class OrgUnitService {
     private final RoomRepository roomRepository;
     private final OrgUnitRepository orgUnitRepository;
-    private final ItemRepository itemRepository;
     private final SecurityService securityService;
+    private final ProjectService projectService;
     private final RoomService roomService;
 
     public OrgUnitService(
@@ -30,11 +31,12 @@ public class OrgUnitService {
             OrgUnitRepository orgUnitRepository,
             ItemRepository itemRepository,
             SecurityService securityService,
+            ProjectService projectService,
             RoomService roomService) {
         this.roomRepository = roomRepository;
         this.orgUnitRepository = orgUnitRepository;
-        this.itemRepository = itemRepository;
         this.securityService = securityService;
+        this.projectService = projectService;
         this.roomService = roomService;
     }
 
@@ -56,6 +58,16 @@ public class OrgUnitService {
 
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
+        if (orgUnitDTO.getRoomId() == null) {
+            // Check if the item is being created as unassigned to a room
+            Project project = projectService.getProjectById(orgUnitDTO.getProjectIdAsLong());
+            OrgUnit newOrgUnit = new OrgUnit(
+                    orgUnitDTO.getName(),
+                    orgUnitDTO.getDescription(),
+                    project);
+            return orgUnitRepository.save(newOrgUnit);
+
+        }
         Room room = roomService.getRoomById(orgUnitDTO.getRoomIdAsLong());
 
         OrgUnit newOrgUnit = new OrgUnit(
