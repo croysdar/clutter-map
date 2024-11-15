@@ -126,7 +126,7 @@ public class ItemServiceTests {
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(mockOrgUnit);
 
         // Arrange: Prepare the Item DTO with the room ID as a string
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), String.valueOf(1L), null);
 
         // Arrange: Create a mock Item that represents the saved item returned by
         // the repository
@@ -150,7 +150,7 @@ public class ItemServiceTests {
     @Test
     void createItem_ShouldThrowException_WhenOrgUnitDoesNotExist() {
         // Arrange: Set up the DTO with a org unit ID that doesn't exist
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), "999");
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), "999", null);
         when(orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong())).thenThrow(new OrgUnitNotFoundException());
 
         // Act & Assert: Attempt to create the item and expect a
@@ -172,7 +172,7 @@ public class ItemServiceTests {
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
         when(itemRepository.findByOwnerId(1L)).thenReturn(items);
 
-        NewItemDTO itemDTO = new NewItemDTO("Extra Item", "Description", List.of(), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("Extra Item", "Description", List.of(), String.valueOf(1L), null);
 
         // Act & Assert: Attempt to create a item and expect an exception
         assertThrows(ItemLimitReachedException.class, () -> itemService.createItem(itemDTO));

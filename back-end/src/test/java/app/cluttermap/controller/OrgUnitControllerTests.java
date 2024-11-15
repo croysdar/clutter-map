@@ -160,7 +160,8 @@ class OrgUnitControllerTests {
         void addOneOrgUnit_ShouldCreateOrgUnit_WhenValidRequest() throws Exception {
                 // Arrange: Set up a NewOrgUnitDTO with valid data and mock the service to
                 // return a new orgUnit
-                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit Description", String.valueOf(1L));
+                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit Description", String.valueOf(1L),
+                                null);
                 OrgUnit newOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockRoom);
                 when(orgUnitService.createOrgUnit(any(NewOrgUnitDTO.class))).thenReturn(newOrgUnit);
 
@@ -181,7 +182,7 @@ class OrgUnitControllerTests {
         @Test
         void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitNameIsBlank() throws Exception {
                 // Arrange: Set up a NewOrgUnitDTO with a blank name to trigger validation
-                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("", "", String.valueOf(1L));
+                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("", "", String.valueOf(1L), null);
 
                 // Act: Perform a POST request to the /org-units endpoint with the blank orgUnit
                 // name
@@ -199,7 +200,7 @@ class OrgUnitControllerTests {
         @Test
         void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
                 // Arrange: Set up a NewOrgUnitDTO with a null name to trigger validation
-                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO(null, "", String.valueOf(1L));
+                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO(null, "", String.valueOf(1L), null);
 
                 // Act: Perform a POST request to the /org-units endpoint with the null orgUnit
                 // name
@@ -215,9 +216,9 @@ class OrgUnitControllerTests {
         }
 
         @Test
-        void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
+        void addOneOrgUnit_ShouldReturnBadRequest_WhenRoomIdAndProjectIsNull() throws Exception {
                 // Arrange: Set up a NewOrgUnitDTO with a null orgUnit ID to trigger validation
-                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", null);
+                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", null, null);
 
                 // Act: Perform a POST request to the /org-units endpoint with the null orgUnit
                 // ID
@@ -227,14 +228,15 @@ class OrgUnitControllerTests {
                                 .andExpect(status().isBadRequest())
 
                                 // Assert: Verify the validation error response for the name field
-                                .andExpect(jsonPath("$.errors[0].field").value("roomId"))
-                                .andExpect(jsonPath("$.errors[0].message").value("Room ID must not be blank."));
+                                .andExpect(jsonPath("$.errors[0].field").value("roomOrProjectValid"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Either RoomId or ProjectId must be provided."));
         }
 
         @Test
-        void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
+        void addOneOrgUnit_ShouldReturnBadRequest_WhenRoomIdIsNaN() throws Exception {
                 // Arrange: Set up a NewOrgUnitDTO with a NaN orgUnit ID to trigger validation
-                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", "string");
+                NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", "string", null);
 
                 // Act: Perform a POST request to the /org-units endpoint with the NaN orgUnit
                 // ID

@@ -120,7 +120,7 @@ public class OrgUnitServiceTests {
         when(roomService.getRoomById(1L)).thenReturn(mockRoom);
 
         // Arrange: Prepare the OrgUnit DTO with the room ID as a string
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", String.valueOf(1L));
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", String.valueOf(1L), null);
 
         // Arrange: Create a mock OrgUnit that represents the saved orgUnit returned by
         // the repository
@@ -144,7 +144,7 @@ public class OrgUnitServiceTests {
     @Test
     void createOrgUnit_ShouldThrowException_WhenOrgUnitDoesNotExist() {
         // Arrange: Set up the DTO with a room ID that doesn't exist
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", "999");
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", "999", null);
         when(roomService.getRoomById(orgUnitDTO.getRoomIdAsLong())).thenThrow(new RoomNotFoundException());
 
         // Act & Assert: Attempt to create the orgUnit and expect a
@@ -166,7 +166,7 @@ public class OrgUnitServiceTests {
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
         when(orgUnitRepository.findByProjectId(1L)).thenReturn(orgUnits);
 
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("Extra OrgUnit", "Description", String.valueOf(1L));
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("Extra OrgUnit", "Description", String.valueOf(1L), null);
 
         // Act & Assert: Attempt to create a orgUnit and expect an exception
         assertThrows(OrgUnitLimitReachedException.class, () -> orgUnitService.createOrgUnit(orgUnitDTO));

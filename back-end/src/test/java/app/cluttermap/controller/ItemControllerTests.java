@@ -162,7 +162,7 @@ class ItemControllerTests {
                 // Arrange: Set up a NewItemDTO with valid data and mock the service to
                 // return a new item
                 NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"),
-                                String.valueOf(1L));
+                                String.valueOf(1L), null);
                 Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
                 when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
@@ -182,7 +182,7 @@ class ItemControllerTests {
         @Test
         void addOneItem_ShouldReturnBadRequest_WhenItemNameIsBlank() throws Exception {
                 // Arrange: Set up a NewItemDTO with a blank name to trigger validation
-                NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L));
+                NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L), null);
 
                 // Act: Perform a POST request to the /items endpoint with the blank item
                 // name
@@ -199,7 +199,7 @@ class ItemControllerTests {
         @Test
         void addOneItem_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
                 // Arrange: Set up a NewItemDTO with a null name to trigger validation
-                NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L));
+                NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L), null);
 
                 // Act: Perform a POST request to the /items endpoint with the null item
                 // name
@@ -214,9 +214,9 @@ class ItemControllerTests {
         }
 
         @Test
-        void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
+        void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdAndProjectIsNull() throws Exception {
                 // Arrange: Set up a NewItemDTO with a null item ID to trigger validation
-                NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null);
+                NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null, null);
 
                 // Act: Perform a POST request to the /items endpoint with the null item
                 // ID
@@ -226,14 +226,15 @@ class ItemControllerTests {
                                 .andExpect(status().isBadRequest())
 
                                 // Assert: Verify the validation error response for the name field
-                                .andExpect(jsonPath("$.errors[0].field").value("orgUnitId"))
-                                .andExpect(jsonPath("$.errors[0].message").value("OrgUnit ID must not be blank."));
+                                .andExpect(jsonPath("$.errors[0].field").value("orgUnitOrProjectValid"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Either OrgUnitId or ProjectId must be provided."));
         }
 
         @Test
         void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
                 // Arrange: Set up a NewItemDTO with a NaN item ID to trigger validation
-                NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string");
+                NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string", null);
 
                 // Act: Perform a POST request to the /items endpoint with the NaN item
                 // ID
