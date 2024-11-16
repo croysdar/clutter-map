@@ -13,21 +13,33 @@ import jakarta.transaction.Transactional;
 
 @Service("projectService")
 public class ProjectService {
+    /* ------------- Constants ------------- */
+    private final int PROJECT_LIMIT = 3;
+
+    /* ------------- Injected Dependencies ------------- */
     private final ProjectRepository projectRepository;
     private final SecurityService securityService;
 
-    private final int PROJECT_LIMIT = 3;
-
+    /* ------------- Constructor ------------- */
     public ProjectService(ProjectRepository projectRepository, SecurityService securityService) {
         this.projectRepository = projectRepository;
         this.securityService = securityService;
     }
 
+    /* ------------- CRUD Operations ------------- */
+    /* --- Read Operations (GET) --- */
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException());
     }
 
+    public Iterable<Project> getUserProjects() {
+        User user = securityService.getCurrentUser();
+
+        return projectRepository.findByOwnerId(user.getId());
+    }
+
+    /* --- Create Operation (POST) --- */
     @Transactional
     public Project createProject(NewProjectDTO projectDTO) {
         User user = securityService.getCurrentUser();
@@ -41,12 +53,7 @@ public class ProjectService {
         return this.projectRepository.save(newProject);
     }
 
-    public Iterable<Project> getUserProjects() {
-        User user = securityService.getCurrentUser();
-
-        return projectRepository.findByOwnerId(user.getId());
-    }
-
+    /* --- Update Operation (PUT) --- */
     @Transactional
     public Project updateProject(Long id, UpdateProjectDTO projectDTO) {
         Project _project = getProjectById(id);
@@ -56,6 +63,7 @@ public class ProjectService {
         return projectRepository.save(_project);
     }
 
+    /* --- Delete Operation (DELETE) --- */
     @Transactional
     public void deleteProject(Long id) {
         // Make sure project exists first
