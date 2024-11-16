@@ -27,12 +27,14 @@ import app.cluttermap.repository.UserRepository;
 
 @Service("securityService")
 public class SecurityService {
+    /* ------------- Injected Dependencies ------------- */
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final RoomRepository roomRepository;
     private final OrgUnitRepository orgUnitRepository;
     private final ItemRepository itemRepository;
 
+    /* ------------- Constructor ------------- */
     public SecurityService(
             UserRepository userRepository,
             ProjectRepository projectRepository,
@@ -46,6 +48,7 @@ public class SecurityService {
         this.itemRepository = itemRepository;
     }
 
+    /* ------------- Current User Operations ------------- */
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -59,6 +62,7 @@ public class SecurityService {
         return userRepository.findById(user_id).orElseThrow(() -> new UserNotFoundException());
     }
 
+    /* ------------- Resource Ownership Checks ------------- */
     public boolean isResourceOwner(Long resourceId, String resourceType) {
         Long currentUserId = getCurrentUser().getId();
 
