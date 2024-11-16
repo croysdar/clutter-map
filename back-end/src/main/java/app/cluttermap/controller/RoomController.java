@@ -26,9 +26,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/rooms")
 @Validated
 public class RoomController {
+    /* ------------- Injected Dependencies ------------- */
     private final RoomService roomService;
     private final OrgUnitService orgUnitService;
 
+    /* ------------- Constructor ------------- */
     public RoomController(
             RoomService roomService,
             OrgUnitService orgUnitService) {
@@ -36,15 +38,10 @@ public class RoomController {
         this.orgUnitService = orgUnitService;
     }
 
+    /* ------------- GET Operations ------------- */
     @GetMapping()
     public ResponseEntity<Iterable<Room>> getRooms() {
         return ResponseEntity.ok(roomService.getUserRooms());
-    }
-
-    @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#roomDTO.getProjectId(), 'project')")
-    public ResponseEntity<Room> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
-        return ResponseEntity.ok(roomService.createRoom(roomDTO));
     }
 
     @GetMapping("/{id}")
@@ -59,6 +56,14 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRoomById(id).getOrgUnits());
     }
 
+    /* ------------- POST Operations ------------- */
+    @PostMapping()
+    @PreAuthorize("@securityService.isResourceOwner(#roomDTO.getProjectId(), 'project')")
+    public ResponseEntity<Room> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
+        return ResponseEntity.ok(roomService.createRoom(roomDTO));
+    }
+
+    /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id,
@@ -76,6 +81,7 @@ public class RoomController {
         return ResponseEntity.ok(updatedOrgUnits);
     }
 
+    /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public ResponseEntity<Void> deleteOneRoom(@PathVariable("id") Long id) {

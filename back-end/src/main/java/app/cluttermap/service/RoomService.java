@@ -13,12 +13,14 @@ import jakarta.transaction.Transactional;
 
 @Service("roomService")
 public class RoomService {
+    // TODO add limit of rooms per project
+
+    /* ------------- Injected Dependencies ------------- */
     private final RoomRepository roomRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
 
-    // TODO add limit of rooms per project
-
+    /* ------------- Constructor ------------- */
     public RoomService(
             RoomRepository roomRepository,
             SecurityService securityService,
@@ -28,17 +30,11 @@ public class RoomService {
         this.projectService = projectService;
     }
 
+    /* ------------- CRUD Operations ------------- */
+    /* --- Read Operations (GET) --- */
     public Room getRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new RoomNotFoundException());
-    }
-
-    @Transactional
-    public Room createRoom(NewRoomDTO roomDTO) {
-        Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
-
-        Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);
-        return roomRepository.save(newRoom);
     }
 
     public Iterable<Room> getUserRooms() {
@@ -47,6 +43,16 @@ public class RoomService {
         return roomRepository.findByOwnerId(user.getId());
     }
 
+    /* --- Create Operation (POST) --- */
+    @Transactional
+    public Room createRoom(NewRoomDTO roomDTO) {
+        Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
+
+        Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);
+        return roomRepository.save(newRoom);
+    }
+
+    /* --- Update Operation (PUT) --- */
     @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = getRoomById(id);
@@ -58,6 +64,7 @@ public class RoomService {
         return roomRepository.save(_room);
     }
 
+    /* --- Delete Operation (DELETE) --- */
     @Transactional
     public void deleteRoom(Long roomId) {
         Room room = roomRepository.findById(roomId)
