@@ -20,12 +20,11 @@ import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 
 @Entity
-// table annotation overrides the default table name
 @Table(name = "rooms")
 public class Room {
 
+    /* ------------- Fields ------------- */
     @Id
-    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -39,28 +38,29 @@ public class Room {
     @JsonBackReference
     private Project project;
 
+    @OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
+    @JsonManagedReference
+    private List<OrgUnit> orgUnits = new ArrayList<>();
+
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructors should list parameters in the same order as the fields for
+    // consistency.
+    // Fields like 'orgUnits' are not included because they are initialized with
+    // default values.
+
     // no-arg constructor for Hibernate
     protected Room() {
     }
 
-    // public constructor
-    // ID is not required because Postgres generates the ID
     public Room(String name, String description, Project project) {
         this.name = name;
         this.description = description;
         this.project = project;
     }
 
-    @OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
-    @JsonManagedReference
-    private List<OrgUnit> orgUnits = new ArrayList<>();
-
-    @PreRemove
-    private void preRemove() {
-        for (OrgUnit orgUnit : orgUnits) {
-            orgUnit.setRoom(null); // Unassign each orgUnit before Room deletion
-        }
-    }
+    /* ------------- Getters and Setters ------------- */
+    // NOTE: Getters and setters should follow the same order as the fields and
+    // constructors for consistency.
 
     public Long getId() {
         return id;
@@ -102,6 +102,8 @@ public class Room {
         this.orgUnits = orgUnits;
     }
 
+    /* ------------- Utility Methods ------------- */
+
     public void addOrgUnit(OrgUnit orgUnit) {
         if (!orgUnits.contains(orgUnit)) {
             orgUnits.add(orgUnit);
@@ -114,5 +116,14 @@ public class Room {
             orgUnits.remove(orgUnit);
         }
         orgUnit.setRoom(null);
+    }
+
+    /* ------------- Lifecycle Callback Methods ------------- */
+
+    @PreRemove
+    private void preRemove() {
+        for (OrgUnit orgUnit : orgUnits) {
+            orgUnit.setRoom(null); // Unassign each orgUnit before Room deletion
+        }
     }
 }
