@@ -19,12 +19,18 @@ import jakarta.transaction.Transactional;
 
 @Service("itemService")
 public class ItemService {
+    /* ------------- Constants ------------- */
+    public static final String PROJECT_MISMATCH_ERROR = "Cannot move item to a different project's organization unit.";
+    public static final String ACCESS_DENIED_STRING = "You do not have permission to access item with ID: %d";
+
+    /* ------------- Injected Dependencies ------------- */
     private final OrgUnitRepository orgUnitRepository;
     private final ItemRepository itemRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
 
+    /* ------------- Constructor ------------- */
     public ItemService(
             OrgUnitRepository orgUnitRepository,
             ItemRepository itemRepository,
@@ -38,26 +44,24 @@ public class ItemService {
         this.orgUnitService = orgUnitService;
     }
 
-    public static final String PROJECT_MISMATCH_ERROR = "Cannot move item to a different project's organization unit.";
-    public static final String ACCESS_DENIED_STRING = "You do not have permission to access item with ID: %d";
-
-    public void checkOwnershipForItems(List<Long> itemIds) {
-        for (Long id : itemIds) {
-            if (!securityService.isResourceOwner(id, "item")) {
-                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
-            }
-        }
-    }
-
+    /* ------------- CRUD Operations ------------- */
+    /* --- Read Operations (GET) --- */
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException());
+    }
+
+    public Iterable<Item> getUserItems() {
+        User user = securityService.getCurrentUser();
+
+        return itemRepository.findByOwnerId(user.getId());
     }
 
     public List<Item> getUnassignedItemsByProjectId(Long projectId) {
         return itemRepository.findUnassignedItemsByProjectId(projectId);
     }
 
+    /* --- Create Operation (POST) --- */
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
         if (itemDTO.getOrgUnitId() == null) {
@@ -83,12 +87,7 @@ public class ItemService {
         return itemRepository.save(newItem);
     }
 
-    public Iterable<Item> getUserItems() {
-        User user = securityService.getCurrentUser();
-
-        return itemRepository.findByOwnerId(user.getId());
-    }
-
+    /* --- Update Operation (PUT) --- */
     @Transactional
     public Item updateItem(Long id, UpdateItemDTO itemDTO) {
         Item _item = getItemById(id);
@@ -106,28 +105,15 @@ public class ItemService {
         return itemRepository.save(_item);
     }
 
-    private void validateSameProject(Item item, OrgUnit targetOrgUnit) {
-        if (targetOrgUnit == null || targetOrgUnit.getProject() == null) {
-            throw new IllegalArgumentException("Target OrgUnit or its Project is null");
-        }
-        if (item == null || item.getProject() == null) {
-            throw new IllegalArgumentException("Item or its Project is null");
-        }
-        if (!item.getProject().equals(targetOrgUnit.getProject())) {
-            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
-        }
+    /* --- Delete Operation (DELETE) --- */
+    @Transactional
+    public void deleteItem(Long id) {
+        // Make sure item exists first
+        getItemById(id);
+        itemRepository.deleteById(id);
     }
 
-    private OrgUnit assignItemToOrgUnit(Item item, OrgUnit orgUnit) {
-        orgUnit.addItem(item); // Manages both sides of the relationship
-        return orgUnitRepository.save(orgUnit);
-    }
-
-    private OrgUnit unassignItemFromOrgUnit(Item item, OrgUnit orgUnit) {
-        orgUnit.removeItem(item); // Manages both sides of the relationship
-        return orgUnitRepository.save(orgUnit);
-    }
-
+    /* ------------- Complex Operations ------------- */
     @Transactional
     public Iterable<Item> assignItemsToOrgUnit(List<Long> itemIds, Long targetOrgUnitId) {
         OrgUnit targetOrgUnit = orgUnitService.getOrgUnitById(targetOrgUnitId);
@@ -184,10 +170,35 @@ public class ItemService {
         // return updatedItems;
     }
 
-    @Transactional
-    public void deleteItem(Long id) {
-        // Make sure item exists first
-        getItemById(id);
-        itemRepository.deleteById(id);
+    /* ------------- Ownership and Security Checks ------------- */
+    public void checkOwnershipForItems(List<Long> itemIds) {
+        for (Long id : itemIds) {
+            if (!securityService.isResourceOwner(id, "item")) {
+                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
+            }
+        }
+    }
+
+    /* ------------- Private Helper Methods ------------- */
+    private void validateSameProject(Item item, OrgUnit targetOrgUnit) {
+        if (targetOrgUnit == null || targetOrgUnit.getProject() == null) {
+            throw new IllegalArgumentException("Target OrgUnit or its Project is null");
+        }
+        if (item == null || item.getProject() == null) {
+            throw new IllegalArgumentException("Item or its Project is null");
+        }
+        if (!item.getProject().equals(targetOrgUnit.getProject())) {
+            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
+        }
+    }
+
+    private OrgUnit assignItemToOrgUnit(Item item, OrgUnit orgUnit) {
+        orgUnit.addItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
+    }
+
+    private OrgUnit unassignItemFromOrgUnit(Item item, OrgUnit orgUnit) {
+        orgUnit.removeItem(item); // Manages both sides of the relationship
+        return orgUnitRepository.save(orgUnit);
     }
 }

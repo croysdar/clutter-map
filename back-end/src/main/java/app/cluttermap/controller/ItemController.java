@@ -22,21 +22,18 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
+    /* ------------- Injected Dependencies ------------- */
     private final ItemService itemService;
 
+    /* ------------- Constructor ------------- */
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
+    /* ------------- GET Operations ------------- */
     @GetMapping()
     public ResponseEntity<Iterable<Item>> getItems() {
         return ResponseEntity.ok(itemService.getUserItems());
-    }
-
-    @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#itemDTO.getOrgUnitId(), 'org-unit')")
-    public ResponseEntity<Item> addOneItem(@Valid @RequestBody NewItemDTO itemDTO) {
-        return ResponseEntity.ok(itemService.createItem(itemDTO));
     }
 
     @GetMapping("/{id}")
@@ -45,6 +42,14 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getItemById(id));
     }
 
+    /* ------------- POST Operations ------------- */
+    @PostMapping()
+    @PreAuthorize("@securityService.isResourceOwner(#itemDTO.getOrgUnitId(), 'org-unit')")
+    public ResponseEntity<Item> addOneItem(@Valid @RequestBody NewItemDTO itemDTO) {
+        return ResponseEntity.ok(itemService.createItem(itemDTO));
+    }
+
+    /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,
@@ -58,6 +63,7 @@ public class ItemController {
         return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 
+    /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Void> deleteOneItem(@PathVariable("id") Long id) {
