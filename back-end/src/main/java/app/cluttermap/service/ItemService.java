@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
@@ -21,16 +22,19 @@ public class ItemService {
     private final OrgUnitRepository orgUnitRepository;
     private final ItemRepository itemRepository;
     private final SecurityService securityService;
+    private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
 
     public ItemService(
             OrgUnitRepository orgUnitRepository,
             ItemRepository itemRepository,
             SecurityService securityService,
+            ProjectService projectService,
             OrgUnitService orgUnitService) {
         this.orgUnitRepository = orgUnitRepository;
         this.itemRepository = itemRepository;
         this.securityService = securityService;
+        this.projectService = projectService;
         this.orgUnitService = orgUnitService;
     }
 
@@ -56,6 +60,17 @@ public class ItemService {
 
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
+        if (itemDTO.getOrgUnitId() == null) {
+            // Check if the item is being created as unassigned to an org unit
+            Project project = projectService.getProjectById(itemDTO.getProjectIdAsLong());
+
+            Item newItem = new Item(
+                    itemDTO.getName(),
+                    itemDTO.getDescription(),
+                    itemDTO.getTags(),
+                    project);
+            return itemRepository.save(newItem);
+        }
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());
 
         Item newItem = new Item(
