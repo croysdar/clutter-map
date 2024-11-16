@@ -2,8 +2,8 @@ package app.cluttermap.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class NewOrgUnitDTO {
@@ -12,14 +12,22 @@ public class NewOrgUnitDTO {
 
     private String description;
 
-    @NotNull(message = "Room ID must not be blank.")
     @Pattern(regexp = "\\d+", message = "Room ID must be a valid number.")
     private String roomId;
 
-    public NewOrgUnitDTO(String name, String description, String roomId) {
+    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
+    private String projectId;
+
+    @AssertTrue(message = "Either RoomId or ProjectId must be provided.")
+    public boolean isRoomOrProjectValid() {
+        return roomId != null || projectId != null;
+    }
+
+    public NewOrgUnitDTO(String name, String description, String roomId, String projectId) {
         this.name = name;
         this.description = description;
         this.roomId = roomId;
+        this.projectId = projectId;
     }
 
     public String getName() {
@@ -32,6 +40,10 @@ public class NewOrgUnitDTO {
 
     public String getRoomId() {
         return roomId;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
 
     public void setName(String name) {
@@ -49,5 +61,10 @@ public class NewOrgUnitDTO {
     @JsonIgnore
     public Long getRoomIdAsLong() {
         return Long.parseLong(roomId);
+    }
+
+    @JsonIgnore
+    public Long getProjectIdAsLong() {
+        return Long.parseLong(projectId);
     }
 }

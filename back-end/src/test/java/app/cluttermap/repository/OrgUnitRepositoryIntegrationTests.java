@@ -69,7 +69,7 @@ public class OrgUnitRepositoryIntegrationTests {
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
         // Act: Retrieve orgUnits associated with owner1
-        List<OrgUnit> owner1OrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner1.getId());
+        List<OrgUnit> owner1OrgUnits = orgUnitRepository.findByOwnerId(owner1.getId());
 
         // Assert: Verify that only the orgUnit owned by owner1 is returned
         assertThat(owner1OrgUnits).hasSize(1);
@@ -98,7 +98,7 @@ public class OrgUnitRepositoryIntegrationTests {
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2, orgUnit3));
 
         // Act: Retrieve all orgUnits associated with the user
-        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner.getId());
+        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all orgUnits owned by the user are returned
         assertThat(ownerOrgUnits).hasSize(3);
@@ -113,7 +113,7 @@ public class OrgUnitRepositoryIntegrationTests {
         userRepository.save(owner); // Save the user without any orgUnits
 
         // Act: Retrieve orgUnits associated with the user
-        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findOrgUnitsByUserId(owner.getId());
+        List<OrgUnit> ownerOrgUnits = orgUnitRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that the returned list is empty
         assertThat(ownerOrgUnits).isEmpty();
@@ -121,8 +121,8 @@ public class OrgUnitRepositoryIntegrationTests {
 
     @Test
     @Transactional
-    void deletingOrgUnit_ShouldAlsoDeleteItems() {
-        // Arrange: Set up a user and create a orgUnit with an associated item
+    void deletingOrgUnit_ShouldNotDeleteItemsButUnassignThem() {
+        // Arrange: Set up a user and create an orgUnit with an associated item
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
@@ -134,23 +134,25 @@ public class OrgUnitRepositoryIntegrationTests {
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
         Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
-        orgUnit.getItems().add(item);
+        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 
         assertThat(itemRepository.findAll()).hasSize(1);
 
-        // Act: Delete the orgUnit, triggering cascade deletion for the associated item
+        // Act: Delete the orgUnit
         orgUnitRepository.delete(orgUnit);
 
-        // Assert: Verify that the item was deleted as an orphan when the orgUnit was
-        // removed
-        assertThat(itemRepository.findAll()).isEmpty();
+        // Assert: Verify that the item still exists and is now "unassigned" (i.e., its
+        // orgUnit is null)
+        Item fetchedItem = itemRepository.findById(item.getId()).orElse(null);
+        assertThat(fetchedItem).isNotNull();
+        assertThat(fetchedItem.getOrgUnit()).isNull();
     }
 
     @Test
     @Transactional
-    void removingItemFromOrgUnit_ShouldTriggerOrphanRemoval() {
-        // Arrange: Set up a user and create a orgUnit with an associated item
+    void removingItemFromOrgUnit_ShouldNotTriggerOrphanRemoval() {
+        // Arrange: Set up a user and create an orgUnit with an associated item
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
@@ -162,18 +164,57 @@ public class OrgUnitRepositoryIntegrationTests {
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
         Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
-        orgUnit.getItems().add(item);
+        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 
         assertThat(itemRepository.findAll()).hasSize(1);
 
-        // Act: Remove the item from the orgUnit's item list and save the orgUnit to
-        // trigger orphan removal
-        orgUnit.getItems().remove(item);
+        // Act: Remove the item from the orgUnit's item list and save the orgUnit
+        orgUnit.removeItem(item);
         orgUnitRepository.save(orgUnit);
 
-        // Assert: Verify that the item was deleted as an orphan when removed from
-        // the orgUnit
-        assertThat(itemRepository.findAll()).isEmpty();
+        // Assert: Verify that the item was not deleted but is unassigned (i.e., its
+        // orgUnit is null)
+        Item fetchedItem = itemRepository.findById(item.getId()).orElse(null);
+        assertThat(fetchedItem).isNotNull();
+        assertThat(fetchedItem.getOrgUnit()).isNull();
+    }
+
+    @Test
+    void findUnassignedOrgUnitsByProjectId_ShouldReturnOnlyUnassignedOrgUnits() {
+        // Arrange: Create a project and orgUnits with and without an assigned room
+        User owner = new User("ownerProviderId");
+        userRepository.save(owner);
+        Project project = new Project("Test Project", owner);
+        projectRepository.save(project);
+
+        OrgUnit unassignedOrgUnit1 = new OrgUnit("Unassigned OrgUnit 1", "Description", project);
+        OrgUnit unassignedOrgUnit2 = new OrgUnit("Unassigned OrgUnit 2", "Description", project);
+
+        Room room = new Room("Room", "Room Description", project);
+        roomRepository.save(room);
+        OrgUnit assignedOrgUnit = new OrgUnit("Assigned OrgUnit", "Description", project);
+        assignedOrgUnit.setRoom(room);
+
+        orgUnitRepository.saveAll(List.of(unassignedOrgUnit1, unassignedOrgUnit2, assignedOrgUnit));
+
+        // Act: Retrieve unassigned orgUnits
+        List<OrgUnit> unassignedOrgUnits = orgUnitRepository.findUnassignedOrgUnitsByProjectId(project.getId());
+
+        // Assert: Verify only unassigned orgUnits are returned
+        assertThat(unassignedOrgUnits).extracting(OrgUnit::getName)
+                .containsExactlyInAnyOrder("Unassigned OrgUnit 1", "Unassigned OrgUnit 2");
+    }
+
+    @Test
+    void findUnassignedOrgUnitsByNonExistentProjectId_ShouldReturnEmptyList() {
+        // Arrange: Use a project ID that does not exist in the database
+        Long nonExistentProjectId = 999L;
+
+        // Act: Retrieve unassigned orgUnits for the non-existent project
+        List<OrgUnit> unassignedOrgUnits = orgUnitRepository.findUnassignedOrgUnitsByProjectId(nonExistentProjectId);
+
+        // Assert: Verify that the result is an empty list
+        assertThat(unassignedOrgUnits).isEmpty();
     }
 }

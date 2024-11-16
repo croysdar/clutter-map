@@ -34,6 +34,14 @@ public class Project {
     @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<OrgUnit> orgUnits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Item> items = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     @JsonBackReference
@@ -78,5 +86,21 @@ public class Project {
 
     public void setRooms(List<Room> rooms) {
         this.rooms = rooms;
+    }
+
+    public List<OrgUnit> getOrgUnits() {
+        return orgUnits;
+    }
+
+    public void setOrgUnits(List<OrgUnit> orgUnits) {
+        this.orgUnits = orgUnits;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 }

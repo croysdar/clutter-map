@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +17,7 @@ import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
 import jakarta.validation.Valid;
 
@@ -22,9 +25,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/org-units")
 public class OrgUnitController {
     private final OrgUnitService orgUnitService;
+    private final ItemService itemService;
 
-    public OrgUnitController(OrgUnitService orgUnitService) {
+    public OrgUnitController(
+            OrgUnitService orgUnitService,
+            ItemService itemService) {
         this.orgUnitService = orgUnitService;
+        this.itemService = itemService;
     }
 
     @GetMapping()
@@ -55,6 +62,22 @@ public class OrgUnitController {
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
+    }
+
+    @PutMapping("/{orgUnitId}/items")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    public ResponseEntity<Iterable<Item>> assignItemsToOrgUnit(
+            @PathVariable Long orgUnitId,
+            @RequestBody List<Long> itemIds) {
+
+        Iterable<Item> updatedItems = itemService.assignItemsToOrgUnit(itemIds, orgUnitId);
+        return ResponseEntity.ok(updatedItems);
+    }
+
+    @PutMapping("/unassign")
+    public ResponseEntity<Iterable<OrgUnit>> unassignOrgUnits(@RequestBody List<Long> orgUnitIds) {
+        orgUnitService.checkOwnershipForOrgUnits(orgUnitIds);
+        return ResponseEntity.ok(orgUnitService.unassignOrgUnits(orgUnitIds));
     }
 
     @DeleteMapping("/{id}")

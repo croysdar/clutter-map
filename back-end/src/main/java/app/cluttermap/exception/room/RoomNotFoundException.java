@@ -1,7 +1,7 @@
 package app.cluttermap.exception.room;
 
-public class RoomNotFoundException extends RuntimeException{
+public class RoomNotFoundException extends RuntimeException {
     public RoomNotFoundException() {
-        super("Room not found");
+        super("Room not found.");
     }
 }

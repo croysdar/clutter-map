@@ -30,7 +30,12 @@ public class Item {
     private List<String> tags;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "org_unit_id")
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_unit_id", nullable = true)
     @JsonBackReference
     private OrgUnit orgUnit;
 
@@ -48,6 +53,16 @@ public class Item {
         this.tags = tags;
         this.quantity = quantity;
         this.orgUnit = orgUnit;
+        this.project = orgUnit.getProject();
+    }
+
+    // This item is unassigned
+    public Item(String name, String description, List<String> tags, Integer quantity, Project project) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.quantity = quantity;
+        this.project = project;
     }
 
     public Long getId() {
@@ -82,12 +97,23 @@ public class Item {
         this.tags = tags;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public OrgUnit getOrgUnit() {
         return orgUnit;
     }
 
     public void setOrgUnit(OrgUnit orgUnit) {
         this.orgUnit = orgUnit;
+        if (orgUnit != null && !orgUnit.getItems().contains(this)) {
+            orgUnit.addItem(this);
+        }
     }
 
     public Integer getQuantity() {

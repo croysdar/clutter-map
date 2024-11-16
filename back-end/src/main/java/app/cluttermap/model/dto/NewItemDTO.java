@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class NewItemDTO {
@@ -16,19 +16,28 @@ public class NewItemDTO {
     private String description;
     private List<String> tags;
 
-    @NotNull(message = "OrgUnit ID must not be blank.")
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
     @Min(value = 1, message = "Quantity must be a least 1.")
     private Integer quantity;
 
-    public NewItemDTO(String name, String description, List<String> tags, Integer quantity, String orgUnitId) {
+    @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
+    private String projectId;
+
+    @AssertTrue(message = "Either OrgUnitId or ProjectId must be provided.")
+    public boolean isOrgUnitOrProjectValid() {
+        return orgUnitId != null || projectId != null;
+    }
+
+    public NewItemDTO(String name, String description, List<String> tags, Integer quantity, String orgUnitId,
+            String projectId) {
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.quantity = (quantity != null) ? quantity : 1;
         this.orgUnitId = orgUnitId;
+        this.projectId = projectId;
     }
 
     public String getName() {
@@ -43,12 +52,16 @@ public class NewItemDTO {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
     public String getOrgUnitId() {
         return orgUnitId;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public void setName(String name) {
@@ -61,6 +74,10 @@ public class NewItemDTO {
 
     public void setOrgUnitId(String orgUnitId) {
         this.orgUnitId = orgUnitId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     @JsonIgnore
@@ -76,4 +93,8 @@ public class NewItemDTO {
         this.quantity = quantity;
     }
 
+    @JsonIgnore
+    public Long getProjectIdAsLong() {
+        return Long.parseLong(projectId);
+    }
 }

@@ -80,7 +80,7 @@ public class ProjectServiceTests {
     void createProject_ShouldCreateProject_WhenLimitNotReached() {
         // Arrange: Set up mocks for the current user and their existing projects
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(projectRepository.findByOwner(mockUser)).thenReturn(Collections.emptyList());
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Arrange: Create a DTO for the new project and set up a mock project to return
         // on save
@@ -110,7 +110,7 @@ public class ProjectServiceTests {
         for (int i = 0; i < PROJECT_LIMIT - 1; i++) {
             existingProjects.add(new Project("Project " + (i + 1), mockUser));
         }
-        when(projectRepository.findByOwner(mockUser)).thenReturn(existingProjects);
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
 
         // Arrange: Prepare a DTO for creating a new project within the project limit
         NewProjectDTO projectDTO = new NewProjectDTO("Within Limit Project");
@@ -127,7 +127,7 @@ public class ProjectServiceTests {
 
         // Arrange: Add one more project to reach the project limit exactly
         existingProjects.add(createdProject);
-        when(projectRepository.findByOwner(mockUser)).thenReturn(existingProjects);
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
 
         // Act & Assert: Attempting to create another project should throw
         // ProjectLimitReachedException
@@ -143,7 +143,7 @@ public class ProjectServiceTests {
 
         Project project1 = new Project("Project 1", mockUser);
         Project project2 = new Project("Project 2", mockUser);
-        when(projectRepository.findByOwner(mockUser)).thenReturn(List.of(project1, project2));
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
 
         // Act: Call the service to retrieve all projects owned by the user
         Iterable<Project> userProjects = projectService.getUserProjects();
@@ -157,7 +157,7 @@ public class ProjectServiceTests {
         // Arrange: Set up the current user and mock their projects to return an empty
         // list
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(projectRepository.findByOwner(mockUser)).thenReturn(Collections.emptyList());
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Act: Call the service to retrieve projects owned by the user
         Iterable<Project> userProjects = projectService.getUserProjects();
@@ -208,14 +208,15 @@ public class ProjectServiceTests {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
         Project project = new Project("Sample Project", mockUser);
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        Long projectId = project.getId();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         // Act: Call the service to delete the project by ID
-        projectService.deleteProject(1L);
+        projectService.deleteProject(projectId);
 
         // Assert: Verify that the repository's deleteById method was called with the
         // correct ID
-        verify(projectRepository).deleteById(1L);
+        verify(projectRepository).deleteById(projectId);
     }
 
     @Test

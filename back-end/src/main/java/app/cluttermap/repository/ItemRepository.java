@@ -12,9 +12,10 @@ import app.cluttermap.model.Item;
 @Repository
 public interface ItemRepository extends CrudRepository<Item, Long> {
     @Query(value = "SELECT i.* FROM items i " +
-            "JOIN org_units ou ON i.org_unit_id = ou.id " +
-            "JOIN rooms r ON ou.room_id = r.id " +
-            "JOIN projects p ON r.project_id = p.id " +
+            "JOIN projects p ON i.project_id = p.id " +
             "WHERE p.owner_id = :ownerId", nativeQuery = true)
-    List<Item> findItemsByUserId(@Param("ownerId") Long ownerId);
+    List<Item> findByOwnerId(@Param("ownerId") Long ownerId);
+
+    @Query(value = "SELECT * FROM items i WHERE i.project_id = :projectId AND i.org_unit_id IS NULL", nativeQuery = true)
+    List<Item> findUnassignedItemsByProjectId(@Param("projectId") Long projectId);
 }
