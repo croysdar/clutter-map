@@ -51,16 +51,10 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 ## How to Run the Project
 
 1. **Backend (Spring Boot)**:
-   - Navigate to the `back-end/` directory.
-   - Create .env file containing ...
-   - Run the following command to start the Spring Boot server:
-     ```
-     ./gradlew bootRun
-     ```
 
-1. **Backend (Spring Boot)**:
    - Navigate to the `back-end/` directory.
    - Create a `.env` file with the following environment variables. Make sure to replace `{DATABASE_NAME}` and other placeholders with your own values:
+
      ```plaintext
      JWT_SECRET={YOUR_JWT_SECRET}
 
@@ -72,6 +66,7 @@ The project is organized into two main directories: `back-end` for the Spring Bo
      DB_USERNAME={YOUR_DB_USERNAME}
      DB_PASSWORD={YOUR_DB_PASSWORD}
      ```
+
    - Run the following command to start the Spring Boot server:
      ```bash
      ./gradlew bootRun
@@ -89,6 +84,7 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 ## API Endpoints
 
 ### `/auth`
+
 - **POST `/verify-token/google`**  
   Verifies a Google ID token and returns a JWT token and user information.  
   **Request Body**: `{ "idTokenString": "string" }`  
@@ -101,8 +97,9 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 ---
 
 ### `/org-units`
+
 - **GET `/`**  
-  Retrieves a list of all organization units.  
+  Retrieves a list of all organization units for the current user.  
   **Response**: `Iterable<OrgUnit>`
 
 - **POST `/`**  
@@ -115,11 +112,30 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Path Variable**: `id` (Long)  
   **Response**: `OrgUnit`
 
+- **GET `/{id}/items`**  
+  Retrieves all items within a specific organization unit by organization unit ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Iterable<Item>`
+
 - **PUT `/{id}`**  
   Updates an existing organization unit.  
   **Path Variable**: `id` (Long)  
   **Request Body**: `UpdateOrgUnitDTO`  
   **Response**: `OrgUnit`
+
+- **PUT `/{id}/items`**  
+  Updates the items assigned to an existing organization unit.  
+  Items must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> itemIds`  
+  **Response**: `Iterable<Item>`
+
+- **PUT `/unassign`**  
+  Unassigns the specified org units from their rooms.
+  Org Units must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Iterable<OrgUnit>`
 
 - **DELETE `/{id}`**  
   Deletes an organization unit by ID.  
@@ -129,8 +145,9 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 ---
 
 ### `/rooms`
+
 - **GET `/`**  
-  Retrieves a list of all rooms.  
+  Retrieves a list of all rooms for the current user.  
   **Response**: `Iterable<Room>`
 
 - **POST `/`**  
@@ -154,6 +171,12 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Request Body**: `UpdateRoomDTO`  
   **Response**: `Room`
 
+- **PUT `/{roomId}/org-units`**  
+  Assigns organization units to a specific room.  
+  **Path Variable**: `roomId` (Long): ID of the room.
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Room`
+
 - **DELETE `/{id}`**  
   Deletes a room by ID.  
   **Path Variable**: `id` (Long)  
@@ -162,8 +185,9 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 ---
 
 ### `/projects`
+
 - **GET `/`**  
-  Retrieves a list of all projects.  
+  Retrieves a list of all projects for the current user.  
   **Response**: `Iterable<Project>`
 
 - **POST `/`**  
@@ -181,6 +205,20 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   **Path Variable**: `id` (Long)  
   **Response**: `Iterable<Room>`
 
+- **GET `/{projectId}/org-units/unassigned`**  
+  Retrieves a list of unassigned organization units within a project (OrgUnits not linked to any room).  
+  **Path Variable**:
+
+  - `projectId` (Long): ID of the project.  
+    **Response**: `List<OrgUnit>`
+
+- **GET `/{projectId}/items/unassigned`**  
+  Retrieves a list of unassigned items within a project (items not linked to any organization unit).  
+  **Path Variable**:
+
+  - `projectId` (Long): ID of the project.  
+    **Response**: `List<Item>`
+
 - **PUT `/{id}`**  
   Updates an existing project.  
   **Path Variable**: `id` (Long)  
@@ -194,9 +232,46 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ---
 
-Each endpoint is protected by security constraints, where applicable, to ensure that only authorized users can perform certain operations.
+### `/items`
 
+- **GET `/`**  
+  Retrieves a list of all items.  
+  **Response**: `Iterable<Item>`
+
+- **POST `/`**  
+  Adds a new item to an organization unit.  
+  **Request Body**: `NewItemDTO`  
+  **Response**: `Item`
+
+- **GET `/{id}`**  
+  Retrieves a specific item by ID.  
+  **Path Variable**: `id` (Long): ID of the item to retrieve.  
+   **Response**: `Item`
+
+- **PUT `/{id}`**  
+  Updates an existing item.  
+  **Path Variable**: `id` (Long): ID of the item to update.  
+  **Request Body**: `UpdateItemDTO`  
+  **Response**: `Item`
+
+- **PUT `/unassign`**  
+  Unassigns the specified items from their org units.
+  Items must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> itemIds`  
+  **Response**: `Iterable<Item>`
+
+- **DELETE `/{id}`**  
+  Deletes an item by ID.  
+  **Path Variable**:
+  - `id` (Long): ID of the item to delete.  
+    **Response**: `Void`
+
+---
+
+Each endpoint is protected by security constraints, where applicable, to ensure that only authorized users can perform certain operations.
 
 ## Database Configuration
 
-The application uses PostgreSQL as its database. Configuration is stored in `back-end/src/main/resources/application.properties`.
+The application uses PostgreSQL as its database. Configuration is stored in
+`back-end/src/main/resources/application.properties`.

@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,6 +50,12 @@ public class ItemController {
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateItemDTO itemDTO) {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
+    }
+
+    @PutMapping("/unassign")
+    public ResponseEntity<Iterable<Item>> unassignItems(@RequestBody List<Long> itemIds) {
+        itemService.checkOwnershipForItems(itemIds);
+        return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 
     @DeleteMapping("/{id}")

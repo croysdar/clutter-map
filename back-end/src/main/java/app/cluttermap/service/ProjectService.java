@@ -32,7 +32,7 @@ public class ProjectService {
     public Project createProject(NewProjectDTO projectDTO) {
         User user = securityService.getCurrentUser();
 
-        int num = projectRepository.findByOwner(user).size();
+        int num = projectRepository.findByOwnerId(user.getId()).size();
         if (num >= PROJECT_LIMIT) {
             throw new ProjectLimitReachedException();
         }
@@ -44,7 +44,7 @@ public class ProjectService {
     public Iterable<Project> getUserProjects() {
         User user = securityService.getCurrentUser();
 
-        return projectRepository.findByOwner(user);
+        return projectRepository.findByOwnerId(user.getId());
     }
 
     @Transactional
