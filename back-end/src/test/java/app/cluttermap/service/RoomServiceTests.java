@@ -22,21 +22,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
 import app.cluttermap.exception.room.RoomNotFoundException;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
-import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.RoomRepository;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 public class RoomServiceTests {
     @Mock
-    private RoomsRepository roomRepository;
+    private RoomRepository roomRepository;
+
+    @Mock
+    private OrgUnitRepository orgUnitRepository;
 
     @Mock
     private SecurityService securityService;
@@ -148,7 +154,7 @@ public class RoomServiceTests {
 
         Room room1 = new Room("Room 1", "Room description 1", mockProject);
         Room room2 = new Room("Room 2", "Room description 2", mockProject);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
         // Act: Retrieve the rooms owned by the user
         Iterable<Room> userRooms = roomService.getUserRooms();
@@ -167,7 +173,7 @@ public class RoomServiceTests {
         Room room2 = new Room("Room 2", "Description 2", project2);
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
         // Act: Fetch rooms for the user
         Iterable<Room> userRooms = roomService.getUserRooms();
@@ -180,7 +186,7 @@ public class RoomServiceTests {
     void getUserRooms_ShouldReturnEmptyList_WhenNoRoomsExist() {
         // Arrange: Set up mock user and stub the repository to return an empty list
         when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findRoomsByProjectOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Act: Retrieve the rooms owned by the user
         Iterable<Room> userRooms = roomService.getUserRooms();
@@ -246,17 +252,128 @@ public class RoomServiceTests {
     }
 
     @Test
+    void addOrgUnitToRoom_Success() {
+        // Arrange: Create a project, a room, and an orgUnit
+        Project project = new Project("Test Project", mockUser);
+        Room room = new Room("Test Room", "Room Description", project);
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", project);
+
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+        when(roomRepository.save(room)).thenReturn(room);
+
+        // Act: Add the orgUnit to the room
+        Room updatedRoom = roomService.addOrgUnitToRoom(room.getId(), orgUnit.getId());
+
+        // Assert: Verify that the orgUnit is now associated with the room
+        assertThat(updatedRoom.getOrgUnits()).contains(orgUnit);
+        assertThat(orgUnit.getRoom()).isEqualTo(room);
+    }
+
+    // TODO allow partial success
+    @Test
+    void addOrgUnitToRoom_DifferentProjects_ShouldThrowIllegalArgumentException() {
+        // Arrange: Create two projects, each with its own room and orgUnit
+        Project project1 = new Project("Project 1", mockUser);
+        Project project2 = new Project("Project 2", mockUser);
+
+        Room room = new Room("Test Room", "Room Description", project1);
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", project2);
+
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+
+        // Act & Assert: Attempt to add the orgUnit to a room in a different project
+        assertThrows(IllegalArgumentException.class, () -> {
+            roomService.addOrgUnitToRoom(room.getId(), orgUnit.getId());
+        });
+    }
+
+    @Test
+    void addOrgUnitToRoom_RoomNotFound_ShouldThrowRoomNotFoundException() {
+        // Arrange: Ensure no room exists with the given ID
+        Long nonExistentRoomId = 999L;
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
+
+        // Act & Assert: Attempt to add the orgUnit to a non-existent room
+        assertThrows(RoomNotFoundException.class, () -> {
+            roomService.addOrgUnitToRoom(nonExistentRoomId, orgUnit.getId());
+        });
+    }
+
+    @Test
+    void addOrgUnitToRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Create a room and ensure no orgUnit exists with the given ID
+        Room room = new Room("Test Room", "Room Description", mockProject);
+        Long nonExistentOrgUnitId = 999L;
+
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
+
+        // Act & Assert: Attempt to add a non-existent orgUnit to the room
+        assertThrows(OrgUnitNotFoundException.class, () -> {
+            roomService.addOrgUnitToRoom(room.getId(), nonExistentOrgUnitId);
+        });
+    }
+
+    @Test
+    void removeOrgUnitFromRoom_Success() {
+        // Arrange: Create a room and add an orgUnit to it
+        Project project = new Project("Test Project", mockUser);
+        Room room = new Room("Test Room", "Room Description", project);
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
+        room.addOrgUnit(orgUnit);
+
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
+        when(roomRepository.save(room)).thenReturn(room);
+
+        // Act: Remove the orgUnit from the room
+        Room updatedRoom = roomService.removeOrgUnitFromRoom(room.getId(), orgUnit.getId());
+
+        // Assert: Verify that the orgUnit is no longer associated with the room
+        assertThat(updatedRoom.getOrgUnits()).doesNotContain(orgUnit);
+        assertThat(orgUnit.getRoom()).isNull();
+    }
+
+    @Test
+    void removeOrgUnitFromRoom_RoomNotFound_ShouldThrowRoomNotFoundException() {
+        // Arrange: Ensure no room exists with the given ID
+        Long nonExistentRoomId = 999L;
+        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", mockProject);
+
+        // Act & Assert: Attempt to remove an orgUnit from a non-existent room
+        assertThrows(RoomNotFoundException.class, () -> {
+            roomService.removeOrgUnitFromRoom(nonExistentRoomId, orgUnit.getId());
+        });
+    }
+
+    @Test
+    void removeOrgUnitFromRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
+        // Arrange: Create a room and ensure no orgUnit exists with the given ID
+        Room room = new Room("Test Room", "Room Description", mockProject);
+        Long nonExistentOrgUnitId = 999L;
+
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
+
+        // Act & Assert: Attempt to remove a non-existent orgUnit from the room
+        assertThrows(OrgUnitNotFoundException.class, () -> {
+            roomService.removeOrgUnitFromRoom(room.getId(), nonExistentOrgUnitId);
+        });
+    }
+
+    @Test
     void deleteRoom_ShouldDeleteRoom_WhenRoomExists() {
         // Arrange: Set up a room and stub the repository to return the room by ID
         Room room = new Room("Sample Room", "Room Description", mockProject);
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        Long roomId = room.getId();
+        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
 
         // Act: Delete the room using the service
-        roomService.deleteRoom(1L);
+        roomService.deleteRoom(roomId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
-        verify(roomRepository).deleteById(1L);
+        verify(roomRepository).delete(room);
     }
 
     @Test

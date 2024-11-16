@@ -2,32 +2,41 @@ package app.cluttermap.service;
 
 import org.springframework.stereotype.Service;
 
+import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
-import app.cluttermap.repository.RoomsRepository;
+import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 
 @Service("roomService")
 public class RoomService {
-    private final RoomsRepository roomsRepository;
+    private final RoomRepository roomRepository;
+    private final OrgUnitRepository orgUnitRepository;
+
     private final SecurityService securityService;
     private final ProjectService projectService;
 
     // TODO add limit of rooms per project
 
-    public RoomService(RoomsRepository roomsRepository, SecurityService securityService,
+    public RoomService(
+            RoomRepository roomRepository,
+            OrgUnitRepository orgUnitRepository,
+            SecurityService securityService,
             ProjectService projectService) {
-        this.roomsRepository = roomsRepository;
+        this.roomRepository = roomRepository;
         this.securityService = securityService;
         this.projectService = projectService;
+        this.orgUnitRepository = orgUnitRepository;
     }
 
     public Room getRoomById(Long id) {
-        return roomsRepository.findById(id)
+        return roomRepository.findById(id)
                 .orElseThrow(() -> new RoomNotFoundException());
     }
 
@@ -36,13 +45,13 @@ public class RoomService {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 
         Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);
-        return roomsRepository.save(newRoom);
+        return roomRepository.save(newRoom);
     }
 
     public Iterable<Room> getUserRooms() {
         User user = securityService.getCurrentUser();
 
-        return roomsRepository.findRoomsByProjectOwnerId(user.getId());
+        return roomRepository.findByOwnerId(user.getId());
     }
 
     @Transactional
@@ -53,13 +62,40 @@ public class RoomService {
             _room.setDescription(roomDTO.getDescription());
         }
 
-        return roomsRepository.save(_room);
+        return roomRepository.save(_room);
     }
 
     @Transactional
-    public void deleteRoom(Long id) {
-        // Make sure room exists first
-        getRoomById(id);
-        roomsRepository.deleteById(id);
+    public Room addOrgUnitToRoom(Long roomId, Long orgUnitId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+
+        if (!orgUnit.getProject().equals(room.getProject())) {
+            throw new IllegalArgumentException("Cannot add org unit to a different project's room");
+        }
+
+        room.addOrgUnit(orgUnit); // Manages both sides of the relationship
+        return roomRepository.save(room);
+    }
+
+    @Transactional
+    public Room removeOrgUnitFromRoom(Long roomId, Long orgUnitId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+        room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
+        roomRepository.save(room);
+        return room;
+    }
+
+    @Transactional
+    public void deleteRoom(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException());
+        roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 }

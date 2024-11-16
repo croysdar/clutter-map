@@ -5,7 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography }
 import { DeleteForever } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDeleteRoomMutation } from './roomApi';
-import { Room } from './roomsSlice';
+import { Room } from './roomsTypes';
 
 type DeleteRoomProps = {
     room: Room

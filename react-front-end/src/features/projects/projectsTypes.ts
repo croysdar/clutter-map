@@ -1,4 +1,4 @@
-import { Room } from '../rooms/roomsSlice'
+import { Room } from '../rooms/roomsTypes'
 
 export interface Project {
     id: number;

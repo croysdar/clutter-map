@@ -1,5 +1,5 @@
 import { baseApiSlice } from "@/features/api/baseApiSlice";
-import { NewItem, Item, ItemUpdate } from "./itemsSlice";
+import { NewItem, Item, ItemUpdate } from "./itemTypes";
 
 export const itemApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

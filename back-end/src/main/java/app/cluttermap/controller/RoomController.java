@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -16,17 +18,22 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/rooms")
 @Validated
-public class RoomsController {
+public class RoomController {
     private final RoomService roomService;
+    private final OrgUnitService orgUnitService;
 
-    public RoomsController(RoomService roomService) {
+    public RoomController(
+            RoomService roomService,
+            OrgUnitService orgUnitService) {
         this.roomService = roomService;
+        this.orgUnitService = orgUnitService;
     }
 
     @GetMapping()
@@ -57,6 +64,16 @@ public class RoomsController {
     public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateRoomDTO roomDTO) {
         return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
+    }
+
+    @PutMapping("/{roomId}/org-units")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'roomId')")
+    public ResponseEntity<Iterable<OrgUnit>> assignOrgUnitsToRoom(
+            @PathVariable Long roomId,
+            @RequestBody List<Long> orgUnitIds) {
+
+        Iterable<OrgUnit> updatedOrgUnits = orgUnitService.assignOrgUnitsToRoom(orgUnitIds, roomId);
+        return ResponseEntity.ok(updatedOrgUnits);
     }
 
     @DeleteMapping("/{id}")

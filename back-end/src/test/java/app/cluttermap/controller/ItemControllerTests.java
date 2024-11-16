@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,11 +41,11 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
-import app.cluttermap.service.ItemsService;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(ItemsController.class)
+@WebMvcTest(ItemController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
@@ -56,7 +58,7 @@ class ItemControllerTests {
     private RoomService roomService;
 
     @MockBean
-    private ItemsService itemService;
+    private ItemService itemService;
 
     @MockBean
     private SecurityService securityService;
@@ -148,7 +150,8 @@ class ItemControllerTests {
 
         // Act: Perform a GET request to the /items/1 endpoint
         mockMvc.perform(get("/items/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getItemById(1L);
@@ -158,7 +161,8 @@ class ItemControllerTests {
     void addOneItem_ShouldCreateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewItemDTO with valid data and mock the service to
         // return a new item
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item Description", List.of("tag 1"),
+                String.valueOf(1L), null);
         Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
@@ -178,7 +182,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenItemNameIsBlank() throws Exception {
         // Arrange: Set up a NewItemDTO with a blank name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO("", "Description", List.of("tag 1"), String.valueOf(1L), null);
 
         // Act: Perform a POST request to the /items endpoint with the blank item
         // name
@@ -195,7 +199,7 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null name to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L));
+        NewItemDTO itemDTO = new NewItemDTO(null, "Description", List.of("tag 1"), String.valueOf(1L), null);
 
         // Act: Perform a POST request to the /items endpoint with the null item
         // name
@@ -210,9 +214,9 @@ class ItemControllerTests {
     }
 
     @Test
-    void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
+    void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdAndProjectIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null);
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), null, null);
 
         // Act: Perform a POST request to the /items endpoint with the null item
         // ID
@@ -222,14 +226,15 @@ class ItemControllerTests {
                 .andExpect(status().isBadRequest())
 
                 // Assert: Verify the validation error response for the name field
-                .andExpect(jsonPath("$.errors[0].field").value("orgUnitId"))
-                .andExpect(jsonPath("$.errors[0].message").value("OrgUnit ID must not be blank."));
+                .andExpect(jsonPath("$.errors[0].field").value("orgUnitOrProjectValid"))
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Either OrgUnitId or ProjectId must be provided."));
     }
 
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
         // Arrange: Set up a NewItemDTO with a NaN item ID to trigger validation
-        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string");
+        NewItemDTO itemDTO = new NewItemDTO("Item Name", "Description", List.of("tag 1"), "string", null);
 
         // Act: Perform a POST request to the /items endpoint with the NaN item
         // ID
@@ -247,8 +252,10 @@ class ItemControllerTests {
     void updateOneItem_ShouldUpdateItem_WhenValidRequest() throws Exception {
         // Arrange: Set up an UpdateItemDTO with a new name and mock the service to
         // return the updated item
-        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description", List.of("Updated Tag"));
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), mockOrgUnit);
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Item", "Updated Description",
+                List.of("Updated Tag"));
+        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                mockOrgUnit);
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items/1 endpoint with the update data
@@ -304,6 +311,64 @@ class ItemControllerTests {
     }
 
     @Test
+    void unassignItems_Success() throws Exception {
+        // Arrange: Set up itemIds, and simulate a successful unassign
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        List<Item> unassignedItems = List.of(
+                new Item("Item 1", "Description", List.of("tag1"), mockOrgUnit),
+                new Item("Item 2", "Description", List.of("tag2"), mockOrgUnit),
+                new Item("Item 3", "Description", List.of("tag3"), mockOrgUnit));
+
+        when(itemService.unassignItems(itemIds)).thenReturn(unassignedItems);
+
+        // Act & Assert: Perform the PUT request and verify status 200 OK and correct
+        // item data
+        mockMvc.perform(put("/items/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Item 1"))
+                .andExpect(jsonPath("$[1].name").value("Item 2"))
+                .andExpect(jsonPath("$[2].name").value("Item 3"));
+    }
+
+    // TODO: Allow partial success
+    @Test
+    void unassignItems_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up item IDs, including a non-existent item ID
+        List<Long> itemIds = List.of(1L, 999L, 3L);
+
+        // Simulate ItemNotFoundException for one of the items
+        when(itemService.unassignItems(itemIds)).thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found with an
+        // error message
+        mockMvc.perform(put("/items/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
+    }
+
+    @Test
+    void unassignItems_UserDoesNotOwnItem_ShouldThrowAccessDenied() throws Exception {
+        // Arrange: Set up itemIds
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+
+        String message = String.format(ItemService.ACCESS_DENIED_STRING, 1L);
+
+        doThrow(new AccessDeniedException(message)).when(itemService).checkOwnershipForItems(itemIds);
+
+        // Act & Assert: Expect an AccessDeniedException when attempting to unassign
+        // items
+        mockMvc.perform(put("/items/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Access Denied"));
+    }
+
+    @Test
     void deleteOneItem_ShouldDeleteItem_WhenItemExists() throws Exception {
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
@@ -321,7 +386,8 @@ class ItemControllerTests {
 
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the item
         verify(itemService).deleteItem(1L);

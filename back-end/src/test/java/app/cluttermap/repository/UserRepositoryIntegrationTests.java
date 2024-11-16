@@ -22,10 +22,10 @@ import jakarta.transaction.Transactional;
 class UserRepositoryIntegrationTests {
 
     @Autowired
-    private UsersRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    private ProjectsRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @BeforeEach
     void setUp() {

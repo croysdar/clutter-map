@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -37,10 +39,11 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(RoomsController.class)
+@WebMvcTest(RoomController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
@@ -51,6 +54,9 @@ class RoomControllerTests {
 
     @MockBean
     private RoomService roomService;
+
+    @MockBean
+    private OrgUnitService orgUnitService;
 
     @MockBean
     private SecurityService securityService;
@@ -134,7 +140,8 @@ class RoomControllerTests {
 
         // Act: Perform a GET request to the /rooms/1 endpoint
         mockMvc.perform(get("/rooms/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure that the service method was called
         verify(roomService).getRoomById(1L);
@@ -285,6 +292,91 @@ class RoomControllerTests {
     }
 
     @Test
+    void assignOrgUnitsToRoom_Success() throws Exception {
+        // Arrange: Set up orgUnitIds and Room ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        Room targetRoom = new Room("Target Room", "Description", mockProject);
+
+        List<OrgUnit> movedOrgUnits = List.of(
+                new OrgUnit("Org Unit 1", "Description", targetRoom),
+                new OrgUnit("Org Unit 2", "Description", targetRoom),
+                new OrgUnit("Org Unit 3", "Description", targetRoom));
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenReturn(movedOrgUnits);
+
+        // Act & Assert: Perform PUT request and verify status 200 OK with updated org
+        // Units
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Org Unit 1"))
+                .andExpect(jsonPath("$[1].name").value("Org Unit 2"))
+                .andExpect(jsonPath("$[2].name").value("Org Unit 3"));
+    }
+
+    @Test
+    void assignOrgUnitsToRoom_TargetRoomNotFound_ShouldReturnNotFound()
+            throws Exception {
+        // Arrange: Set up orgUnitIds and non existent Room ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 999L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new RoomNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
+    }
+
+    // TODO allow partial success
+    @Test
+    void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up Room ID and list with a non-existent Org Unit ID
+        List<Long> orgUnitIds = List.of(1L, 999L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    // TODO allow partial success
+    @Test
+    void assignOrgUnitsToRoom_OrgUnitInDifferentProject_ShouldReturnBadRequest()
+            throws Exception {
+        // Arrange: Set up a item IDs and target OrgUnit ID
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        Long targetRoomId = 10L;
+
+        when(orgUnitService.assignOrgUnitsToRoom(orgUnitIds, targetRoomId))
+                .thenThrow(new IllegalArgumentException(
+                        OrgUnitService.PROJECT_MISMATCH_ERROR));
+
+        // Act & Assert: Perform PUT request and verify status 400 Bad Request
+        mockMvc.perform(put("/rooms/{targetRoomId}/org-units", targetRoomId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(
+                                OrgUnitService.PROJECT_MISMATCH_ERROR));
+    }
+
+    @Test
     void deleteOneRoom_ShouldDeleteRoom_WhenRoomExists() throws Exception {
         // Act: Perform a DELETE request to the /rooms/1 endpoint
         mockMvc.perform(delete("/rooms/1"))
@@ -302,7 +394,8 @@ class RoomControllerTests {
 
         // Act: Perform a DELETE request to the /rooms/1 endpoint
         mockMvc.perform(delete("/rooms/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the room
         verify(roomService).deleteRoom(1L);
@@ -337,7 +430,8 @@ class RoomControllerTests {
 
         // Act: Perform a GET request to the /rooms/1/org-units endpoint
         mockMvc.perform(get("/rooms/1/org-units"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Room not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // room

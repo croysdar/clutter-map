@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Item } from './itemsSlice';
+import { Item } from './itemTypes';
 import { DeleteForever } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDeleteItemMutation } from './itemApi';

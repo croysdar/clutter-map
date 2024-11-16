@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,15 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
-import app.cluttermap.service.ItemsService;
+import app.cluttermap.service.ItemService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/items")
-public class ItemsController {
-    private final ItemsService itemService;
+public class ItemController {
+    private final ItemService itemService;
 
-    public ItemsController(ItemsService itemService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
@@ -48,6 +50,12 @@ public class ItemsController {
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateItemDTO itemDTO) {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
+    }
+
+    @PutMapping("/unassign")
+    public ResponseEntity<Iterable<Item>> unassignItems(@RequestBody List<Long> itemIds) {
+        itemService.checkOwnershipForItems(itemIds);
+        return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 
     @DeleteMapping("/{id}")

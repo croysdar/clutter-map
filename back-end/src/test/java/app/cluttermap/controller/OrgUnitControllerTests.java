@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,12 +25,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
@@ -38,11 +41,12 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
+import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
 
-@WebMvcTest(OrgUnitsController.class)
+@WebMvcTest(OrgUnitController.class)
 @ExtendWith(SpringExtension.class)
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
@@ -56,6 +60,9 @@ class OrgUnitControllerTests {
 
     @MockBean
     private OrgUnitService orgUnitService;
+
+    @MockBean
+    private ItemService itemService;
 
     @MockBean
     private SecurityService securityService;
@@ -142,7 +149,8 @@ class OrgUnitControllerTests {
 
         // Act: Perform a GET request to the /org-units/1 endpoint
         mockMvc.perform(get("/org-units/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getOrgUnitById(1L);
@@ -152,7 +160,8 @@ class OrgUnitControllerTests {
     void addOneOrgUnit_ShouldCreateOrgUnit_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with valid data and mock the service to
         // return a new orgUnit
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit Description", String.valueOf(1L));
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit Description", String.valueOf(1L),
+                null);
         OrgUnit newOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockRoom);
         when(orgUnitService.createOrgUnit(any(NewOrgUnitDTO.class))).thenReturn(newOrgUnit);
 
@@ -173,7 +182,7 @@ class OrgUnitControllerTests {
     @Test
     void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitNameIsBlank() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with a blank name to trigger validation
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("", "", String.valueOf(1L));
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("", "", String.valueOf(1L), null);
 
         // Act: Perform a POST request to the /org-units endpoint with the blank orgUnit
         // name
@@ -184,13 +193,14 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
     void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitNameIsNull() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with a null name to trigger validation
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO(null, "", String.valueOf(1L));
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO(null, "", String.valueOf(1L), null);
 
         // Act: Perform a POST request to the /org-units endpoint with the null orgUnit
         // name
@@ -201,13 +211,14 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
-    void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitIdIsNull() throws Exception {
+    void addOneOrgUnit_ShouldReturnBadRequest_WhenRoomIdAndProjectIsNull() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with a null orgUnit ID to trigger validation
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", null);
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", null, null);
 
         // Act: Perform a POST request to the /org-units endpoint with the null orgUnit
         // ID
@@ -217,14 +228,15 @@ class OrgUnitControllerTests {
                 .andExpect(status().isBadRequest())
 
                 // Assert: Verify the validation error response for the name field
-                .andExpect(jsonPath("$.errors[0].field").value("roomId"))
-                .andExpect(jsonPath("$.errors[0].message").value("Room ID must not be blank."));
+                .andExpect(jsonPath("$.errors[0].field").value("roomOrProjectValid"))
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Either RoomId or ProjectId must be provided."));
     }
 
     @Test
-    void addOneOrgUnit_ShouldReturnBadRequest_WhenOrgUnitIdIsNaN() throws Exception {
+    void addOneOrgUnit_ShouldReturnBadRequest_WhenRoomIdIsNaN() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with a NaN orgUnit ID to trigger validation
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", "string");
+        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("OrgUnit Name", "", "string", null);
 
         // Act: Perform a POST request to the /org-units endpoint with the NaN orgUnit
         // ID
@@ -275,7 +287,8 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
@@ -293,31 +306,145 @@ class OrgUnitControllerTests {
 
                 // Assert: Verify the validation error response for the name field
                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").value("Organization unit name must not be blank."));
+                .andExpect(jsonPath("$.errors[0].message")
+                        .value("Organization unit name must not be blank."));
     }
 
     @Test
-    void deleteOneOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() throws Exception {
-        // Act: Perform a DELETE request to the /org-units/1 endpoint
-        mockMvc.perform(delete("/org-units/1"))
-                .andExpect(status().isNoContent());
+    void assignItemsToOrgUnit_Success() throws Exception {
+        // Arrange: Set up itemIds and Org Unit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 10L;
 
-        // Assert: Ensure the service method was called to delete the orgUnit by ID
-        verify(orgUnitService).deleteOrgUnit(1L);
+        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        List<Item> movedItems = List.of(
+                new Item("Item 1", "Description", List.of("tag1"), targetOrgUnit),
+                new Item("Item 2", "Description", List.of("tag2"), targetOrgUnit),
+                new Item("Item 3", "Description", List.of("tag3"), targetOrgUnit));
+
+        when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
+                .thenReturn(movedItems);
+
+        // Act & Assert: Perform PUT request and verify status 200 OK with updated items
+        mockMvc.perform(put("/org-units/{orgUnitId}/items", targetOrgUnitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Item 1"))
+                .andExpect(jsonPath("$[1].name").value("Item 2"))
+                .andExpect(jsonPath("$[2].name").value("Item 3"));
     }
 
     @Test
-    void deleteOneOrgUnit_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
-        // non-existent orgUnit
-        doThrow(new OrgUnitNotFoundException()).when(orgUnitService).deleteOrgUnit(1L);
+    void assignItemsToOrgUnit_TargetOrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up itemIds and non existent Org Unit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 999L;
 
-        // Act: Perform a DELETE request to the /org-units/1 endpoint
-        mockMvc.perform(delete("/org-units/1"))
-                .andExpect(status().isNotFound());
+        when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
+                .thenThrow(new OrgUnitNotFoundException());
 
-        // Assert: Ensure the service method was called to attempt to delete the orgUnit
-        verify(orgUnitService).deleteOrgUnit(1L);
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/org-units/{orgUnitId}/items", targetOrgUnitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    // TODO allow partial success
+    @Test
+    void assignItemsToOrgUnit_ItemNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up Org Unit ID and list with a non-existent item ID
+        List<Long> itemIds = List.of(1L, 999L, 3L);
+        Long targetOrgUnitId = 10L;
+
+        when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
+                .thenThrow(new ItemNotFoundException());
+
+        // Act & Assert: Perform PUT request and verify status 404 Not Found
+        mockMvc.perform(put("/org-units/{orgUnitId}/items", targetOrgUnitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Item not found."));
+    }
+
+    // TODO allow partial success
+    @Test
+    void assignItemsToOrgUnit_ItemInDifferentProject_ShouldReturnBadRequest() throws Exception {
+        // Arrange: Set up a item IDs and target OrgUnit ID
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        Long targetOrgUnitId = 10L;
+
+        when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
+                .thenThrow(new IllegalArgumentException(OrgUnitService.PROJECT_MISMATCH_ERROR));
+
+        // Act & Assert: Perform PUT request and verify status 400 Bad Request
+        mockMvc.perform(put("/org-units/{orgUnitId}/items", targetOrgUnitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value(OrgUnitService.PROJECT_MISMATCH_ERROR));
+    }
+
+    @Test
+    void unassignOrgUnits_Success() throws Exception {
+        // Arrange: Set up room, and orgUnitIds, and simulate a successful removal
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        List<OrgUnit> unassignedOrgUnits = List.of(
+                new OrgUnit("OrgUnit 1", "Description", mockRoom),
+                new OrgUnit("OrgUnit 2", "Description", mockRoom),
+                new OrgUnit("OrgUnit 3", "Description", mockRoom));
+
+        when(orgUnitService.unassignOrgUnits(orgUnitIds)).thenReturn(unassignedOrgUnits);
+
+        // Act & Assert: Perform the PUT request and verify status 200 OK and correct
+        // item data
+        mockMvc.perform(put("/org-units/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("OrgUnit 1"))
+                .andExpect(jsonPath("$[1].name").value("OrgUnit 2"))
+                .andExpect(jsonPath("$[2].name").value("OrgUnit 3"));
+    }
+
+    // TODO: Allow partial success
+    @Test
+    void unassignOrgUnits_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
+        // Arrange: Set up item IDs, including a non-existent item ID
+        List<Long> orgUnitIds = List.of(1L, 999L, 3L);
+
+        // Simulate ItemNotFoundException for one of the items
+        when(orgUnitService.unassignOrgUnits(orgUnitIds)).thenThrow(new OrgUnitNotFoundException());
+
+        // Act & Assert: Perform the PUT request and verify status 404 Not Found with an
+        // error message
+        mockMvc.perform(put("/org-units/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+    }
+
+    @Test
+    void unassignOrgUnits_UserDoesNotOwnOrgUnit_ShouldThrowAccessDenied() throws Exception {
+        // Arrange: Set up orgUnitIds
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+
+        String message = String.format(OrgUnitService.ACCESS_DENIED_STRING, 1L);
+
+        doThrow(new AccessDeniedException(message)).when(orgUnitService).checkOwnershipForOrgUnits(orgUnitIds);
+
+        // Act & Assert: Expect an AccessDeniedException when attempting to unassign
+        // org units
+        mockMvc.perform(put("/org-units/unassign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orgUnitIds)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Access Denied"));
     }
 
     @Test
@@ -349,10 +476,36 @@ class OrgUnitControllerTests {
 
         // Act: Perform a GET request to the /org-units/1/org-units endpoint
         mockMvc.perform(get("/org-units/1/items"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // orgUnit
         verify(orgUnitService).getOrgUnitById(1L);
+    }
+
+    @Test
+    void deleteOneOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() throws Exception {
+        // Act: Perform a DELETE request to the /org-units/1 endpoint
+        mockMvc.perform(delete("/org-units/1"))
+                .andExpect(status().isNoContent());
+
+        // Assert: Ensure the service method was called to delete the orgUnit by ID
+        verify(orgUnitService).deleteOrgUnit(1L);
+    }
+
+    @Test
+    void deleteOneOrgUnit_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
+        // non-existent orgUnit
+        doThrow(new OrgUnitNotFoundException()).when(orgUnitService).deleteOrgUnit(1L);
+
+        // Act: Perform a DELETE request to the /org-units/1 endpoint
+        mockMvc.perform(delete("/org-units/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Organization unit not found."));
+
+        // Assert: Ensure the service method was called to attempt to delete the orgUnit
+        verify(orgUnitService).deleteOrgUnit(1L);
     }
 }
