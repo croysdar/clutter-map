@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,11 +32,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.model.Item;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
+import app.cluttermap.service.ItemService;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.ProjectService;
 import app.cluttermap.service.SecurityService;
 
@@ -50,6 +55,12 @@ class ProjectControllerTests {
 
     @MockBean
     private ProjectService projectService;
+
+    @MockBean
+    private OrgUnitService orgUnitService;
+
+    @MockBean
+    private ItemService itemService;
 
     @MockBean
     private SecurityService securityService;
@@ -126,10 +137,93 @@ class ProjectControllerTests {
 
         // Act: Perform a GET request to the /projects/1 endpoint
         mockMvc.perform(get("/projects/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure that the service method was called
         verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_Success() throws Exception {
+        // Arrange: Set up projectId and simulate unassigned items
+        Project project = new Project("Test Project", mockUser);
+        Long projectId = 1L;
+        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), project);
+        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+
+        // Act & Assert: Perform the GET request on the new path and verify status 200
+        // OK and correct data
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Unassigned Item"));
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_NoUnassignedItems_ShouldReturnEmptyList() throws Exception {
+        // Arrange: Set up projectId and simulate no unassigned items
+        Long projectId = 1L;
+        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of());
+
+        // Act & Assert: Perform the GET request and verify status 200 OK with an empty
+        // list
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getUnassignedItemsByNonExistentProjectId_ShouldReturnNotFound() throws Exception {
+        // Arrange: Use a project ID that does not exist
+        Long nonExistentProjectId = 999L;
+        when(itemService.getUnassignedItemsByProjectId(nonExistentProjectId))
+                .thenThrow(new ProjectNotFoundException());
+
+        // Act & Assert: Perform the GET request and verify status 404 Not Found
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", nonExistentProjectId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
+    }
+
+    @Test
+    void getUnassignedOrgUnitsByProjectId_Success() throws Exception {
+        // Arrange: Set up projectId and simulate unassigned org units
+        Project project = new Project("Test Project", mockUser);
+        Long projectId = 1L;
+        OrgUnit unassignedOrgUnit = new OrgUnit("Unassigned OrgUnit", "Description", project);
+        when(orgUnitService.getUnassignedOrgUnitsByProjectId(projectId)).thenReturn(List.of(unassignedOrgUnit));
+
+        // Act & Assert: Perform the GET request and verify status 200 OK and correct
+        // data
+        mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Unassigned OrgUnit"));
+    }
+
+    @Test
+    void getUnassignedOrgUnitsByProjectId_NoUnassignedOrgUnits_ShouldReturnEmptyList() throws Exception {
+        // Arrange: Set up projectId and simulate no unassigned org units
+        Long projectId = 1L;
+        when(orgUnitService.getUnassignedOrgUnitsByProjectId(projectId)).thenReturn(List.of());
+
+        // Act & Assert: Perform the GET request and verify status 200 OK with an empty
+        // list
+        mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getUnassignedOrgUnitsByNonExistentProjectId_ShouldReturnNotFound() throws Exception {
+        // Arrange: Use a project ID that does not exist
+        Long nonExistentProjectId = 999L;
+        when(orgUnitService.getUnassignedOrgUnitsByProjectId(nonExistentProjectId))
+                .thenThrow(new ProjectNotFoundException());
+
+        // Act & Assert: Perform the GET request and verify status 404 Not Found
+        mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", nonExistentProjectId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
     }
 
     @Test
@@ -262,7 +356,8 @@ class ProjectControllerTests {
 
         // Act: Perform a DELETE request to the /projects/1 endpoint
         mockMvc.perform(delete("/projects/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the project
         verify(projectService).deleteProject(1L);
@@ -296,7 +391,8 @@ class ProjectControllerTests {
 
         // Act: Perform a GET request to the /projects/1/rooms endpoint
         mockMvc.perform(get("/projects/1/rooms"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Project not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // project

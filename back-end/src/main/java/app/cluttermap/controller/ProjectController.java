@@ -1,5 +1,7 @@
 package app.cluttermap.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,10 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.cluttermap.model.Item;
+import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
+import app.cluttermap.service.ItemService;
+import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.ProjectService;
 import jakarta.validation.Valid;
 
@@ -22,9 +28,16 @@ import jakarta.validation.Valid;
 @RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
+    private final OrgUnitService orgUnitService;
+    private final ItemService itemService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(
+            ProjectService projectService,
+            OrgUnitService orgUnitService,
+            ItemService itemService) {
         this.projectService = projectService;
+        this.orgUnitService = orgUnitService;
+        this.itemService = itemService;
     }
 
     @GetMapping()
@@ -47,6 +60,20 @@ public class ProjectController {
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> getOneProject(@PathVariable("id") Long id) {
         return ResponseEntity.ok(projectService.getProjectById(id));
+    }
+
+    @GetMapping("/{projectId}/items/unassigned")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    public ResponseEntity<List<Item>> getUnassignedItemsByProjectId(@PathVariable Long projectId) {
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
+        return ResponseEntity.ok(unassignedItems);
+    }
+
+    @GetMapping("/{projectId}/org-units/unassigned")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    public ResponseEntity<Iterable<OrgUnit>> getUnassignedOrgUnitsByProjectId(@PathVariable Long projectId) {
+        Iterable<OrgUnit> unassignedOrgUnits = orgUnitService.getUnassignedOrgUnitsByProjectId(projectId);
+        return ResponseEntity.ok(unassignedOrgUnits);
     }
 
     @PutMapping("/{id}")
