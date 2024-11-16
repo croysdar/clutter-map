@@ -36,8 +36,9 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 300 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
+                fullWidth
                 variant="outlined"
                 label="Add a tag"
                 value={inputValue}

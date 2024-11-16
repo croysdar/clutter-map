@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +19,9 @@ public class NewItemDTO {
     @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
     private String orgUnitId;
 
+    @Min(value = 1, message = "Quantity must be a least 1.")
+    private Integer quantity;
+
     @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     private String projectId;
 
@@ -26,10 +30,12 @@ public class NewItemDTO {
         return orgUnitId != null || projectId != null;
     }
 
-    public NewItemDTO(String name, String description, List<String> tags, String orgUnitId, String projectId) {
+    public NewItemDTO(String name, String description, List<String> tags, Integer quantity, String orgUnitId,
+            String projectId) {
         this.name = name;
         this.description = description;
         this.tags = tags;
+        this.quantity = (quantity != null) ? quantity : 1;
         this.orgUnitId = orgUnitId;
         this.projectId = projectId;
     }
@@ -77,6 +83,14 @@ public class NewItemDTO {
     @JsonIgnore
     public Long getOrgUnitIdAsLong() {
         return Long.parseLong(orgUnitId);
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     @JsonIgnore

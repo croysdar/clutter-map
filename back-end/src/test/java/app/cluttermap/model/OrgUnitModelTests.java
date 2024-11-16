@@ -35,7 +35,7 @@ public class OrgUnitModelTests {
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Add a item to the orgUnit
-        Item item = new Item("White Shelving Unit", "This is a shelving unit", List.of("tag1"), orgUnit);
+        Item item = new Item("White Shelving Unit", "This is a shelving unit", List.of("tag1"), 1, orgUnit);
         orgUnit.getItems().add(item);
 
         // Assert: Verify that the item was added to the orgUnit's items
@@ -44,6 +44,7 @@ public class OrgUnitModelTests {
         assertThat(orgUnit.getItems().get(0).getName()).isEqualTo("White Shelving Unit");
         assertThat(orgUnit.getItems().get(0).getTags()).isEqualTo(List.of("tag1"));
         assertThat(orgUnit.getItems().get(0).getOrgUnit()).isEqualTo(orgUnit);
+        assertThat(orgUnit.getItems().get(0).getQuantity()).isEqualTo(1);
 
         // Act: Remove the item from the orgUnit
         orgUnit.getItems().remove(item);

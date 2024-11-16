@@ -210,7 +210,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), project);
+        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository
@@ -233,7 +233,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), project);
+        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository

@@ -149,7 +149,7 @@ class ProjectControllerTests {
         // Arrange: Set up projectId and simulate unassigned items
         Project project = new Project("Test Project", mockUser);
         Long projectId = 1L;
-        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), project);
+        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), 1, project);
         when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
 
         // Act & Assert: Perform the GET request on the new path and verify status 200

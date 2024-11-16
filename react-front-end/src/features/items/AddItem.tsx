@@ -5,10 +5,12 @@ import { Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
+import { QuantityField } from '@/components/QuantityField';
 
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
     itemDescription: HTMLTextAreaElement
+    itemQuantity: HTMLInputElement;
 }
 
 interface AddItemFormElements extends HTMLFormElement {
@@ -24,8 +26,9 @@ export const AddItem = () => {
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 
-    // State to manage tags
+    // States to manage special input
     const [tags, setTags] = useState<string[]>([]);
+    const [quantity, setQuantity] = useState<number>(1);
 
     const handleSubmit = async (e: React.FormEvent<AddItemFormElements>) => {
         e.preventDefault()
@@ -42,7 +45,7 @@ export const AddItem = () => {
         }
 
         try {
-            await addNewItem({ name, description, tags, orgUnitId }).unwrap()
+            await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
             form.reset()
 
             navigate(sourcePageUrl);
@@ -90,6 +93,13 @@ export const AddItem = () => {
                         InputLabelProps={{ shrink: true }}
                     />
 
+                    {/* Item Quantity */}
+                    <QuantityField
+                        quantity={quantity}
+                        onQuantityChange={setQuantity}
+                    />
+
+                    {/* Item Tags */}
                     <TagField tags={tags} onTagsChange={setTags} />
 
                     {/* Submit Button */}

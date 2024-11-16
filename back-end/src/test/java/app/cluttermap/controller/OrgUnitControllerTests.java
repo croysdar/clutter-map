@@ -318,9 +318,9 @@ class OrgUnitControllerTests {
 
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
         List<Item> movedItems = List.of(
-                new Item("Item 1", "Description", List.of("tag1"), targetOrgUnit),
-                new Item("Item 2", "Description", List.of("tag2"), targetOrgUnit),
-                new Item("Item 3", "Description", List.of("tag3"), targetOrgUnit));
+                new Item("Item 1", "Description", List.of("tag1"), 1, targetOrgUnit),
+                new Item("Item 2", "Description", List.of("tag2"), 1, targetOrgUnit),
+                new Item("Item 3", "Description", List.of("tag3"), 1, targetOrgUnit));
 
         when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
                 .thenReturn(movedItems);
@@ -452,7 +452,7 @@ class OrgUnitControllerTests {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", mockRoom);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
         orgUnit.setItems(Collections.singletonList(item));
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
 

@@ -17,11 +17,10 @@ interface AddOrgUnitFormElements extends HTMLFormElement {
 export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
     const navigate = useNavigate()
-    const { roomId } = useParams();
+    const { roomId, projectId } = useParams();
 
     const { data: room } = useGetRoomQuery(roomId!);
 
-    const { projectId } = useParams();
 
     const handleSubmit = async (e: React.FormEvent<AddOrgUnitFormElements>) => {
         e.preventDefault()

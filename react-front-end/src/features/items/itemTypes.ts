@@ -3,8 +3,9 @@ export interface Item {
     name: string;
     description: string;
     tags: string[]
+    quantity: number;
 }
 
-export type NewItem = Pick<Item, 'name' | 'description' | 'tags'> | { orgUnitId: string }
+export type NewItem = Pick<Item, 'name' | 'description' | 'tags' | 'quantity'> | { orgUnitId: string }
 
-export type ItemUpdate = Pick<Item, 'id' | 'name' | 'description' | 'tags'>
+export type ItemUpdate = Pick<Item, 'id' | 'name' | 'description' | 'tags' | 'quantity'>

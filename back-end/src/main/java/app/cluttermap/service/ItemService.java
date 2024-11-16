@@ -68,6 +68,7 @@ public class ItemService {
                     itemDTO.getName(),
                     itemDTO.getDescription(),
                     itemDTO.getTags(),
+                    itemDTO.getQuantity(),
                     project);
             return itemRepository.save(newItem);
         }
@@ -77,6 +78,7 @@ public class ItemService {
                 itemDTO.getName(),
                 itemDTO.getDescription(),
                 itemDTO.getTags(),
+                itemDTO.getQuantity(),
                 orgUnit);
         return itemRepository.save(newItem);
     }
@@ -93,6 +95,9 @@ public class ItemService {
         _item.setName(itemDTO.getName());
         if (itemDTO.getDescription() != null) {
             _item.setDescription(itemDTO.getDescription());
+        }
+        if (itemDTO.getQuantity() >= 1) {
+            _item.setQuantity(itemDTO.getQuantity());
         }
         if (itemDTO.getTags() != null) {
             _item.setTags(itemDTO.getTags());

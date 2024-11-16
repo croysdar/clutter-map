@@ -67,8 +67,8 @@ public class ItemRepositoryIntegrationTests {
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit Owned by Owner 2", "OrgUnit Description", room2);
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
-        Item item1 = new Item("Item Owned by Owner 1", "Item Description", List.of("tag 1"), orgUnit1);
-        Item item2 = new Item("Item Owned by Owner 2", "Item Description", List.of("tag 2"), orgUnit2);
+        Item item1 = new Item("Item Owned by Owner 1", "Item Description", List.of("tag 1"), 1, orgUnit1);
+        Item item2 = new Item("Item Owned by Owner 2", "Item Description", List.of("tag 2"), 1, orgUnit2);
         itemRepository.saveAll(List.of(item1, item2));
 
         // Act: Retrieve items associated with owner1
@@ -98,9 +98,9 @@ public class ItemRepositoryIntegrationTests {
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", room);
         orgUnitRepository.save(orgUnit);
 
-        Item item1 = new Item("Item 1", "Item Description", List.of("tag 1"), orgUnit);
-        Item item2 = new Item("Item 2", "Item Description", List.of("tag 1"), orgUnit);
-        Item item3 = new Item("Item 3", "Item Description", List.of("tag 1"), orgUnit);
+        Item item1 = new Item("Item 1", "Item Description", List.of("tag 1"), 1, orgUnit);
+        Item item2 = new Item("Item 2", "Item Description", List.of("tag 1"), 1, orgUnit);
+        Item item3 = new Item("Item 3", "Item Description", List.of("tag 1"), 1, orgUnit);
         itemRepository.saveAll(List.of(item1, item2, item3));
 
         // Act: Retrieve all items associated with the user
@@ -131,12 +131,12 @@ public class ItemRepositoryIntegrationTests {
         userRepository.save(owner);
         Project project = new Project("Test Project", owner);
         projectRepository.save(project);
-        Item unassignedItem1 = new Item("Unassigned Item 1", "Description", List.of("tag1"), project);
-        Item unassignedItem2 = new Item("Unassigned Item 2", "Description", List.of("tag2"), project);
+        Item unassignedItem1 = new Item("Unassigned Item 1", "Description", List.of("tag1"), 1, project);
+        Item unassignedItem2 = new Item("Unassigned Item 2", "Description", List.of("tag2"), 1, project);
 
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "Description", project);
         orgUnitRepository.save(orgUnit);
-        Item assignedItem = new Item("Assigned Item", "Description", List.of("tag3"), project);
+        Item assignedItem = new Item("Assigned Item", "Description", List.of("tag3"), 1, project);
         assignedItem.setOrgUnit(orgUnit);
 
         itemRepository.saveAll(List.of(unassignedItem1, unassignedItem2, assignedItem));

@@ -39,25 +39,29 @@ public class Item {
     @JsonBackReference
     private OrgUnit orgUnit;
 
+    private Integer quantity;
+
     // no-arg constructor for Hibernate
     protected Item() {
     }
 
     // public constructor
     // ID is not required because Postgres generates the ID
-    public Item(String name, String description, List<String> tags, OrgUnit orgUnit) {
+    public Item(String name, String description, List<String> tags, Integer quantity, OrgUnit orgUnit) {
         this.name = name;
         this.description = description;
         this.tags = tags;
+        this.quantity = quantity;
         this.orgUnit = orgUnit;
         this.project = orgUnit.getProject();
     }
 
     // This item is unassigned
-    public Item(String name, String description, List<String> tags, Project project) {
+    public Item(String name, String description, List<String> tags, Integer quantity, Project project) {
         this.name = name;
         this.description = description;
         this.tags = tags;
+        this.quantity = quantity;
         this.project = project;
     }
 
@@ -110,5 +114,13 @@ public class Item {
         if (orgUnit != null && !orgUnit.getItems().contains(this)) {
             orgUnit.addItem(this);
         }
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

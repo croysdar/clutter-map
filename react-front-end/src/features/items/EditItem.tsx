@@ -6,10 +6,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { TagField } from '@/components/TagField'
 import DeleteItemButton from './DeleteItemButton'
 import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import { QuantityField } from '@/components/QuantityField'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
     itemDescription: HTMLTextAreaElement
+    itemQuantity: HTMLInputElement;
 }
 
 interface EditItemFormElements extends HTMLFormElement {
@@ -24,12 +26,16 @@ const EditItem = () => {
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
-    // State to manage tags
+    // States to manage special input
     const [tags, setTags] = useState<string[]>(item?.tags || []);
+    const [quantity, setQuantity] = useState<number>(item?.quantity || 1);
 
     useEffect(() => {
         if (item?.tags) {
             setTags(item.tags);
+        }
+        if (item?.quantity) {
+            setQuantity(item.quantity);
         }
     }, [item]);
 
@@ -57,7 +63,7 @@ const EditItem = () => {
         const description = elements.itemDescription.value
 
         if (item && name) {
-            await updateItem({ id: item.id, name: name, description: description, tags: tags })
+            await updateItem({ id: item.id, name: name, description: description, tags: tags, quantity: quantity })
             // redirect to ...[this org unit]/items
             navigate(redirectUrl)
         }
@@ -105,6 +111,13 @@ const EditItem = () => {
                         InputLabelProps={{ shrink: true }}
                     />
 
+                    {/* Item Quantity */}
+                    <QuantityField
+                        quantity={quantity}
+                        onQuantityChange={setQuantity}
+                    />
+
+                    {/* Item Tags */}
                     <TagField tags={tags} onTagsChange={setTags} />
 
                     {/* Submit Button */}

@@ -133,7 +133,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
         orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 
@@ -163,7 +163,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), orgUnit);
+        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
         orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 

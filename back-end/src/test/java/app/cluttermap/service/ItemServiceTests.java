@@ -98,7 +98,7 @@ public class ItemServiceTests {
     @Test
     void getItemId_ShouldReturnItem_WhenItemExists() {
         // Arrange: Set up a sample org unit and stub the repository to return it by ID
-        Item item = new Item("Sample Item", "Item description", List.of(), mockOrgUnit);
+        Item item = new Item("Sample Item", "Item description", List.of(), 1, mockOrgUnit);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         // Act: Retrieve the org unit using the service method
@@ -126,11 +126,12 @@ public class ItemServiceTests {
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(mockOrgUnit);
 
         // Arrange: Prepare the Item DTO with the room ID as a string
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), String.valueOf(1L), null);
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), 1, String.valueOf(1L), null);
 
         // Arrange: Create a mock Item that represents the saved item returned by
         // the repository
-        Item mockItem = new Item(itemDTO.getName(), itemDTO.getDescription(), List.of(), mockOrgUnit);
+        Item mockItem = new Item(itemDTO.getName(), itemDTO.getDescription(), List.of(), itemDTO.getQuantity(),
+                mockOrgUnit);
         when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
 
         // Act: create a item using itemService and pass in the item DTO
@@ -150,7 +151,7 @@ public class ItemServiceTests {
     @Test
     void createItem_ShouldThrowException_WhenOrgUnitDoesNotExist() {
         // Arrange: Set up the DTO with a org unit ID that doesn't exist
-        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), "999", null);
+        NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), 1, "999", null);
         when(orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong())).thenThrow(new OrgUnitNotFoundException());
 
         // Act & Assert: Attempt to create the item and expect a
@@ -164,7 +165,7 @@ public class ItemServiceTests {
         // Arrange: Set up a room with the maximum allowed items
         List<Item> items = new ArrayList<>();
         for (int i = 0; i < ITEM_LIMIT; i++) {
-            items.add(new Item("Item " + (i + 1), "Description " + (i + 1), List.of(), mockOrgUnit));
+            items.add(new Item("Item " + (i + 1), "Description " + (i + 1), List.of(), 1, mockOrgUnit));
         }
         mockOrgUnit.setItems(items);
 
@@ -172,7 +173,7 @@ public class ItemServiceTests {
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
         when(itemRepository.findByOwnerId(1L)).thenReturn(items);
 
-        NewItemDTO itemDTO = new NewItemDTO("Extra Item", "Description", List.of(), String.valueOf(1L), null);
+        NewItemDTO itemDTO = new NewItemDTO("Extra Item", "Description", List.of(), 1, String.valueOf(1L), null);
 
         // Act & Assert: Attempt to create a item and expect an exception
         assertThrows(ItemLimitReachedException.class, () -> itemService.createItem(itemDTO));
@@ -184,8 +185,8 @@ public class ItemServiceTests {
         // return items owned by the user
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        Item item1 = new Item("Item 1", "Item description 1", List.of(), mockOrgUnit);
-        Item item2 = new Item("Item 2", "Item description 2", List.of(), mockOrgUnit);
+        Item item1 = new Item("Item 1", "Item description 1", List.of(), 1, mockOrgUnit);
+        Item item2 = new Item("Item 2", "Item description 2", List.of(), 1, mockOrgUnit);
         when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
 
         // Act: Retrieve the items owned by the user
@@ -207,8 +208,8 @@ public class ItemServiceTests {
         OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "OrgUnit Description 1", room1);
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "OrgUnit Description 2", room2);
 
-        Item item1 = new Item("Item 1", "Description 1", List.of(), orgUnit1);
-        Item item2 = new Item("Item 2", "Description 2", List.of(), orgUnit2);
+        Item item1 = new Item("Item 1", "Description 1", List.of(), 1, orgUnit1);
+        Item item2 = new Item("Item 2", "Description 2", List.of(), 1, orgUnit2);
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
@@ -237,7 +238,7 @@ public class ItemServiceTests {
     void getUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
         // Arrange: Mock repository method
         Long projectId = 1L;
-        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), mockProject);
+        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), 1, mockProject);
         when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
 
         // Act: Call service method
@@ -264,12 +265,12 @@ public class ItemServiceTests {
     void updateItem_ShouldUpdateItem_WhenItemExists() {
         // Arrange: Set up mock item with initial values and stub the repository to
         // return the item by ID
-        Item item = new Item("Old Name", "Old Description", List.of("tag 1", "tag 2"), mockOrgUnit);
+        Item item = new Item("Old Name", "Old Description", List.of("tag 1", "tag 2"), 1, mockOrgUnit);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         // Arrange: Create an UpdateItemDTO with updated values
         UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", "Updated Description",
-                List.of("Updated tag 1", "Updated tag 2"));
+                List.of("Updated tag 1", "Updated tag 2"), 2);
 
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
@@ -281,6 +282,7 @@ public class ItemServiceTests {
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
         assertThat(updatedItem.getDescription()).isEqualTo("Updated Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("Updated tag 1", "Updated tag 2"));
+        assertThat(updatedItem.getQuantity()).isEqualTo(2);
         verify(itemRepository).save(item);
     }
 
@@ -291,7 +293,7 @@ public class ItemServiceTests {
         when(itemRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Arrange: Set up an UpdateItemDTO with updated values
-        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", "Updated Description", List.of("tag 1", "tag 2"));
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", "Updated Description", List.of("tag 1", "tag 2"), 2);
 
         // Act & Assert: Attempt to update the item and expect a
         // ItemNotFoundException
@@ -301,14 +303,14 @@ public class ItemServiceTests {
     @Test
     void updateItem_ShouldNotChangeDescription_WhenDescriptionIsNull() {
         // Arrange: Set up a item with an initial description
-        Item item = new Item("Item Name", "Initial Description", List.of("tag 1", "tag 2"), mockOrgUnit);
+        Item item = new Item("Item Name", "Initial Description", List.of("tag 1", "tag 2"), 1, mockOrgUnit);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
         // Arrange: Set up an UpdateItemDTO with null description
-        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", null, List.of("Updated tag 1", "Updated tag 2"));
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", null, List.of("Updated tag 1", "Updated tag 2"), 2);
 
         // Act: Update item
         Item updatedItem = itemService.updateItem(1L, itemDTO);
@@ -317,20 +319,21 @@ public class ItemServiceTests {
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
         assertThat(updatedItem.getDescription()).isEqualTo("Initial Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("Updated tag 1", "Updated tag 2"));
+        assertThat(updatedItem.getQuantity()).isEqualTo(2);
         verify(itemRepository).save(item);
     }
 
     @Test
     void updateItem_ShouldNotChangeTags_WhenTagsIsNull() {
         // Arrange: Set up a item with an initial description
-        Item item = new Item("Item Name", "Description", List.of("tag 1", "tag 2"), mockOrgUnit);
+        Item item = new Item("Item Name", "Description", List.of("tag 1", "tag 2"), 2, mockOrgUnit);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
         // Arrange: Set up an UpdateItemDTO with null tags
-        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", "Updated Description", null);
+        UpdateItemDTO itemDTO = new UpdateItemDTO("Updated Name", "Updated Description", null, 2);
 
         // Act: Update item
         Item updatedItem = itemService.updateItem(1L, itemDTO);
@@ -339,6 +342,7 @@ public class ItemServiceTests {
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
         assertThat(updatedItem.getDescription()).isEqualTo("Updated Description");
         assertThat(updatedItem.getTags()).isEqualTo(List.of("tag 1", "tag 2"));
+        assertThat(updatedItem.getQuantity()).isEqualTo(2);
         verify(itemRepository).save(item);
     }
 
@@ -348,8 +352,8 @@ public class ItemServiceTests {
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
         when(orgUnitService.getOrgUnitById(10L)).thenReturn(targetOrgUnit);
 
-        Item item1 = new Item("Item 1", "Description", List.of("tag1"), mockProject);
-        Item item2 = new Item("Item 2", "Description", List.of("tag2"), mockProject);
+        Item item1 = new Item("Item 1", "Description", List.of("tag1"), 1, mockProject);
+        Item item2 = new Item("Item 2", "Description", List.of("tag2"), 1, mockProject);
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
         when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
@@ -385,7 +389,7 @@ public class ItemServiceTests {
 
         // Arrange: Create an item with a different project than mockOrgUnit
         Project differentProject = new Project("Different Project", mockUser);
-        Item itemWithDifferentProject = new Item("Item", "Description", List.of("tag1"), differentProject);
+        Item itemWithDifferentProject = new Item("Item", "Description", List.of("tag1"), 1, differentProject);
         itemWithDifferentProject.setId(2L);
         when(itemRepository.findById(itemWithDifferentProject.getId()))
                 .thenReturn(Optional.of(itemWithDifferentProject));
@@ -400,9 +404,9 @@ public class ItemServiceTests {
     @Test
     void unassignItem_Success() {
         // Arrange: Create items and associate items with the mock orgUnit
-        Item item1 = new Item("Item 1", "Description", List.of("tag1"), mockOrgUnit);
+        Item item1 = new Item("Item 1", "Description", List.of("tag1"), 1, mockOrgUnit);
         mockOrgUnit.addItem(item1);
-        Item item2 = new Item("Item 2", "Description", List.of("tag2"), mockOrgUnit);
+        Item item2 = new Item("Item 2", "Description", List.of("tag2"), 1, mockOrgUnit);
         mockOrgUnit.addItem(item2);
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
@@ -422,7 +426,7 @@ public class ItemServiceTests {
     void unassignItems_ItemNotFound_ShouldThrowItemNotFoundException() {
         // Arrange: Set up item IDs, including a non-existent item ID
         List<Long> itemIds = List.of(1L, 999L, 3L); // Assuming 999L does not exist
-        Item item1 = new Item("Item 1", "Item Description", List.of(), mockOrgUnit);
+        Item item1 = new Item("Item 1", "Item Description", List.of(), 1, mockOrgUnit);
 
         // Simulate ItemNotFoundException for the non-existent item
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
@@ -437,7 +441,7 @@ public class ItemServiceTests {
     @Test
     void deleteItem_ShouldDeleteItem_WhenItemExists() {
         // Arrange: Set up a item and stub the repository to return the item by ID
-        Item item = new Item("Sample Item", "Item Description", List.of(), mockOrgUnit);
+        Item item = new Item("Sample Item", "Item Description", List.of(), 1, mockOrgUnit);
         Long itemId = item.getId();
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
