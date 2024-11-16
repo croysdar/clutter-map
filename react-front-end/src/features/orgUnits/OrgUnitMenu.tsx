@@ -14,8 +14,7 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const open = Boolean(anchorEl)
     const navigate = useNavigate();
-    const { roomId } = useParams();
-    const { projectId } = useParams();
+    const { roomId, projectId } = useParams();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();

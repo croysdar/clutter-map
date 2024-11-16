@@ -16,9 +16,8 @@ interface EditOrgUnitFormElements extends HTMLFormElement {
 }
 
 const EditOrgUnit = () => {
-    const { orgUnitId } = useParams();
     const navigate = useNavigate();
-    const { roomId, projectId } = useParams();
+    const { orgUnitId, roomId, projectId } = useParams();
     const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units`;
 
     const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);

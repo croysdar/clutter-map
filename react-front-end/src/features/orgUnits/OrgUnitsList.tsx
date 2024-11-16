@@ -2,8 +2,6 @@ import React from 'react';
 
 import {
     Card,
-    CardActions,
-    CardContent,
     CardHeader,
     CircularProgress,
     Paper,
@@ -11,10 +9,10 @@ import {
 } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
-import { useParams } from 'react-router-dom';
-import ItemsAccordion from '../items/ItemsAccordion';
+import { ListViewTileWrap } from '@/pages/ListViewPage';
+import { useNavigate, useParams } from 'react-router-dom';
+import RoomMenu from '../rooms/RoomMenu';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
 const OrgUnitsList: React.FC = () => {
@@ -28,6 +26,12 @@ const OrgUnitsList: React.FC = () => {
         isError,
         error
     } = useGetOrgUnitsByRoomQuery(roomId!);
+
+    const navigate = useNavigate();
+    const handleClick = (e: any, orgUnitId: number) => {
+        e.preventDefault();
+        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`)
+    }
 
     if (isLoading) {
         return (
@@ -46,31 +50,24 @@ const OrgUnitsList: React.FC = () => {
     }
 
     return (
-        <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <Typography variant="h2" key="room-name">
-                {room.name}
-            </Typography>
-            {orgUnits.map((orgUnit) => (
-                <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ marginTop: 3 }}>
-                    <div key={orgUnit.id} >
-                        <CardHeader
-                            title={<Typography variant='h4'> {orgUnit.name}</Typography>}
-                            action={<OrgUnitMenu orgUnit={orgUnit} />}
-                        />
-                        <CardContent>
-                            <Typography variant="body2" sx={{ mb: 1 }}>{orgUnit.description}</Typography>
-                        </CardContent>
-                        <CardActions>
-                            <ItemsAccordion orgUnitId={orgUnit.id.toString()} />
-                        </CardActions>
-                    </div>
-                </Card>
-            ))}
+        <>
+            <ListViewTileWrap title={room.name} subtitle={room.description} menu={<RoomMenu room={room} />}>
+                {orgUnits.map((orgUnit) => (
+                    <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ width: '100%' }}>
+                        <div key={orgUnit.id} >
+                            <CardHeader
+                                title={<Typography variant='h6'> {orgUnit.name}</Typography>}
+                                onClick={(e) => handleClick(e, orgUnit.id)}
+                            />
+                        </div>
+                    </Card>
+                ))}
+            </ListViewTileWrap>
             <CreateNewObjectButton
                 objectLabel='Organizational Unit'
                 to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
             />
-        </Paper>
+        </>
     );
 };
 
