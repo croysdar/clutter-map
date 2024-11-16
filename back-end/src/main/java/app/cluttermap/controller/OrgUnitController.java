@@ -24,9 +24,11 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/org-units")
 public class OrgUnitController {
+    /* ------------- Injected Dependencies ------------- */
     private final OrgUnitService orgUnitService;
     private final ItemService itemService;
 
+    /* ------------- Constructor ------------- */
     public OrgUnitController(
             OrgUnitService orgUnitService,
             ItemService itemService) {
@@ -34,15 +36,10 @@ public class OrgUnitController {
         this.itemService = itemService;
     }
 
+    /* ------------- GET Operations ------------- */
     @GetMapping()
     public ResponseEntity<Iterable<OrgUnit>> getOrgUnits() {
         return ResponseEntity.ok(orgUnitService.getUserOrgUnits());
-    }
-
-    @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
-    public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
-        return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
     @GetMapping("/{id}")
@@ -57,6 +54,14 @@ public class OrgUnitController {
         return ResponseEntity.ok(orgUnitService.getOrgUnitById(id).getItems());
     }
 
+    /* ------------- POST Operations ------------- */
+    @PostMapping()
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
+    public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
+        return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
+    }
+
+    /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
@@ -80,6 +85,7 @@ public class OrgUnitController {
         return ResponseEntity.ok(orgUnitService.unassignOrgUnits(orgUnitIds));
     }
 
+    /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {
