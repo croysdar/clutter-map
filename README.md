@@ -85,102 +85,14 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/auth`
 
-- **POST `/verify-token/google`**  
-  Verifies a Google ID token and returns a JWT token and user information.  
-  **Request Body**: `{ "idTokenString": "string" }`  
-  **Response**: `{ "token": "JWT token" }`
-
 - **GET `/user-info`**  
   Retrieves the current user's email and username.  
   **Response**: `{ "userEmail": "string", "userName": "string", "userFirstName": "string", "userLastName": "string }`
 
----
-
-### `/org-units`
-
-- **GET `/`**  
-  Retrieves a list of all organization units for the current user.  
-  **Response**: `Iterable<OrgUnit>`
-
-- **POST `/`**  
-  Adds a new organization unit.  
-  **Request Body**: `NewOrgUnitDTO`  
-  **Response**: `OrgUnit`
-
-- **GET `/{id}`**  
-  Retrieves a specific organization unit by ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `OrgUnit`
-
-- **GET `/{id}/items`**  
-  Retrieves all items within a specific organization unit by organization unit ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `Iterable<Item>`
-
-- **PUT `/{id}`**  
-  Updates an existing organization unit.  
-  **Path Variable**: `id` (Long)  
-  **Request Body**: `UpdateOrgUnitDTO`  
-  **Response**: `OrgUnit`
-
-- **PUT `/{id}/items`**  
-  Updates the items assigned to an existing organization unit.  
-  Items must exist
-  **Path Variable**: `id` (Long)  
-  **Request Body**: `List<Long> itemIds`  
-  **Response**: `Iterable<Item>`
-
-- **PUT `/unassign`**  
-  Unassigns the specified org units from their rooms.
-  Org Units must exist
-  **Path Variable**: `id` (Long)  
-  **Request Body**: `List<Long> orgUnitIds`  
-  **Response**: `Iterable<OrgUnit>`
-
-- **DELETE `/{id}`**  
-  Deletes an organization unit by ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `Void`
-
----
-
-### `/rooms`
-
-- **GET `/`**  
-  Retrieves a list of all rooms for the current user.  
-  **Response**: `Iterable<Room>`
-
-- **POST `/`**  
-  Adds a new room.  
-  **Request Body**: `NewRoomDTO`  
-  **Response**: `Room`
-
-- **GET `/{id}`**  
-  Retrieves a specific room by ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `Room`
-
-- **GET `/{id}/org-units`**  
-  Retrieves all organization units within a specific room by room ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `Iterable<OrgUnit>`
-
-- **PUT `/{id}`**  
-  Updates an existing room.  
-  **Path Variable**: `id` (Long)  
-  **Request Body**: `UpdateRoomDTO`  
-  **Response**: `Room`
-
-- **PUT `/{roomId}/org-units`**  
-  Assigns organization units to a specific room.  
-  **Path Variable**: `roomId` (Long): ID of the room.
-  **Request Body**: `List<Long> orgUnitIds`  
-  **Response**: `Room`
-
-- **DELETE `/{id}`**  
-  Deletes a room by ID.  
-  **Path Variable**: `id` (Long)  
-  **Response**: `Void`
+- **POST `/verify-token/google`**  
+  Verifies a Google ID token and returns a JWT token and user information.  
+  **Request Body**: `{ "idTokenString": "string" }`  
+  **Response**: `{ "token": "JWT token" }`
 
 ---
 
@@ -189,11 +101,6 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 - **GET `/`**  
   Retrieves a list of all projects for the current user.  
   **Response**: `Iterable<Project>`
-
-- **POST `/`**  
-  Adds a new project.  
-  **Request Body**: `NewProjectDTO`  
-  **Response**: `Project`
 
 - **GET `/{id}`**  
   Retrieves a specific project by ID.  
@@ -219,6 +126,11 @@ The project is organized into two main directories: `back-end` for the Spring Bo
   - `projectId` (Long): ID of the project.  
     **Response**: `List<Item>`
 
+- **POST `/`**  
+  Adds a new project.  
+  **Request Body**: `NewProjectDTO`  
+  **Response**: `Project`
+
 - **PUT `/{id}`**  
   Updates an existing project.  
   **Path Variable**: `id` (Long)  
@@ -232,21 +144,109 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ---
 
+### `/rooms`
+
+- **GET `/`**  
+  Retrieves a list of all rooms for the current user.  
+  **Response**: `Iterable<Room>`
+
+- **GET `/{id}`**  
+  Retrieves a specific room by ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Room`
+
+- **GET `/{id}/org-units`**  
+  Retrieves all organization units within a specific room by room ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Iterable<OrgUnit>`
+
+- **POST `/`**  
+  Adds a new room.  
+  **Request Body**: `NewRoomDTO`  
+  **Response**: `Room`
+
+- **PUT `/{id}`**  
+  Updates an existing room.  
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `UpdateRoomDTO`  
+  **Response**: `Room`
+
+- **PUT `/{roomId}/org-units`**  
+  Assigns organization units to a specific room.  
+  **Path Variable**: `roomId` (Long): ID of the room.
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Room`
+
+- **DELETE `/{id}`**  
+  Deletes a room by ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Void`
+
+---
+
+### `/org-units`
+
+- **GET `/`**  
+  Retrieves a list of all organization units for the current user.  
+  **Response**: `Iterable<OrgUnit>`
+
+- **GET `/{id}`**  
+  Retrieves a specific organization unit by ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `OrgUnit`
+
+- **GET `/{id}/items`**  
+  Retrieves all items within a specific organization unit by organization unit ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Iterable<Item>`
+
+- **POST `/`**  
+  Adds a new organization unit.  
+  **Request Body**: `NewOrgUnitDTO`  
+  **Response**: `OrgUnit`
+
+- **PUT `/{id}`**  
+  Updates an existing organization unit.  
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `UpdateOrgUnitDTO`  
+  **Response**: `OrgUnit`
+
+- **PUT `/unassign`**  
+  Unassigns the specified org units from their rooms.
+  Org Units must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> orgUnitIds`  
+  **Response**: `Iterable<OrgUnit>`
+
+- **PUT `/{id}/items`**  
+  Updates the items assigned to an existing organization unit.  
+  Items must exist
+  **Path Variable**: `id` (Long)  
+  **Request Body**: `List<Long> itemIds`  
+  **Response**: `Iterable<Item>`
+
+- **DELETE `/{id}`**  
+  Deletes an organization unit by ID.  
+  **Path Variable**: `id` (Long)  
+  **Response**: `Void`
+
+---
+
 ### `/items`
 
 - **GET `/`**  
   Retrieves a list of all items.  
   **Response**: `Iterable<Item>`
 
-- **POST `/`**  
-  Adds a new item to an organization unit.  
-  **Request Body**: `NewItemDTO`  
-  **Response**: `Item`
-
 - **GET `/{id}`**  
   Retrieves a specific item by ID.  
   **Path Variable**: `id` (Long): ID of the item to retrieve.  
    **Response**: `Item`
+
+- **POST `/`**  
+  Adds a new item to an organization unit.  
+  **Request Body**: `NewItemDTO`  
+  **Response**: `Item`
 
 - **PUT `/{id}`**  
   Updates an existing item.  
