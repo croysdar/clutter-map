@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public class NewOrgUnitDTO {
+    /* ------------- Fields ------------- */
     @NotBlank(message = "Organization unit name must not be blank.")
     private String name;
 
@@ -18,11 +19,16 @@ public class NewOrgUnitDTO {
     @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     private String projectId;
 
+    /* ------------- Validation Methods ------------- */
+    // Custom validation method to ensure that either RoomId or ProjectId is
+    // provided.
     @AssertTrue(message = "Either RoomId or ProjectId must be provided.")
     public boolean isRoomOrProjectValid() {
         return roomId != null || projectId != null;
     }
 
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructor parameters should follow the same order as the fields.
     public NewOrgUnitDTO(String name, String description, String roomId, String projectId) {
         this.name = name;
         this.description = description;
@@ -30,6 +36,9 @@ public class NewOrgUnitDTO {
         this.projectId = projectId;
     }
 
+    /* ------------- Getters ------------- */
+    // NOTE: Getters should follow the same order as the fields and constructor for
+    // consistency.
     public String getName() {
         return name;
     }
@@ -46,17 +55,9 @@ public class NewOrgUnitDTO {
         return projectId;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
+    /* ------------- JsonIgnore Getters ------------- */
+    // NOTE: These getters are used internally for processing and are excluded from
+    // JSON serialization.
 
     @JsonIgnore
     public Long getRoomIdAsLong() {
