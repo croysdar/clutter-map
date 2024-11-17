@@ -58,6 +58,7 @@ public class OrgUnitController {
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
+        // TODO: Make sure owner check works here when org unit is unassigned
         return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 

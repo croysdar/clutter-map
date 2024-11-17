@@ -46,6 +46,7 @@ public class ItemController {
     @PostMapping()
     @PreAuthorize("@securityService.isResourceOwner(#itemDTO.getOrgUnitId(), 'org-unit')")
     public ResponseEntity<Item> addOneItem(@Valid @RequestBody NewItemDTO itemDTO) {
+        // TODO: Make sure owner check works here when item is unassigned
         return ResponseEntity.ok(itemService.createItem(itemDTO));
     }
 
