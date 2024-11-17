@@ -27,10 +27,12 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
+    /* ------------- Injected Dependencies ------------- */
     private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
     private final ItemService itemService;
 
+    /* ------------- Constructor ------------- */
     public ProjectController(
             ProjectService projectService,
             OrgUnitService orgUnitService,
@@ -40,20 +42,10 @@ public class ProjectController {
         this.itemService = itemService;
     }
 
+    /* ------------- GET Operations ------------- */
     @GetMapping()
     public ResponseEntity<Iterable<Project>> getProjects() {
         return ResponseEntity.ok(projectService.getUserProjects());
-    }
-
-    @GetMapping("/{id}/rooms")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
-    public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(projectService.getProjectById(id).getRooms());
-    }
-
-    @PostMapping()
-    public ResponseEntity<Project> addOneProject(@Valid @RequestBody NewProjectDTO projectDTO) {
-        return ResponseEntity.ok(projectService.createProject(projectDTO));
     }
 
     @GetMapping("/{id}")
@@ -62,11 +54,10 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
-    @GetMapping("/{projectId}/items/unassigned")
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
-    public ResponseEntity<List<Item>> getUnassignedItemsByProjectId(@PathVariable Long projectId) {
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
-        return ResponseEntity.ok(unassignedItems);
+    @GetMapping("/{id}/rooms")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
+    public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(projectService.getProjectById(id).getRooms());
     }
 
     @GetMapping("/{projectId}/org-units/unassigned")
@@ -76,17 +67,28 @@ public class ProjectController {
         return ResponseEntity.ok(unassignedOrgUnits);
     }
 
+    @GetMapping("/{projectId}/items/unassigned")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    public ResponseEntity<List<Item>> getUnassignedItemsByProjectId(@PathVariable Long projectId) {
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
+        return ResponseEntity.ok(unassignedItems);
+    }
+
+    /* ------------- POST Operations ------------- */
+    @PostMapping()
+    public ResponseEntity<Project> addOneProject(@Valid @RequestBody NewProjectDTO projectDTO) {
+        return ResponseEntity.ok(projectService.createProject(projectDTO));
+    }
+
+    /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateProjectDTO projectDTO) {
-        /*
-         * Use to change project name.
-         * Cannot use to change rooms within project.
-         */
         return ResponseEntity.ok(projectService.updateProject(id, projectDTO));
     }
 
+    /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public ResponseEntity<Void> deleteOneProject(@PathVariable("id") Long id) {

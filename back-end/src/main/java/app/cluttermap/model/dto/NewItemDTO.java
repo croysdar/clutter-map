@@ -10,26 +10,33 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public class NewItemDTO {
+    /* ------------- Fields ------------- */
     @NotBlank(message = "Item name must not be blank.")
     private String name;
 
     private String description;
-    private List<String> tags;
 
-    @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
-    private String orgUnitId;
+    private List<String> tags;
 
     @Min(value = 1, message = "Quantity must be a least 1.")
     private Integer quantity;
 
+    @Pattern(regexp = "\\d+", message = "OrgUnit ID must be a valid number.")
+    private String orgUnitId;
+
     @Pattern(regexp = "\\d+", message = "Project ID must be a valid number.")
     private String projectId;
 
+    /* ------------- Validation Methods ------------- */
+    // Custom validation method to ensure that either OrgUnitId or ProjectId is
+    // provided.
     @AssertTrue(message = "Either OrgUnitId or ProjectId must be provided.")
     public boolean isOrgUnitOrProjectValid() {
         return orgUnitId != null || projectId != null;
     }
 
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructor parameters should follow the same order as the fields.
     public NewItemDTO(String name, String description, List<String> tags, Integer quantity, String orgUnitId,
             String projectId) {
         this.name = name;
@@ -40,6 +47,9 @@ public class NewItemDTO {
         this.projectId = projectId;
     }
 
+    /* ------------- Getters ------------- */
+    // NOTE: Getters should follow the same order as the fields and constructor for
+    // consistency.
     public String getName() {
         return name;
     }
@@ -52,6 +62,10 @@ public class NewItemDTO {
         return tags;
     }
 
+    public Integer getQuantity() {
+        return quantity;
+    }
+
     public String getOrgUnitId() {
         return orgUnitId;
     }
@@ -60,37 +74,13 @@ public class NewItemDTO {
         return projectId;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setOrgUnitId(String orgUnitId) {
-        this.orgUnitId = orgUnitId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
+    /* ------------- JsonIgnore Getters ------------- */
+    // NOTE: These getters are used internally for processing and are excluded from
+    // JSON serialization.
 
     @JsonIgnore
     public Long getOrgUnitIdAsLong() {
         return Long.parseLong(orgUnitId);
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
     }
 
     @JsonIgnore

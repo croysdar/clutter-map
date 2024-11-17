@@ -22,13 +22,18 @@ import jakarta.persistence.Table;
 @Table(name = "projects")
 public class Project {
 
+    /* ------------- Fields ------------- */
     @Id
-    // Postgres generates an ID
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    @JsonBackReference
+    private User owner;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -42,16 +47,13 @@ public class Project {
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    @JsonBackReference
-    private User owner;
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructors should list parameters in the same order as the fields for
+    // consistency.
+    // Fields like 'rooms', 'orgUnits', and 'items' are not included because they
+    // are initialized with default values.
 
-    public User getOwner() {
-        return owner;
-    }
-
-    // no-arg constructor for Hibernate
+    // No-Arg constructor for Hibernate
     protected Project() {
     }
 
@@ -60,9 +62,9 @@ public class Project {
         this.name = name;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
+    /* ------------- Getters and Setters ------------- */
+    // NOTE: Getters and setters should follow the same order as the fields and
+    // constructors for consistency.
 
     public Long getId() {
         return id;
@@ -78,6 +80,14 @@ public class Project {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public List<Room> getRooms() {

@@ -23,6 +23,7 @@ import jakarta.persistence.Table;
 @Table(name = "org_units")
 public class OrgUnit {
 
+    /* ------------- Fields ------------- */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -33,43 +34,51 @@ public class OrgUnit {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    @JsonBackReference
-    private Project project;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = true)
     @JsonBackReference
     private Room room;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
+    private Project project;
 
     @OneToMany(mappedBy = "orgUnit", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
 
-    @PreRemove
-    private void preRemove() {
-        for (Item item : items) {
-            item.setOrgUnit(null); // Unassign each item before OrgUnit deletion
-        }
-    }
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructors should list parameters in the same order as the fields for
+    // consistency.
+    // Fields like 'items' are not included because they are initialized with
+    // default values.
 
-    // no-arg constructor for Hibernate
+    // No-Arg constructor for Hibernate
     protected OrgUnit() {
     }
 
-    public OrgUnit(String name, String description, Room room) {
+    public OrgUnit(
+            String name,
+            String description,
+            Room room) {
         this.name = name;
         this.description = description;
         this.room = room;
         this.project = room.getProject();
     }
 
-    // This org unit is unassigned
-    public OrgUnit(String name, String description, Project project) {
+    public OrgUnit(
+            String name,
+            String description,
+            Project project) {
         this.name = name;
         this.description = description;
         this.project = project;
     }
+
+    /* ------------- Getters and Setters ------------- */
+    // NOTE: Getters and setters should follow the same order as the fields and
+    // constructors for consistency.
 
     public Long getId() {
         return id;
@@ -95,14 +104,6 @@ public class OrgUnit {
         this.description = description;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
     public Room getRoom() {
         return room;
     }
@@ -114,6 +115,14 @@ public class OrgUnit {
         }
     }
 
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public List<Item> getItems() {
         return items;
     }
@@ -121,6 +130,8 @@ public class OrgUnit {
     public void setItems(List<Item> items) {
         this.items = items;
     }
+
+    /* ------------- Utility Methods ------------- */
 
     public void addItem(Item item) {
         if (!items.contains(item)) {
@@ -134,5 +145,14 @@ public class OrgUnit {
             items.remove(item);
         }
         item.setOrgUnit(null);
+    }
+
+    /* ------------- Lifecycle Callback Methods ------------- */
+
+    @PreRemove
+    private void preRemove() {
+        for (Item item : items) {
+            item.setOrgUnit(null); // Unassign each item before OrgUnit deletion
+        }
     }
 }

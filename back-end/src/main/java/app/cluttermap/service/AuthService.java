@@ -28,7 +28,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Service("authService")
 public class AuthService {
-    // Logger supports different levels (INFO, DEBUG, ERROR, WARN)
+    /* ------------- Constants ------------- */
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     // Factory for JSON processing, using Gson for serialization and deserialization
@@ -37,23 +37,26 @@ public class AuthService {
     // HTTP transport layer, used to send HTTP requests over the network
     private final NetHttpTransport transport = new NetHttpTransport();
 
-    public final SecurityService securityService;
+    private final long EXPIRATION_TIME = 86400000; // 1 day
 
+    /* ------------- Injected Dependencies ------------- */
+    public final SecurityService securityService;
     private UserRepository userRepository;
 
-    public AuthService(SecurityService securityService, UserRepository userRepository) {
-        this.securityService = securityService;
-        this.userRepository = userRepository;
-    }
-
+    /* ------------- Configuration Values ------------- */
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
     @Value("${security.jwt.secret-key}")
     private String JWT_SECRET;
 
-    private final long EXPIRATION_TIME = 86400000; // 1 day
+    /* ------------- Constructor ------------- */
+    public AuthService(SecurityService securityService, UserRepository userRepository) {
+        this.securityService = securityService;
+        this.userRepository = userRepository;
+    }
 
+    /* ------------- Token Verification ------------- */
     public GoogleIdToken verifyGoogleToken(String idTokenString) throws GeneralSecurityException, IOException {
         try {
             // Create the google id token verifier
@@ -74,6 +77,7 @@ public class AuthService {
         }
     }
 
+    /* ------------- User Management ------------- */
     public User findOrCreateUserFromGoogleToken(GoogleIdToken idToken) {
         // Get user information from the payload
         GoogleIdToken.Payload payload = idToken.getPayload();
@@ -105,6 +109,7 @@ public class AuthService {
         });
     }
 
+    /* ------------- Token Generation ------------- */
     public String generateJwtToken(User user) {
         // Securely convert the JWT_SECRET into a key used for signing the JWT using
         // HMAC SHA-256.

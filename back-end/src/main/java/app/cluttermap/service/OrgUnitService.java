@@ -20,12 +20,18 @@ import jakarta.transaction.Transactional;
 
 @Service("orgUnitService")
 public class OrgUnitService {
+    /* ------------- Constants ------------- */
+    public static final String PROJECT_MISMATCH_ERROR = "Cannot move organization unit to a different project's room.";
+    public static final String ACCESS_DENIED_STRING = "You do not have permission to access org unit with ID: %d";
+
+    /* ------------- Injected Dependencies ------------- */
     private final RoomRepository roomRepository;
     private final OrgUnitRepository orgUnitRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final RoomService roomService;
 
+    /* ------------- Constructor ------------- */
     public OrgUnitService(
             RoomRepository roomRepository,
             OrgUnitRepository orgUnitRepository,
@@ -40,22 +46,20 @@ public class OrgUnitService {
         this.roomService = roomService;
     }
 
-    public static final String PROJECT_MISMATCH_ERROR = "Cannot move organization unit to a different project's room.";
-    public static final String ACCESS_DENIED_STRING = "You do not have permission to access org unit with ID: %d";
-
-    public void checkOwnershipForOrgUnits(List<Long> orgUnitIds) {
-        for (Long id : orgUnitIds) {
-            if (!securityService.isResourceOwner(id, "org-unit")) {
-                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
-            }
-        }
-    }
-
+    /* ------------- CRUD Operations ------------- */
+    /* --- Read Operations (GET) --- */
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new OrgUnitNotFoundException());
     }
 
+    public Iterable<OrgUnit> getUserOrgUnits() {
+        User user = securityService.getCurrentUser();
+
+        return orgUnitRepository.findByOwnerId(user.getId());
+    }
+
+    /* --- Create Operation (POST) --- */
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
         if (orgUnitDTO.getRoomId() == null) {
@@ -77,16 +81,11 @@ public class OrgUnitService {
         return orgUnitRepository.save(newOrgUnit);
     }
 
-    public Iterable<OrgUnit> getUserOrgUnits() {
-        User user = securityService.getCurrentUser();
-
-        return orgUnitRepository.findByOwnerId(user.getId());
-    }
-
     public Iterable<OrgUnit> getUnassignedOrgUnitsByProjectId(Long projectId) {
         return orgUnitRepository.findUnassignedOrgUnitsByProjectId(projectId);
     }
 
+    /* --- Update Operation (PUT) --- */
     @Transactional
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = getOrgUnitById(id);
@@ -98,28 +97,15 @@ public class OrgUnitService {
         return orgUnitRepository.save(_orgUnit);
     }
 
-    private void validateSameProject(OrgUnit orgUnit, Room targetRoom) {
-        if (targetRoom == null || targetRoom.getProject() == null) {
-            throw new IllegalArgumentException("Target Room or its Project is null");
-        }
-        if (orgUnit == null || orgUnit.getProject() == null) {
-            throw new IllegalArgumentException("Org Unit or its Project is null");
-        }
-        if (!orgUnit.getProject().equals(targetRoom.getProject())) {
-            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
-        }
+    /* --- Delete Operation (DELETE) --- */
+    @Transactional
+    public void deleteOrgUnit(Long orgUnitId) {
+        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
+                .orElseThrow(() -> new OrgUnitNotFoundException());
+        orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }
 
-    private Room assignOrgUnitToRoom(OrgUnit orgUnit, Room room) {
-        room.addOrgUnit(orgUnit); // Manages both sides of the relationship
-        return roomRepository.save(room);
-    }
-
-    private Room unassignOrgUnitFromRoom(OrgUnit orgUnit, Room room) {
-        room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
-        return roomRepository.save(room);
-    }
-
+    /* ------------- Complex Operations ------------- */
     @Transactional
     public Iterable<OrgUnit> assignOrgUnitsToRoom(List<Long> orgUnitIds, Long targetRoomId) {
         Room targetRoom = roomService.getRoomById(targetRoomId);
@@ -157,10 +143,35 @@ public class OrgUnitService {
         return updatedOrgUnits;
     }
 
-    @Transactional
-    public void deleteOrgUnit(Long orgUnitId) {
-        OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
-        orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
+    /* ------------- Ownership and Security Checks ------------- */
+    public void checkOwnershipForOrgUnits(List<Long> orgUnitIds) {
+        for (Long id : orgUnitIds) {
+            if (!securityService.isResourceOwner(id, "org-unit")) {
+                throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
+            }
+        }
+    }
+
+    /* ------------- Private Helper Methods ------------- */
+    private void validateSameProject(OrgUnit orgUnit, Room targetRoom) {
+        if (targetRoom == null || targetRoom.getProject() == null) {
+            throw new IllegalArgumentException("Target Room or its Project is null");
+        }
+        if (orgUnit == null || orgUnit.getProject() == null) {
+            throw new IllegalArgumentException("Org Unit or its Project is null");
+        }
+        if (!orgUnit.getProject().equals(targetRoom.getProject())) {
+            throw new IllegalArgumentException(PROJECT_MISMATCH_ERROR);
+        }
+    }
+
+    private Room assignOrgUnitToRoom(OrgUnit orgUnit, Room room) {
+        room.addOrgUnit(orgUnit); // Manages both sides of the relationship
+        return roomRepository.save(room);
+    }
+
+    private Room unassignOrgUnitFromRoom(OrgUnit orgUnit, Room room) {
+        room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
+        return roomRepository.save(room);
     }
 }

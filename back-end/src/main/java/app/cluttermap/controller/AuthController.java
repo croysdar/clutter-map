@@ -22,20 +22,24 @@ import app.cluttermap.service.SecurityService;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    /* ------------- Injected Dependencies ------------- */
     public final SecurityService securityService;
     public final AuthService authService;
 
+    /* ------------- Constructor ------------- */
     public AuthController(SecurityService securityService, AuthService authService) {
         this.securityService = securityService;
         this.authService = authService;
     }
 
+    /* ------------- Configuration Values ------------- */
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
     @Value("${security.jwt.secret-key}")
     private String JWT_SECRET;
 
+    /* ------------- Authentication Operations ------------- */
     // This is called after a user logs in with the "Sign in with Google" button
     // Google returns a token to the frontend and we now want to verify it
     @PostMapping("/verify-token/google")
@@ -54,7 +58,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // Used to both validate a JWT token (typically issued from this backend)
+    /* ------------- User Information Retrieval ------------- */
+    // Used to both validate a JWT token (issued from this backend)
     // as well as get simple user info to return to the frontend
     @GetMapping("/user-info")
     public ResponseEntity<Map<String, Object>> getUserInfo() {

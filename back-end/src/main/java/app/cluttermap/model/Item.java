@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 @Table(name = "items")
 public class Item {
 
+    /* ------------- Fields ------------- */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -29,25 +30,32 @@ public class Item {
 
     private List<String> tags;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    @JsonBackReference
-    private Project project;
+    private Integer quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "org_unit_id", nullable = true)
     @JsonBackReference
     private OrgUnit orgUnit;
 
-    private Integer quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
+    private Project project;
 
-    // no-arg constructor for Hibernate
+    /* ------------- Constructors ------------- */
+    // NOTE: Constructors should list parameters in the same order as the fields for
+    // consistency.
+
+    // No-Arg constructor for Hibernate
     protected Item() {
     }
 
-    // public constructor
-    // ID is not required because Postgres generates the ID
-    public Item(String name, String description, List<String> tags, Integer quantity, OrgUnit orgUnit) {
+    public Item(
+            String name,
+            String description,
+            List<String> tags,
+            Integer quantity,
+            OrgUnit orgUnit) {
         this.name = name;
         this.description = description;
         this.tags = tags;
@@ -56,14 +64,22 @@ public class Item {
         this.project = orgUnit.getProject();
     }
 
-    // This item is unassigned
-    public Item(String name, String description, List<String> tags, Integer quantity, Project project) {
+    public Item(
+            String name,
+            String description,
+            List<String> tags,
+            Integer quantity,
+            Project project) {
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.quantity = quantity;
         this.project = project;
     }
+
+    /* ------------- Getters and Setters ------------- */
+    // NOTE: Getters and setters should follow the same order as the fields and
+    // constructors for consistency.
 
     public Long getId() {
         return id;
@@ -97,12 +113,12 @@ public class Item {
         this.tags = tags;
     }
 
-    public Project getProject() {
-        return project;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public OrgUnit getOrgUnit() {
@@ -116,11 +132,12 @@ public class Item {
         }
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public Project getProject() {
+        return project;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setProject(Project project) {
+        this.project = project;
     }
+
 }
