@@ -22,11 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
-import app.cluttermap.exception.room.RoomNotFoundException;
-import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
@@ -34,6 +31,7 @@ import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -84,7 +82,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Attempt to retrieve the room and expect a RoomNotFoundException
-        assertThrows(RoomNotFoundException.class, () -> roomService.getRoomById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.getRoomById(1L));
     }
 
     @Test
@@ -119,11 +117,12 @@ public class RoomServiceTests {
     void createRoom_ShouldThrowException_WhenProjectDoesNotExist() {
         // Arrange: Set up the DTO with a project ID that doesn't exist
         NewRoomDTO roomDTO = new NewRoomDTO("New Room", "Room description", "999");
-        when(projectService.getProjectById(roomDTO.getProjectIdAsLong())).thenThrow(new ProjectNotFoundException());
+        when(projectService.getProjectById(roomDTO.getProjectIdAsLong()))
+                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
 
         // Act & Assert: Attempt to create the room and expect a
         // ProjectNotFoundException
-        assertThrows(ProjectNotFoundException.class, () -> roomService.createRoom(roomDTO));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.createRoom(roomDTO));
     }
 
     @Disabled("Feature under development")
@@ -227,7 +226,7 @@ public class RoomServiceTests {
         UpdateRoomDTO roomDTO = new UpdateRoomDTO("Updated Name", "Updated Description");
 
         // Act & Assert: Attempt to update the room and expect a RoomNotFoundException
-        assertThrows(RoomNotFoundException.class, () -> roomService.updateRoom(1L, roomDTO));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.updateRoom(1L, roomDTO));
     }
 
     @Test
@@ -273,7 +272,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Attempt to delete the room and expect a RoomNotFoundException
-        assertThrows(RoomNotFoundException.class, () -> roomService.deleteRoom(1L));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoom(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(roomRepository, never()).deleteById(anyLong());

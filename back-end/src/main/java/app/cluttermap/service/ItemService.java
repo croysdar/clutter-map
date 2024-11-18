@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.exception.item.ItemNotFoundException;
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -15,6 +15,7 @@ import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
 @Service("itemService")
@@ -48,7 +49,7 @@ public class ItemService {
     /* --- Read Operations (GET) --- */
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
     }
 
     public Iterable<Item> getUserItems() {

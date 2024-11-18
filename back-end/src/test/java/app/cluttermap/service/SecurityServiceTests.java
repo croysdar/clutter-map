@@ -21,12 +21,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
-import app.cluttermap.exception.item.ItemNotFoundException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
-import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -133,7 +130,7 @@ class SecurityServiceTests {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Verify that ProjectNotFoundException is thrown
-        assertThrows(ProjectNotFoundException.class, () -> securityService.isResourceOwner(1L, "project"));
+        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "project"));
     }
 
     @Test
@@ -161,7 +158,7 @@ class SecurityServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Verify that RoomNotFoundException is thrown
-        assertThrows(RoomNotFoundException.class, () -> securityService.isResourceOwner(1L, "room"));
+        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "room"));
     }
 
     @Test
@@ -190,7 +187,7 @@ class SecurityServiceTests {
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Verify that OrgUnitNotFoundException is thrown
-        assertThrows(OrgUnitNotFoundException.class, () -> securityService.isResourceOwner(1L, "org-unit"));
+        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "org-unit"));
     }
 
     @Test
@@ -219,7 +216,7 @@ class SecurityServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(itemRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert: Verify that ItemNotFoundException is thrown
-        assertThrows(ItemNotFoundException.class, () -> securityService.isResourceOwner(1L, "item"));
+        // Act & Assert: Verify that ResourceNotFoundException is thrown
+        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "item"));
     }
 }

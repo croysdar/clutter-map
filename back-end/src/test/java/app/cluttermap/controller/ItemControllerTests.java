@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import app.cluttermap.exception.item.ItemNotFoundException;
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -44,6 +44,7 @@ import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.service.ItemService;
 import app.cluttermap.service.RoomService;
 import app.cluttermap.service.SecurityService;
+import app.cluttermap.util.ResourceType;
 
 @WebMvcTest(ItemController.class)
 @ExtendWith(SpringExtension.class)
@@ -147,14 +148,14 @@ class ItemControllerTests {
 
     @Test
     void getOneItem_ShouldReturnNotFound_WhenItemDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw ItemNotFoundException when a
+        // Arrange: Mock the service to throw ResourceNotFoundException when a
         // non-existent item ID is requested
-        when(itemService.getItemById(1L)).thenThrow(new ItemNotFoundException());
+        when(itemService.getItemById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 1L));
 
         // Act: Perform a GET request to the /items/1 endpoint
         mockMvc.perform(get("/items/1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Item not found."));
+                .andExpect(content().string("ITEM with ID 1 not found."));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getItemById(1L);
@@ -420,8 +421,8 @@ class ItemControllerTests {
         // Arrange: Set up item IDs, including a non-existent item ID
         List<Long> itemIds = List.of(1L, 999L, 3L);
 
-        // Simulate ItemNotFoundException for one of the items
-        when(itemService.unassignItems(itemIds)).thenThrow(new ItemNotFoundException());
+        // Simulate ResourceNotFoundException for one of the items
+        when(itemService.unassignItems(itemIds)).thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 999L));
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found with an
         // error message
@@ -429,7 +430,7 @@ class ItemControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(itemIds)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Item not found."));
+                .andExpect(content().string("ITEM with ID 999 not found."));
     }
 
     @Test
@@ -462,14 +463,14 @@ class ItemControllerTests {
 
     @Test
     void deleteOneItem_ShouldReturnNotFound_WhenItemDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw ItemNotFoundException when deleting a
+        // Arrange: Mock the service to throw ResourceNotFoundException when deleting a
         // non-existent item
-        doThrow(new ItemNotFoundException()).when(itemService).deleteItem(1L);
+        doThrow(new ResourceNotFoundException(ResourceType.ITEM, 1L)).when(itemService).deleteItem(1L);
 
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Item not found."));
+                .andExpect(content().string("ITEM with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the item
         verify(itemService).deleteItem(1L);

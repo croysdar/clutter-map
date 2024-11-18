@@ -24,9 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.item.ItemLimitReachedException;
-import app.cluttermap.exception.item.ItemNotFoundException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -38,6 +37,7 @@ import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -116,7 +116,7 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to retrieve the item and expect a
         // ItemNotFoundException
-        assertThrows(ItemNotFoundException.class, () -> itemService.getItemById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(1L));
     }
 
     @Test
@@ -152,11 +152,12 @@ public class ItemServiceTests {
     void createItem_ShouldThrowException_WhenOrgUnitDoesNotExist() {
         // Arrange: Set up the DTO with a org unit ID that doesn't exist
         NewItemDTO itemDTO = new NewItemDTO("New Item", "Item description", List.of(), 1, "999", null);
-        when(orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong())).thenThrow(new OrgUnitNotFoundException());
+        when(orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong()))
+                .thenThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 999L));
 
         // Act & Assert: Attempt to create the item and expect a
         // RoomNotFoundException
-        assertThrows(OrgUnitNotFoundException.class, () -> itemService.createItem(itemDTO));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.createItem(itemDTO));
     }
 
     @Disabled("Feature under development")
@@ -297,7 +298,7 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to update the item and expect a
         // ItemNotFoundException
-        assertThrows(ItemNotFoundException.class, () -> itemService.updateItem(1L, itemDTO));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.updateItem(1L, itemDTO));
     }
 
     @Test
@@ -367,7 +368,7 @@ public class ItemServiceTests {
     }
 
     @Test
-    void assignItemsToOrgUnit_ItemNotFound_ShouldThrowItemNotFoundException() {
+    void assignItemsToOrgUnit_ItemNotFound_ShouldThrowResourceNotFoundException() {
         // Arrange: Set up target OrgUnit ID and non-existent item ID
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
         when(orgUnitService.getOrgUnitById(targetOrgUnit.getId())).thenReturn(targetOrgUnit);
@@ -376,7 +377,7 @@ public class ItemServiceTests {
         when(itemRepository.findById(nonExistentItemId)).thenReturn(Optional.empty());
 
         // Act & Assert: Expect ItemNotFoundException
-        assertThrows(ItemNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             itemService.assignItemsToOrgUnit(List.of(nonExistentItemId), targetOrgUnit.getId());
         });
     }
@@ -423,17 +424,17 @@ public class ItemServiceTests {
 
     // TODO allow partial success
     @Test
-    void unassignItems_ItemNotFound_ShouldThrowItemNotFoundException() {
+    void unassignItems_ItemNotFound_ShouldThrowResourceNotFoundException() {
         // Arrange: Set up item IDs, including a non-existent item ID
         List<Long> itemIds = List.of(1L, 999L, 3L); // Assuming 999L does not exist
         Item item1 = new Item("Item 1", "Item Description", List.of(), 1, mockOrgUnit);
 
         // Simulate ItemNotFoundException for the non-existent item
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
-        when(itemRepository.findById(999L)).thenThrow(new ItemNotFoundException());
+        when(itemRepository.findById(999L)).thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 999L));
 
         // Act & Assert: Expect ItemNotFoundException
-        assertThrows(ItemNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             itemService.unassignItems(itemIds);
         });
     }
@@ -461,7 +462,7 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to delete the item and expect a
         // ItemNotFoundException
-        assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(1L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItem(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(itemRepository, never()).deleteById(anyLong());

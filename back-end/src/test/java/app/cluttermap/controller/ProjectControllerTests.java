@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import app.cluttermap.exception.project.ProjectNotFoundException;
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -43,6 +43,7 @@ import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.ProjectService;
 import app.cluttermap.service.SecurityService;
+import app.cluttermap.util.ResourceType;
 
 @WebMvcTest(ProjectController.class)
 @ExtendWith(SpringExtension.class)
@@ -133,12 +134,12 @@ class ProjectControllerTests {
     void getOneProject_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw ProjectNotFoundException when a
         // non-existent project ID is requested
-        when(projectService.getProjectById(1L)).thenThrow(new ProjectNotFoundException());
+        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
 
         // Act: Perform a GET request to the /projects/1 endpoint
         mockMvc.perform(get("/projects/1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Project not found."));
+                .andExpect(content().string("PROJECT with ID 1 not found."));
 
         // Assert: Ensure that the service method was called
         verify(projectService).getProjectById(1L);
@@ -177,12 +178,12 @@ class ProjectControllerTests {
         // Arrange: Use a project ID that does not exist
         Long nonExistentProjectId = 999L;
         when(itemService.getUnassignedItemsByProjectId(nonExistentProjectId))
-                .thenThrow(new ProjectNotFoundException());
+                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
 
         // Act & Assert: Perform the GET request and verify status 404 Not Found
         mockMvc.perform(get("/projects/{projectId}/items/unassigned", nonExistentProjectId))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Project not found."));
+                .andExpect(content().string("PROJECT with ID 999 not found."));
     }
 
     @Test
@@ -218,12 +219,12 @@ class ProjectControllerTests {
         // Arrange: Use a project ID that does not exist
         Long nonExistentProjectId = 999L;
         when(orgUnitService.getUnassignedOrgUnitsByProjectId(nonExistentProjectId))
-                .thenThrow(new ProjectNotFoundException());
+                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
 
         // Act & Assert: Perform the GET request and verify status 404 Not Found
         mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", nonExistentProjectId))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Project not found."));
+                .andExpect(content().string("PROJECT with ID 999 not found."));
     }
 
     @Test
@@ -352,12 +353,12 @@ class ProjectControllerTests {
     void deleteOneProject_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw ProjectNotFoundException when deleting a
         // non-existent project
-        doThrow(new ProjectNotFoundException()).when(projectService).deleteProject(1L);
+        doThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L)).when(projectService).deleteProject(1L);
 
         // Act: Perform a DELETE request to the /projects/1 endpoint
         mockMvc.perform(delete("/projects/1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Project not found."));
+                .andExpect(content().string("PROJECT with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the project
         verify(projectService).deleteProject(1L);
@@ -387,12 +388,12 @@ class ProjectControllerTests {
     void getProjectRooms_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw ProjectNotFoundException when retrieving
         // rooms for a non-existent project
-        when(projectService.getProjectById(1L)).thenThrow(new ProjectNotFoundException());
+        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
 
         // Act: Perform a GET request to the /projects/1/rooms endpoint
         mockMvc.perform(get("/projects/1/rooms"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Project not found."));
+                .andExpect(content().string("PROJECT with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to retrieve the
         // project

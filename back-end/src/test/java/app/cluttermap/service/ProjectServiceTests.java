@@ -22,8 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
@@ -73,7 +73,7 @@ public class ProjectServiceTests {
 
         // Act & Assert: Verify that calling getProjectById throws
         // ProjectNotFoundException for a missing project
-        assertThrows(ProjectNotFoundException.class, () -> projectService.getProjectById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> projectService.getProjectById(1L));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class ProjectServiceTests {
 
         // Act & Assert: Verify that attempting to update a non-existent project throws
         // ProjectNotFoundException
-        assertThrows(ProjectNotFoundException.class, () -> projectService.updateProject(1L, projectDTO));
+        assertThrows(ResourceNotFoundException.class, () -> projectService.updateProject(1L, projectDTO));
     }
 
     @Test
@@ -227,7 +227,7 @@ public class ProjectServiceTests {
 
         // Act & Assert: Verify that attempting to delete a non-existent project throws
         // ProjectNotFoundException
-        assertThrows(ProjectNotFoundException.class, () -> projectService.deleteProject(1L));
+        assertThrows(ResourceNotFoundException.class, () -> projectService.deleteProject(1L));
 
         // Assert: Verify that deleteById was never called on the repository, as the
         // project does not exist

@@ -17,13 +17,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
 import app.cluttermap.exception.item.ItemLimitReachedException;
-import app.cluttermap.exception.item.ItemNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
-import app.cluttermap.exception.room.RoomNotFoundException;
 import io.jsonwebtoken.io.IOException;
 
 @ControllerAdvice
@@ -82,13 +78,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ ProjectNotFoundException.class })
-    public ResponseEntity<Object> handleProjectNotFoundException(ProjectNotFoundException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler({ RoomNotFoundException.class })
-    public ResponseEntity<Object> handleRoomNotFoundException(RoomNotFoundException exception) {
+    @ExceptionHandler({ ResourceNotFoundException.class })
+    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
@@ -97,19 +88,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ OrgUnitNotFoundException.class })
-    public ResponseEntity<Object> handleOrgUnitNotFoundException(OrgUnitNotFoundException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler({ OrgUnitLimitReachedException.class })
     public ResponseEntity<Object> handleOrgUnitLimitReachedException(OrgUnitLimitReachedException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler({ ItemNotFoundException.class })
-    public ResponseEntity<Object> handleItemNotFoundException(ItemNotFoundException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ ItemLimitReachedException.class })

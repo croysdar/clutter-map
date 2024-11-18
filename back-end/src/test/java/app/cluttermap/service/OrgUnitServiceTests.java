@@ -24,9 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
-import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -36,6 +35,7 @@ import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -110,7 +110,7 @@ public class OrgUnitServiceTests {
 
         // Act & Assert: Attempt to retrieve the orgUnit and expect a
         // OrgUnitNotFoundException
-        assertThrows(OrgUnitNotFoundException.class, () -> orgUnitService.getOrgUnitById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.getOrgUnitById(1L));
     }
 
     @Test
@@ -145,11 +145,12 @@ public class OrgUnitServiceTests {
     void createOrgUnit_ShouldThrowException_WhenOrgUnitDoesNotExist() {
         // Arrange: Set up the DTO with a room ID that doesn't exist
         NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", "999", null);
-        when(roomService.getRoomById(orgUnitDTO.getRoomIdAsLong())).thenThrow(new RoomNotFoundException());
+        when(roomService.getRoomById(orgUnitDTO.getRoomIdAsLong()))
+                .thenThrow(new ResourceNotFoundException(ResourceType.ROOM, 999L));
 
         // Act & Assert: Attempt to create the orgUnit and expect a
         // RoomNotFoundException
-        assertThrows(RoomNotFoundException.class, () -> orgUnitService.createOrgUnit(orgUnitDTO));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
     @Disabled("Feature under development")
@@ -257,7 +258,7 @@ public class OrgUnitServiceTests {
 
         // Act & Assert: Attempt to update the orgUnit and expect a
         // OrgUnitNotFoundException
-        assertThrows(OrgUnitNotFoundException.class, () -> orgUnitService.updateOrgUnit(1L, orgUnitDTO));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.updateOrgUnit(1L, orgUnitDTO));
     }
 
     @Test
@@ -309,7 +310,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(nonExistentOrgUnitId)).thenReturn(Optional.empty());
 
         // Act & Assert: Expect OrgUnitNotFoundException for the non-existent org unit
-        assertThrows(OrgUnitNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             orgUnitService.assignOrgUnitsToRoom(List.of(nonExistentOrgUnitId), targetRoom.getId());
         });
     }
@@ -366,7 +367,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert: Expect OrgUnitNotFoundException for the missing org unit
-        assertThrows(OrgUnitNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             orgUnitService.unassignOrgUnits(orgUnitIds);
         });
     }
@@ -394,7 +395,7 @@ public class OrgUnitServiceTests {
 
         // Act & Assert: Attempt to delete the orgUnit and expect a
         // OrgUnitNotFoundException
-        assertThrows(OrgUnitNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(orgUnitRepository, never()).deleteById(anyLong());

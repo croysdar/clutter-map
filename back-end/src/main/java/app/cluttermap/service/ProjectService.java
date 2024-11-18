@@ -2,13 +2,14 @@ package app.cluttermap.service;
 
 import org.springframework.stereotype.Service;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
 @Service("projectService")
@@ -30,7 +31,7 @@ public class ProjectService {
     /* --- Read Operations (GET) --- */
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));
     }
 
     public Iterable<Project> getUserProjects() {

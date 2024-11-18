@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -16,6 +16,7 @@ import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
 @Service("orgUnitService")
@@ -50,7 +51,7 @@ public class OrgUnitService {
     /* --- Read Operations (GET) --- */
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, id));
     }
 
     public Iterable<OrgUnit> getUserOrgUnits() {
@@ -101,7 +102,7 @@ public class OrgUnitService {
     @Transactional
     public void deleteOrgUnit(Long orgUnitId) {
         OrgUnit orgUnit = orgUnitRepository.findById(orgUnitId)
-                .orElseThrow(() -> new OrgUnitNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, orgUnitId));
         orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }
 

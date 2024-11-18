@@ -8,12 +8,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
-import app.cluttermap.exception.item.ItemNotFoundException;
-import app.cluttermap.exception.org_unit.OrgUnitNotFoundException;
-import app.cluttermap.exception.project.ProjectNotFoundException;
-import app.cluttermap.exception.room.RoomNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -24,6 +21,7 @@ import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
 import app.cluttermap.repository.UserRepository;
+import app.cluttermap.util.ResourceType;
 
 @Service("securityService")
 public class SecurityService {
@@ -68,36 +66,28 @@ public class SecurityService {
 
         switch (resourceType) {
             case "project":
-                Optional<Project> projectData = projectRepository.findById(resourceId);
-                if (!projectData.isPresent()) {
-                    throw new ProjectNotFoundException();
-                }
+                Project project = projectRepository.findById(resourceId)
+                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, resourceId));
 
-                return projectData.get().getOwner().getId().equals(currentUserId);
+                return project.getOwner().getId().equals(currentUserId);
 
             case "room":
-                Optional<Room> roomData = roomRepository.findById(resourceId);
-                if (!roomData.isPresent()) {
-                    throw new RoomNotFoundException();
-                }
+                Room room = roomRepository.findById(resourceId)
+                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, resourceId));
 
-                return roomData.get().getProject().getOwner().getId().equals(currentUserId);
+                return room.getProject().getOwner().getId().equals(currentUserId);
 
             case "org-unit":
-                Optional<OrgUnit> orgUnitData = orgUnitRepository.findById(resourceId);
-                if (!orgUnitData.isPresent()) {
-                    throw new OrgUnitNotFoundException();
-                }
+                OrgUnit orgUnit = orgUnitRepository.findById(resourceId)
+                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, resourceId));
 
-                return orgUnitData.get().getRoom().getProject().getOwner().getId().equals(currentUserId);
+                return orgUnit.getRoom().getProject().getOwner().getId().equals(currentUserId);
 
             case "item":
-                Optional<Item> itemData = itemRepository.findById(resourceId);
-                if (!itemData.isPresent()) {
-                    throw new ItemNotFoundException();
-                }
+                Item item = itemRepository.findById(resourceId)
+                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, resourceId));
 
-                return itemData.get().getOrgUnit().getRoom().getProject().getOwner().getId().equals(currentUserId);
+                return item.getOrgUnit().getRoom().getProject().getOwner().getId().equals(currentUserId);
         }
 
         return false;
