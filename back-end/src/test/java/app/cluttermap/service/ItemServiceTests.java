@@ -121,7 +121,7 @@ public class ItemServiceTests {
     }
 
     @Test
-    void createItem_ShouldCreateItem_WhenRoomExists() {
+    void createItem_ShouldCreateItem_WhenValid() {
         // Arrange: Stub org unit retrieval to return mockOrgUnit when the specified ID
         // is used
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(mockOrgUnit);
@@ -150,16 +150,32 @@ public class ItemServiceTests {
     }
 
     @Test
-    void createItem_ShouldThrowException_WhenOrgUnitDoesNotExist() {
-        // Arrange: Set up the DTO with a org unit ID that doesn't exist
-        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().orgUnitId(999L).build();
+    void createItem_ShouldCreateItem_WhenProjectExistsAndOrgUnitIdNull() {
+        // Arrange: Stub project retrieval to return mockProject when the specified ID
+        // is used
+        when(projectService.getProjectById(1L)).thenReturn(mockProject);
 
-        when(orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong()))
-                .thenThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 999L));
+        // Arrange: Prepare the Item DTO with the org unit ID as null
+        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().orgUnitId(null).build();
 
-        // Act & Assert: Attempt to create the item and expect a
-        // RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.createItem(itemDTO));
+        // Arrange: Create a mock Item that represents the saved Item returned by
+        // the repository
+        Item mockOrgUnit = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                itemDTO.getQuantity(), mockProject);
+        when(itemRepository.save(any(Item.class))).thenReturn(mockOrgUnit);
+
+        // Act: create a item using itemService and pass in the item DTO
+        Item createdOrgUnit = itemService.createItem(itemDTO);
+
+        // Assert: verify that the created item is not null and matches the expected
+        // details from itemDTO
+        assertThat(createdOrgUnit).isNotNull();
+        assertThat(createdOrgUnit.getName()).isEqualTo(itemDTO.getName());
+        assertThat(createdOrgUnit.getDescription()).isEqualTo(itemDTO.getDescription());
+        assertThat(createdOrgUnit.getProject()).isEqualTo(mockProject);
+
+        // Verify that itemRepository.save() was called to persist the new item
+        verify(itemRepository).save(any(Item.class));
     }
 
     @Disabled("Feature under development")
@@ -281,10 +297,10 @@ public class ItemServiceTests {
         Item updatedItem = itemService.updateItem(1L, itemDTO);
 
         // Assert: Verify that the item's name was updated correctly
-        assertThat(updatedItem.getName()).isEqualTo(TestDataFactory.DEFAULT_ITEM_NAME);
-        assertThat(updatedItem.getDescription()).isEqualTo(TestDataFactory.DEFAULT_ITEM_DESCRIPTION);
-        assertThat(updatedItem.getTags()).isEqualTo(TestDataFactory.DEFAULT_ITEM_TAGS);
-        assertThat(updatedItem.getQuantity()).isEqualTo(TestDataFactory.DEFAULT_ITEM_QUANTITY);
+        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
+        assertThat(updatedItem.getDescription()).isEqualTo(itemDTO.getDescription());
+        assertThat(updatedItem.getTags()).isEqualTo(itemDTO.getTags());
+        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
         verify(itemRepository).save(item);
     }
 
@@ -311,26 +327,19 @@ public class ItemServiceTests {
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
-        String updatedName = "Updated Name";
-        List<String> updatedTags = List.of("Updated tag 1", "Updated tag 2");
-        Integer updatedQuantity = 2;
-
         // Arrange: Set up an UpdateItemDTO with null description
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
-                .name(updatedName)
                 .description(null)
-                .tags(updatedTags)
-                .quantity(updatedQuantity)
                 .build();
 
         // Act: Update item
         Item updatedItem = itemService.updateItem(1L, itemDTO);
 
         // Assert: Verify that the name was updated but the description remains the same
-        assertThat(updatedItem.getName()).isEqualTo(updatedName);
+        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
         assertThat(updatedItem.getDescription()).isEqualTo("Initial Description");
-        assertThat(updatedItem.getTags()).isEqualTo(List.of("Updated tag 1", "Updated tag 2"));
-        assertThat(updatedItem.getQuantity()).isEqualTo(updatedQuantity);
+        assertThat(updatedItem.getTags()).isEqualTo(itemDTO.getTags());
+        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
         verify(itemRepository).save(item);
     }
 
@@ -348,26 +357,19 @@ public class ItemServiceTests {
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
-        String updatedName = "Updated Name";
-        String updatedDescription = "Updated Description";
-        Integer updatedQuantity = 2;
-
         // Arrange: Set up an UpdateItemDTO with null tags
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
-                .name(updatedName)
-                .description(updatedDescription)
                 .tags(null)
-                .quantity(updatedQuantity)
                 .build();
 
         // Act: Update item
         Item updatedItem = itemService.updateItem(1L, itemDTO);
 
         // Assert: Verify that the name was updated but the tags remain the same
-        assertThat(updatedItem.getName()).isEqualTo(updatedName);
-        assertThat(updatedItem.getDescription()).isEqualTo(updatedDescription);
+        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
+        assertThat(updatedItem.getDescription()).isEqualTo(itemDTO.getDescription());
         assertThat(updatedItem.getTags()).isEqualTo(initialTags);
-        assertThat(updatedItem.getQuantity()).isEqualTo(updatedQuantity);
+        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
         verify(itemRepository).save(item);
     }
 

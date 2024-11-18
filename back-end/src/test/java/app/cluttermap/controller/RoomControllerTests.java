@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -151,7 +152,7 @@ class RoomControllerTests {
         void addOneRoom_ShouldCreateRoom_WhenValidRequest() throws Exception {
                 // Arrange: Set up a NewRoomDTO with valid data and mock the service to
                 // return a new room
-                NewRoomDTO roomDTO = new NewRoomDTO("New Room", "Room Description", String.valueOf(1L));
+                NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().build();
                 Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), mockProject);
                 when(roomService.createRoom(any(NewRoomDTO.class))).thenReturn(newRoom);
 
@@ -162,7 +163,7 @@ class RoomControllerTests {
                                 .andExpect(status().isOk())
 
                                 // Assert: Verify the response contains the expected room name
-                                .andExpect(jsonPath("$.name").value("New Room"));
+                                .andExpect(jsonPath("$.name").value(roomDTO.getName()));
 
                 // Assert: Ensure the service method was called to create the room
                 verify(roomService).createRoom(any(NewRoomDTO.class));
@@ -171,7 +172,7 @@ class RoomControllerTests {
         @Test
         void addOneRoom_ShouldReturnBadRequest_WhenRoomNameIsBlank() throws Exception {
                 // Arrange: Set up a NewRoomDTO with a blank name to trigger validation
-                NewRoomDTO roomDTO = new NewRoomDTO("", "", String.valueOf(1L));
+                NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().name("").build();
 
                 // Act: Perform a POST request to the /rooms endpoint with the blank room
                 // name
@@ -188,7 +189,7 @@ class RoomControllerTests {
         @Test
         void addOneRoom_ShouldReturnBadRequest_WhenRoomNameIsNull() throws Exception {
                 // Arrange: Set up a NewRoomDTO with a null name to trigger validation
-                NewRoomDTO roomDTO = new NewRoomDTO(null, "", String.valueOf(1L));
+                NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().name(null).build();
 
                 // Act: Perform a POST request to the /rooms endpoint with the null room name
                 mockMvc.perform(post("/rooms")
@@ -204,7 +205,7 @@ class RoomControllerTests {
         @Test
         void addOneRoom_ShouldReturnBadRequest_WhenProjectIdIsNull() throws Exception {
                 // Arrange: Set up a NewRoomDTO with a null project ID to trigger validation
-                NewRoomDTO roomDTO = new NewRoomDTO("Project Name", "", null);
+                NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().projectId(null).build();
 
                 // Act: Perform a POST request to the /rooms endpoint with the null project ID
                 mockMvc.perform(post("/rooms")
@@ -220,7 +221,7 @@ class RoomControllerTests {
         @Test
         void addOneRoom_ShouldReturnBadRequest_WhenProjectIdIsNaN() throws Exception {
                 // Arrange: Set up a NewRoomDTO with a NaN project ID to trigger validation
-                NewRoomDTO roomDTO = new NewRoomDTO("Project Name", "", "string");
+                NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().projectId("invalid").build();
 
                 // Act: Perform a POST request to the /rooms endpoint with the NaN project ID
                 mockMvc.perform(post("/rooms")
@@ -237,7 +238,8 @@ class RoomControllerTests {
         void updateOneRoom_ShouldUpdateRoom_WhenValidRequest() throws Exception {
                 // Arrange: Set up an UpdateRoomDTO with a new name and mock the service to
                 // return the updated room
-                UpdateRoomDTO roomDTO = new UpdateRoomDTO("Updated Room", "Updated Description");
+                UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
+
                 Room updatedRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), mockProject);
                 when(roomService.updateRoom(eq(1L), any(UpdateRoomDTO.class))).thenReturn(updatedRoom);
 
@@ -248,8 +250,8 @@ class RoomControllerTests {
                                 .andExpect(status().isOk())
 
                                 // Assert: Verify the response contains the updated room name
-                                .andExpect(jsonPath("$.name").value("Updated Room"))
-                                .andExpect(jsonPath("$.description").value("Updated Description"));
+                                .andExpect(jsonPath("$.name").value(roomDTO.getName()))
+                                .andExpect(jsonPath("$.description").value(roomDTO.getDescription()));
 
                 // Assert: Ensure the service method was called
                 verify(roomService).updateRoom(eq(1L), any(UpdateRoomDTO.class));
@@ -259,7 +261,7 @@ class RoomControllerTests {
         void updateOneRoom_ShouldReturnBadRequest_WhenRoomNameIsBlank() throws Exception {
                 // Arrange: Set up an UpdateRoomDTO with a blank room name to trigger
                 // validation
-                UpdateRoomDTO roomDTO = new UpdateRoomDTO("", "Updated Description");
+                UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().name("").build();
 
                 // Act: Perform a PUT request to the /rooms/1 endpoint with the invalid
                 // room name
@@ -277,7 +279,7 @@ class RoomControllerTests {
         void updateOneRoom_ShouldReturnBadRequest_WhenRoomNameIsNull() throws Exception {
                 // Arrange: Set up an UpdateRoomDTO with a null room name to trigger
                 // validation
-                UpdateRoomDTO roomDTO = new UpdateRoomDTO(null, "Updated Description");
+                UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().name(null).build();
 
                 // Act: Perform a PUT request to the /rooms/1 endpoint with the null room
                 // name

@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
 import app.cluttermap.model.Project;
@@ -86,13 +87,13 @@ public class RoomServiceTests {
     }
 
     @Test
-    void createRoom_ShouldCreateRoom_WhenProjectExists() {
+    void createRoom_ShouldCreateRoom_WhenValid() {
         // Arrange: Stub project retrieval to return mockProject when the specified ID
         // is used
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
 
         // Arrange: Prepare the Room DTO with the project ID as a string
-        NewRoomDTO roomDTO = new NewRoomDTO("New Room", "Room description", String.valueOf(1L));
+        NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().build();
 
         // Arrange: Create a mock Room that represents the saved room returned by the
         // repository
@@ -116,7 +117,7 @@ public class RoomServiceTests {
     @Test
     void createRoom_ShouldThrowException_WhenProjectDoesNotExist() {
         // Arrange: Set up the DTO with a project ID that doesn't exist
-        NewRoomDTO roomDTO = new NewRoomDTO("New Room", "Room description", "999");
+        NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().projectId(999L).build();
         when(projectService.getProjectById(roomDTO.getProjectIdAsLong()))
                 .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
 
@@ -139,7 +140,7 @@ public class RoomServiceTests {
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
         when(roomRepository.findByProjectId(1L)).thenReturn(rooms);
 
-        NewRoomDTO roomDTO = new NewRoomDTO("Extra Room", "Description", String.valueOf(1L));
+        NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().build();
 
         // Act & Assert: Attempt to create a room and expect an exception
         assertThrows(RoomLimitReachedException.class, () -> roomService.createRoom(roomDTO));
@@ -202,7 +203,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
         // Arrange: Create an UpdateRoomDTO with updated values
-        UpdateRoomDTO roomDTO = new UpdateRoomDTO("Updated Name", "Updated Description");
+        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
 
         // Stub the repository to return the room after saving
         when(roomRepository.save(room)).thenReturn(room);
@@ -211,8 +212,8 @@ public class RoomServiceTests {
         Room updatedRoom = roomService.updateRoom(1L, roomDTO);
 
         // Assert: Verify that the room's name was updated correctly
-        assertThat(updatedRoom.getName()).isEqualTo("Updated Name");
-        assertThat(updatedRoom.getDescription()).isEqualTo("Updated Description");
+        assertThat(updatedRoom.getName()).isEqualTo(roomDTO.getName());
+        assertThat(updatedRoom.getDescription()).isEqualTo(roomDTO.getDescription());
         verify(roomRepository).save(room);
     }
 
@@ -223,7 +224,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Arrange: Set up an UpdateRoomDTO with updated values
-        UpdateRoomDTO roomDTO = new UpdateRoomDTO("Updated Name", "Updated Description");
+        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
 
         // Act & Assert: Attempt to update the room and expect a RoomNotFoundException
         assertThrows(ResourceNotFoundException.class, () -> roomService.updateRoom(1L, roomDTO));
@@ -239,13 +240,13 @@ public class RoomServiceTests {
         when(roomRepository.save(room)).thenReturn(room);
 
         // Arrange: Set up an UpdateRoomDTO with null description
-        UpdateRoomDTO roomDTO = new UpdateRoomDTO("Updated Name", null);
+        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().description(null).build();
 
         // Act: Update room
         Room updatedRoom = roomService.updateRoom(1L, roomDTO);
 
         // Assert: Verify that the name was updated but the description remains the same
-        assertThat(updatedRoom.getName()).isEqualTo("Updated Name");
+        assertThat(updatedRoom.getName()).isEqualTo(roomDTO.getName());
         assertThat(updatedRoom.getDescription()).isEqualTo("Initial Description");
         verify(roomRepository).save(room);
     }

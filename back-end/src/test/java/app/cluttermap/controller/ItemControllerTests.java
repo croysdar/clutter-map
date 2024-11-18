@@ -168,7 +168,8 @@ class ItemControllerTests {
         // return a new item
         NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().build();
 
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), itemDTO.getQuantity(),
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                itemDTO.getQuantity(),
                 mockOrgUnit);
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
@@ -179,7 +180,7 @@ class ItemControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected item name
-                .andExpect(jsonPath("$.name").value(TestDataFactory.DEFAULT_ITEM_NAME));
+                .andExpect(jsonPath("$.name").value(itemDTO.getName()));
 
         // Assert: Ensure the service method was called to create the item
         verify(itemService).createItem(any(NewItemDTO.class));
@@ -222,7 +223,8 @@ class ItemControllerTests {
     @Test
     void addOneItem_ShouldReturnBadRequest_WhenOrgUnitIdAndProjectIsNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null item ID to trigger validation
-        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().projectId((String) null).orgUnitId((String) null)
+        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().projectId((String) null)
+                .orgUnitId((String) null)
                 .build();
 
         // Act: Perform a POST request to the /items endpoint with the null org unit
@@ -275,7 +277,8 @@ class ItemControllerTests {
     void addOneItem_ShouldSetQuantity1_WhenQuantityNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null quantity
         NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().quantity(null).build();
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(), itemDTO.getQuantity(),
+        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
+                itemDTO.getQuantity(),
                 mockOrgUnit);
 
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
@@ -310,10 +313,10 @@ class ItemControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the updated item name
-                .andExpect(jsonPath("$.name").value(TestDataFactory.DEFAULT_ITEM_NAME))
-                .andExpect(jsonPath("$.description").value(TestDataFactory.DEFAULT_ITEM_DESCRIPTION))
-                .andExpect(jsonPath("$.tags").value(contains(TestDataFactory.DEFAULT_ITEM_TAGS.toArray())))
-                .andExpect(jsonPath("$.quantity").value(TestDataFactory.DEFAULT_ITEM_QUANTITY));
+                .andExpect(jsonPath("$.name").value(itemDTO.getName()))
+                .andExpect(jsonPath("$.description").value(itemDTO.getDescription()))
+                .andExpect(jsonPath("$.tags").value(contains(itemDTO.getTags().toArray())))
+                .andExpect(jsonPath("$.quantity").value(itemDTO.getQuantity()));
 
         // Assert: Ensure the service method was called
         verify(itemService).updateItem(eq(1L), any(UpdateItemDTO.class));
@@ -422,7 +425,8 @@ class ItemControllerTests {
         List<Long> itemIds = List.of(1L, 999L, 3L);
 
         // Simulate ResourceNotFoundException for one of the items
-        when(itemService.unassignItems(itemIds)).thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 999L));
+        when(itemService.unassignItems(itemIds))
+                .thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 999L));
 
         // Act & Assert: Perform the PUT request and verify status 404 Not Found with an
         // error message

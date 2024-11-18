@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
@@ -231,8 +232,8 @@ class ProjectControllerTests {
     void addOneProject_ShouldCreateProject_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewProjectDTO with valid data and mock the service to
         // return a new project
-        NewProjectDTO projectDTO = new NewProjectDTO("New Project");
-        Project newProject = new Project("New Project", mockUser);
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
+        Project newProject = new Project(projectDTO.getName(), mockUser);
         when(projectService.createProject(any(NewProjectDTO.class))).thenReturn(newProject);
 
         // Act: Perform a POST request to the /projects endpoint with the project data
@@ -242,7 +243,7 @@ class ProjectControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected project name
-                .andExpect(jsonPath("$.name").value("New Project"));
+                .andExpect(jsonPath("$.name").value(projectDTO.getName()));
 
         // Assert: Ensure the service method was called to create the project
         verify(projectService).createProject(any(NewProjectDTO.class));
@@ -251,7 +252,7 @@ class ProjectControllerTests {
     @Test
     void addOneProject_ShouldReturnBadRequest_WhenProjectNameIsBlank() throws Exception {
         // Arrange: Set up a NewProjectDTO with a blank name to trigger validation
-        NewProjectDTO projectDTO = new NewProjectDTO("");
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().name("").build();
 
         // Act: Perform a POST request to the /projects endpoint with the blank project
         // name
@@ -268,7 +269,7 @@ class ProjectControllerTests {
     @Test
     void addOneProject_ShouldReturnBadRequest_WhenProjectNameIsNull() throws Exception {
         // Arrange: Set up a NewProjectDTO with a null name to trigger validation
-        NewProjectDTO projectDTO = new NewProjectDTO(null);
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().name(null).build();
 
         // Act: Perform a POST request to the /projects endpoint with the null project
         // name
@@ -286,8 +287,9 @@ class ProjectControllerTests {
     void updateOneProject_ShouldUpdateProject_WhenValidRequest() throws Exception {
         // Arrange: Set up an UpdateProjectDTO with a new name and mock the service to
         // return the updated project
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Project");
-        Project updatedProject = new Project("Updated Project", mockUser);
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
+
+        Project updatedProject = new Project(projectDTO.getName(), mockUser);
         when(projectService.updateProject(eq(1L), any(UpdateProjectDTO.class))).thenReturn(updatedProject);
 
         // Act: Perform a PUT request to the /projects/1 endpoint with the update data
@@ -297,7 +299,7 @@ class ProjectControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the updated project name
-                .andExpect(jsonPath("$.name").value("Updated Project"));
+                .andExpect(jsonPath("$.name").value(projectDTO.getName()));
 
         // Assert: Ensure the service method was called
         verify(projectService).updateProject(eq(1L), any(UpdateProjectDTO.class));
@@ -307,7 +309,7 @@ class ProjectControllerTests {
     void updateOneProject_ShouldReturnBadRequest_WhenProjectNameIsBlank() throws Exception {
         // Arrange: Set up an UpdateProjectDTO with a blank project name to trigger
         // validation
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("");
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().name("").build();
 
         // Act: Perform a PUT request to the /projects/1 endpoint with the invalid
         // project name
@@ -325,7 +327,7 @@ class ProjectControllerTests {
     void updateOneProject_ShouldReturnBadRequest_WhenProjectNameIsNull() throws Exception {
         // Arrange: Set up an UpdateProjectDTO with a null project name to trigger
         // validation
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO(null);
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().name(null).build();
 
         // Act: Perform a PUT request to the /projects/1 endpoint with the null project
         // name

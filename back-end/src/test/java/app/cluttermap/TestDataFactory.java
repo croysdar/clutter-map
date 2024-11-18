@@ -1,18 +1,19 @@
 package app.cluttermap;
 
+import static app.cluttermap.TestDataConstants.*;
+
 import java.util.List;
 
 import app.cluttermap.model.dto.NewItemDTO;
+import app.cluttermap.model.dto.NewOrgUnitDTO;
+import app.cluttermap.model.dto.NewProjectDTO;
+import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
+import app.cluttermap.model.dto.UpdateOrgUnitDTO;
+import app.cluttermap.model.dto.UpdateProjectDTO;
+import app.cluttermap.model.dto.UpdateRoomDTO;
 
 public class TestDataFactory {
-    // Constants for default test values
-    public static final String DEFAULT_ITEM_NAME = "Item Name";
-    public static final String DEFAULT_ITEM_DESCRIPTION = "Item Description";
-    public static final List<String> DEFAULT_ITEM_TAGS = List.of("Tag 1", "Tag 2");
-    public static final Integer DEFAULT_ITEM_QUANTITY = 1;
-    public static final String DEFAULT_ORG_UNIT_ID = "1";
-    public static final String DEFAULT_PROJECT_ID = "1";
 
     public static class NewItemDTOBuilder {
         private String name = DEFAULT_ITEM_NAME;
@@ -69,11 +70,6 @@ public class TestDataFactory {
         }
     }
 
-    // Factory method to initialize a builder with defaults
-    public static NewItemDTOBuilder newItemDTOBuilder() {
-        return new NewItemDTOBuilder();
-    }
-
     public static class UpdateItemDTOBuilder {
         private String name = DEFAULT_ITEM_NAME;
         private String description = DEFAULT_ITEM_DESCRIPTION;
@@ -105,9 +101,141 @@ public class TestDataFactory {
         }
     }
 
-    // Factory method to initialize a builder with defaults
-    public static UpdateItemDTOBuilder updateItemDTOBuilder() {
-        return new UpdateItemDTOBuilder();
+    public static class NewOrgUnitDTOBuilder {
+        private String name = DEFAULT_ORG_UNIT_NAME;
+        private String description = DEFAULT_ORG_UNIT_DESCRIPTION;
+        private String roomId = DEFAULT_ROOM_ID;
+        private String projectId = DEFAULT_PROJECT_ID;
+
+        public NewOrgUnitDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public NewOrgUnitDTOBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public NewOrgUnitDTOBuilder roomId(Object roomId) {
+            if (roomId instanceof Long) {
+                this.roomId = String.valueOf(roomId);
+            } else if (roomId instanceof String) {
+                this.roomId = (String) roomId;
+            } else {
+                this.roomId = null;
+            }
+            return this;
+        }
+
+        public NewOrgUnitDTOBuilder projectId(Object projectId) {
+            if (projectId instanceof Long) {
+                this.projectId = String.valueOf(projectId);
+            } else if (projectId instanceof String) {
+                this.projectId = (String) projectId;
+            } else {
+                this.projectId = null;
+            }
+            return this;
+        }
+
+        public NewOrgUnitDTO build() {
+            return new NewOrgUnitDTO(name, description, roomId, projectId);
+        }
     }
 
+    public static class UpdateOrgUnitDTOBuilder {
+        private String name = DEFAULT_ORG_UNIT_NAME;
+        private String description = DEFAULT_ORG_UNIT_DESCRIPTION;
+
+        public UpdateOrgUnitDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UpdateOrgUnitDTOBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public UpdateOrgUnitDTO build() {
+            return new UpdateOrgUnitDTO(name, description);
+        }
+    }
+
+    public static class NewRoomDTOBuilder {
+        private String name = DEFAULT_ROOM_NAME;
+        private String description = DEFAULT_ROOM_DESCRIPTION;
+        private String projectId = DEFAULT_PROJECT_ID;
+
+        public NewRoomDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public NewRoomDTOBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public NewRoomDTOBuilder projectId(Object projectId) {
+            if (projectId instanceof Long) {
+                this.projectId = String.valueOf(projectId);
+            } else if (projectId instanceof String) {
+                this.projectId = (String) projectId;
+            } else {
+                this.projectId = null;
+            }
+            return this;
+        }
+
+        public NewRoomDTO build() {
+            return new NewRoomDTO(name, description, projectId);
+        }
+    }
+
+    public static class UpdateRoomDTOBuilder {
+        private String name = DEFAULT_ROOM_NAME;
+        private String description = DEFAULT_ROOM_DESCRIPTION;
+
+        public UpdateRoomDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UpdateRoomDTOBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public UpdateRoomDTO build() {
+            return new UpdateRoomDTO(name, description);
+        }
+    }
+
+    public static class NewProjectDTOBuilder {
+        private String name = DEFAULT_PROJECT_NAME;
+
+        public NewProjectDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public NewProjectDTO build() {
+            return new NewProjectDTO(name);
+        }
+    }
+
+    public static class UpdateProjectDTOBuilder {
+        private String name = DEFAULT_PROJECT_NAME;
+
+        public UpdateProjectDTOBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UpdateProjectDTO build() {
+            return new UpdateProjectDTO(name);
+        }
+    }
 }

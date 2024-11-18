@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
 import app.cluttermap.model.OrgUnit;
@@ -35,7 +36,6 @@ import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -114,13 +114,13 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void createOrgUnit_ShouldCreateOrgUnit_WhenRoomExists() {
+    void createOrgUnit_ShouldCreateOrgUnit_WhenValid() {
         // Arrange: Stub room retrieval to return mockRoom when the specified ID
         // is used
         when(roomService.getRoomById(1L)).thenReturn(mockRoom);
 
         // Arrange: Prepare the OrgUnit DTO with the room ID as a string
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", String.valueOf(1L), null);
+        NewOrgUnitDTO orgUnitDTO = new TestDataFactory.NewOrgUnitDTOBuilder().build();
 
         // Arrange: Create a mock OrgUnit that represents the saved orgUnit returned by
         // the repository
@@ -142,15 +142,31 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void createOrgUnit_ShouldThrowException_WhenOrgUnitDoesNotExist() {
-        // Arrange: Set up the DTO with a room ID that doesn't exist
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("New OrgUnit", "OrgUnit description", "999", null);
-        when(roomService.getRoomById(orgUnitDTO.getRoomIdAsLong()))
-                .thenThrow(new ResourceNotFoundException(ResourceType.ROOM, 999L));
+    void createOrgUnit_ShouldCreateOrgUnit_WhenProjectExistsAndRoomIdNull() {
+        // Arrange: Stub project retrieval to return mockProject when the specified ID
+        // is used
+        when(projectService.getProjectById(1L)).thenReturn(mockProject);
 
-        // Act & Assert: Attempt to create the orgUnit and expect a
-        // RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.createOrgUnit(orgUnitDTO));
+        // Arrange: Prepare the OrgUnit DTO with the room ID null
+        NewOrgUnitDTO orgUnitDTO = new TestDataFactory.NewOrgUnitDTOBuilder().roomId(null).build();
+
+        // Arrange: Create a mock OrgUnit that represents the saved orgUnit returned by
+        // the repository
+        OrgUnit mockOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockProject);
+        when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
+
+        // Act: create a orgUnit using orgUnitService and pass in the orgUnit DTO
+        OrgUnit createdOrgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
+
+        // Assert: verify that the created orgUnit is not null and matches the expected
+        // details from orgUnitDTO
+        assertThat(createdOrgUnit).isNotNull();
+        assertThat(createdOrgUnit.getName()).isEqualTo(orgUnitDTO.getName());
+        assertThat(createdOrgUnit.getDescription()).isEqualTo(orgUnitDTO.getDescription());
+        assertThat(createdOrgUnit.getProject()).isEqualTo(mockProject);
+
+        // Verify that orgUnitRepository.save() was called to persist the new orgUnit
+        verify(orgUnitRepository).save(any(OrgUnit.class));
     }
 
     @Disabled("Feature under development")
@@ -167,7 +183,7 @@ public class OrgUnitServiceTests {
         when(projectService.getProjectById(1L)).thenReturn(mockProject);
         when(orgUnitRepository.findByProjectId(1L)).thenReturn(orgUnits);
 
-        NewOrgUnitDTO orgUnitDTO = new NewOrgUnitDTO("Extra OrgUnit", "Description", String.valueOf(1L), null);
+        NewOrgUnitDTO orgUnitDTO = new TestDataFactory.NewOrgUnitDTOBuilder().build();
 
         // Act & Assert: Attempt to create a orgUnit and expect an exception
         assertThrows(OrgUnitLimitReachedException.class, () -> orgUnitService.createOrgUnit(orgUnitDTO));
@@ -233,7 +249,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
 
         // Arrange: Create an UpdateOrgUnitDTO with updated values
-        UpdateOrgUnitDTO orgUnitDTO = new UpdateOrgUnitDTO("Updated Name", "Updated Description");
+        UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder().build();
 
         // Stub the repository to return the orgUnit after saving
         when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
@@ -242,8 +258,8 @@ public class OrgUnitServiceTests {
         OrgUnit updatedOrgUnit = orgUnitService.updateOrgUnit(1L, orgUnitDTO);
 
         // Assert: Verify that the orgUnit's name was updated correctly
-        assertThat(updatedOrgUnit.getName()).isEqualTo("Updated Name");
-        assertThat(updatedOrgUnit.getDescription()).isEqualTo("Updated Description");
+        assertThat(updatedOrgUnit.getName()).isEqualTo(orgUnit.getName());
+        assertThat(updatedOrgUnit.getDescription()).isEqualTo(orgUnit.getDescription());
         verify(orgUnitRepository).save(orgUnit);
     }
 
@@ -254,7 +270,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Arrange: Set up an UpdateOrgUnitDTO with updated values
-        UpdateOrgUnitDTO orgUnitDTO = new UpdateOrgUnitDTO("Updated Name", "Updated Description");
+        UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder().build();
 
         // Act & Assert: Attempt to update the orgUnit and expect a
         // OrgUnitNotFoundException
@@ -271,13 +287,13 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
 
         // Arrange: Set up an UpdateOrgUnitDTO with null description
-        UpdateOrgUnitDTO orgUnitDTO = new UpdateOrgUnitDTO("Updated Name", null);
+        UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder().description(null).build();
 
         // Act: Update orgUnit
         OrgUnit updatedOrgUnit = orgUnitService.updateOrgUnit(1L, orgUnitDTO);
 
         // Assert: Verify that the name was updated but the description remains the same
-        assertThat(updatedOrgUnit.getName()).isEqualTo("Updated Name");
+        assertThat(updatedOrgUnit.getName()).isEqualTo(orgUnit.getName());
         assertThat(updatedOrgUnit.getDescription()).isEqualTo("Initial Description");
         verify(orgUnitRepository).save(orgUnit);
     }

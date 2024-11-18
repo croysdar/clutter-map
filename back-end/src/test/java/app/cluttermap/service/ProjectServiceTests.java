@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.model.Project;
@@ -77,15 +78,15 @@ public class ProjectServiceTests {
     }
 
     @Test
-    void createProject_ShouldCreateProject_WhenLimitNotReached() {
+    void createProject_ShouldCreateProject_WhenValid() {
         // Arrange: Set up mocks for the current user and their existing projects
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Arrange: Create a DTO for the new project and set up a mock project to return
         // on save
-        NewProjectDTO projectDTO = new NewProjectDTO("New Project");
-        Project newProject = new Project("New Project", mockUser);
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
+        Project newProject = new Project(projectDTO.getName(), mockUser);
         when(projectRepository.save(any(Project.class))).thenReturn(newProject);
 
         // Act: Call the service to create the project
@@ -93,7 +94,7 @@ public class ProjectServiceTests {
 
         // Assert: Verify the project was created with the expected properties
         assertThat(createdProject).isNotNull();
-        assertThat(createdProject.getName()).isEqualTo("New Project");
+        assertThat(createdProject.getName()).isEqualTo(projectDTO.getName());
         assertThat(createdProject.getOwner()).isEqualTo(mockUser);
 
         // Assert: Ensure the project was saved in the repository
@@ -113,7 +114,7 @@ public class ProjectServiceTests {
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
 
         // Arrange: Prepare a DTO for creating a new project within the project limit
-        NewProjectDTO projectDTO = new NewProjectDTO("Within Limit Project");
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().name("Within Limit Project").build();
         Project newProject = new Project("Within Limit Project", mockUser);
         when(projectRepository.save(any(Project.class))).thenReturn(newProject);
 
@@ -131,7 +132,7 @@ public class ProjectServiceTests {
 
         // Act & Assert: Attempting to create another project should throw
         // ProjectLimitReachedException
-        NewProjectDTO exceedingProjectDTO = new NewProjectDTO("Exceeding Limit Project");
+        NewProjectDTO exceedingProjectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
         assertThrows(ProjectLimitReachedException.class, () -> projectService.createProject(exceedingProjectDTO));
         verify(projectRepository, times(1)).save(any(Project.class));
     }
@@ -174,7 +175,7 @@ public class ProjectServiceTests {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
         // Arrange: Prepare the DTO with the updated project name
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Name");
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
 
         // Arrange: Mock the repository save to return the updated project
         when(projectRepository.save(project)).thenReturn(project);
@@ -183,7 +184,7 @@ public class ProjectServiceTests {
         Project updatedProject = projectService.updateProject(1L, projectDTO);
 
         // Assert: Verify that the project's name was updated as expected
-        assertThat(updatedProject.getName()).isEqualTo("Updated Name");
+        assertThat(updatedProject.getName()).isEqualTo(projectDTO.getName());
 
         // Assert: Ensure the repository save method was called to persist the changes
         verify(projectRepository).save(project);
@@ -196,7 +197,7 @@ public class ProjectServiceTests {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Arrange: Prepare the DTO with the updated project name
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Name");
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
 
         // Act & Assert: Verify that attempting to update a non-existent project throws
         // ProjectNotFoundException
