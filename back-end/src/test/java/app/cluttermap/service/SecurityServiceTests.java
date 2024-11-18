@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
@@ -197,7 +197,8 @@ class SecurityServiceTests {
         Project project = new Project("Test Project", mockUser);
         Room room = new Room("Test Room", "", project);
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
-        Item item = new Item("Test Item", "Item description", List.of("Tag"), 1, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
+
         item.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));

@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -210,7 +211,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
+        Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository
@@ -233,7 +234,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
+        Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository

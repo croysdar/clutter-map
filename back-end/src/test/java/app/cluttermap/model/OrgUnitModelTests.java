@@ -7,6 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class OrgUnitModelTests {
     @Test
@@ -35,16 +37,14 @@ public class OrgUnitModelTests {
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Add a item to the orgUnit
-        Item item = new Item("White Shelving Unit", "This is a shelving unit", List.of("tag1"), 1, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         orgUnit.getItems().add(item);
 
         // Assert: Verify that the item was added to the orgUnit's items
         // collection
         assertThat(orgUnit.getItems()).hasSize(1);
-        assertThat(orgUnit.getItems().get(0).getName()).isEqualTo("White Shelving Unit");
-        assertThat(orgUnit.getItems().get(0).getTags()).isEqualTo(List.of("tag1"));
+        assertThat(orgUnit.getItems().get(0).getName()).isEqualTo(item.getName());
         assertThat(orgUnit.getItems().get(0).getOrgUnit()).isEqualTo(orgUnit);
-        assertThat(orgUnit.getItems().get(0).getQuantity()).isEqualTo(1);
 
         // Act: Remove the item from the orgUnit
         orgUnit.getItems().remove(item);

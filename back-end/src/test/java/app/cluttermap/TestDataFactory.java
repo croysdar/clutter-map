@@ -4,6 +4,9 @@ import static app.cluttermap.TestDataConstants.*;
 
 import java.util.List;
 
+import app.cluttermap.model.Item;
+import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.Project;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.NewProjectDTO;
@@ -14,6 +17,73 @@ import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 
 public class TestDataFactory {
+
+    public static class ItemBuilder {
+        private String name = DEFAULT_ITEM_NAME;
+        private String description = DEFAULT_ITEM_DESCRIPTION;
+        private List<String> tags = DEFAULT_ITEM_TAGS;
+        private Integer quantity = DEFAULT_ITEM_QUANTITY;
+        private OrgUnit orgUnit;
+        private Project project;
+
+        public ItemBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ItemBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public ItemBuilder tags(List<String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public ItemBuilder quantity(Integer quantity) {
+            this.quantity = quantity;
+            return this;
+        }
+
+        public ItemBuilder orgUnit(OrgUnit orgUnit) {
+            this.orgUnit = orgUnit;
+            this.project = null;
+            return this;
+        }
+
+        public ItemBuilder project(Project project) {
+            this.project = project;
+            this.orgUnit = null;
+            return this;
+        }
+
+        public ItemBuilder fromDTO(NewItemDTO itemDTO) {
+            this.name = itemDTO.getName();
+            this.description = itemDTO.getDescription();
+            this.tags = itemDTO.getTags();
+            this.quantity = itemDTO.getQuantity();
+            return this;
+        }
+
+        public ItemBuilder fromDTO(UpdateItemDTO itemDTO) {
+            this.name = itemDTO.getName();
+            this.description = itemDTO.getDescription();
+            this.tags = itemDTO.getTags();
+            this.quantity = itemDTO.getQuantity();
+            return this;
+        }
+
+        public Item build() {
+            if (orgUnit != null) {
+                return new Item(name, description, tags, quantity, orgUnit);
+            } else if (project != null) {
+                return new Item(name, description, tags, quantity, project);
+            } else {
+                throw new IllegalStateException("Either OrgUnit or Project must be set to build an Item.");
+            }
+        }
+    }
 
     public static class NewItemDTOBuilder {
         private String name = DEFAULT_ITEM_NAME;

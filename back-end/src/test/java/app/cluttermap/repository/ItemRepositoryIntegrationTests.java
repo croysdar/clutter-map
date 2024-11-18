@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -67,8 +68,9 @@ public class ItemRepositoryIntegrationTests {
         OrgUnit orgUnit2 = new OrgUnit("OrgUnit Owned by Owner 2", "OrgUnit Description", room2);
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
-        Item item1 = new Item("Item Owned by Owner 1", "Item Description", List.of("tag 1"), 1, orgUnit1);
-        Item item2 = new Item("Item Owned by Owner 2", "Item Description", List.of("tag 2"), 1, orgUnit2);
+        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by Owner 1").orgUnit(orgUnit1).build();
+        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by Owner 2").orgUnit(orgUnit2).build();
+
         itemRepository.saveAll(List.of(item1, item2));
 
         // Act: Retrieve items associated with owner1
@@ -98,9 +100,11 @@ public class ItemRepositoryIntegrationTests {
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", room);
         orgUnitRepository.save(orgUnit);
 
-        Item item1 = new Item("Item 1", "Item Description", List.of("tag 1"), 1, orgUnit);
-        Item item2 = new Item("Item 2", "Item Description", List.of("tag 1"), 1, orgUnit);
-        Item item3 = new Item("Item 3", "Item Description", List.of("tag 1"), 1, orgUnit);
+        List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
+        Item item1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).orgUnit(orgUnit).build();
+        Item item2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).orgUnit(orgUnit).build();
+        Item item3 = new TestDataFactory.ItemBuilder().name(itemNames.get(2)).orgUnit(orgUnit).build();
+
         itemRepository.saveAll(List.of(item1, item2, item3));
 
         // Act: Retrieve all items associated with the user
@@ -108,7 +112,7 @@ public class ItemRepositoryIntegrationTests {
 
         // Assert: Verify that all items owned by the user are returned
         assertThat(ownerItems).hasSize(3);
-        assertThat(ownerItems).extracting(Item::getName).containsExactlyInAnyOrder("Item 1", "Item 2", "Item 3");
+        assertThat(ownerItems).extracting(Item::getName).containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
     }
 
     @Test
@@ -131,12 +135,14 @@ public class ItemRepositoryIntegrationTests {
         userRepository.save(owner);
         Project project = new Project("Test Project", owner);
         projectRepository.save(project);
-        Item unassignedItem1 = new Item("Unassigned Item 1", "Description", List.of("tag1"), 1, project);
-        Item unassignedItem2 = new Item("Unassigned Item 2", "Description", List.of("tag2"), 1, project);
+
+        List<String> itemNames = List.of("Item 1", "Item 2");
+        Item unassignedItem1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).project(project).build();
+        Item unassignedItem2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).project(project).build();
 
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "Description", project);
         orgUnitRepository.save(orgUnit);
-        Item assignedItem = new Item("Assigned Item", "Description", List.of("tag3"), 1, project);
+        Item assignedItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         assignedItem.setOrgUnit(orgUnit);
 
         itemRepository.saveAll(List.of(unassignedItem1, unassignedItem2, assignedItem));
@@ -145,8 +151,8 @@ public class ItemRepositoryIntegrationTests {
         List<Item> unassignedItems = itemRepository.findUnassignedItemsByProjectId(project.getId());
 
         // Assert: Verify only unassigned items are returned
-        assertThat(unassignedItems).extracting(Item::getName).containsExactlyInAnyOrder("Unassigned Item 1",
-                "Unassigned Item 2");
+        assertThat(unassignedItems).extracting(Item::getName)
+                .containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
     }
 
     @Test

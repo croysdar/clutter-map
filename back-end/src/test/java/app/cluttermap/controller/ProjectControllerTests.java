@@ -151,14 +151,14 @@ class ProjectControllerTests {
         // Arrange: Set up projectId and simulate unassigned items
         Project project = new Project("Test Project", mockUser);
         Long projectId = 1L;
-        Item unassignedItem = new Item("Unassigned Item", "Description", List.of("tag1"), 1, project);
+        Item unassignedItem = new TestDataFactory.ItemBuilder().project(project).build();
         when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
 
         // Act & Assert: Perform the GET request on the new path and verify status 200
         // OK and correct data
         mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Unassigned Item"));
+                .andExpect(jsonPath("$[0].name").value(unassignedItem.getName()));
     }
 
     @Test

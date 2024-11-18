@@ -7,6 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class ItemModelTests {
     @Test
@@ -18,7 +20,12 @@ public class ItemModelTests {
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Create a new Item instance
-        Item item = new Item("Test Item", "Item Description", List.of("tag 1", "tag 2"), 10, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder()
+                .name("Test Item")
+                .description("Item Description")
+                .tags(List.of("tag 1", "tag 2"))
+                .quantity(10)
+                .orgUnit(orgUnit).build();
 
         // Assert: Verify that the items's fields are correctly set
         assertThat(item.getName()).isEqualTo("Test Item");

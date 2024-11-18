@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataConstants;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -133,7 +135,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 
@@ -163,7 +165,7 @@ public class OrgUnitRepositoryIntegrationTests {
         roomRepository.save(room);
 
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         orgUnit.addItem(item); // Use addItem to set bidirectional relationship
         orgUnitRepository.save(orgUnit);
 

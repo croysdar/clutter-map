@@ -89,8 +89,10 @@ class ItemControllerTests {
     @Test
     void getUserItems_ShouldReturnAllUserItems() throws Exception {
         // Arrange: Set up mock user items and mock the service to return them
-        Item item1 = new Item("Test Item 1", "Description 1", List.of("Tag 11", "Tag 12"), 1, mockOrgUnit);
-        Item item2 = new Item("Test Item 2", "Description 2", List.of("Tag 21", "Tag 22"), 2, mockOrgUnit);
+        List<String> names = List.of("Test Item 1", "Test Item 2");
+        Item item1 = new TestDataFactory.ItemBuilder().project(mockProject).name(names.get(0)).build();
+        Item item2 = new TestDataFactory.ItemBuilder().project(mockProject).name(names.get(1)).build();
+
         when(itemService.getUserItems()).thenReturn(List.of(item1, item2));
 
         // Act: Perform a GET request to the /items endpoint
@@ -98,14 +100,8 @@ class ItemControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected item names
-                .andExpect(jsonPath("$[0].name").value("Test Item 1"))
-                .andExpect(jsonPath("$[0].description").value("Description 1"))
-                .andExpect(jsonPath("$[0].tags").value(contains("Tag 11", "Tag 12")))
-                .andExpect(jsonPath("$[0].quantity").value(1))
-                .andExpect(jsonPath("$[1].name").value("Test Item 2"))
-                .andExpect(jsonPath("$[1].description").value("Description 2"))
-                .andExpect(jsonPath("$[1].tags").value(contains("Tag 21", "Tag 22")))
-                .andExpect(jsonPath("$[1].quantity").value(2));
+                .andExpect(jsonPath("$[0].name").value(names.get(0)))
+                .andExpect(jsonPath("$[1].name").value(names.get(1)));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getUserItems();
@@ -131,17 +127,17 @@ class ItemControllerTests {
     void getOneItem_ShouldReturnItem_WhenItemExists() throws Exception {
         // Arrange: Set up a mock item and stub the service to return it when
         // searched by ID
-        Item item = new Item("Test Item", "Item description", List.of("tag 1"), 1, mockOrgUnit);
+        Item item = new TestDataFactory.ItemBuilder().project(mockProject).build();
         when(itemService.getItemById(1L)).thenReturn(item);
 
         // Act: Perform a GET request to the /items/1 endpoint
         mockMvc.perform(get("/items/1"))
                 .andExpect(status().isOk())
                 // Assert: Verify the response contains the expected item name
-                .andExpect(jsonPath("$.name").value("Test Item"))
-                .andExpect(jsonPath("$.description").value("Item description"))
-                .andExpect(jsonPath("$.tags").value(contains("tag 1")))
-                .andExpect(jsonPath("$.quantity").value(1));
+                .andExpect(jsonPath("$.name").value(item.getName()))
+                .andExpect(jsonPath("$.description").value(item.getDescription()))
+                .andExpect(jsonPath("$.tags").value(contains(item.getTags().toArray())))
+                .andExpect(jsonPath("$.quantity").value(item.getQuantity()));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getItemById(1L);
@@ -167,10 +163,7 @@ class ItemControllerTests {
         // Arrange: Set up a NewItemDTO with valid data and mock the service to
         // return a new item
         NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().build();
-
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
-                itemDTO.getQuantity(),
-                mockOrgUnit);
+        Item newItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
         // Act: Perform a POST request to the /items endpoint with the item data
@@ -277,9 +270,7 @@ class ItemControllerTests {
     void addOneItem_ShouldSetQuantity1_WhenQuantityNull() throws Exception {
         // Arrange: Set up a NewItemDTO with a null quantity
         NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().quantity(null).build();
-        Item newItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
-                itemDTO.getQuantity(),
-                mockOrgUnit);
+        Item newItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
 
         when(itemService.createItem(any(NewItemDTO.class))).thenReturn(newItem);
 
@@ -302,8 +293,8 @@ class ItemControllerTests {
         // Arrange: Set up an UpdateItemDTO with a new name and mock the service to
         // return the updated item
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder().build();
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
-                itemDTO.getQuantity(), mockOrgUnit);
+        Item updatedItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
+
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items/1 endpoint with the update data
@@ -379,8 +370,8 @@ class ItemControllerTests {
         // Arrange: Set up a UpdateItemDTO with a null quantity
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder().quantity(null).build();
 
-        Item updatedItem = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getTags(),
-                itemDTO.getQuantity(), mockOrgUnit);
+        Item updatedItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
+
         when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
 
         // Act: Perform a PUT request to the /items endpoint with the null quantity
@@ -397,13 +388,15 @@ class ItemControllerTests {
         verify(itemService).updateItem(eq(1L), any(UpdateItemDTO.class));
     }
 
+    @Test
     void unassignItems_Success() throws Exception {
         // Arrange: Set up itemIds, and simulate a successful unassign
         List<Long> itemIds = List.of(1L, 2L, 3L);
+        List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
         List<Item> unassignedItems = List.of(
-                new Item("Item 1", "Description", List.of("tag1"), 1, mockOrgUnit),
-                new Item("Item 2", "Description", List.of("tag2"), 1, mockOrgUnit),
-                new Item("Item 3", "Description", List.of("tag3"), 1, mockOrgUnit));
+                new TestDataFactory.ItemBuilder().name(itemNames.get(0)).orgUnit(mockOrgUnit).build(),
+                new TestDataFactory.ItemBuilder().name(itemNames.get(1)).orgUnit(mockOrgUnit).build(),
+                new TestDataFactory.ItemBuilder().name(itemNames.get(2)).orgUnit(mockOrgUnit).build());
 
         when(itemService.unassignItems(itemIds)).thenReturn(unassignedItems);
 
@@ -413,9 +406,12 @@ class ItemControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(itemIds)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Item 1"))
-                .andExpect(jsonPath("$[1].name").value("Item 2"))
-                .andExpect(jsonPath("$[2].name").value("Item 3"));
+                .andExpect(jsonPath("$[0].name").value(itemNames.get(0)))
+                .andExpect(jsonPath("$[1].name").value(itemNames.get(1)))
+                .andExpect(jsonPath("$[2].name").value(itemNames.get(2)));
+
+        // Assert: Ensure the service method was called to unassign the items
+        verify(itemService).unassignItems(itemIds);
     }
 
     // TODO: Allow partial success

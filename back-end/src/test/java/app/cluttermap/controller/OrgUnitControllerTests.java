@@ -318,12 +318,13 @@ class OrgUnitControllerTests {
         // Arrange: Set up itemIds and Org Unit ID
         List<Long> itemIds = List.of(1L, 2L, 3L);
         Long targetOrgUnitId = 10L;
-
         OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+
+        List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
         List<Item> movedItems = List.of(
-                new Item("Item 1", "Description", List.of("tag1"), 1, targetOrgUnit),
-                new Item("Item 2", "Description", List.of("tag2"), 1, targetOrgUnit),
-                new Item("Item 3", "Description", List.of("tag3"), 1, targetOrgUnit));
+                new TestDataFactory.ItemBuilder().name(itemNames.get(0)).orgUnit(targetOrgUnit).build(),
+                new TestDataFactory.ItemBuilder().name(itemNames.get(1)).orgUnit(targetOrgUnit).build(),
+                new TestDataFactory.ItemBuilder().name(itemNames.get(2)).orgUnit(targetOrgUnit).build());
 
         when(itemService.assignItemsToOrgUnit(itemIds, targetOrgUnitId))
                 .thenReturn(movedItems);
@@ -333,9 +334,10 @@ class OrgUnitControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(itemIds)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Item 1"))
-                .andExpect(jsonPath("$[1].name").value("Item 2"))
-                .andExpect(jsonPath("$[2].name").value("Item 3"));
+                .andExpect(jsonPath("$[0].name").value(itemNames.get(0)))
+                .andExpect(jsonPath("$[1].name").value(itemNames.get(1)))
+                .andExpect(jsonPath("$[2].name").value(itemNames.get(2)));
+
     }
 
     @Test
@@ -412,6 +414,9 @@ class OrgUnitControllerTests {
                 .andExpect(jsonPath("$[0].name").value("OrgUnit 1"))
                 .andExpect(jsonPath("$[1].name").value("OrgUnit 2"))
                 .andExpect(jsonPath("$[2].name").value("OrgUnit 3"));
+
+        // Assert: Ensure the service method was called to unassign the items
+        verify(orgUnitService).unassignOrgUnits(orgUnitIds);
     }
 
     // TODO: Allow partial success
@@ -456,7 +461,7 @@ class OrgUnitControllerTests {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit
         OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", mockRoom);
-        Item item = new Item("Item", "Item Description", List.of("tag1"), 1, orgUnit);
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         orgUnit.setItems(Collections.singletonList(item));
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
 
@@ -465,8 +470,8 @@ class OrgUnitControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$[0].name").value("Item"))
-                .andExpect(jsonPath("$[0].description").value("Item Description"));
+                .andExpect(jsonPath("$[0].name").value(item.getName()))
+                .andExpect(jsonPath("$[0].description").value(item.getDescription()));
 
         // Assert: Ensure the service method was called to retrieve the orgUnit by ID
         verify(orgUnitService).getOrgUnitById(1L);
