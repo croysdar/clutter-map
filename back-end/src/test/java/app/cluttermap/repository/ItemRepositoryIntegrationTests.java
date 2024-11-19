@@ -64,8 +64,8 @@ public class ItemRepositoryIntegrationTests {
         Room room2 = new Room("Room 2", "Room Description 2", project2);
         roomRepository.saveAll(List.of(room1, room2));
 
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit Owned by Owner 1", "OrgUnit Description", room1);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit Owned by Owner 2", "OrgUnit Description", room2);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
         Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by Owner 1").orgUnit(orgUnit1).build();
@@ -97,7 +97,7 @@ public class ItemRepositoryIntegrationTests {
         Room room = new Room("Room", "Room Description", project);
         roomRepository.save(room);
 
-        OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         orgUnitRepository.save(orgUnit);
 
         List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
@@ -140,8 +140,9 @@ public class ItemRepositoryIntegrationTests {
         Item unassignedItem1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).project(project).build();
         Item unassignedItem2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).project(project).build();
 
-        OrgUnit orgUnit = new OrgUnit("OrgUnit", "Description", project);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         orgUnitRepository.save(orgUnit);
+
         Item assignedItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         assignedItem.setOrgUnit(orgUnit);
 

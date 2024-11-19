@@ -162,7 +162,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "For storage", project);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
         // Arrange: Save the project (and implicitly the orgUnit) to the repository
@@ -186,7 +186,7 @@ public class ProjectRepositoryIntegrationTests {
         userRepository.save(owner);
 
         Project project = new Project("Test Project", owner);
-        OrgUnit orgUnit = new OrgUnit("Test Org Unit", "Org Unit Description", project);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
         // Arrange: Save the project (and implicitly the orgUnit) to the repository

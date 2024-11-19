@@ -17,15 +17,10 @@ public class ItemModelTests {
         User owner = new User("ownerProviderId");
         Project project = new Project("Test Project", owner);
         Room room = new Room("Test Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
 
         // Act: Create a new Item instance
-        Item item = new TestDataFactory.ItemBuilder()
-                .name("Test Item")
-                .description("Item Description")
-                .tags(List.of("tag 1", "tag 2"))
-                .quantity(10)
-                .orgUnit(orgUnit).build();
+        Item item = new Item("Test Item", "Item Description", List.of("tag 1", "tag 2"), 10, orgUnit);
 
         // Assert: Verify that the items's fields are correctly set
         assertThat(item.getName()).isEqualTo("Test Item");

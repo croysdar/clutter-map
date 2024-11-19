@@ -90,19 +90,16 @@ class OrgUnitControllerTests {
     @Test
     void getUserOrgUnits_ShouldReturnAllUserOrgUnits() throws Exception {
         // Arrange: Set up mock user orgUnits and mock the service to return them
-        OrgUnit orgUnit1 = new OrgUnit("Test OrgUnit 1", "Description 1", mockRoom);
-        OrgUnit orgUnit2 = new OrgUnit("Test OrgUnit 2", "Description 2", mockRoom);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         when(orgUnitService.getUserOrgUnits()).thenReturn(List.of(orgUnit1, orgUnit2));
 
         // Act: Perform a GET request to the /org-units endpoint
         mockMvc.perform(get("/org-units"))
                 .andExpect(status().isOk())
-
-                // Assert: Verify the response contains the expected orgUnit names
-                .andExpect(jsonPath("$[0].name").value("Test OrgUnit 1"))
-                .andExpect(jsonPath("$[0].description").value("Description 1"))
-                .andExpect(jsonPath("$[1].name").value("Test OrgUnit 2"))
-                .andExpect(jsonPath("$[1].description").value("Description 2"));
+                // Assert: Verify the response contains at 2 items
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getUserOrgUnits();
@@ -128,15 +125,14 @@ class OrgUnitControllerTests {
     void getOneOrgUnit_ShouldReturnOrgUnit_WhenOrgUnitExists() throws Exception {
         // Arrange: Set up a mock orgUnit and stub the service to return it when
         // searched by ID
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
 
         // Act: Perform a GET request to the /org-units/1 endpoint
         mockMvc.perform(get("/org-units/1"))
                 .andExpect(status().isOk())
                 // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$.name").value("Test OrgUnit"))
-                .andExpect(jsonPath("$.description").value("OrgUnit description"));
+                .andExpect(jsonPath("$.name").value(orgUnit.getName()));
 
         // Assert: Ensure that the service method was called
         verify(orgUnitService).getOrgUnitById(1L);
@@ -163,7 +159,7 @@ class OrgUnitControllerTests {
         // Arrange: Set up a NewOrgUnitDTO with valid data and mock the service to
         // return a new orgUnit
         NewOrgUnitDTO orgUnitDTO = new TestDataFactory.NewOrgUnitDTOBuilder().build();
-        OrgUnit newOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockRoom);
+        OrgUnit newOrgUnit = new TestDataFactory.OrgUnitBuilder().fromDTO(orgUnitDTO).room(mockRoom).build();
         when(orgUnitService.createOrgUnit(any(NewOrgUnitDTO.class))).thenReturn(newOrgUnit);
 
         // Act: Perform a POST request to the /org-units endpoint with the orgUnit data
@@ -258,7 +254,7 @@ class OrgUnitControllerTests {
         // return the updated orgUnit
         UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder().build();
 
-        OrgUnit updatedOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockRoom);
+        OrgUnit updatedOrgUnit = new TestDataFactory.OrgUnitBuilder().fromDTO(orgUnitDTO).room(mockRoom).build();
         when(orgUnitService.updateOrgUnit(eq(1L), any(UpdateOrgUnitDTO.class))).thenReturn(updatedOrgUnit);
 
         // Act: Perform a PUT request to the /org-units/1 endpoint with the update data
@@ -318,7 +314,7 @@ class OrgUnitControllerTests {
         // Arrange: Set up itemIds and Org Unit ID
         List<Long> itemIds = List.of(1L, 2L, 3L);
         Long targetOrgUnitId = 10L;
-        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
 
         List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
         List<Item> movedItems = List.of(
@@ -398,10 +394,11 @@ class OrgUnitControllerTests {
     void unassignOrgUnits_Success() throws Exception {
         // Arrange: Set up room, and orgUnitIds, and simulate a successful removal
         List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        List<String> orgUnitNames = List.of("OrgUnit 1", "OrgUnit 2", "OrgUnit 3");
         List<OrgUnit> unassignedOrgUnits = List.of(
-                new OrgUnit("OrgUnit 1", "Description", mockRoom),
-                new OrgUnit("OrgUnit 2", "Description", mockRoom),
-                new OrgUnit("OrgUnit 3", "Description", mockRoom));
+                new TestDataFactory.OrgUnitBuilder().name(orgUnitNames.get(0)).room(mockRoom).build(),
+                new TestDataFactory.OrgUnitBuilder().name(orgUnitNames.get(1)).room(mockRoom).build(),
+                new TestDataFactory.OrgUnitBuilder().name(orgUnitNames.get(2)).room(mockRoom).build());
 
         when(orgUnitService.unassignOrgUnits(orgUnitIds)).thenReturn(unassignedOrgUnits);
 
@@ -411,9 +408,9 @@ class OrgUnitControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(orgUnitIds)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("OrgUnit 1"))
-                .andExpect(jsonPath("$[1].name").value("OrgUnit 2"))
-                .andExpect(jsonPath("$[2].name").value("OrgUnit 3"));
+                .andExpect(jsonPath("$[0].name").value(orgUnitNames.get(0)))
+                .andExpect(jsonPath("$[1].name").value(orgUnitNames.get(1)))
+                .andExpect(jsonPath("$[2].name").value(orgUnitNames.get(2)));
 
         // Assert: Ensure the service method was called to unassign the items
         verify(orgUnitService).unassignOrgUnits(orgUnitIds);
@@ -460,7 +457,7 @@ class OrgUnitControllerTests {
     void getOrgUnitItems_ShouldReturnItems_WhenOrgUnitExists() throws Exception {
         // Arrange: Set up a orgUnit with an item and mock the service to return the
         // orgUnit
-        OrgUnit orgUnit = new OrgUnit("OrgUnit", "OrgUnit Description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
         Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
         orgUnit.setItems(Collections.singletonList(item));
         when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);

@@ -75,7 +75,7 @@ class ItemControllerTests {
         mockUser = new User("mockProviderId");
         mockProject = new Project("Mock Project", mockUser);
         mockRoom = new Room("Mock Room", "Room Description", mockProject);
-        mockOrgUnit = new OrgUnit("Mock Org Unit", "Org Unit Description", mockRoom);
+        mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         // Stub isResourceOwner to allow access to protected resources

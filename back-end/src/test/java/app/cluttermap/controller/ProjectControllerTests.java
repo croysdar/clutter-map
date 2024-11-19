@@ -1,5 +1,6 @@
 package app.cluttermap.controller;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -192,14 +193,14 @@ class ProjectControllerTests {
         // Arrange: Set up projectId and simulate unassigned org units
         Project project = new Project("Test Project", mockUser);
         Long projectId = 1L;
-        OrgUnit unassignedOrgUnit = new OrgUnit("Unassigned OrgUnit", "Description", project);
+        OrgUnit unassignedOrgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         when(orgUnitService.getUnassignedOrgUnitsByProjectId(projectId)).thenReturn(List.of(unassignedOrgUnit));
 
         // Act & Assert: Perform the GET request and verify status 200 OK and correct
         // data
         mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", projectId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Unassigned OrgUnit"));
+                .andExpect(jsonPath("$[0].name").value(unassignedOrgUnit.getName()));
     }
 
     @Test

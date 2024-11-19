@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -117,8 +118,7 @@ public class RoomRepositoryIntegrationTests {
         projectRepository.save(project);
 
         Room room = new Room("Test Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit",
-                "This is a shelving unit", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
         roomRepository.save(room);
 
@@ -145,8 +145,7 @@ public class RoomRepositoryIntegrationTests {
         projectRepository.save(project);
 
         Room room = new Room("Test Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit",
-                "This is a shelving unit", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
         roomRepository.save(room);
 

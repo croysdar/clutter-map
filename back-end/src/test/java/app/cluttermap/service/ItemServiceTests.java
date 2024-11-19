@@ -72,6 +72,7 @@ public class ItemServiceTests {
 
     private User mockUser;
     private Project mockProject;
+    private Room mockRoom;
     private OrgUnit mockOrgUnit;
 
     private static int ITEM_LIMIT = 1000;
@@ -80,7 +81,8 @@ public class ItemServiceTests {
     void setUp() {
         mockUser = new User("mockProviderId");
         mockProject = new Project("Mock Project", mockUser);
-        mockOrgUnit = new OrgUnit("Mock Org Unit", "", new Room("Mock Room", "Room Description", mockProject));
+        mockRoom = new Room("Mock Room", "Room Description", mockProject);
+        mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         mockOrgUnit.setId(1L);
     }
 
@@ -224,8 +226,8 @@ public class ItemServiceTests {
         Room room1 = new Room("Room 1", "Room Description 1", project1);
         Room room2 = new Room("Room 2", "Room Description 2", project2);
 
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "OrgUnit Description 1", room1);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "OrgUnit Description 2", room2);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
 
         Item item1 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit1).build();
         Item item2 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit2).build();
@@ -391,7 +393,7 @@ public class ItemServiceTests {
     @Test
     void assignItemsToOrgUnit_Success() {
         // Arrange: Create target OrgUnit and mock items to move
-        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
         when(orgUnitService.getOrgUnitById(10L)).thenReturn(targetOrgUnit);
 
         Item item1 = new TestDataFactory.ItemBuilder().project(mockProject).build();
@@ -411,7 +413,7 @@ public class ItemServiceTests {
     @Test
     void assignItemsToOrgUnit_ItemNotFound_ShouldThrowResourceNotFoundException() {
         // Arrange: Set up target OrgUnit ID and non-existent item ID
-        OrgUnit targetOrgUnit = new OrgUnit("Target OrgUnit", "Description", mockProject);
+        OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
         when(orgUnitService.getOrgUnitById(targetOrgUnit.getId())).thenReturn(targetOrgUnit);
 
         Long nonExistentItemId = 999L;

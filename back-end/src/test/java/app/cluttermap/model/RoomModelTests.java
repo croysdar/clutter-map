@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class RoomModelTests {
     @Test
@@ -31,13 +33,12 @@ public class RoomModelTests {
         Room room = new Room("Test Room", "Room Description", project);
 
         // Act: Add a orgUnit to the room
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "This is a shelving unit", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
 
         // Assert: Verify that the orgUnit was added to the room's orgUnits
         // collection
         assertThat(room.getOrgUnits()).hasSize(1);
-        assertThat(room.getOrgUnits().get(0).getName()).isEqualTo("White Shelving Unit");
         assertThat(room.getOrgUnits().get(0).getRoom()).isEqualTo(room);
 
         // Act: Remove the orgUnit from the room

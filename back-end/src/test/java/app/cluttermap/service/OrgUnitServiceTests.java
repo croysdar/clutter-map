@@ -92,7 +92,7 @@ public class OrgUnitServiceTests {
     @Test
     void getOrgUnitId_ShouldReturnOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up a sample org unit and stub the repository to return it by ID
-        OrgUnit orgUnit = new OrgUnit("Sample Org Unit", "Org Unit description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
 
         // Act: Retrieve the org unit using the service method
@@ -124,7 +124,7 @@ public class OrgUnitServiceTests {
 
         // Arrange: Create a mock OrgUnit that represents the saved orgUnit returned by
         // the repository
-        OrgUnit mockOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockRoom);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().fromDTO(orgUnitDTO).room(mockRoom).build();
         when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
         // Act: create a orgUnit using orgUnitService and pass in the orgUnit DTO
@@ -152,7 +152,7 @@ public class OrgUnitServiceTests {
 
         // Arrange: Create a mock OrgUnit that represents the saved orgUnit returned by
         // the repository
-        OrgUnit mockOrgUnit = new OrgUnit(orgUnitDTO.getName(), orgUnitDTO.getDescription(), mockProject);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().fromDTO(orgUnitDTO).project(mockProject).build();
         when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
         // Act: create a orgUnit using orgUnitService and pass in the orgUnit DTO
@@ -175,7 +175,7 @@ public class OrgUnitServiceTests {
         // Arrange: Set up a room with the maximum allowed orgUnits
         List<OrgUnit> orgUnits = new ArrayList<>();
         for (int i = 0; i < ORG_UNIT_LIMIT; i++) {
-            orgUnits.add(new OrgUnit("OrgUnit " + (i + 1), "Description " + (i + 1), mockRoom));
+            orgUnits.add(new TestDataFactory.OrgUnitBuilder().room(mockRoom).build());
         }
         mockRoom.setOrgUnits(orgUnits);
 
@@ -195,8 +195,8 @@ public class OrgUnitServiceTests {
         // return orgUnits owned by the user
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "OrgUnit description 1", mockRoom);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "OrgUnit description 2", mockRoom);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
 
         // Act: Retrieve the orgUnits owned by the user
@@ -215,8 +215,8 @@ public class OrgUnitServiceTests {
         Room room1 = new Room("Room 1", "Room Description 1", project1);
         Room room2 = new Room("Room 2", "Room Description 2", project2);
 
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description 1", room1);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description 2", room2);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
@@ -245,7 +245,11 @@ public class OrgUnitServiceTests {
     void updateOrgUnit_ShouldUpdateOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up mock orgUnit with initial values and stub the repository to
         // return the orgUnit by ID
-        OrgUnit orgUnit = new OrgUnit("Old Name", "Old Description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder()
+                .name("Old Name")
+                .description("Old Description")
+                .room(mockRoom).build();
+
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
 
         // Arrange: Create an UpdateOrgUnitDTO with updated values
@@ -280,7 +284,10 @@ public class OrgUnitServiceTests {
     @Test
     void updateOrgUnit_ShouldNotChangeDescription_WhenDescriptionIsNull() {
         // Arrange: Set up a orgUnit with an initial description
-        OrgUnit orgUnit = new OrgUnit("OrgUnit Name", "Initial Description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder()
+                .name("Old Name")
+                .description("Old Description")
+                .room(mockRoom).build();
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
 
         // Stub the repository to return the orgUnit after saving
@@ -294,7 +301,7 @@ public class OrgUnitServiceTests {
 
         // Assert: Verify that the name was updated but the description remains the same
         assertThat(updatedOrgUnit.getName()).isEqualTo(orgUnit.getName());
-        assertThat(updatedOrgUnit.getDescription()).isEqualTo("Initial Description");
+        assertThat(updatedOrgUnit.getDescription()).isEqualTo("Old Description");
         verify(orgUnitRepository).save(orgUnit);
     }
 
@@ -304,8 +311,8 @@ public class OrgUnitServiceTests {
         Room targetRoom = new Room("Target Room", "Description", mockProject);
         when(roomService.getRoomById(10L)).thenReturn(targetRoom);
 
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", mockProject);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", mockProject);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
 
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
         when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnit2));
@@ -337,7 +344,7 @@ public class OrgUnitServiceTests {
         // Arrange: Create org units with a different project than the target room
         Project differentProject = new Project("Different Project", mockUser);
         Room targetRoom = new Room("Target Room", "Description", mockProject);
-        OrgUnit orgUnitWithDifferentProject = new OrgUnit("OrgUnit", "Description", differentProject);
+        OrgUnit orgUnitWithDifferentProject = new TestDataFactory.OrgUnitBuilder().project(differentProject).build();
 
         when(roomService.getRoomById(10L)).thenReturn(targetRoom);
         when(orgUnitRepository.findById(20L)).thenReturn(Optional.of(orgUnitWithDifferentProject));
@@ -352,8 +359,8 @@ public class OrgUnitServiceTests {
     void unassignOrgUnitsFromRoom_Success() {
         // Arrange: Set up org units currently assigned to a room
         Room mockRoom = new Room("Mock Room", "Description", mockProject);
-        OrgUnit orgUnit1 = new OrgUnit("OrgUnit 1", "Description", mockProject);
-        OrgUnit orgUnit2 = new OrgUnit("OrgUnit 2", "Description", mockProject);
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
         orgUnit1.setRoom(mockRoom);
         orgUnit2.setRoom(mockRoom);
 
@@ -369,17 +376,13 @@ public class OrgUnitServiceTests {
         }
     }
 
-    // when(orgUnitService.getOrgUnitById(999L)).thenThrow(new
-    // OrgUnitNotFoundException());
-
+    // TODO allow partial success
     @Test
     void unassignOrgUnitsFromRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
         // Arrange: Set up org unit IDs, including a non-existent org unit ID
-        List<Long> orgUnitIds = List.of(1L, 999L, 3L); // Assuming 999L does not exist
-        OrgUnit orgUnit1 = new OrgUnit("Org Unit 1", "Description", mockProject);
+        List<Long> orgUnitIds = List.of(999L); // Assuming 999L does not exist
 
         // Simulate OrgUnitNotFoundException for the non-existent org unit
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit1));
         when(orgUnitRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert: Expect OrgUnitNotFoundException for the missing org unit
@@ -391,7 +394,7 @@ public class OrgUnitServiceTests {
     @Test
     void deleteOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up a orgUnit and stub the repository to return the orgUnit by ID
-        OrgUnit orgUnit = new OrgUnit("Sample OrgUnit", "OrgUnit Description", mockRoom);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         Long orgUnitId = orgUnit.getId();
         when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
 

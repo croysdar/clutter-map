@@ -7,6 +7,7 @@ import java.util.List;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
+import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.NewProjectDTO;
@@ -168,6 +169,57 @@ public class TestDataFactory {
 
         public UpdateItemDTO build() {
             return new UpdateItemDTO(name, description, tags, quantity);
+        }
+    }
+
+    public static class OrgUnitBuilder {
+        private String name = DEFAULT_ORG_UNIT_NAME;
+        private String description = DEFAULT_ORG_UNIT_DESCRIPTION;
+        private Room room;
+        private Project project;
+
+        public OrgUnitBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public OrgUnitBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public OrgUnitBuilder room(Room room) {
+            this.room = room;
+            this.project = null;
+            return this;
+        }
+
+        public OrgUnitBuilder project(Project project) {
+            this.project = project;
+            this.room = null;
+            return this;
+        }
+
+        public OrgUnitBuilder fromDTO(NewOrgUnitDTO orgUnitDTO) {
+            this.name = orgUnitDTO.getName();
+            this.description = orgUnitDTO.getDescription();
+            return this;
+        }
+
+        public OrgUnitBuilder fromDTO(UpdateOrgUnitDTO orgUnitDTO) {
+            this.name = orgUnitDTO.getName();
+            this.description = orgUnitDTO.getDescription();
+            return this;
+        }
+
+        public OrgUnit build() {
+            if (room != null) {
+                return new OrgUnit(name, description, room);
+            } else if (project != null) {
+                return new OrgUnit(name, description, project);
+            } else {
+                throw new IllegalStateException("Either Room or Project must be set to build an OrgUnit.");
+            }
         }
     }
 

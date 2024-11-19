@@ -167,7 +167,7 @@ class SecurityServiceTests {
         setUpJwtAuthentication(1L);
         Project project = new Project("Test Project", mockUser);
         Room room = new Room("Test Room", "", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         orgUnit.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
@@ -196,7 +196,7 @@ class SecurityServiceTests {
         setUpJwtAuthentication(1L);
         Project project = new Project("Test Project", mockUser);
         Room room = new Room("Test Room", "", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
 
         item.setId(1L);
