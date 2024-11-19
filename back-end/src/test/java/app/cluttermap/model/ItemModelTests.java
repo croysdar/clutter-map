@@ -14,8 +14,8 @@ public class ItemModelTests {
     @Test
     void item_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project for the item
-        User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        User user = new User("userProviderId");
+        Project project = new TestDataFactory.ProjectBuilder().user(user).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
 

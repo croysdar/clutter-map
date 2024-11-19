@@ -8,6 +8,7 @@ import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
+import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.NewProjectDTO;
@@ -373,6 +374,39 @@ public class TestDataFactory {
 
         public UpdateRoomDTO build() {
             return new UpdateRoomDTO(name, description);
+        }
+    }
+
+    public static class ProjectBuilder {
+        private String name = DEFAULT_PROJECT_NAME;
+        private User user;
+
+        public ProjectBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ProjectBuilder user(User user) {
+            this.user = user;
+            return this;
+        }
+
+        public ProjectBuilder fromDTO(NewProjectDTO projectDTOj) {
+            this.name = projectDTOj.getName();
+            return this;
+        }
+
+        public ProjectBuilder fromDTO(UpdateProjectDTO projectDTOj) {
+            this.name = projectDTOj.getName();
+            return this;
+        }
+
+        public Project build() {
+            if (user != null) {
+                return new Project(name, user);
+            } else {
+                throw new IllegalStateException("User must be set to build a Project.");
+            }
         }
     }
 

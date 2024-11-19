@@ -51,10 +51,10 @@ public class ProjectRepositoryIntegrationTests {
     void findByOwner_ShouldReturnOnlyProjectsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project
         User user1 = new User("owner1ProviderId");
-        Project project1 = new Project("Project Owned by User 1", user1);
+        Project project1 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 1").user(user1).build();
 
         User user2 = new User("owner2ProviderId");
-        Project project2 = new Project("Project Owned by User 2", user2);
+        Project project2 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 2").user(user2).build();
 
         // Arrange: Save the users and their projects to the repositories
         userRepository.saveAll(List.of(user1, user2));
@@ -113,7 +113,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.getRooms().add(room);
 
@@ -136,7 +136,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.getRooms().add(room);
 
@@ -161,7 +161,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
@@ -185,7 +185,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
@@ -210,7 +210,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 
@@ -233,7 +233,7 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 

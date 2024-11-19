@@ -70,7 +70,7 @@ public class OrgUnitServiceTests {
     @BeforeEach
     void setUp() {
         mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
         mockRoom.setId(1L);
     }
@@ -208,8 +208,8 @@ public class OrgUnitServiceTests {
     @Test
     void getUserOrgUnits_ShouldReturnOrgUnitsAcrossMultipleProjects() {
         // Arrange: Set up two projects for the same user with orgUnits
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
 
         Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
         Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
@@ -341,7 +341,7 @@ public class OrgUnitServiceTests {
     @Test
     void assignOrgUnitsToRoom_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Create org units with a different project than the target room
-        Project differentProject = new Project("Different Project", mockUser);
+        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Room targetRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
         OrgUnit orgUnitWithDifferentProject = new TestDataFactory.OrgUnitBuilder().project(differentProject).build();
 

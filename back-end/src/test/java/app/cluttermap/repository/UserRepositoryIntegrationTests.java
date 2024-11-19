@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import jakarta.transaction.Transactional;
@@ -51,8 +52,8 @@ class UserRepositoryIntegrationTests {
         // Arrange: Set up a user and create a project
         User user = new User("providerId");
 
-        Project project1 = new Project("Project 1", user);
-        Project project2 = new Project("Project 2", user);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(user).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(user).build();
         user.getProjects().add(project1);
         user.getProjects().add(project2);
 

@@ -58,8 +58,8 @@ public class OrgUnitRepositoryIntegrationTests {
         User user2 = new User("owner2ProviderId");
         userRepository.saveAll(List.of(user1, user2));
 
-        Project project1 = new Project("Project 1", user1);
-        Project project2 = new Project("Project 2", user2);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(user1).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(user2).build();
         projectRepository.saveAll(List.of(project1, project2));
 
         Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
@@ -89,7 +89,7 @@ public class OrgUnitRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
@@ -130,7 +130,7 @@ public class OrgUnitRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
@@ -160,7 +160,7 @@ public class OrgUnitRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
@@ -189,7 +189,7 @@ public class OrgUnitRepositoryIntegrationTests {
         // Arrange: Create a project and orgUnits with and without an assigned room
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         OrgUnit unassignedOrgUnit1 = new TestDataFactory.OrgUnitBuilder().name("Unassigned OrgUnit 1").project(project)

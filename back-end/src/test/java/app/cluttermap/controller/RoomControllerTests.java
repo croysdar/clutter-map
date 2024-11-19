@@ -69,7 +69,7 @@ class RoomControllerTests {
     @BeforeEach
     void setUp() {
         mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         // Stub isResourceOwner to allow access to protected resources

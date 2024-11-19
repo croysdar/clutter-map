@@ -80,7 +80,7 @@ public class ItemServiceTests {
     @BeforeEach
     void setUp() {
         mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         mockOrgUnit.setId(1L);
@@ -220,8 +220,8 @@ public class ItemServiceTests {
     @Test
     void getUserItems_ShouldReturnItemsAcrossMultipleProjects() {
         // Arrange: Set up two projects for the same user with items
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
 
         Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
         Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
@@ -432,7 +432,7 @@ public class ItemServiceTests {
         when(orgUnitService.getOrgUnitById(mockOrgUnit.getId())).thenReturn(mockOrgUnit);
 
         // Arrange: Create an item with a different project than mockOrgUnit
-        Project differentProject = new Project("Different Project", mockUser);
+        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Item itemWithDifferentProject = new TestDataFactory.ItemBuilder().project(differentProject).build();
 
         itemWithDifferentProject.setId(2L);

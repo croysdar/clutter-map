@@ -71,7 +71,7 @@ class ItemControllerTests {
     @BeforeEach
     void setUp() {
         User mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(
                 new TestDataFactory.RoomBuilder().project(mockProject).build()).build();
 

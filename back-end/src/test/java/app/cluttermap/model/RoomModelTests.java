@@ -13,7 +13,7 @@ public class RoomModelTests {
     void room_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project for the room
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
 
         // Act: Create a new Room instance
         Room room = new Room("Test Room", "Room Description", project);
@@ -29,7 +29,7 @@ public class RoomModelTests {
     void room_ShouldManageOrgUnitsCorrectly() {
         // Arrange: Set up a user, create a project, and a room
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new Room("Test Room", "Room Description", project);
 
         // Act: Add a orgUnit to the room

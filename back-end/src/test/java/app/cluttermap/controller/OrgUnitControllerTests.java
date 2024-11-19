@@ -75,7 +75,7 @@ class OrgUnitControllerTests {
     @BeforeEach
     void setUp() {
         mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);

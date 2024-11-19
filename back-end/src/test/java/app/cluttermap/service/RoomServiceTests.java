@@ -60,7 +60,7 @@ public class RoomServiceTests {
     @BeforeEach
     void setUp() {
         mockUser = new User("mockProviderId");
-        mockProject = new Project("Mock Project", mockUser);
+        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
     }
 
     @Test
@@ -166,8 +166,8 @@ public class RoomServiceTests {
     @Test
     void getUserRooms_ShouldReturnRoomsAcrossMultipleProjects() {
         // Arrange: Set up two projects for the same user with rooms
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
 
         Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
         Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();

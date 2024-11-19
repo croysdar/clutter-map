@@ -56,8 +56,8 @@ public class ItemRepositoryIntegrationTests {
         User user2 = new User("owner2ProviderId");
         userRepository.saveAll(List.of(user1, user2));
 
-        Project project1 = new Project("Project 1", user1);
-        Project project2 = new Project("Project 2", user2);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(user1).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(user2).build();
         projectRepository.saveAll(List.of(project1, project2));
 
         Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
@@ -91,7 +91,7 @@ public class ItemRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
@@ -133,7 +133,7 @@ public class ItemRepositoryIntegrationTests {
         // Arrange: Create a project and items with and without an assigned orgUnit
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
         List<String> itemNames = List.of("Item 1", "Item 2");

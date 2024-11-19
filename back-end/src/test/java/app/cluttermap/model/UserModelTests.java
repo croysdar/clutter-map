@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 class UserModelTests {
     @Test
@@ -42,8 +44,9 @@ class UserModelTests {
     void user_ShouldManageProjectsCorrectly() {
         // Arrange: Set up a user and create multiple projects
         User user = new User("ownerProviderId");
-        Project project1 = new Project("Project 1", user);
-        Project project2 = new Project("Project 2", user);
+
+        Project project1 = new TestDataFactory.ProjectBuilder().name("Project 1").user(user).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().name("Project 2").user(user).build();
         List<Project> projects = new ArrayList<>(List.of(project1, project2));
 
         // Act: Set the list of projects on the user

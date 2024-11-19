@@ -56,7 +56,7 @@ public class ProjectServiceTests {
     void getProjectById_ShouldReturnProject_WhenProjectExists() {
         // Arrange: Prepare a sample project and stub the repository to return it when
         // searched by ID
-        Project project = new Project("Sample Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
         // Act: Call the service method to retrieve the project by ID
@@ -86,7 +86,7 @@ public class ProjectServiceTests {
         // Arrange: Create a DTO for the new project and set up a mock project to return
         // on save
         NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
-        Project newProject = new Project(projectDTO.getName(), mockUser);
+        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
         when(projectRepository.save(any(Project.class))).thenReturn(newProject);
 
         // Act: Call the service to create the project
@@ -109,13 +109,13 @@ public class ProjectServiceTests {
 
         List<Project> existingProjects = new ArrayList<>();
         for (int i = 0; i < PROJECT_LIMIT - 1; i++) {
-            existingProjects.add(new Project("Project " + (i + 1), mockUser));
+            existingProjects.add(new TestDataFactory.ProjectBuilder().user(mockUser).build());
         }
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
 
         // Arrange: Prepare a DTO for creating a new project within the project limit
         NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().name("Within Limit Project").build();
-        Project newProject = new Project("Within Limit Project", mockUser);
+        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
         when(projectRepository.save(any(Project.class))).thenReturn(newProject);
 
         // Act: Call the service to create a project within the limit
@@ -142,8 +142,8 @@ public class ProjectServiceTests {
         // Arrange: Set up the current user and mock the projects they own
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
 
         // Act: Call the service to retrieve all projects owned by the user
@@ -171,7 +171,7 @@ public class ProjectServiceTests {
     void updateProject_ShouldUpdateProject_WhenProjectExists() {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
-        Project project = new Project("Old Name", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().name("Old Name").user(mockUser).build();
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
         // Arrange: Prepare the DTO with the updated project name
@@ -208,7 +208,7 @@ public class ProjectServiceTests {
     void deleteProject_ShouldDeleteProject_WhenProjectExists() {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
-        Project project = new Project("Sample Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Long projectId = project.getId();
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 

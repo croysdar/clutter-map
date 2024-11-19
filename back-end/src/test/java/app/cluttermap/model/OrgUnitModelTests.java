@@ -13,7 +13,7 @@ public class OrgUnitModelTests {
     void orgUnit_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project for the orgUnit
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
 
         // Act: Create a new OrgUnit instance
@@ -30,7 +30,7 @@ public class OrgUnitModelTests {
     void orgUnit_ShouldManageItemsCorrectly() {
         // Arrange: Set up a user, create a project, and a orgUnit
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 

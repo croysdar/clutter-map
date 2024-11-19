@@ -83,8 +83,8 @@ class ProjectControllerTests {
     @Test
     void getUserProjects_ShouldReturnAllUserProjects() throws Exception {
         // Arrange: Set up mock user projects and mock the service to return them
-        Project project1 = new Project("Test Project 1", mockUser);
-        Project project2 = new Project("Test Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         when(projectService.getUserProjects()).thenReturn(List.of(project1, project2));
 
         // Act: Perform a GET request to the /projects endpoint
@@ -119,7 +119,7 @@ class ProjectControllerTests {
     void getOneProject_ShouldReturnProject_WhenProjectExists() throws Exception {
         // Arrange: Set up a mock project and stub the service to return it when
         // searched by ID
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().name("Test Project").user(mockUser).build();
         when(projectService.getProjectById(1L)).thenReturn(project);
 
         // Act: Perform a GET request to the /projects/1 endpoint
@@ -150,7 +150,7 @@ class ProjectControllerTests {
     @Test
     void getUnassignedItemsByProjectId_Success() throws Exception {
         // Arrange: Set up projectId and simulate unassigned items
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Long projectId = 1L;
         Item unassignedItem = new TestDataFactory.ItemBuilder().project(project).build();
         when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
@@ -191,7 +191,7 @@ class ProjectControllerTests {
     @Test
     void getUnassignedOrgUnitsByProjectId_Success() throws Exception {
         // Arrange: Set up projectId and simulate unassigned org units
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Long projectId = 1L;
         OrgUnit unassignedOrgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         when(orgUnitService.getUnassignedOrgUnitsByProjectId(projectId)).thenReturn(List.of(unassignedOrgUnit));
@@ -234,7 +234,7 @@ class ProjectControllerTests {
         // Arrange: Set up a NewProjectDTO with valid data and mock the service to
         // return a new project
         NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
-        Project newProject = new Project(projectDTO.getName(), mockUser);
+        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
         when(projectService.createProject(any(NewProjectDTO.class))).thenReturn(newProject);
 
         // Act: Perform a POST request to the /projects endpoint with the project data
@@ -290,7 +290,7 @@ class ProjectControllerTests {
         // return the updated project
         NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
 
-        Project updatedProject = new Project(projectDTO.getName(), mockUser);
+        Project updatedProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
         when(projectService.updateProject(eq(1L), any(UpdateProjectDTO.class))).thenReturn(updatedProject);
 
         // Act: Perform a PUT request to the /projects/1 endpoint with the update data
@@ -371,7 +371,7 @@ class ProjectControllerTests {
     void getProjectRooms_ShouldReturnRooms_WhenProjectExists() throws Exception {
         // Arrange: Set up a project with a room and mock the service to return the
         // project
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.setRooms(Collections.singletonList(room));
         when(projectService.getProjectById(1L)).thenReturn(project);

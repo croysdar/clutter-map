@@ -109,7 +109,7 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsProject() {
         // Arrange: Mock the current user and a project owned by that user
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         project.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -137,7 +137,7 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsRoom() {
         // Arrange: Mock the current user, project, and room owned by that user
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         room.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
@@ -165,7 +165,7 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsOrgUnit() {
         // Arrange: Mock the current user, project, room, and org unit
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         orgUnit.setId(1L);
@@ -194,7 +194,7 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsItem() {
         // Arrange: Mock the current user, project, room, org unit, and item
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
