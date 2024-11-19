@@ -48,27 +48,27 @@ public class RoomRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnOnlyRoomsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project and room
-        User owner1 = new User("owner1ProviderId");
-        User owner2 = new User("owner2ProviderId");
-        userRepository.saveAll(List.of(owner1, owner2));
+        User user1 = new User("owner1ProviderId");
+        User user2 = new User("owner2ProviderId");
+        userRepository.saveAll(List.of(user1, user2));
 
-        Project project1 = new Project("Project 1", owner1);
-        Project project2 = new Project("Project 2", owner2);
+        Project project1 = new Project("Project 1", user1);
+        Project project2 = new Project("Project 2", user2);
         projectRepository.saveAll(List.of(project1, project2));
 
-        Room room1 = new Room("Room Owned by Owner 1", "Room Description", project1);
-        Room room2 = new Room("Room Owned by Owner 2", "Room Description", project2);
+        Room room1 = new TestDataFactory.RoomBuilder().name("Room Owned by User 1").project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().name("Room Owned by User 2").project(project2).build();
         roomRepository.saveAll(List.of(room1, room2));
 
-        // Act: Retrieve rooms associated with owner1
-        List<Room> owner1Rooms = roomRepository.findByOwnerId(owner1.getId());
+        // Act: Retrieve rooms associated with user1
+        List<Room> user1Rooms = roomRepository.findByOwnerId(user1.getId());
 
-        // Assert: Verify that only the room owned by owner1 is returned
-        assertThat(owner1Rooms).hasSize(1);
-        assertThat(owner1Rooms.get(0).getName()).isEqualTo("Room Owned by Owner 1");
+        // Assert: Verify that only the room owned by user1 is returned
+        assertThat(user1Rooms).hasSize(1);
+        assertThat(user1Rooms.get(0).getName()).isEqualTo("Room Owned by User 1");
 
-        // Assert: Confirm that the room list does not contain a room owned by owner2
-        assertThat(owner1Rooms).doesNotContain(room2);
+        // Assert: Confirm that the room list does not contain a room owned by user2
+        assertThat(user1Rooms).doesNotContain(room2);
     }
 
     @Test
@@ -80,9 +80,11 @@ public class RoomRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room1 = new Room("Room 1", "Room Description", project);
-        Room room2 = new Room("Room 2", "Room Description", project);
-        Room room3 = new Room("Room 3", "Room Description", project);
+        List<String> roomNames = List.of("OrgUnit 1", "OrgUnit 2", "OrgUnit 3");
+        Room room1 = new TestDataFactory.RoomBuilder().name(roomNames.get(0)).project(project).build();
+        Room room2 = new TestDataFactory.RoomBuilder().name(roomNames.get(1)).project(project).build();
+        Room room3 = new TestDataFactory.RoomBuilder().name(roomNames.get(2)).project(project).build();
+
         roomRepository.saveAll(List.of(room1, room2, room3));
 
         // Act: Retrieve all rooms associated with the user
@@ -90,8 +92,9 @@ public class RoomRepositoryIntegrationTests {
 
         // Assert: Verify that all rooms owned by the user are returned
         assertThat(ownerRooms).hasSize(3);
-        assertThat(ownerRooms).extracting(Room::getName).containsExactlyInAnyOrder("Room 1", "Room 2",
-                "Room 3");
+        assertThat(ownerRooms).extracting(Room::getName)
+                .containsExactlyInAnyOrder(roomNames.toArray(new String[0]));
+
     }
 
     @Test
@@ -117,7 +120,7 @@ public class RoomRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Test Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
         roomRepository.save(room);
@@ -144,7 +147,7 @@ public class RoomRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Test Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
         roomRepository.save(room);

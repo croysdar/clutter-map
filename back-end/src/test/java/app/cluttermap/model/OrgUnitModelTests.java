@@ -14,7 +14,7 @@ public class OrgUnitModelTests {
         // Arrange: Set up a user and create a project for the orgUnit
         User owner = new User("ownerProviderId");
         Project project = new Project("Test Project", owner);
-        Room room = new Room("Test Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
 
         // Act: Create a new OrgUnit instance
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
@@ -31,7 +31,7 @@ public class OrgUnitModelTests {
         // Arrange: Set up a user, create a project, and a orgUnit
         User owner = new User("ownerProviderId");
         Project project = new Project("Test Project", owner);
-        Room room = new Room("Test Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Add a item to the orgUnit

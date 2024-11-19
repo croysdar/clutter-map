@@ -81,7 +81,7 @@ public class ItemServiceTests {
     void setUp() {
         mockUser = new User("mockProviderId");
         mockProject = new Project("Mock Project", mockUser);
-        mockRoom = new Room("Mock Room", "Room Description", mockProject);
+        mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         mockOrgUnit.setId(1L);
     }
@@ -223,8 +223,8 @@ public class ItemServiceTests {
         Project project1 = new Project("Project 1", mockUser);
         Project project2 = new Project("Project 2", mockUser);
 
-        Room room1 = new Room("Room 1", "Room Description 1", project1);
-        Room room2 = new Room("Room 2", "Room Description 2", project2);
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
 
         OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
         OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();

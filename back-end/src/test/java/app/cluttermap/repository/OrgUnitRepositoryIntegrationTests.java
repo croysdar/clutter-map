@@ -62,8 +62,8 @@ public class OrgUnitRepositoryIntegrationTests {
         Project project2 = new Project("Project 2", user2);
         projectRepository.saveAll(List.of(project1, project2));
 
-        Room room1 = new Room("Room 1", "Room Description 1", project1);
-        Room room2 = new Room("Room 2", "Room Description 2", project2);
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
         roomRepository.saveAll(List.of(room1, room2));
 
         OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().name("OrgUnit Owned by User 1").room(room1).build();
@@ -72,15 +72,15 @@ public class OrgUnitRepositoryIntegrationTests {
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
         // Act: Retrieve orgUnits associated with owner1
-        List<OrgUnit> owner1OrgUnits = orgUnitRepository.findByOwnerId(user1.getId());
+        List<OrgUnit> user1OrgUnits = orgUnitRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the orgUnit owned by owner1 is returned
-        assertThat(owner1OrgUnits).hasSize(1);
-        assertThat(owner1OrgUnits.get(0).getName()).isEqualTo("OrgUnit Owned by User 1");
+        assertThat(user1OrgUnits).hasSize(1);
+        assertThat(user1OrgUnits.get(0).getName()).isEqualTo("OrgUnit Owned by User 1");
 
         // Assert: Confirm that the orgUnit list does not contain a orgUnit owned by
         // owner2
-        assertThat(owner1OrgUnits).doesNotContain(orgUnit2);
+        assertThat(user1OrgUnits).doesNotContain(orgUnit2);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class OrgUnitRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         roomRepository.save(room);
 
         List<String> orgUnitNames = List.of("OrgUnit 1", "OrgUnit 2", "OrgUnit 3");
@@ -133,7 +133,7 @@ public class OrgUnitRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         roomRepository.save(room);
 
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
@@ -163,7 +163,7 @@ public class OrgUnitRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         roomRepository.save(room);
 
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
@@ -197,7 +197,7 @@ public class OrgUnitRepositoryIntegrationTests {
         OrgUnit unassignedOrgUnit2 = new TestDataFactory.OrgUnitBuilder().name("Unassigned OrgUnit 2").project(project)
                 .build();
 
-        Room room = new Room("Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         roomRepository.save(room);
         OrgUnit assignedOrgUnit = new TestDataFactory.OrgUnitBuilder().name("Assigned OrgUnit").project(project)
                 .build();

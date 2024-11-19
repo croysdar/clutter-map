@@ -16,7 +16,7 @@ public class ItemModelTests {
         // Arrange: Set up a user and create a project for the item
         User owner = new User("ownerProviderId");
         Project project = new Project("Test Project", owner);
-        Room room = new Room("Test Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
 
         // Act: Create a new Item instance

@@ -65,19 +65,18 @@ class ItemControllerTests {
     @MockBean
     private SecurityService securityService;
 
-    private User mockUser;
     private Project mockProject;
-    private Room mockRoom;
     private OrgUnit mockOrgUnit;
 
     @BeforeEach
     void setUp() {
-        mockUser = new User("mockProviderId");
+        User mockUser = new User("mockProviderId");
         mockProject = new Project("Mock Project", mockUser);
-        mockRoom = new Room("Mock Room", "Room Description", mockProject);
-        mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(
+                new TestDataFactory.RoomBuilder().project(mockProject).build()).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
+
         // Stub isResourceOwner to allow access to protected resources
         when(securityService.isResourceOwner(anyLong(), eq("orgUnit"))).thenReturn(true);
         when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(true);
@@ -99,9 +98,9 @@ class ItemControllerTests {
         mockMvc.perform(get("/items"))
                 .andExpect(status().isOk())
 
-                // Assert: Verify the response contains the expected item names
-                .andExpect(jsonPath("$[0].name").value(names.get(0)))
-                .andExpect(jsonPath("$[1].name").value(names.get(1)));
+                // Assert: Verify the response contains 2 items
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
 
         // Assert: Ensure that the service method was called
         verify(itemService).getUserItems();

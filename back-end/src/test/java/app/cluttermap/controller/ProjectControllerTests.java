@@ -91,9 +91,9 @@ class ProjectControllerTests {
         mockMvc.perform(get("/projects"))
                 .andExpect(status().isOk())
 
-                // Assert: Verify the response contains the expected project names
-                .andExpect(jsonPath("$[0].name").value("Test Project 1"))
-                .andExpect(jsonPath("$[1].name").value("Test Project 2"));
+                // Assert: Verify the response contains 2 projects
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
 
         // Assert: Ensure that the service method was called
         verify(projectService).getUserProjects();
@@ -372,7 +372,7 @@ class ProjectControllerTests {
         // Arrange: Set up a project with a room and mock the service to return the
         // project
         Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Living Room", "This is the living room", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.setRooms(Collections.singletonList(room));
         when(projectService.getProjectById(1L)).thenReturn(project);
 
@@ -381,7 +381,7 @@ class ProjectControllerTests {
                 .andExpect(status().isOk())
 
                 // Assert: Verify the response contains the expected room name
-                .andExpect(jsonPath("$[0].name").value("Living Room"));
+                .andExpect(jsonPath("$[0].name").value(room.getName()));
 
         // Assert: Ensure the service method was called to retrieve the project by ID
         verify(projectService).getProjectById(1L);

@@ -285,6 +285,47 @@ public class TestDataFactory {
         }
     }
 
+    public static class RoomBuilder {
+        private String name = DEFAULT_ROOM_NAME;
+        private String description = DEFAULT_ROOM_DESCRIPTION;
+        private Project project;
+
+        public RoomBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public RoomBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public RoomBuilder project(Project project) {
+            this.project = project;
+            return this;
+        }
+
+        public RoomBuilder fromDTO(NewRoomDTO roomDTO) {
+            this.name = roomDTO.getName();
+            this.description = roomDTO.getDescription();
+            return this;
+        }
+
+        public RoomBuilder fromDTO(UpdateRoomDTO roomDTO) {
+            this.name = roomDTO.getName();
+            this.description = roomDTO.getDescription();
+            return this;
+        }
+
+        public Room build() {
+            if (project != null) {
+                return new Room(name, description, project);
+            } else {
+                throw new IllegalStateException("Project must be set to build a Room.");
+            }
+        }
+    }
+
     public static class NewRoomDTOBuilder {
         private String name = DEFAULT_ROOM_NAME;
         private String description = DEFAULT_ROOM_DESCRIPTION;

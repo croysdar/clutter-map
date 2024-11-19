@@ -66,7 +66,7 @@ public class RoomServiceTests {
     @Test
     void getRoomId_ShouldReturnRoom_WhenRoomExists() {
         // Arrange: Set up a sample room and stub the repository to return it by ID
-        Room room = new Room("Sample Room", "This is a room", mockProject);
+        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
         // Act: Retrieve the room using the service method
@@ -95,10 +95,10 @@ public class RoomServiceTests {
         // Arrange: Prepare the Room DTO with the project ID as a string
         NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().build();
 
-        // Arrange: Create a mock Room that represents the saved room returned by the
+        // Arrange: Create a Room that represents the saved room returned by the
         // repository
-        Room mockRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), mockProject);
-        when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
+        Room room = new TestDataFactory.RoomBuilder().fromDTO(roomDTO).project(mockProject).build();
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
 
         // Act: create a room using roomService and pass in the room DTO
         Room createdRoom = roomService.createRoom(roomDTO);
@@ -132,7 +132,7 @@ public class RoomServiceTests {
         // Arrange: Set up a project with the maximum allowed rooms
         List<Room> rooms = new ArrayList<>();
         for (int i = 0; i < ROOM_LIMIT; i++) {
-            rooms.add(new Room("Room " + (i + 1), "Description " + (i + 1), mockProject));
+            rooms.add(new TestDataFactory.RoomBuilder().project(mockProject).build());
         }
         mockProject.setRooms(rooms);
 
@@ -152,8 +152,8 @@ public class RoomServiceTests {
         // return rooms owned by the user
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        Room room1 = new Room("Room 1", "Room description 1", mockProject);
-        Room room2 = new Room("Room 2", "Room description 2", mockProject);
+        Room room1 = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(mockProject).build();
         when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
         // Act: Retrieve the rooms owned by the user
@@ -169,8 +169,8 @@ public class RoomServiceTests {
         Project project1 = new Project("Project 1", mockUser);
         Project project2 = new Project("Project 2", mockUser);
 
-        Room room1 = new Room("Room 1", "Description 1", project1);
-        Room room2 = new Room("Room 2", "Description 2", project2);
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
@@ -199,7 +199,8 @@ public class RoomServiceTests {
     void updateRoom_ShouldUpdateRoom_WhenRoomExists() {
         // Arrange: Set up mock room with initial values and stub the repository to
         // return the room by ID
-        Room room = new Room("Old Name", "Old Description", mockProject);
+        Room room = new TestDataFactory.RoomBuilder().name("Old Name").description("Old Description")
+                .project(mockProject).build();
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
         // Arrange: Create an UpdateRoomDTO with updated values
@@ -233,7 +234,8 @@ public class RoomServiceTests {
     @Test
     void updateRoom_ShouldNotChangeDescription_WhenDescriptionIsNull() {
         // Arrange: Set up a room with an initial description
-        Room room = new Room("Room Name", "Initial Description", mockProject);
+        Room room = new TestDataFactory.RoomBuilder().name("Old Name").description("Old Description")
+                .project(mockProject).build();
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
         // Stub the repository to return the room after saving
@@ -247,14 +249,14 @@ public class RoomServiceTests {
 
         // Assert: Verify that the name was updated but the description remains the same
         assertThat(updatedRoom.getName()).isEqualTo(roomDTO.getName());
-        assertThat(updatedRoom.getDescription()).isEqualTo("Initial Description");
+        assertThat(updatedRoom.getDescription()).isEqualTo("Old Description");
         verify(roomRepository).save(room);
     }
 
     @Test
     void deleteRoom_ShouldDeleteRoom_WhenRoomExists() {
         // Arrange: Set up a room and stub the repository to return the room by ID
-        Room room = new Room("Sample Room", "Room Description", mockProject);
+        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
         Long roomId = room.getId();
         when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
 

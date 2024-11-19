@@ -138,7 +138,7 @@ class SecurityServiceTests {
         // Arrange: Mock the current user, project, and room owned by that user
         setUpJwtAuthentication(1L);
         Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         room.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
@@ -166,7 +166,7 @@ class SecurityServiceTests {
         // Arrange: Mock the current user, project, room, and org unit
         setUpJwtAuthentication(1L);
         Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         orgUnit.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
@@ -195,7 +195,7 @@ class SecurityServiceTests {
         // Arrange: Mock the current user, project, room, org unit, and item
         setUpJwtAuthentication(1L);
         Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
 

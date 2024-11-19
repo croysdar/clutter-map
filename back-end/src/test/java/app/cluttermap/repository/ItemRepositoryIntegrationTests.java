@@ -52,37 +52,37 @@ public class ItemRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnOnlyItemsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project, room and item
-        User owner1 = new User("owner1ProviderId");
-        User owner2 = new User("owner2ProviderId");
-        userRepository.saveAll(List.of(owner1, owner2));
+        User user1 = new User("owner1ProviderId");
+        User user2 = new User("owner2ProviderId");
+        userRepository.saveAll(List.of(user1, user2));
 
-        Project project1 = new Project("Project 1", owner1);
-        Project project2 = new Project("Project 2", owner2);
+        Project project1 = new Project("Project 1", user1);
+        Project project2 = new Project("Project 2", user2);
         projectRepository.saveAll(List.of(project1, project2));
 
-        Room room1 = new Room("Room 1", "Room Description 1", project1);
-        Room room2 = new Room("Room 2", "Room Description 2", project2);
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
         roomRepository.saveAll(List.of(room1, room2));
 
         OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
         OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
         orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
 
-        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by Owner 1").orgUnit(orgUnit1).build();
-        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by Owner 2").orgUnit(orgUnit2).build();
+        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by User 1").orgUnit(orgUnit1).build();
+        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by User 2").orgUnit(orgUnit2).build();
 
         itemRepository.saveAll(List.of(item1, item2));
 
-        // Act: Retrieve items associated with owner1
-        List<Item> owner1Items = itemRepository.findByOwnerId(owner1.getId());
+        // Act: Retrieve items associated with user1
+        List<Item> user1Items = itemRepository.findByOwnerId(user1.getId());
 
-        // Assert: Verify that only the item owned by owner1 is returned
-        assertThat(owner1Items).hasSize(1);
-        assertThat(owner1Items.get(0).getName()).isEqualTo("Item Owned by Owner 1");
+        // Assert: Verify that only the item owned by user1 is returned
+        assertThat(user1Items).hasSize(1);
+        assertThat(user1Items.get(0).getName()).isEqualTo("Item Owned by User 1");
 
         // Assert: Confirm that the item list does not contain a item owned by
-        // owner2
-        assertThat(owner1Items).doesNotContain(item2);
+        // user2
+        assertThat(user1Items).doesNotContain(item2);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ItemRepositoryIntegrationTests {
         Project project = new Project("Project", owner);
         projectRepository.save(project);
 
-        Room room = new Room("Room", "Room Description", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         roomRepository.save(room);
 
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();

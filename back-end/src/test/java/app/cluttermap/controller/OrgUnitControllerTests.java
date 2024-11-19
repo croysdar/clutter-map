@@ -76,7 +76,7 @@ class OrgUnitControllerTests {
     void setUp() {
         mockUser = new User("mockProviderId");
         mockProject = new Project("Mock Project", mockUser);
-        mockRoom = new Room("Mock Room", "Room Description", mockProject);
+        mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         // Stub isResourceOwner to allow access to protected resources
@@ -97,7 +97,8 @@ class OrgUnitControllerTests {
         // Act: Perform a GET request to the /org-units endpoint
         mockMvc.perform(get("/org-units"))
                 .andExpect(status().isOk())
-                // Assert: Verify the response contains at 2 items
+
+                // Assert: Verify the response contains 2 org units
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2));
 
