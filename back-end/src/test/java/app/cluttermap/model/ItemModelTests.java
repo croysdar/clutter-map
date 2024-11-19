@@ -7,15 +7,17 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class ItemModelTests {
     @Test
     void item_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project for the item
-        User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
-        Room room = new Room("Test Room", "Room Description", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
+        User user = new User("userProviderId");
+        Project project = new TestDataFactory.ProjectBuilder().user(user).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
 
         // Act: Create a new Item instance
         Item item = new Item("Test Item", "Item Description", List.of("tag 1", "tag 2"), 10, orgUnit);

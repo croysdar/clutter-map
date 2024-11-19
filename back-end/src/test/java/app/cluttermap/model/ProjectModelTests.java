@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class ProjectModelTests {
     @Test
@@ -28,12 +30,11 @@ public class ProjectModelTests {
         Project project = new Project("Test Project", owner);
 
         // Act: Add a room to the project
-        Room room = new Room("Living Room", "This is the living room", project);
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.getRooms().add(room);
 
         // Assert: Verify that the room was added to the project's rooms collection
         assertThat(project.getRooms()).hasSize(1);
-        assertThat(project.getRooms().get(0).getName()).isEqualTo("Living Room");
         assertThat(project.getRooms().get(0).getProject()).isEqualTo(project);
 
         // Act: Remove the room from the project

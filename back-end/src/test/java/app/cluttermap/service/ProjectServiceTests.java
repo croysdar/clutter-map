@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
 import app.cluttermap.model.Project;
@@ -52,97 +53,12 @@ public class ProjectServiceTests {
     }
 
     @Test
-    void getProjectById_ShouldReturnProject_WhenProjectExists() {
-        // Arrange: Prepare a sample project and stub the repository to return it when
-        // searched by ID
-        Project project = new Project("Sample Project", mockUser);
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-
-        // Act: Call the service method to retrieve the project by ID
-        Project foundProject = projectService.getProjectById(1L);
-
-        // Assert: Verify that the retrieved project matches the expected project
-        assertThat(foundProject).isEqualTo(project);
-    }
-
-    @Test
-    void getProjectById_ShouldThrowException_WhenProjectDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent project ID
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Verify that calling getProjectById throws
-        // ProjectNotFoundException for a missing project
-        assertThrows(ResourceNotFoundException.class, () -> projectService.getProjectById(1L));
-    }
-
-    @Test
-    void createProject_ShouldCreateProject_WhenLimitNotReached() {
-        // Arrange: Set up mocks for the current user and their existing projects
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
-
-        // Arrange: Create a DTO for the new project and set up a mock project to return
-        // on save
-        NewProjectDTO projectDTO = new NewProjectDTO("New Project");
-        Project newProject = new Project("New Project", mockUser);
-        when(projectRepository.save(any(Project.class))).thenReturn(newProject);
-
-        // Act: Call the service to create the project
-        Project createdProject = projectService.createProject(projectDTO);
-
-        // Assert: Verify the project was created with the expected properties
-        assertThat(createdProject).isNotNull();
-        assertThat(createdProject.getName()).isEqualTo("New Project");
-        assertThat(createdProject.getOwner()).isEqualTo(mockUser);
-
-        // Assert: Ensure the project was saved in the repository
-        verify(projectRepository).save(any(Project.class));
-    }
-
-    @Test
-    void createProject_ShouldThrowException_WhenLimitReached() {
-        // Arrange: Set up the current user and mock their existing projects to be one
-        // less than the project limit
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-
-        List<Project> existingProjects = new ArrayList<>();
-        for (int i = 0; i < PROJECT_LIMIT - 1; i++) {
-            existingProjects.add(new Project("Project " + (i + 1), mockUser));
-        }
-        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
-
-        // Arrange: Prepare a DTO for creating a new project within the project limit
-        NewProjectDTO projectDTO = new NewProjectDTO("Within Limit Project");
-        Project newProject = new Project("Within Limit Project", mockUser);
-        when(projectRepository.save(any(Project.class))).thenReturn(newProject);
-
-        // Act: Call the service to create a project within the limit
-        Project createdProject = projectService.createProject(projectDTO);
-
-        // Assert: Verify the project was created and saved within the limit
-        assertThat(createdProject).isNotNull();
-        assertThat(createdProject.getName()).isEqualTo("Within Limit Project");
-        verify(projectRepository).save(any(Project.class));
-
-        // Arrange: Add one more project to reach the project limit exactly
-        existingProjects.add(createdProject);
-        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
-
-        // Act & Assert: Attempting to create another project should throw
-        // ProjectLimitReachedException
-        NewProjectDTO exceedingProjectDTO = new NewProjectDTO("Exceeding Limit Project");
-        assertThrows(ProjectLimitReachedException.class, () -> projectService.createProject(exceedingProjectDTO));
-        verify(projectRepository, times(1)).save(any(Project.class));
-    }
-
-    @Test
     void getUserProjects_ShouldReturnProjectsOwnedByUser() {
         // Arrange: Set up the current user and mock the projects they own
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        Project project1 = new Project("Project 1", mockUser);
-        Project project2 = new Project("Project 2", mockUser);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
 
         // Act: Call the service to retrieve all projects owned by the user
@@ -167,14 +83,99 @@ public class ProjectServiceTests {
     }
 
     @Test
+    void getProjectById_ShouldReturnProject_WhenProjectExists() {
+        // Arrange: Prepare a sample project and stub the repository to return it when
+        // searched by ID
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        // Act: Call the service method to retrieve the project by ID
+        Project foundProject = projectService.getProjectById(1L);
+
+        // Assert: Verify that the retrieved project matches the expected project
+        assertThat(foundProject).isEqualTo(project);
+    }
+
+    @Test
+    void getProjectById_ShouldThrowException_WhenProjectDoesNotExist() {
+        // Arrange: Stub the repository to return an empty result when searching for a
+        // non-existent project ID
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert: Verify that calling getProjectById throws
+        // ProjectNotFoundException for a missing project
+        assertThrows(ResourceNotFoundException.class, () -> projectService.getProjectById(1L));
+    }
+
+    @Test
+    void createProject_ShouldCreateProject_WhenValid() {
+        // Arrange: Set up mocks for the current user and their existing projects
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+
+        // Arrange: Create a DTO for the new project and set up a mock project to return
+        // on save
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
+        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
+        when(projectRepository.save(any(Project.class))).thenReturn(newProject);
+
+        // Act: Call the service to create the project
+        Project createdProject = projectService.createProject(projectDTO);
+
+        // Assert: Verify the project was created with the expected properties
+        assertThat(createdProject).isNotNull();
+        assertThat(createdProject.getName()).isEqualTo(projectDTO.getName());
+        assertThat(createdProject.getOwner()).isEqualTo(mockUser);
+
+        // Assert: Ensure the project was saved in the repository
+        verify(projectRepository).save(any(Project.class));
+    }
+
+    @Test
+    void createProject_ShouldThrowException_WhenLimitReached() {
+        // Arrange: Set up the current user and mock their existing projects to be one
+        // less than the project limit
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+
+        List<Project> existingProjects = new ArrayList<>();
+        for (int i = 0; i < PROJECT_LIMIT - 1; i++) {
+            existingProjects.add(new TestDataFactory.ProjectBuilder().user(mockUser).build());
+        }
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
+
+        // Arrange: Prepare a DTO for creating a new project within the project limit
+        NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().name("Within Limit Project").build();
+        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
+        when(projectRepository.save(any(Project.class))).thenReturn(newProject);
+
+        // Act: Call the service to create a project within the limit
+        Project createdProject = projectService.createProject(projectDTO);
+
+        // Assert: Verify the project was created and saved within the limit
+        assertThat(createdProject).isNotNull();
+        assertThat(createdProject.getName()).isEqualTo("Within Limit Project");
+        verify(projectRepository).save(any(Project.class));
+
+        // Arrange: Add one more project to reach the project limit exactly
+        existingProjects.add(createdProject);
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(existingProjects);
+
+        // Act & Assert: Attempting to create another project should throw
+        // ProjectLimitReachedException
+        NewProjectDTO exceedingProjectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
+        assertThrows(ProjectLimitReachedException.class, () -> projectService.createProject(exceedingProjectDTO));
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+
+    @Test
     void updateProject_ShouldUpdateProject_WhenProjectExists() {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
-        Project project = new Project("Old Name", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().name("Old Name").user(mockUser).build();
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
         // Arrange: Prepare the DTO with the updated project name
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Name");
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
 
         // Arrange: Mock the repository save to return the updated project
         when(projectRepository.save(project)).thenReturn(project);
@@ -183,7 +184,7 @@ public class ProjectServiceTests {
         Project updatedProject = projectService.updateProject(1L, projectDTO);
 
         // Assert: Verify that the project's name was updated as expected
-        assertThat(updatedProject.getName()).isEqualTo("Updated Name");
+        assertThat(updatedProject.getName()).isEqualTo(projectDTO.getName());
 
         // Assert: Ensure the repository save method was called to persist the changes
         verify(projectRepository).save(project);
@@ -196,7 +197,7 @@ public class ProjectServiceTests {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Arrange: Prepare the DTO with the updated project name
-        UpdateProjectDTO projectDTO = new UpdateProjectDTO("Updated Name");
+        UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
 
         // Act & Assert: Verify that attempting to update a non-existent project throws
         // ProjectNotFoundException
@@ -207,7 +208,7 @@ public class ProjectServiceTests {
     void deleteProject_ShouldDeleteProject_WhenProjectExists() {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
-        Project project = new Project("Sample Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Long projectId = project.getId();
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 

@@ -33,17 +33,18 @@ public class RoomService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Room getRoomById(Long id) {
-        return roomRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, id));
-    }
-
     public Iterable<Room> getUserRooms() {
         User user = securityService.getCurrentUser();
 
         return roomRepository.findByOwnerId(user.getId());
     }
 
+    public Room getRoomById(Long id) {
+        return roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, id));
+    }
+
+    /* --- Create Operation (POST) --- */
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
@@ -52,6 +53,7 @@ public class RoomService {
         return roomRepository.save(newRoom);
     }
 
+    /* --- Update Operation (PUT) --- */
     @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = getRoomById(id);
@@ -63,6 +65,7 @@ public class RoomService {
         return roomRepository.save(_room);
     }
 
+    /* --- Delete Operation (DELETE) --- */
     @Transactional
     public void deleteRoom(Long roomId) {
         Room room = roomRepository.findById(roomId)

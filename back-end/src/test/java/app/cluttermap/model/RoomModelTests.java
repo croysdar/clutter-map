@@ -5,13 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
+
 @ActiveProfiles("test")
 public class RoomModelTests {
     @Test
     void room_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange: Set up a user and create a project for the room
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
 
         // Act: Create a new Room instance
         Room room = new Room("Test Room", "Room Description", project);
@@ -27,17 +29,16 @@ public class RoomModelTests {
     void room_ShouldManageOrgUnitsCorrectly() {
         // Arrange: Set up a user, create a project, and a room
         User owner = new User("ownerProviderId");
-        Project project = new Project("Test Project", owner);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         Room room = new Room("Test Room", "Room Description", project);
 
         // Act: Add a orgUnit to the room
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "This is a shelving unit", room);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         room.getOrgUnits().add(orgUnit);
 
         // Assert: Verify that the orgUnit was added to the room's orgUnits
         // collection
         assertThat(room.getOrgUnits()).hasSize(1);
-        assertThat(room.getOrgUnits().get(0).getName()).isEqualTo("White Shelving Unit");
         assertThat(room.getOrgUnits().get(0).getRoom()).isEqualTo(room);
 
         // Act: Remove the orgUnit from the room

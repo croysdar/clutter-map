@@ -49,15 +49,15 @@ public class OrgUnitService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public OrgUnit getOrgUnitById(Long id) {
-        return orgUnitRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, id));
-    }
-
     public Iterable<OrgUnit> getUserOrgUnits() {
         User user = securityService.getCurrentUser();
 
         return orgUnitRepository.findByOwnerId(user.getId());
+    }
+
+    public OrgUnit getOrgUnitById(Long id) {
+        return orgUnitRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, id));
     }
 
     /* --- Create Operation (POST) --- */

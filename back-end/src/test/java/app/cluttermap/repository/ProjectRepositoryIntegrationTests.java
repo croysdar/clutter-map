@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -49,26 +50,26 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnOnlyProjectsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project
-        User owner1 = new User("owner1ProviderId");
-        Project project1 = new Project("Project Owned by Owner 1", owner1);
+        User user1 = new User("owner1ProviderId");
+        Project project1 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 1").user(user1).build();
 
-        User owner2 = new User("owner2ProviderId");
-        Project project2 = new Project("Project Owned by Owner 2", owner2);
+        User user2 = new User("owner2ProviderId");
+        Project project2 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 2").user(user2).build();
 
         // Arrange: Save the users and their projects to the repositories
-        userRepository.saveAll(List.of(owner1, owner2));
+        userRepository.saveAll(List.of(user1, user2));
         projectRepository.saveAll(List.of(project1, project2));
 
-        // Act: Retrieve projects associated with owner1
-        List<Project> owner1Projects = projectRepository.findByOwnerId(owner1.getId());
+        // Act: Retrieve projects associated with user1
+        List<Project> user1Projects = projectRepository.findByOwnerId(user1.getId());
 
-        // Assert: Verify that only the project owned by owner1 is returned
-        assertThat(owner1Projects).hasSize(1);
-        assertThat(owner1Projects.get(0).getName()).isEqualTo("Project Owned by Owner 1");
+        // Assert: Verify that only the project owned by user1 is returned
+        assertThat(user1Projects).hasSize(1);
+        assertThat(user1Projects.get(0).getName()).isEqualTo("Project Owned by User 1");
 
         // Assert: Confirm that the project list does not contain a project owned by
-        // owner2
-        assertThat(owner1Projects).doesNotContain(project2);
+        // user2
+        assertThat(user1Projects).doesNotContain(project2);
     }
 
     @Test
@@ -112,8 +113,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        Room room = new Room("Living Room", "This is the living room", project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.getRooms().add(room);
 
         // Arrange: Save the project (and implicitly the room) to the repository
@@ -135,8 +136,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        Room room = new Room("Living Room", "This is the living room", project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         project.getRooms().add(room);
 
         // Arrange: Save the project (and implicitly the room) to the repository
@@ -160,8 +161,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        OrgUnit orgUnit = new OrgUnit("White Shelving Unit", "For storage", project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
         // Arrange: Save the project (and implicitly the orgUnit) to the repository
@@ -184,8 +185,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        OrgUnit orgUnit = new OrgUnit("Test Org Unit", "Org Unit Description", project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         project.getOrgUnits().add(orgUnit);
 
         // Arrange: Save the project (and implicitly the orgUnit) to the repository
@@ -209,8 +210,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository
@@ -232,8 +233,8 @@ public class ProjectRepositoryIntegrationTests {
         User owner = new User("ownerProviderId");
         userRepository.save(owner);
 
-        Project project = new Project("Test Project", owner);
-        Item item = new Item("Test Item", "Item Description", List.of("Tag 1"), 1, project);
+        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Item item = new TestDataFactory.ItemBuilder().project(project).build();
         project.getItems().add(item);
 
         // Arrange: Save the project (and implicitly the item) to the repository

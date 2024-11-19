@@ -29,15 +29,15 @@ public class ProjectService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Project getProjectById(Long id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));
-    }
-
     public Iterable<Project> getUserProjects() {
         User user = securityService.getCurrentUser();
 
         return projectRepository.findByOwnerId(user.getId());
+    }
+
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));
     }
 
     /* --- Create Operation (POST) --- */

@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 
+import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
@@ -109,7 +109,7 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsProject() {
         // Arrange: Mock the current user and a project owned by that user
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         project.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -137,8 +137,8 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsRoom() {
         // Arrange: Mock the current user, project, and room owned by that user
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
         room.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
@@ -165,9 +165,9 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsOrgUnit() {
         // Arrange: Mock the current user, project, room, and org unit
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
         orgUnit.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
@@ -194,10 +194,11 @@ class SecurityServiceTests {
     void isResourceOwner_ShouldReturnTrue_WhenUserOwnsItem() {
         // Arrange: Mock the current user, project, room, org unit, and item
         setUpJwtAuthentication(1L);
-        Project project = new Project("Test Project", mockUser);
-        Room room = new Room("Test Room", "", project);
-        OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit description", room);
-        Item item = new Item("Test Item", "Item description", List.of("Tag"), 1, orgUnit);
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
+
         item.setId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
