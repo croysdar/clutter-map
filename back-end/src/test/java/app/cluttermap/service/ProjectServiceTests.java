@@ -53,6 +53,36 @@ public class ProjectServiceTests {
     }
 
     @Test
+    void getUserProjects_ShouldReturnProjectsOwnedByUser() {
+        // Arrange: Set up the current user and mock the projects they own
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
+
+        // Act: Call the service to retrieve all projects owned by the user
+        Iterable<Project> userProjects = projectService.getUserProjects();
+
+        // Assert: Verify that the returned projects match the expected projects
+        assertThat(userProjects).containsExactly(project1, project2);
+    }
+
+    @Test
+    void getUserProjects_ShouldReturnEmptyList_WhenNoProjectsExist() {
+        // Arrange: Set up the current user and mock their projects to return an empty
+        // list
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+
+        // Act: Call the service to retrieve projects owned by the user
+        Iterable<Project> userProjects = projectService.getUserProjects();
+
+        // Assert: Verify that the returned projects list is empty
+        assertThat(userProjects).isEmpty();
+    }
+
+    @Test
     void getProjectById_ShouldReturnProject_WhenProjectExists() {
         // Arrange: Prepare a sample project and stub the repository to return it when
         // searched by ID
@@ -135,36 +165,6 @@ public class ProjectServiceTests {
         NewProjectDTO exceedingProjectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
         assertThrows(ProjectLimitReachedException.class, () -> projectService.createProject(exceedingProjectDTO));
         verify(projectRepository, times(1)).save(any(Project.class));
-    }
-
-    @Test
-    void getUserProjects_ShouldReturnProjectsOwnedByUser() {
-        // Arrange: Set up the current user and mock the projects they own
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
-
-        // Act: Call the service to retrieve all projects owned by the user
-        Iterable<Project> userProjects = projectService.getUserProjects();
-
-        // Assert: Verify that the returned projects match the expected projects
-        assertThat(userProjects).containsExactly(project1, project2);
-    }
-
-    @Test
-    void getUserProjects_ShouldReturnEmptyList_WhenNoProjectsExist() {
-        // Arrange: Set up the current user and mock their projects to return an empty
-        // list
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
-
-        // Act: Call the service to retrieve projects owned by the user
-        Iterable<Project> userProjects = projectService.getUserProjects();
-
-        // Assert: Verify that the returned projects list is empty
-        assertThat(userProjects).isEmpty();
     }
 
     @Test

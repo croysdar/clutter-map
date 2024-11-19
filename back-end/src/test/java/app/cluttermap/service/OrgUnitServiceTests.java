@@ -76,16 +76,55 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnOrgUnit() {
-        // Overwrite the default stub for `isResourceOwner` to deny access to the org
-        // unit
-        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("org-unit"))).thenReturn(false);
+    void getUserOrgUnits_ShouldReturnOrgUnitsOwnedByUser() {
+        // Arrange: Set up mock user, projects, and orgUnits, and stub the repository to
+        // return orgUnits owned by the user
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        // Act & Assert:
-        assertThrows(AccessDeniedException.class, () -> {
-            orgUnitService.checkOwnershipForOrgUnits(orgUnitIds);
-        });
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
+
+        // Act: Retrieve the orgUnits owned by the user
+        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
+
+        // Assert: Verify that the result contains only the orgUnits owned by the user
+        assertThat(userOrgUnits).containsExactly(orgUnit1, orgUnit2);
+    }
+
+    @Test
+    void getUserOrgUnits_ShouldReturnOrgUnitsAcrossMultipleProjects() {
+        // Arrange: Set up two projects for the same user with orgUnits
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
+
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
+
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
+
+        // Act: Fetch orgUnits for the user
+        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
+
+        // Assert: Verify both orgUnits are returned across different projects
+        assertThat(userOrgUnits).containsExactlyInAnyOrder(orgUnit1, orgUnit2);
+    }
+
+    @Test
+    void getUserOrgUnits_ShouldReturnEmptyList_WhenNoOrgUnitsExist() {
+        // Arrange: Set up mock user and stub the repository to return an empty list
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+
+        // Act: Retrieve the orgUnits owned by the user
+        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
+
+        // Assert: Verify that the result is empty
+        assertThat(userOrgUnits).isEmpty();
     }
 
     @Test
@@ -189,58 +228,6 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void getUserOrgUnits_ShouldReturnOrgUnitsOwnedByUser() {
-        // Arrange: Set up mock user, projects, and orgUnits, and stub the repository to
-        // return orgUnits owned by the user
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
-
-        // Act: Retrieve the orgUnits owned by the user
-        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
-
-        // Assert: Verify that the result contains only the orgUnits owned by the user
-        assertThat(userOrgUnits).containsExactly(orgUnit1, orgUnit2);
-    }
-
-    @Test
-    void getUserOrgUnits_ShouldReturnOrgUnitsAcrossMultipleProjects() {
-        // Arrange: Set up two projects for the same user with orgUnits
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
-
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(orgUnit1, orgUnit2));
-
-        // Act: Fetch orgUnits for the user
-        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
-
-        // Assert: Verify both orgUnits are returned across different projects
-        assertThat(userOrgUnits).containsExactlyInAnyOrder(orgUnit1, orgUnit2);
-    }
-
-    @Test
-    void getUserOrgUnits_ShouldReturnEmptyList_WhenNoOrgUnitsExist() {
-        // Arrange: Set up mock user and stub the repository to return an empty list
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(orgUnitRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
-
-        // Act: Retrieve the orgUnits owned by the user
-        Iterable<OrgUnit> userOrgUnits = orgUnitService.getUserOrgUnits();
-
-        // Assert: Verify that the result is empty
-        assertThat(userOrgUnits).isEmpty();
-    }
-
-    @Test
     void updateOrgUnit_ShouldUpdateOrgUnit_WhenOrgUnitExists() {
         // Arrange: Set up mock orgUnit with initial values and stub the repository to
         // return the orgUnit by ID
@@ -302,6 +289,35 @@ public class OrgUnitServiceTests {
         assertThat(updatedOrgUnit.getName()).isEqualTo(orgUnit.getName());
         assertThat(updatedOrgUnit.getDescription()).isEqualTo("Old Description");
         verify(orgUnitRepository).save(orgUnit);
+    }
+
+    @Test
+    void deleteOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() {
+        // Arrange: Set up a orgUnit and stub the repository to return the orgUnit by ID
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
+        Long orgUnitId = orgUnit.getId();
+        when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
+
+        // Act: Delete the orgUnit using the service
+        orgUnitService.deleteOrgUnit(orgUnitId);
+
+        // Assert: Verify that the repository's delete method was called with the
+        // correct ID
+        verify(orgUnitRepository).delete(orgUnit);
+    }
+
+    @Test
+    void deleteOrgUnit_ShouldThrowException_WhenOrgUnitDoesNotExist() {
+        // Arrange: Stub the repository to return an empty result when searching for a
+        // non-existent orgUnit
+        when(orgUnitRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert: Attempt to delete the orgUnit and expect a
+        // OrgUnitNotFoundException
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
+
+        // Assert: Verify that the repository's delete method was never called
+        verify(orgUnitRepository, never()).deleteById(anyLong());
     }
 
     @Test
@@ -390,31 +406,15 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void deleteOrgUnit_ShouldDeleteOrgUnit_WhenOrgUnitExists() {
-        // Arrange: Set up a orgUnit and stub the repository to return the orgUnit by ID
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        Long orgUnitId = orgUnit.getId();
-        when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
+    void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnOrgUnit() {
+        // Overwrite the default stub for `isResourceOwner` to deny access to the org
+        // unit
+        List<Long> orgUnitIds = List.of(1L, 2L, 3L);
+        when(securityService.isResourceOwner(anyLong(), eq("org-unit"))).thenReturn(false);
 
-        // Act: Delete the orgUnit using the service
-        orgUnitService.deleteOrgUnit(orgUnitId);
-
-        // Assert: Verify that the repository's delete method was called with the
-        // correct ID
-        verify(orgUnitRepository).delete(orgUnit);
-    }
-
-    @Test
-    void deleteOrgUnit_ShouldThrowException_WhenOrgUnitDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent orgUnit
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Attempt to delete the orgUnit and expect a
-        // OrgUnitNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
-
-        // Assert: Verify that the repository's delete method was never called
-        verify(orgUnitRepository, never()).deleteById(anyLong());
+        // Act & Assert:
+        assertThrows(AccessDeniedException.class, () -> {
+            orgUnitService.checkOwnershipForOrgUnits(orgUnitIds);
+        });
     }
 }

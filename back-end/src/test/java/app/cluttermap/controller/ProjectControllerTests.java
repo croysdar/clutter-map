@@ -1,6 +1,5 @@
 package app.cluttermap.controller;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -148,44 +147,39 @@ class ProjectControllerTests {
     }
 
     @Test
-    void getUnassignedItemsByProjectId_Success() throws Exception {
-        // Arrange: Set up projectId and simulate unassigned items
+    void getProjectRooms_ShouldReturnRooms_WhenProjectExists() throws Exception {
+        // Arrange: Set up a project with a room and mock the service to return the
+        // project
         Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Long projectId = 1L;
-        Item unassignedItem = new TestDataFactory.ItemBuilder().project(project).build();
-        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+        Room room = new TestDataFactory.RoomBuilder().project(project).build();
+        project.setRooms(Collections.singletonList(room));
+        when(projectService.getProjectById(1L)).thenReturn(project);
 
-        // Act & Assert: Perform the GET request on the new path and verify status 200
-        // OK and correct data
-        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+        // Act: Perform a GET request to the /projects/1/rooms endpoint
+        mockMvc.perform(get("/projects/1/rooms"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value(unassignedItem.getName()));
+
+                // Assert: Verify the response contains the expected room name
+                .andExpect(jsonPath("$[0].name").value(room.getName()));
+
+        // Assert: Ensure the service method was called to retrieve the project by ID
+        verify(projectService).getProjectById(1L);
     }
 
     @Test
-    void getUnassignedItemsByProjectId_NoUnassignedItems_ShouldReturnEmptyList() throws Exception {
-        // Arrange: Set up projectId and simulate no unassigned items
-        Long projectId = 1L;
-        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of());
+    void getProjectRooms_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw ProjectNotFoundException when retrieving
+        // rooms for a non-existent project
+        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
 
-        // Act & Assert: Perform the GET request and verify status 200 OK with an empty
-        // list
-        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
-    }
-
-    @Test
-    void getUnassignedItemsByNonExistentProjectId_ShouldReturnNotFound() throws Exception {
-        // Arrange: Use a project ID that does not exist
-        Long nonExistentProjectId = 999L;
-        when(itemService.getUnassignedItemsByProjectId(nonExistentProjectId))
-                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
-
-        // Act & Assert: Perform the GET request and verify status 404 Not Found
-        mockMvc.perform(get("/projects/{projectId}/items/unassigned", nonExistentProjectId))
+        // Act: Perform a GET request to the /projects/1/rooms endpoint
+        mockMvc.perform(get("/projects/1/rooms"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("PROJECT with ID 999 not found."));
+                .andExpect(content().string("PROJECT with ID 1 not found."));
+
+        // Assert: Ensure the service method was called to attempt to retrieve the
+        // project
+        verify(projectService).getProjectById(1L);
     }
 
     @Test
@@ -225,6 +219,47 @@ class ProjectControllerTests {
 
         // Act & Assert: Perform the GET request and verify status 404 Not Found
         mockMvc.perform(get("/projects/{projectId}/org-units/unassigned", nonExistentProjectId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("PROJECT with ID 999 not found."));
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_Success() throws Exception {
+        // Arrange: Set up projectId and simulate unassigned items
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Long projectId = 1L;
+        Item unassignedItem = new TestDataFactory.ItemBuilder().project(project).build();
+        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+
+        // Act & Assert: Perform the GET request on the new path and verify status 200
+        // OK and correct data
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value(unassignedItem.getName()));
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_NoUnassignedItems_ShouldReturnEmptyList() throws Exception {
+        // Arrange: Set up projectId and simulate no unassigned items
+        Long projectId = 1L;
+        when(itemService.getUnassignedItemsByProjectId(projectId)).thenReturn(List.of());
+
+        // Act & Assert: Perform the GET request and verify status 200 OK with an empty
+        // list
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getUnassignedItemsByNonExistentProjectId_ShouldReturnNotFound() throws Exception {
+        // Arrange: Use a project ID that does not exist
+        Long nonExistentProjectId = 999L;
+        when(itemService.getUnassignedItemsByProjectId(nonExistentProjectId))
+                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
+
+        // Act & Assert: Perform the GET request and verify status 404 Not Found
+        mockMvc.perform(get("/projects/{projectId}/items/unassigned", nonExistentProjectId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("PROJECT with ID 999 not found."));
     }
@@ -367,39 +402,4 @@ class ProjectControllerTests {
         verify(projectService).deleteProject(1L);
     }
 
-    @Test
-    void getProjectRooms_ShouldReturnRooms_WhenProjectExists() throws Exception {
-        // Arrange: Set up a project with a room and mock the service to return the
-        // project
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        project.setRooms(Collections.singletonList(room));
-        when(projectService.getProjectById(1L)).thenReturn(project);
-
-        // Act: Perform a GET request to the /projects/1/rooms endpoint
-        mockMvc.perform(get("/projects/1/rooms"))
-                .andExpect(status().isOk())
-
-                // Assert: Verify the response contains the expected room name
-                .andExpect(jsonPath("$[0].name").value(room.getName()));
-
-        // Assert: Ensure the service method was called to retrieve the project by ID
-        verify(projectService).getProjectById(1L);
-    }
-
-    @Test
-    void getProjectRooms_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw ProjectNotFoundException when retrieving
-        // rooms for a non-existent project
-        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
-
-        // Act: Perform a GET request to the /projects/1/rooms endpoint
-        mockMvc.perform(get("/projects/1/rooms"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("PROJECT with ID 1 not found."));
-
-        // Assert: Ensure the service method was called to attempt to retrieve the
-        // project
-        verify(projectService).getProjectById(1L);
-    }
 }

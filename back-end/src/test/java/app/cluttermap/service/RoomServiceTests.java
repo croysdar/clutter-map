@@ -64,6 +64,55 @@ public class RoomServiceTests {
     }
 
     @Test
+    void getUserRooms_ShouldReturnRoomsOwnedByUser() {
+        // Arrange: Set up mock user, projects, and rooms, and stub the repository to
+        // return rooms owned by the user
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+
+        Room room1 = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+
+        // Act: Retrieve the rooms owned by the user
+        Iterable<Room> userRooms = roomService.getUserRooms();
+
+        // Assert: Verify that the result contains only the rooms owned by the user
+        assertThat(userRooms).containsExactly(room1, room2);
+    }
+
+    @Test
+    void getUserRooms_ShouldReturnRoomsAcrossMultipleProjects() {
+        // Arrange: Set up two projects for the same user with rooms
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
+
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
+
+        // Act: Fetch rooms for the user
+        Iterable<Room> userRooms = roomService.getUserRooms();
+
+        // Assert: Verify both rooms are returned across different projects
+        assertThat(userRooms).containsExactlyInAnyOrder(room1, room2);
+    }
+
+    @Test
+    void getUserRooms_ShouldReturnEmptyList_WhenNoRoomsExist() {
+        // Arrange: Set up mock user and stub the repository to return an empty list
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+
+        // Act: Retrieve the rooms owned by the user
+        Iterable<Room> userRooms = roomService.getUserRooms();
+
+        // Assert: Verify that the result is empty
+        assertThat(userRooms).isEmpty();
+    }
+
+    @Test
     void getRoomId_ShouldReturnRoom_WhenRoomExists() {
         // Arrange: Set up a sample room and stub the repository to return it by ID
         Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
@@ -144,55 +193,6 @@ public class RoomServiceTests {
 
         // Act & Assert: Attempt to create a room and expect an exception
         assertThrows(RoomLimitReachedException.class, () -> roomService.createRoom(roomDTO));
-    }
-
-    @Test
-    void getUserRooms_ShouldReturnRoomsOwnedByUser() {
-        // Arrange: Set up mock user, projects, and rooms, and stub the repository to
-        // return rooms owned by the user
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
-
-        // Act: Retrieve the rooms owned by the user
-        Iterable<Room> userRooms = roomService.getUserRooms();
-
-        // Assert: Verify that the result contains only the rooms owned by the user
-        assertThat(userRooms).containsExactly(room1, room2);
-    }
-
-    @Test
-    void getUserRooms_ShouldReturnRoomsAcrossMultipleProjects() {
-        // Arrange: Set up two projects for the same user with rooms
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
-
-        // Act: Fetch rooms for the user
-        Iterable<Room> userRooms = roomService.getUserRooms();
-
-        // Assert: Verify both rooms are returned across different projects
-        assertThat(userRooms).containsExactlyInAnyOrder(room1, room2);
-    }
-
-    @Test
-    void getUserRooms_ShouldReturnEmptyList_WhenNoRoomsExist() {
-        // Arrange: Set up mock user and stub the repository to return an empty list
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
-
-        // Act: Retrieve the rooms owned by the user
-        Iterable<Room> userRooms = roomService.getUserRooms();
-
-        // Assert: Verify that the result is empty
-        assertThat(userRooms).isEmpty();
     }
 
     @Test

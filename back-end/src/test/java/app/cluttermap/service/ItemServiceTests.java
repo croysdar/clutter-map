@@ -87,19 +87,63 @@ public class ItemServiceTests {
     }
 
     @Test
-    void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnItem() {
-        // Overwrite the default stub for `isResourceOwner` to deny access to the item
-        List<Long> itemIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(false);
+    void getUserItems_ShouldReturnItemsOwnedByUser() {
+        // Arrange: Set up mock user, projects, and items, and stub the repository to
+        // return items owned by the user
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
 
-        // Act & Assert:
-        assertThrows(AccessDeniedException.class, () -> {
-            itemService.checkOwnershipForItems(itemIds);
-        });
+        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
+        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
+
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
+
+        // Act: Retrieve the items owned by the user
+        Iterable<Item> userItems = itemService.getUserItems();
+
+        // Assert: Verify that the result contains only the items owned by the user
+        assertThat(userItems).containsExactly(item1, item2);
     }
 
     @Test
-    void getItemId_ShouldReturnItem_WhenItemExists() {
+    void getUserItems_ShouldReturnItemsAcrossMultipleProjects() {
+        // Arrange: Set up two projects for the same user with items
+        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+
+        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
+
+        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
+        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
+
+        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit1).build();
+        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit2).build();
+
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
+
+        // Act: Fetch items for the user
+        Iterable<Item> userItems = itemService.getUserItems();
+
+        // Assert: Verify both items are returned across different projects
+        assertThat(userItems).containsExactlyInAnyOrder(item1, item2);
+    }
+
+    @Test
+    void getUserItems_ShouldReturnEmptyList_WhenNoItemsExist() {
+        // Arrange: Set up mock user and stub the repository to return an empty list
+        when(securityService.getCurrentUser()).thenReturn(mockUser);
+        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
+
+        // Act: Retrieve the items owned by the user
+        Iterable<Item> userItems = itemService.getUserItems();
+
+        // Assert: Verify that the result is empty
+        assertThat(userItems).isEmpty();
+    }
+
+    @Test
+    void getItemById_ShouldReturnItem_WhenItemExists() {
         // Arrange: Set up a sample org unit and stub the repository to return it by ID
         Item item = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
@@ -120,6 +164,33 @@ public class ItemServiceTests {
         // Act & Assert: Attempt to retrieve the item and expect a
         // ItemNotFoundException
         assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(1L));
+    }
+
+    @Test
+    void getUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
+        // Arrange: Mock repository method
+        Long projectId = 1L;
+        Item unassignedItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
+        when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
+
+        // Act: Call service method
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
+
+        // Assert: Verify correct items are returned
+        assertThat(unassignedItems).containsExactly(unassignedItem);
+    }
+
+    @Test
+    void getUnassignedItemsByNonExistentProjectId_ShouldReturnEmptyList() {
+        // Arrange: Use a project ID that does not exist
+        Long nonExistentProjectId = 999L;
+        when(itemRepository.findUnassignedItemsByProjectId(nonExistentProjectId)).thenReturn(List.of());
+
+        // Act: Call the service method
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(nonExistentProjectId);
+
+        // Assert: Verify that the result is an empty list
+        assertThat(unassignedItems).isEmpty();
     }
 
     @Test
@@ -197,89 +268,6 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to create a item and expect an exception
         assertThrows(ItemLimitReachedException.class, () -> itemService.createItem(itemDTO));
-    }
-
-    @Test
-    void getUserItems_ShouldReturnItemsOwnedByUser() {
-        // Arrange: Set up mock user, projects, and items, and stub the repository to
-        // return items owned by the user
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-
-        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-
-        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
-
-        // Act: Retrieve the items owned by the user
-        Iterable<Item> userItems = itemService.getUserItems();
-
-        // Assert: Verify that the result contains only the items owned by the user
-        assertThat(userItems).containsExactly(item1, item2);
-    }
-
-    @Test
-    void getUserItems_ShouldReturnItemsAcrossMultipleProjects() {
-        // Arrange: Set up two projects for the same user with items
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
-
-        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit1).build();
-        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit2).build();
-
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
-
-        // Act: Fetch items for the user
-        Iterable<Item> userItems = itemService.getUserItems();
-
-        // Assert: Verify both items are returned across different projects
-        assertThat(userItems).containsExactlyInAnyOrder(item1, item2);
-    }
-
-    @Test
-    void getUserItems_ShouldReturnEmptyList_WhenNoItemsExist() {
-        // Arrange: Set up mock user and stub the repository to return an empty list
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
-
-        // Act: Retrieve the items owned by the user
-        Iterable<Item> userItems = itemService.getUserItems();
-
-        // Assert: Verify that the result is empty
-        assertThat(userItems).isEmpty();
-    }
-
-    @Test
-    void getUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
-        // Arrange: Mock repository method
-        Long projectId = 1L;
-        Item unassignedItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
-
-        // Act: Call service method
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
-
-        // Assert: Verify correct items are returned
-        assertThat(unassignedItems).containsExactly(unassignedItem);
-    }
-
-    @Test
-    void getUnassignedItemsByNonExistentProjectId_ShouldReturnEmptyList() {
-        // Arrange: Use a project ID that does not exist
-        Long nonExistentProjectId = 999L;
-        when(itemRepository.findUnassignedItemsByProjectId(nonExistentProjectId)).thenReturn(List.of());
-
-        // Act: Call the service method
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(nonExistentProjectId);
-
-        // Assert: Verify that the result is an empty list
-        assertThat(unassignedItems).isEmpty();
     }
 
     @Test
@@ -391,6 +379,35 @@ public class ItemServiceTests {
     }
 
     @Test
+    void deleteItem_ShouldDeleteItem_WhenItemExists() {
+        // Arrange: Set up a item and stub the repository to return the item by ID
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
+        Long itemId = item.getId();
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        // Act: Delete the item using the service
+        itemService.deleteItem(itemId);
+
+        // Assert: Verify that the repository's delete method was called with the
+        // correct ID
+        verify(itemRepository).deleteById(itemId);
+    }
+
+    @Test
+    void deleteItem_ShouldThrowException_WhenItemDoesNotExist() {
+        // Arrange: Stub the repository to return an empty result when searching for a
+        // non-existent item
+        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert: Attempt to delete the item and expect a
+        // ItemNotFoundException
+        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItem(1L));
+
+        // Assert: Verify that the repository's delete method was never called
+        verify(itemRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
     void assignItemsToOrgUnit_Success() {
         // Arrange: Create target OrgUnit and mock items to move
         OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
@@ -480,31 +497,14 @@ public class ItemServiceTests {
     }
 
     @Test
-    void deleteItem_ShouldDeleteItem_WhenItemExists() {
-        // Arrange: Set up a item and stub the repository to return the item by ID
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        Long itemId = item.getId();
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+    void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnItem() {
+        // Overwrite the default stub for `isResourceOwner` to deny access to the item
+        List<Long> itemIds = List.of(1L, 2L, 3L);
+        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(false);
 
-        // Act: Delete the item using the service
-        itemService.deleteItem(itemId);
-
-        // Assert: Verify that the repository's delete method was called with the
-        // correct ID
-        verify(itemRepository).deleteById(itemId);
-    }
-
-    @Test
-    void deleteItem_ShouldThrowException_WhenItemDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent item
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Attempt to delete the item and expect a
-        // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItem(1L));
-
-        // Assert: Verify that the repository's delete method was never called
-        verify(itemRepository, never()).deleteById(anyLong());
+        // Act & Assert:
+        assertThrows(AccessDeniedException.class, () -> {
+            itemService.checkOwnershipForItems(itemIds);
+        });
     }
 }

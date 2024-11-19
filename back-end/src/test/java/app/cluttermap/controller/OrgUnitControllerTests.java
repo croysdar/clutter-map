@@ -156,6 +156,44 @@ class OrgUnitControllerTests {
     }
 
     @Test
+    void getOrgUnitItems_ShouldReturnItems_WhenOrgUnitExists() throws Exception {
+        // Arrange: Set up a orgUnit with an item and mock the service to return the
+        // orgUnit
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
+        orgUnit.setItems(Collections.singletonList(item));
+        when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
+
+        // Act: Perform a GET request to the /org-units/1/org-units endpoint
+        mockMvc.perform(get("/org-units/1/items"))
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected orgUnit name
+                .andExpect(jsonPath("$[0].name").value(item.getName()))
+                .andExpect(jsonPath("$[0].description").value(item.getDescription()));
+
+        // Assert: Ensure the service method was called to retrieve the orgUnit by ID
+        verify(orgUnitService).getOrgUnitById(1L);
+    }
+
+    @Test
+    void getOrgUnitItems_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw OrgUnitNotFoundException when retrieving
+        // orgUnits for a non-existent orgUnit
+        when(orgUnitService.getOrgUnitById(1L))
+                .thenThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 1L));
+
+        // Act: Perform a GET request to the /org-units/1/org-units endpoint
+        mockMvc.perform(get("/org-units/1/items"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 1 not found."));
+
+        // Assert: Ensure the service method was called to attempt to retrieve the
+        // orgUnit
+        verify(orgUnitService).getOrgUnitById(1L);
+    }
+
+    @Test
     void addOneOrgUnit_ShouldCreateOrgUnit_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewOrgUnitDTO with valid data and mock the service to
         // return a new orgUnit
@@ -452,44 +490,6 @@ class OrgUnitControllerTests {
                 .content(objectMapper.writeValueAsString(orgUnitIds)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("Access Denied"));
-    }
-
-    @Test
-    void getOrgUnitItems_ShouldReturnItems_WhenOrgUnitExists() throws Exception {
-        // Arrange: Set up a orgUnit with an item and mock the service to return the
-        // orgUnit
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
-        orgUnit.setItems(Collections.singletonList(item));
-        when(orgUnitService.getOrgUnitById(1L)).thenReturn(orgUnit);
-
-        // Act: Perform a GET request to the /org-units/1/org-units endpoint
-        mockMvc.perform(get("/org-units/1/items"))
-                .andExpect(status().isOk())
-
-                // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$[0].name").value(item.getName()))
-                .andExpect(jsonPath("$[0].description").value(item.getDescription()));
-
-        // Assert: Ensure the service method was called to retrieve the orgUnit by ID
-        verify(orgUnitService).getOrgUnitById(1L);
-    }
-
-    @Test
-    void getOrgUnitItems_ShouldReturnNotFound_WhenOrgUnitDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw OrgUnitNotFoundException when retrieving
-        // orgUnits for a non-existent orgUnit
-        when(orgUnitService.getOrgUnitById(1L))
-                .thenThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 1L));
-
-        // Act: Perform a GET request to the /org-units/1/org-units endpoint
-        mockMvc.perform(get("/org-units/1/items"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 1 not found."));
-
-        // Assert: Ensure the service method was called to attempt to retrieve the
-        // orgUnit
-        verify(orgUnitService).getOrgUnitById(1L);
     }
 
     @Test

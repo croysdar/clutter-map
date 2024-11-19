@@ -147,6 +147,42 @@ class RoomControllerTests {
     }
 
     @Test
+    void getRoomOrgUnits_ShouldReturnOrgUnits_WhenRoomExists() throws Exception {
+        // Arrange: Set up a room with a orgUnit and mock the service to return the
+        // room
+        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
+        room.setOrgUnits(Collections.singletonList(orgUnit));
+        when(roomService.getRoomById(1L)).thenReturn(room);
+
+        // Act: Perform a GET request to the /rooms/1/org-units endpoint
+        mockMvc.perform(get("/rooms/1/org-units"))
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected orgUnit name
+                .andExpect(jsonPath("$[0].name").value(orgUnit.getName()));
+
+        // Assert: Ensure the service method was called to retrieve the room by ID
+        verify(roomService).getRoomById(1L);
+    }
+
+    @Test
+    void getRoomOrgUnits_ShouldReturnNotFound_WhenRoomDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw RoomNotFoundException when retrieving
+        // orgUnits for a non-existent room
+        when(roomService.getRoomById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.ROOM, 1L));
+
+        // Act: Perform a GET request to the /rooms/1/org-units endpoint
+        mockMvc.perform(get("/rooms/1/org-units"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("ROOM with ID 1 not found."));
+
+        // Assert: Ensure the service method was called to attempt to retrieve the
+        // room
+        verify(roomService).getRoomById(1L);
+    }
+
+    @Test
     void addOneRoom_ShouldCreateRoom_WhenValidRequest() throws Exception {
         // Arrange: Set up a NewRoomDTO with valid data and mock the service to
         // return a new room
@@ -399,41 +435,5 @@ class RoomControllerTests {
 
         // Assert: Ensure the service method was called to attempt to delete the room
         verify(roomService).deleteRoom(1L);
-    }
-
-    @Test
-    void getRoomOrgUnits_ShouldReturnOrgUnits_WhenRoomExists() throws Exception {
-        // Arrange: Set up a room with a orgUnit and mock the service to return the
-        // room
-        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        room.setOrgUnits(Collections.singletonList(orgUnit));
-        when(roomService.getRoomById(1L)).thenReturn(room);
-
-        // Act: Perform a GET request to the /rooms/1/org-units endpoint
-        mockMvc.perform(get("/rooms/1/org-units"))
-                .andExpect(status().isOk())
-
-                // Assert: Verify the response contains the expected orgUnit name
-                .andExpect(jsonPath("$[0].name").value(orgUnit.getName()));
-
-        // Assert: Ensure the service method was called to retrieve the room by ID
-        verify(roomService).getRoomById(1L);
-    }
-
-    @Test
-    void getRoomOrgUnits_ShouldReturnNotFound_WhenRoomDoesNotExist() throws Exception {
-        // Arrange: Mock the service to throw RoomNotFoundException when retrieving
-        // orgUnits for a non-existent room
-        when(roomService.getRoomById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.ROOM, 1L));
-
-        // Act: Perform a GET request to the /rooms/1/org-units endpoint
-        mockMvc.perform(get("/rooms/1/org-units"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("ROOM with ID 1 not found."));
-
-        // Assert: Ensure the service method was called to attempt to retrieve the
-        // room
-        verify(roomService).getRoomById(1L);
     }
 }

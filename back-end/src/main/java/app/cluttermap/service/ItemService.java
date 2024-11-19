@@ -47,15 +47,15 @@ public class ItemService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Item getItemById(Long id) {
-        return itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
-    }
-
     public Iterable<Item> getUserItems() {
         User user = securityService.getCurrentUser();
 
         return itemRepository.findByOwnerId(user.getId());
+    }
+
+    public Item getItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
     }
 
     public List<Item> getUnassignedItemsByProjectId(Long projectId) {
