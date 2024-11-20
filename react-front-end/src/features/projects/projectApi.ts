@@ -3,6 +3,7 @@ import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
 
 export const projectApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        /* ------------- GET Operations ------------- */
         getProjects: builder.query<Project[], void>({
             query: () => '/projects',
             providesTags: (result = []) => [
@@ -16,6 +17,17 @@ export const projectApi = baseApiSlice.injectEndpoints({
             providesTags: (result, error, arg) => [{ type: 'Project', id: arg }]
         }),
 
+        /* ------------- POST Operations ------------- */
+        addNewProject: builder.mutation<Project, NewProject>({
+            query: initialProject => ({
+                url: '/projects',
+                method: 'POST',
+                body: initialProject
+            }),
+            invalidatesTags: ['Project']
+        }),
+
+        /* ------------- PUT Operations ------------- */
         updateProject: builder.mutation<Project, ProjectUpdate>({
             query: project => ({
                 url: `/projects/${project.id}`,
@@ -25,6 +37,7 @@ export const projectApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: 'Project', id: arg.id }]
         }),
 
+        /* ------------- DELETE Operations ------------- */
         deleteProject: builder.mutation<{ success: boolean, id: number }, number>({
             query: projectId => ({
                 url: `/projects/${projectId}`,
@@ -33,14 +46,6 @@ export const projectApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, id) => [{ type: 'Project', id }]
         }),
 
-        addNewProject: builder.mutation<Project, NewProject>({
-            query: initialProject => ({
-                url: '/projects',
-                method: 'POST',
-                body: initialProject
-            }),
-            invalidatesTags: ['Project']
-        })
 
     })
 })

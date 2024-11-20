@@ -1,8 +1,10 @@
 import { baseApiSlice } from "@/api/baseApiSlice";
-import { NewOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
+import { NewOrgUnit, NewUnassignedOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
+import { Item, ItemsAssign } from "../items/itemTypes";
 
 export const orgUnitApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        /* ------------- GET Operations ------------- */
         getOrgUnits: builder.query<OrgUnit[], void>({
             query: () => '/org-units',
             providesTags: (result = []) => [
@@ -24,6 +26,26 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
             providesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg }]
         }),
 
+        /* ------------- POST Operations ------------- */
+        addNewOrgUnit: builder.mutation<OrgUnit, NewOrgUnit>({
+            query: initialOrgUnit => ({
+                url: '/org-units',
+                method: 'POST',
+                body: initialOrgUnit
+            }),
+            invalidatesTags: ['OrgUnit']
+        }),
+
+        addNewUnassignedOrgUnit: builder.mutation<OrgUnit, NewUnassignedOrgUnit>({
+            query: initialOrgUnit => ({
+                url: '/org-units',
+                method: 'POST',
+                body: initialOrgUnit
+            }),
+            invalidatesTags: ['OrgUnit']
+        }),
+
+        /* ------------- PUT Operations ------------- */
         updateOrgUnit: builder.mutation<OrgUnit, OrgUnitUpdate>({
             query: orgUnit => ({
                 url: `/org-units/${orgUnit.id}`,
@@ -33,6 +55,24 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg.id }]
         }),
 
+        assignItemsToOrgUnit: builder.mutation<Item[], ItemsAssign>({
+            query: ({ itemIds, orgUnitId }) => ({
+                url: `/org-units/${orgUnitId}/items`,
+                method: 'PUT',
+                body: itemIds
+            })
+        }),
+
+        unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], Number[]>({
+            query: orgUnitIds => ({
+                url: '/org-units/unassign',
+                method: 'PUT',
+                body: orgUnitIds
+            }),
+            invalidatesTags: ['OrgUnit', 'Room']
+        }),
+
+        /* ------------- DELETE Operations ------------- */
         deleteOrgUnit: builder.mutation<{ success: boolean, id: number }, number>({
             query: orgUnitId => ({
                 url: `/org-units/${orgUnitId}`,
@@ -41,14 +81,6 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, id) => [{ type: 'OrgUnit', id }]
         }),
 
-        addNewOrgUnit: builder.mutation<OrgUnit, NewOrgUnit>({
-            query: initialOrgUnit => ({
-                url: '/org-units',
-                method: 'POST',
-                body: initialOrgUnit
-            }),
-            invalidatesTags: ['OrgUnit']
-        }),
     })
 })
 
