@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { TagField } from '@/components/TagField'
-import DeleteItemButton from './DeleteItemButton'
-import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { QuantityField } from '@/components/QuantityField'
+import { TagField } from '@/components/TagField'
+import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -143,7 +143,15 @@ const EditItem = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteItemButton item={item} isDisabled={updateLoading} redirectUrl={redirectUrl} />
+                <DeleteEntityButton
+                    entity={item}
+                    id={item.id}
+                    name={item.name}
+                    entityType='Item'
+                    mutation={useDeleteItemMutation}
+                    isDisabled={updateLoading}
+                    redirectUrl={redirectUrl}
+                />
 
             </CardContent>
         </Card>

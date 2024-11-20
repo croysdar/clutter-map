@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteProjectButton from './DeleteProjectButton'
-import { useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
+import DeleteEntityButton from '@/components/DeleteEntityButton'
+import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -108,7 +108,16 @@ const EditProject = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteProjectButton project={project} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
+                <DeleteEntityButton
+                    entity={project}
+                    id={project.id}
+                    name={project.name}
+                    entityType='Project'
+                    mutation={useDeleteProjectMutation}
+                    extraWarning='This will delete all rooms, organizational units and items within.'
+                    isDisabled={updateLoading}
+                    redirectUrl={sourcePageUrl}
+                />
 
             </CardContent>
         </Card>

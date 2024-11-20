@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteOrgUnitButton from './DeleteOrgUnitButton'
-import { useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
+import DeleteEntityButton from '@/components/DeleteEntityButton'
+import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -128,7 +128,16 @@ const EditOrgUnit = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteOrgUnitButton orgUnit={orgUnit} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
+                <DeleteEntityButton
+                    entity={orgUnit}
+                    id={orgUnit.id}
+                    name={orgUnit.name}
+                    entityType='Organizational Unit'
+                    mutation={useDeleteOrgUnitMutation}
+                    extraWarning='This will send all items within the organizer to the Clutter Stash.'
+                    isDisabled={updateLoading}
+                    redirectUrl={sourcePageUrl}
+                />
 
             </CardContent>
         </Card>

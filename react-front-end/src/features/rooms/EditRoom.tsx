@@ -3,8 +3,8 @@ import React from 'react'
 import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteRoomButton from './DeleteRoomButton'
-import { useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
+import DeleteEntityButton from '@/components/DeleteEntityButton'
+import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -126,7 +126,16 @@ const EditRoom = () => {
                 </Button>
 
                 {/* Delete button with a confirmation dialog */}
-                <DeleteRoomButton room={room} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
+                <DeleteEntityButton
+                    entity={room}
+                    id={room.id}
+                    name={room.name}
+                    entityType='Room'
+                    mutation={useDeleteRoomMutation}
+                    extraWarning='This will send all organizers within the room to the Clutter Stash.'
+                    isDisabled={updateLoading}
+                    redirectUrl={sourcePageUrl}
+                />
 
             </CardContent>
         </Card>
