@@ -1,4 +1,4 @@
-import { baseApiSlice } from "@/features/api/baseApiSlice";
+import { baseApiSlice } from "@/api/baseApiSlice";
 import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
 
 export const projectApi = baseApiSlice.injectEndpoints({

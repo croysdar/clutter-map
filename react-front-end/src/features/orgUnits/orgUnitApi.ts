@@ -1,4 +1,4 @@
-import { baseApiSlice } from "@/features/api/baseApiSlice";
+import { baseApiSlice } from "@/api/baseApiSlice";
 import { NewOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
 
 export const orgUnitApi = baseApiSlice.injectEndpoints({
