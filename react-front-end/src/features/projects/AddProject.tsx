@@ -3,6 +3,7 @@ import React from 'react';
 import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
+import { AddNewCardWrapper } from '@/pages/AddNewPage';
 
 interface AddProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -38,51 +39,45 @@ export const AddProject = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Project
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Project Name */}
-                    <TextField
-                        label="Project Name"
+        <AddNewCardWrapper title="Add a New Project">
+            <form onSubmit={handleSubmit}>
+                {/* Project Name */}
+                <TextField
+                    label="Project Name"
 
-                        id="projectName"
-                        name="name"
+                    id="projectName"
+                    name="name"
 
-                        required
+                    required
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Project
-                    </Button>
-                </form>
-
+                {/* Submit Button */}
                 <Button
-                    variant="text"
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     fullWidth
                     sx={{ marginTop: 2 }}
-                    onClick={() => navigate('/projects')}
-
+                    disabled={isLoading}
                 >
-                    Cancel
+                    Create Project
                 </Button>
+            </form>
 
-            </CardContent>
-        </Card>
+            <Button
+                variant="text"
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={() => navigate('/projects')}
+
+            >
+                Cancel
+            </Button>
+        </AddNewCardWrapper>
     )
 }

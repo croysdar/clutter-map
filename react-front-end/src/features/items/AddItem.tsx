@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
+import { QuantityField } from '@/components/QuantityField';
 import { TagField } from '@/components/TagField';
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import { AddNewCardWrapper } from '@/pages/AddNewPage';
+import { Button, TextField } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
-import { QuantityField } from '@/components/QuantityField';
 
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -57,73 +58,67 @@ export const AddItem = () => {
     // TODO change this so that the Org Unit can be chosen from a drop down
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Item
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Item Name */}
-                    <TextField
-                        label="Item Name"
+        <AddNewCardWrapper title="Add a New Item">
+            <form onSubmit={handleSubmit}>
+                {/* Item Name */}
+                <TextField
+                    label="Item Name"
 
-                        id="itemName"
-                        name="name"
+                    id="itemName"
+                    name="name"
 
-                        required
+                    required
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                    {/* Item Description */}
-                    <TextField
-                        label="Item Description"
+                {/* Item Description */}
+                <TextField
+                    label="Item Description"
 
-                        id="itemDescription"
-                        name="description"
+                    id="itemDescription"
+                    name="description"
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                    {/* Item Quantity */}
-                    <QuantityField
-                        quantity={quantity}
-                        onQuantityChange={setQuantity}
-                    />
+                {/* Item Quantity */}
+                <QuantityField
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                />
 
-                    {/* Item Tags */}
-                    <TagField tags={tags} onTagsChange={setTags} />
+                {/* Item Tags */}
+                <TagField tags={tags} onTagsChange={setTags} />
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Item
-                    </Button>
-                </form>
+                {/* Submit Button */}
                 <Button
-                    variant="text"
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     fullWidth
                     sx={{ marginTop: 2 }}
-                    onClick={() => navigate(sourcePageUrl)}
+                    disabled={isLoading}
                 >
-                    Cancel
+                    Create Item
                 </Button>
-
-            </CardContent>
-        </Card>
+            </form>
+            <Button
+                variant="text"
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={() => navigate(sourcePageUrl)}
+            >
+                Cancel
+            </Button>
+        </AddNewCardWrapper>
     )
 }

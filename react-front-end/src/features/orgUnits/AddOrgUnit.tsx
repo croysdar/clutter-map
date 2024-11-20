@@ -1,7 +1,9 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import { AddNewCardWrapper } from '@/pages/AddNewPage';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
 
@@ -48,64 +50,59 @@ export const AddOrgUnit = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Organizational Unit
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* OrgUnit Name */}
-                    <TextField
-                        label="OrgUnit Name"
+        <AddNewCardWrapper title="Add a New Organizational Unit">
+            <form onSubmit={handleSubmit}>
+                {/* OrgUnit Name */}
+                <TextField
+                    label="OrgUnit Name"
 
-                        id="orgUnitName"
-                        name="name"
+                    id="orgUnitName"
+                    name="name"
 
-                        required
+                    required
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                    {/* OrgUnit Description */}
-                    <TextField
-                        label="OrgUnit Description"
+                {/* OrgUnit Description */}
+                <TextField
+                    label="OrgUnit Description"
 
-                        id="orgUnitDescription"
-                        name="description"
+                    id="orgUnitDescription"
+                    name="description"
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Organizational Unit
-                    </Button>
-                </form>
+                {/* Submit Button */}
                 <Button
-                    variant="text"
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     fullWidth
                     sx={{ marginTop: 2 }}
-                    onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}
+                    disabled={isLoading}
                 >
-                    Cancel
+                    Create Organizational Unit
                 </Button>
+            </form>
+            <Button
+                variant="text"
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}
+            >
+                Cancel
+            </Button>
 
-            </CardContent>
-        </Card>
+        </AddNewCardWrapper>
     )
 }

@@ -1,7 +1,5 @@
-
-import { Paper, Typography, Container, Box } from '@mui/material';
 import React from 'react';
-
+import { Paper, Typography, Container, Box } from '@mui/material';
 
 export type ListViewTileWrapProps = {
     title: string

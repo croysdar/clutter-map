@@ -4,6 +4,7 @@ import { Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
+import { AddNewCardWrapper } from '@/pages/AddNewPage';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -13,7 +14,6 @@ interface AddRoomFormFields extends HTMLFormControlsCollection {
 interface AddRoomFormElements extends HTMLFormElement {
     readonly elements: AddRoomFormFields
 }
-
 
 export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
@@ -48,65 +48,60 @@ export const AddRoom = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Room
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Room Name */}
-                    <TextField
-                        label="Room Name"
 
-                        id="roomName"
-                        name="name"
+        <AddNewCardWrapper title="Add a New Room">
+            <form onSubmit={handleSubmit}>
+                {/* Room Name */}
+                <TextField
+                    label="Room Name"
 
-                        required
+                    id="roomName"
+                    name="name"
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    required
 
-                    {/* Room Description */}
-                    <TextField
-                        label="Room Description"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
 
-                        id="roomDescription"
-                        name="description"
+                {/* Room Description */}
+                <TextField
+                    label="Room Description"
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    id="roomDescription"
+                    name="description"
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Room
-                    </Button>
-                </form>
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
+
+                {/* Submit Button */}
                 <Button
-                    variant="text"
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     fullWidth
                     sx={{ marginTop: 2 }}
-                    onClick={() => navigate(`/projects/${projectId}/rooms`)}
-
+                    disabled={isLoading}
                 >
-                    Cancel
+                    Create Room
                 </Button>
+            </form>
+            <Button
+                variant="text"
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={() => navigate(`/projects/${projectId}/rooms`)}
 
-            </CardContent>
-        </Card>
+            >
+                Cancel
+            </Button>
+        </AddNewCardWrapper>
     )
 }
