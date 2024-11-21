@@ -1,59 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { MoreVert } from '@mui/icons-material';
-import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
+import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
 import { Room } from '@/features/rooms/roomsTypes';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 type RoomMenuProps = {
     room: Room
 }
 
 const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl)
-    const navigate = useNavigate();
+
     const { projectId } = useParams();
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setAnchorEl(event.currentTarget);
-    }
+    const menuItems: LinkMenuItem[] = [
+        {
+            label: "Edit Room",
+            url: `/projects/${projectId}/rooms/${room.id}/edit`
+        }
+    ]
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    }
-
-    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        navigate(`/projects/${projectId}/rooms/${room.id}/edit`)
-        handleClose();
-    }
-
-    return (
-        <>
-            <Tooltip title="Settings">
-                <IconButton
-                    onClick={handleClick}
-                >
-                    <MoreVert />
-                </IconButton>
-            </Tooltip>
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                id={`room-${room.id}-menu`}
-                onClose={handleClose}
-            >
-                <MenuItem onClick={handleEdit}>
-                    Edit Room
-                </MenuItem>
-            </Menu>
-        </>
-    );
+    return <LinksMenu menuItems={menuItems} />
 }
 
 export default RoomMenu;
