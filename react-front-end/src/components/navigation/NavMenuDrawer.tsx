@@ -15,7 +15,7 @@ import { selectAuthStatus } from '@/features/auth/authSlice';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import { Link } from 'react-router-dom';
 
-const NavMenu = () => {
+const NavMenuDrawer = () => {
     const [open, setOpen] = useState<boolean>(false);
 
     const loggedIn = useAppSelector(selectAuthStatus) === 'verified';
@@ -83,4 +83,4 @@ const NavLink: React.FC<NavLinkProps> = ({ label, to }) => {
     )
 }
 
-export default NavMenu;
+export default NavMenuDrawer;

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { rejectAuthStatus, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
-import NavMenu from './NavMenu';
+import NavMenuDrawer from './NavMenuDrawer';
 
 const Navbar: React.FC = () => {
     const userName = useAppSelector(selectCurrentUserName);
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
         <AppBar position="static" >
             <Toolbar sx={{ justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <NavMenu />
+                    <NavMenuDrawer />
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                             Clutter Map
