@@ -5,28 +5,28 @@ import { fetchUserInfo, rejectAuthStatus } from '@/features/auth/authSlice';
 import { useAppDispatch } from '@/hooks/useAppHooks';
 
 function App() {
-  const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    const token = localStorage.getItem('jwt')
+    useEffect(() => {
+        const token = localStorage.getItem('jwt')
 
-    // Check if user has previously logged in
-    if (token) {
-      // send token to backend to fetch user data
-      dispatch(fetchUserInfo(token));
-    }
-    else {
-      // Set auth status to 'none' because there is no jwt
-      dispatch(rejectAuthStatus());
-    }
-  }, [dispatch]);
+        // Check if user has previously logged in
+        if (token) {
+            // send token to backend to fetch user data
+            dispatch(fetchUserInfo(token));
+        }
+        else {
+            // Set auth status to 'none' because there is no jwt
+            dispatch(rejectAuthStatus());
+        }
+    }, [dispatch]);
 
 
-  return (
-    <div className="App">
-        <Pages />
-    </div>
-  );
+    return (
+        <div className="App">
+            <Pages />
+        </div>
+    );
 }
 
 export default App;
