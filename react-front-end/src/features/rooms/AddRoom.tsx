@@ -1,6 +1,9 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import AppTextField from '@/components/forms/AppTextField';
+import CancelButton from '@/components/forms/CancelButton';
+import SubmitButton from '@/components/forms/SubmitButton';
+import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
@@ -14,11 +17,11 @@ interface AddRoomFormElements extends HTMLFormElement {
     readonly elements: AddRoomFormFields
 }
 
-
 export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
     const navigate = useNavigate()
     const { projectId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms`
 
     const { data: project } = useGetProjectQuery(projectId!);
 
@@ -41,72 +44,46 @@ export const AddRoom = () => {
             form.reset()
 
             // redirect to [this project]/rooms
-            navigate(`/projects/${projectId}/rooms`)
+            navigate(redirectUrl)
         } catch (err) {
             console.error("Failed to create the room: ", err)
         }
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Room
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Room Name */}
-                    <TextField
-                        label="Room Name"
 
-                        id="roomName"
-                        name="name"
+        <AddNewCardWrapper title="Add a New Room">
+            <form onSubmit={handleSubmit}>
+                {/* Room Name */}
+                <AppTextField
+                    label="Room Name"
 
-                        required
+                    id="roomName"
+                    name="name"
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    required
+                />
 
-                    {/* Room Description */}
-                    <TextField
-                        label="Room Description"
+                {/* Room Description */}
+                <AppTextField
+                    label="Room Description"
 
-                        id="roomDescription"
-                        name="description"
+                    id="roomDescription"
+                    name="description"
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                    multiline
+                    rows={4}
+                />
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Room
-                    </Button>
-                </form>
-                <Button
-                    variant="text"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={() => navigate(`/projects/${projectId}/rooms`)}
-
-                >
-                    Cancel
-                </Button>
-
-            </CardContent>
-        </Card>
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={isLoading}
+                    label="Create Room"
+                />
+            </form>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
+        </AddNewCardWrapper>
     )
 }

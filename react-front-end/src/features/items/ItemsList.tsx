@@ -1,27 +1,23 @@
 import React from 'react';
 
 import {
-    Card,
-    CardContent,
-    CardHeader,
     CircularProgress,
-    Paper,
-    Typography
+    Paper
 } from '@mui/material';
 
-import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
+import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
+import { TileWrapper } from '@/components/common/TileWrapper';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
 import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from './itemApi';
 import ItemMenu from './ItemMenu';
-import { RenderTags } from '@/components/TagField';
 
 const ItemsList: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
-
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
+    const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`
 
     const {
         data: items = [],
@@ -43,30 +39,29 @@ const ItemsList: React.FC = () => {
     }
 
     if (!orgUnit) {
-        return <div>Organizational unit not found.</div>
+        return <div>Organizer not found.</div>
     }
 
     return (
         <>
-            <ListViewTileWrap title={orgUnit.name} subtitle={orgUnit.description} menu={<OrgUnitMenu orgUnit={orgUnit} />}>
+            <ListViewTileWrap
+                title={orgUnit.name}
+                subtitle={orgUnit.description}
+                menu={<OrgUnitMenu orgUnit={orgUnit} />}
+                count={items.length}
+            >
                 {items.map((item) => (
-                    <Card key={`item-card-${item.id}`} sx={{ width: '100%' }}>
-                        <div key={item.id} >
-                            <CardHeader
-                                title={<Typography variant='h6'> {item.name}</Typography>}
-                                action={<ItemMenu item={item} />}
-                            />
-                            <CardContent>
-                                <Typography variant="body2" sx={{ mb: 1 }}>{item.description}</Typography>
-                                <RenderTags tags={item.tags} />
-                            </CardContent>
-                        </div>
-                    </Card>
+                    <TileWrapper
+                        // TODO make item details page
+                        title={item.name}
+                        id={item.id}
+                        elementLeft={<ItemMenu item={item} />}
+                    />
                 ))}
             </ListViewTileWrap>
-            <CreateNewObjectButton
+            <CreateNewEntityButton
                 objectLabel='Item'
-                to={`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`}
+                to={addUrl}
             />
         </>
     );

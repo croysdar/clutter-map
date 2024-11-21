@@ -1,58 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { MoreVert } from '@mui/icons-material';
-import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-
+import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
 import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 type OrgUnitMenuProps = {
     orgUnit: OrgUnit
 }
 
 const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl)
-    const navigate = useNavigate();
     const { roomId, projectId } = useParams();
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setAnchorEl(event.currentTarget);
-    }
-    const handleClose = () => {
-        setAnchorEl(null);
-    }
+    const menuItems: LinkMenuItem[] = [
+        {
+            label: "Edit Organizer",
+            url: `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnit.id}/edit`
+        }
+    ]
 
-    const handleEdit = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnit.id}/edit`)
-        handleClose();
-    }
-
-    return (
-        <>
-            <Tooltip title="Settings">
-                <IconButton
-                    onClick={handleClick}
-                >
-                    <MoreVert />
-                </IconButton>
-            </Tooltip>
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                id={`orgUnit-${orgUnit.id}-menu`}
-                onClose={handleClose}
-            >
-                <MenuItem onClick={handleEdit}>
-                    Edit Unit
-                </MenuItem>
-            </Menu>
-        </>
-    );
+    return <LinksMenu menuItems={menuItems} />
 }
 
 export default OrgUnitMenu;

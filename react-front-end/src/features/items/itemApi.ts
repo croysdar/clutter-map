@@ -1,8 +1,9 @@
-import { baseApiSlice } from "@/features/api/baseApiSlice";
-import { NewItem, Item, ItemUpdate } from "./itemTypes";
+import { baseApiSlice } from "@/services/baseApiSlice";
+import { NewItem, Item, ItemUpdate, NewUnassignedItem } from "./itemTypes";
 
 export const itemApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        /* ------------- GET Operations ------------- */
         getItems: builder.query<Item[], void>({
             query: () => '/items',
             providesTags: (result = []) => [
@@ -24,6 +25,26 @@ export const itemApi = baseApiSlice.injectEndpoints({
             providesTags: (result, error, arg) => [{ type: 'Item', id: arg }]
         }),
 
+        /* ------------- POST Operations ------------- */
+        addNewItem: builder.mutation<Item, NewItem>({
+            query: initialItem => ({
+                url: '/items',
+                method: 'POST',
+                body: initialItem
+            }),
+            invalidatesTags: ['Item']
+        }),
+
+        addNewUnassignedItem: builder.mutation<Item, NewUnassignedItem>({
+            query: initialItem => ({
+                url: '/items',
+                method: 'POST',
+                body: initialItem
+            }),
+            invalidatesTags: ['Item']
+        }),
+
+        /* ------------- PUT Operations ------------- */
         updateItem: builder.mutation<Item, ItemUpdate>({
             query: item => ({
                 url: `/items/${item.id}`,
@@ -33,6 +54,16 @@ export const itemApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: 'Item', id: arg.id }]
         }),
 
+        unassignItemsFromOrgUnit: builder.mutation<Item[], Number[]>({
+            query: itemIds => ({
+                url: '/items/unassign',
+                method: 'PUT',
+                body: itemIds
+            }),
+            invalidatesTags: ['Item', 'OrgUnit']
+        }),
+
+        /* ------------- DELETE Operations ------------- */
         deleteItem: builder.mutation<{ success: boolean, id: number }, number>({
             query: itemId => ({
                 url: `/items/${itemId}`,
@@ -41,14 +72,6 @@ export const itemApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, id) => [{ type: 'Item', id }]
         }),
 
-        addNewItem: builder.mutation<Item, NewItem>({
-            query: initialItem => ({
-                url: '/items',
-                method: 'POST',
-                body: initialItem
-            }),
-            invalidatesTags: ['Item']
-        }),
     })
 })
 

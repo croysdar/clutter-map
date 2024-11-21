@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 
-import { TagField } from '@/components/TagField';
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import { QuantityField } from '@/components/forms/QuantityField';
+import { TagField } from '@/components/forms/TagField';
+import AppTextField from '@/components/forms/AppTextField';
+import CancelButton from '@/components/forms/CancelButton';
+import SubmitButton from '@/components/forms/SubmitButton';
+import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
-import { QuantityField } from '@/components/QuantityField';
 
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -22,7 +25,7 @@ export const AddItem = () => {
 
     const navigate = useNavigate()
     const { projectId, roomId, orgUnitId } = useParams();
-    const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 
@@ -40,7 +43,7 @@ export const AddItem = () => {
         const form = e.currentTarget
 
         if (!orgUnit) {
-            console.log("Organizational Unit not found")
+            console.log("Organizer not found")
             return
         }
 
@@ -48,7 +51,7 @@ export const AddItem = () => {
             await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
             form.reset()
 
-            navigate(sourcePageUrl);
+            navigate(redirectUrl);
         } catch (err) {
             console.error("Failed to create the item: ", err)
         }
@@ -57,73 +60,47 @@ export const AddItem = () => {
     // TODO change this so that the Org Unit can be chosen from a drop down
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Item
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Item Name */}
-                    <TextField
-                        label="Item Name"
+        <AddNewCardWrapper title="Add a New Item">
+            <form onSubmit={handleSubmit}>
+                {/* Item Name */}
+                <AppTextField
+                    label="Item Name"
 
-                        id="itemName"
-                        name="name"
+                    id="itemName"
+                    name="name"
 
-                        required
+                    required
+                />
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                {/* Item Description */}
+                <AppTextField
+                    label="Item Description"
 
-                    {/* Item Description */}
-                    <TextField
-                        label="Item Description"
+                    id="itemDescription"
+                    name="description"
 
-                        id="itemDescription"
-                        name="description"
+                    multiline
+                    rows={4}
+                />
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                {/* Item Quantity */}
+                <QuantityField
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                />
 
-                    {/* Item Quantity */}
-                    <QuantityField
-                        quantity={quantity}
-                        onQuantityChange={setQuantity}
-                    />
+                {/* Item Tags */}
+                <TagField tags={tags} onTagsChange={setTags} />
 
-                    {/* Item Tags */}
-                    <TagField tags={tags} onTagsChange={setTags} />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Item
-                    </Button>
-                </form>
-                <Button
-                    variant="text"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={() => navigate(sourcePageUrl)}
-                >
-                    Cancel
-                </Button>
-
-            </CardContent>
-        </Card>
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={isLoading}
+                    label="Create Item"
+                />
+            </form>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
+        </AddNewCardWrapper>
     )
 }

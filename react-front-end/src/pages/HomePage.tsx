@@ -1,6 +1,7 @@
 import React from 'react';
 
 import ButtonLink from '@/components/common/ButtonLink';
+import { StaticPageWrapper } from '@/components/pageWrappers/StaticPageWrapper';
 import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import { CircularProgress, Typography } from '@mui/material';
@@ -16,12 +17,12 @@ const HomePage: React.FC = () => {
             await dispatch(verifyToken({ idToken, provider: 'google' }));
             const jwt = localStorage.getItem('jwt');
             if (jwt)
-                await(dispatch(fetchUserInfo(jwt)));
+                await (dispatch(fetchUserInfo(jwt)));
         }
     }
 
     return (
-        <>
+        <StaticPageWrapper>
             <Typography variant='h3' sx={{ mb: 2 }}>
                 Welcome to Clutter Map
             </Typography>
@@ -67,7 +68,7 @@ const HomePage: React.FC = () => {
                     }}
                 />
             }
-        </>
+        </StaticPageWrapper>
     )
 }
 

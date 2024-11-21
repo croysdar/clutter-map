@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { TagField } from '@/components/TagField'
-import DeleteItemButton from './DeleteItemButton'
-import { useGetItemQuery, useUpdateItemMutation } from './itemApi'
-import { QuantityField } from '@/components/QuantityField'
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
+import AppTextField from '@/components/forms/AppTextField'
+import CancelButton from '@/components/forms/CancelButton'
+import { QuantityField } from '@/components/forms/QuantityField'
+import SubmitButton from '@/components/forms/SubmitButton'
+import { TagField } from '@/components/forms/TagField'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
+import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import { Item } from './itemTypes'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -69,85 +74,76 @@ const EditItem = () => {
         }
     }
 
-    const handleCancelClick = () => {
-        navigate(redirectUrl)
-    }
-
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Item
-                    </Typography>
-                }
+        <EditCardWrapper title="Edit Item">
+            <form onSubmit={handleSubmit}>
+                {/* Item Name */}
+                <AppTextField
+                    label="Item Name"
+                    id="itemName"
+                    name="name"
+                    defaultValue={item.name}
+                    required
+                />
+
+                {/* Item Description */}
+                <AppTextField
+                    label="Item Description"
+                    id="itemDescription"
+                    name="description"
+                    defaultValue={item.description}
+                    multiline
+                    rows={4}
+                />
+
+                {/* Item Quantity */}
+                <QuantityField
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                />
+
+                {/* Item Tags */}
+                <TagField tags={tags} onTagsChange={setTags} />
+
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={updateLoading}
+                    label="Save Changes"
+                />
+            </form>
+
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
             />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* Item Name */}
-                    <TextField
-                        label="Item Name"
-                        id="itemName"
-                        name="name"
-                        defaultValue={item.name}
-                        required
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
 
-                    {/* Item Description */}
-                    <TextField
-                        label="Item Description"
-                        id="itemDescription"
-                        name="description"
-                        defaultValue={item.description}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Item Quantity */}
-                    <QuantityField
-                        quantity={quantity}
-                        onQuantityChange={setQuantity}
-                    />
-
-                    {/* Item Tags */}
-                    <TagField tags={tags} onTagsChange={setTags} />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteItemButton item={item} isDisabled={updateLoading} redirectUrl={redirectUrl} />
-
-            </CardContent>
-        </Card>
+            {/* Delete button with a confirmation dialog */}
+            <DeleteItemButton
+                item={item}
+                isDisabled={updateLoading}
+                redirectUrl={redirectUrl}
+            />
+        </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    item: Item,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteItemButton: React.FC<DeleteButtonProps> = ({ item, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={item}
+            id={item.id}
+            name={item.name}
+            entityType='Item'
+            mutation={useDeleteItemMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditItem

@@ -1,10 +1,15 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteProjectButton from './DeleteProjectButton'
-import { useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
+import AppTextField from '@/components/forms/AppTextField'
+import CancelButton from '@/components/forms/CancelButton'
+import SubmitButton from '@/components/forms/SubmitButton'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
+import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
+import { Project } from './projectsTypes'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -17,7 +22,7 @@ interface EditProjectFormElements extends HTMLFormElement {
 const EditProject = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const sourcePageUrl = '/projects';
+    const redirectUrl = '/projects';
 
     const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 
@@ -50,69 +55,64 @@ const EditProject = () => {
 
         if (project && name) {
             await updateProject({ id: project.id, name: name })
-            navigate(sourcePageUrl)
+            navigate(redirectUrl)
         }
     }
 
-    const handleCancelClick = () => {
-        navigate(sourcePageUrl)
-    }
-
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Project
-                    </Typography>
-                }
+        <EditCardWrapper title="Edit Project">
+            <form onSubmit={handleSubmit}>
+                {/* Project Name */}
+                <AppTextField
+                    label="Project Name"
+
+                    id="projectName"
+                    name="name"
+                    defaultValue={project.name}
+
+                    required
+                />
+
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={updateLoading}
+                    label="Save Changes"
+                />
+            </form>
+
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
             />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* Project Name */}
-                    <TextField
-                        label="Project Name"
 
-                        id="projectName"
-                        name="name"
-                        defaultValue={project.name}
-
-                        required
-
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteProjectButton project={project} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
-
-            </CardContent>
-        </Card>
+            {/* Delete button with a confirmation dialog */}
+            <DeleteButton
+                project={project}
+                isDisabled={updateLoading}
+                redirectUrl={redirectUrl}
+            />
+        </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    project: Project,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteButton: React.FC<DeleteButtonProps> = ({ project, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={project}
+            id={project.id}
+            name={project.name}
+            entityType='Project'
+            extraWarning='This will delete all rooms, organizers and items within.'
+            mutation={useDeleteProjectMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditProject

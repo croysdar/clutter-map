@@ -1,8 +1,10 @@
-import { baseApiSlice } from "@/features/api/baseApiSlice";
+import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
+import { OrgUnit, OrgUnitsAssign } from "../orgUnits/orgUnitsTypes";
 
 export const roomsApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        /* ------------- GET Operations ------------- */
         getRooms: builder.query<Room[], void>({
             query: () => '/rooms',
             providesTags: (result = []) => [
@@ -24,6 +26,17 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             providesTags: (result, error, arg) => [{ type: 'Room', id: arg }]
         }),
 
+        /* ------------- POST Operations ------------- */
+        addNewRoom: builder.mutation<Room, NewRoom>({
+            query: initialRoom => ({
+                url: '/rooms',
+                method: 'POST',
+                body: initialRoom
+            }),
+            invalidatesTags: ['Room']
+        }),
+
+        /* ------------- PUT Operations ------------- */
         updateRoom: builder.mutation<Room, RoomUpdate>({
             query: room => ({
                 url: `/rooms/${room.id}`,
@@ -33,6 +46,15 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: 'Room', id: arg.id }]
         }),
 
+        assignOrgUnitsToRoom: builder.mutation<OrgUnit[], OrgUnitsAssign>({
+            query: ({ orgUnitIds, roomId }) => ({
+                url: `/rooms/${roomId}/org-units`,
+                method: 'PUT',
+                body: orgUnitIds
+            })
+        }),
+
+        /* ------------- DELETE Operations ------------- */
         deleteRoom: builder.mutation<{ success: boolean, id: number }, number>({
             query: roomId => ({
                 url: `/rooms/${roomId}`,
@@ -41,14 +63,6 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, id) => [{ type: 'Room', id }]
         }),
 
-        addNewRoom: builder.mutation<Room, NewRoom>({
-            query: initialRoom => ({
-                url: '/rooms',
-                method: 'POST',
-                body: initialRoom
-            }),
-            invalidatesTags: ['Room']
-        }),
     })
 })
 

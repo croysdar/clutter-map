@@ -1,10 +1,15 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import DeleteRoomButton from './DeleteRoomButton'
-import { useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
+import AppTextField from '@/components/forms/AppTextField'
+import CancelButton from '@/components/forms/CancelButton'
+import SubmitButton from '@/components/forms/SubmitButton'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
+import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
+import { Room } from './roomsTypes'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -18,7 +23,7 @@ interface EditRoomFormElements extends HTMLFormElement {
 const EditRoom = () => {
     const navigate = useNavigate();
     const { roomId, projectId } = useParams();
-    const sourcePageUrl = `/projects/${projectId}/rooms`;
+    const redirectUrl = `/projects/${projectId}/rooms`;
 
     const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
 
@@ -52,85 +57,75 @@ const EditRoom = () => {
 
         if (room && name) {
             await updateRoom({ id: room.id, name: name, description: description })
-            navigate(sourcePageUrl)
+            navigate(redirectUrl)
         }
     }
 
-    const handleCancelClick = () => {
-        navigate(sourcePageUrl)
-    }
-
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Room
-                    </Typography>
-                }
+        <EditCardWrapper title="Edit Room">
+            <form onSubmit={handleSubmit}>
+                {/* Room Name */}
+                <AppTextField
+                    label="Room Name"
+
+                    id="roomName"
+                    name="name"
+                    defaultValue={room.name}
+
+                    required
+                />
+
+                {/* Room Description */}
+                <AppTextField
+                    label="Room Description"
+
+                    id="roomDescription"
+                    name="description"
+                    defaultValue={room.description}
+
+                    multiline
+                    rows={4}
+                />
+
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={updateLoading}
+                    label="Save Changes"
+                />
+            </form>
+
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
             />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* Room Name */}
-                    <TextField
-                        label="Room Name"
 
-                        id="roomName"
-                        name="name"
-                        defaultValue={room.name}
-
-                        required
-
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Room Description */}
-                    <TextField
-                        label="Room Description"
-
-                        id="roomDescription"
-                        name="description"
-                        defaultValue={room.description}
-
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteRoomButton room={room} isDisabled={updateLoading} redirectUrl={sourcePageUrl} />
-
-            </CardContent>
-        </Card>
+            {/* Delete button with a confirmation dialog */}
+            <DeleteRoomButton
+                room={room}
+                isDisabled={updateLoading}
+                redirectUrl={redirectUrl}
+            />
+        </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    room: Room,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteRoomButton: React.FC<DeleteButtonProps> = ({ room, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={room}
+            id={room.id}
+            name={room.name}
+            entityType='Room'
+            mutation={useDeleteRoomMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditRoom

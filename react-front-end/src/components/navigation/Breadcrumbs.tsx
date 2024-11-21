@@ -56,7 +56,7 @@ const AppBreadcrumbs: React.FC = () => {
         if (matchPath("/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items", path)) {
             if (orgUnitLoading)
                 return '...'
-            return orgUnitData ? orgUnitData.name : `Organizational Unit ${orgUnitId}`;
+            return orgUnitData ? orgUnitData.name : `Organizer ${orgUnitId}`;
         }
 
         // Default fallback: return the last segment of the path

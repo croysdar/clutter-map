@@ -1,7 +1,11 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import AppTextField from '@/components/forms/AppTextField';
+import CancelButton from '@/components/forms/CancelButton';
+import SubmitButton from '@/components/forms/SubmitButton';
+import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
 
@@ -18,6 +22,7 @@ export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
     const navigate = useNavigate()
     const { roomId, projectId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -48,64 +53,38 @@ export const AddOrgUnit = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Organizational Unit
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* OrgUnit Name */}
-                    <TextField
-                        label="OrgUnit Name"
+        <AddNewCardWrapper title="Add a New Organizer">
+            <form onSubmit={handleSubmit}>
+                {/* OrgUnit Name */}
+                <AppTextField
+                    label="OrgUnit Name"
 
-                        id="orgUnitName"
-                        name="name"
+                    id="orgUnitName"
+                    name="name"
 
-                        required
+                    required
+                />
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                {/* OrgUnit Description */}
+                <AppTextField
+                    label="OrgUnit Description"
 
-                    {/* OrgUnit Description */}
-                    <TextField
-                        label="OrgUnit Description"
+                    id="orgUnitDescription"
+                    name="description"
 
-                        id="orgUnitDescription"
-                        name="description"
+                    multiline
+                    rows={4}
+                />
 
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Organizational Unit
-                    </Button>
-                </form>
-                <Button
-                    variant="text"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}
-                >
-                    Cancel
-                </Button>
-
-            </CardContent>
-        </Card>
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={isLoading}
+                    label="Create Organizer"
+                />
+            </form>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
+        </AddNewCardWrapper>
     )
 }

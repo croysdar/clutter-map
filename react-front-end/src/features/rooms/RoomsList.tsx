@@ -1,15 +1,13 @@
 import React from 'react';
 
 import {
-    Card,
-    CardHeader,
     CircularProgress,
-    Paper,
-    Typography
+    Paper
 } from '@mui/material';
 
-import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
+import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
+import { TileWrapper } from '@/components/common/TileWrapper';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import ProjectMenu from '../projects/ProjectMenu';
@@ -19,6 +17,8 @@ const RoomsList: React.FC = () => {
     const { projectId } = useParams();
 
     const { data: project } = useGetProjectQuery(projectId!);
+
+    const addUrl = `/projects/${projectId}/rooms/add`
 
     const {
         data: rooms = [],
@@ -53,18 +53,22 @@ const RoomsList: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap title={project.name} menu={<ProjectMenu project={project} />} >
+            <ListViewTileWrap
+                title={project.name}
+                menu={<ProjectMenu project={project} />}
+                count={rooms.length}
+            >
                 {rooms.map((room) => (
-                    <Card key={`room-card-${room.id}`} sx={{ width: '100%' }} onClick={(e) => handleClick(e, room.id)} >
-                        <CardHeader
-                            title={<Typography variant='h6'> {room.name}</Typography>}
-                        />
-                    </Card>
+                    <TileWrapper
+                        title={room.name}
+                        id={room.id}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, room.id)}
+                    />
                 ))}
             </ListViewTileWrap>
-            <CreateNewObjectButton
+            <CreateNewEntityButton
                 objectLabel='room'
-                to={`/projects/${projectId}/rooms/add`}
+                to={addUrl}
             />
         </>
     );

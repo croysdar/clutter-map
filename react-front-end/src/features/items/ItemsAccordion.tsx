@@ -5,22 +5,17 @@ import {
     AccordionDetails,
     AccordionSummary,
     Card,
-    CardActions,
-    CardContent,
     CardHeader,
     CircularProgress,
     Container,
     Typography
 } from '@mui/material';
 
-import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
+import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from './itemApi';
-
-import { RenderTags } from '@/components/TagField';
-import ItemMenu from './ItemMenu';
 
 interface ItemsAccordionProps {
     orgUnitId: string
@@ -51,7 +46,7 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
     }
 
     if (!orgUnit) {
-        return <div>Organizational Unit not found.</div>
+        return <div>Organizer not found.</div>
     }
 
     return (
@@ -93,7 +88,7 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
                     </AccordionDetails>
                 </Accordion>
             }
-            <CreateNewObjectButton
+            <CreateNewEntityButton
                 objectLabel='item'
                 to={`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`}
             />

@@ -1,6 +1,9 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import AppTextField from '@/components/forms/AppTextField';
+import CancelButton from '@/components/forms/CancelButton';
+import SubmitButton from '@/components/forms/SubmitButton';
+import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
 
@@ -17,6 +20,7 @@ interface AddProjectFormElements extends HTMLFormElement {
 export const AddProject = () => {
     const [addNewProject, { isLoading }] = useAddNewProjectMutation()
     const navigate = useNavigate()
+    const redirectUrl = `/projects`
 
     const handleSubmit = async (e: React.FormEvent<AddProjectFormElements>) => {
         e.preventDefault()
@@ -38,51 +42,28 @@ export const AddProject = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h4" component="h2" gutterBottom align="center">
-                    Add a New Project
-                </Typography>
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    {/* Project Name */}
-                    <TextField
-                        label="Project Name"
+        <AddNewCardWrapper title="Add a New Project">
+            <form onSubmit={handleSubmit}>
+                {/* Project Name */}
+                <AppTextField
+                    label="Project Name"
 
-                        id="projectName"
-                        name="name"
+                    id="projectName"
+                    name="name"
 
-                        required
+                    required
+                />
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
+                {/* Submit Button */}
+                <SubmitButton
+                    disabled={isLoading}
+                    label="Create Project"
+                />
+            </form>
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={isLoading}
-                    >
-                        Create Project
-                    </Button>
-                </form>
-
-                <Button
-                    variant="text"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={() => navigate('/projects')}
-
-                >
-                    Cancel
-                </Button>
-
-            </CardContent>
-        </Card>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
+        </AddNewCardWrapper>
     )
 }
