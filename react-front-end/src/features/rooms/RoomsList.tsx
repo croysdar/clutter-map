@@ -53,7 +53,11 @@ const RoomsList: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap title={project.name} menu={<ProjectMenu project={project} />} >
+            <ListViewTileWrap
+                title={project.name}
+                menu={<ProjectMenu project={project} />}
+                count={rooms.length}
+            >
                 {rooms.map((room) => (
                     <TileWrapper
                         title={room.name}

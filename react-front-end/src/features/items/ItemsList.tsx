@@ -44,7 +44,12 @@ const ItemsList: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap title={orgUnit.name} subtitle={orgUnit.description} menu={<OrgUnitMenu orgUnit={orgUnit} />}>
+            <ListViewTileWrap
+                title={orgUnit.name}
+                subtitle={orgUnit.description}
+                menu={<OrgUnitMenu orgUnit={orgUnit} />}
+                count={items.length}
+            >
                 {items.map((item) => (
                     <TileWrapper
                         // TODO make item details page

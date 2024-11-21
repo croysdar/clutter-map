@@ -47,7 +47,12 @@ const OrgUnitsList: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap title={room.name} subtitle={room.description} menu={<RoomMenu room={room} />}>
+            <ListViewTileWrap
+                title={room.name}
+                subtitle={room.description}
+                menu={<RoomMenu room={room} />}
+                count={orgUnits.length}
+            >
                 {orgUnits.map((orgUnit) => (
                     <TileWrapper
                         title={orgUnit.name}
