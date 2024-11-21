@@ -1,22 +1,18 @@
 import React from 'react';
 
-import {
-    Card,
-    CardHeader,
-    CircularProgress,
-    Paper,
-    Typography
-} from '@mui/material';
+import { CircularProgress, Paper } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import { useGetRoomQuery } from '@/features/rooms/roomApi';
+import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
+import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import RoomMenu from '../rooms/RoomMenu';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
 
 const OrgUnitsList: React.FC = () => {
     const { projectId, roomId } = useParams();
+    const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/add`
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -28,7 +24,7 @@ const OrgUnitsList: React.FC = () => {
     } = useGetOrgUnitsByRoomQuery(roomId!);
 
     const navigate = useNavigate();
-    const handleClick = (e: any, orgUnitId: number) => {
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>, orgUnitId: number) => {
         e.preventDefault();
         navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`)
     }
@@ -53,19 +49,16 @@ const OrgUnitsList: React.FC = () => {
         <>
             <ListViewTileWrap title={room.name} subtitle={room.description} menu={<RoomMenu room={room} />}>
                 {orgUnits.map((orgUnit) => (
-                    <Card key={`orgUnit-card-${orgUnit.id}`} sx={{ width: '100%' }}>
-                        <div key={orgUnit.id} >
-                            <CardHeader
-                                title={<Typography variant='h6'> {orgUnit.name}</Typography>}
-                                onClick={(e) => handleClick(e, orgUnit.id)}
-                            />
-                        </div>
-                    </Card>
+                    <TileWrapper
+                        title={orgUnit.name}
+                        id={orgUnit.id}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)}
+                    />
                 ))}
             </ListViewTileWrap>
             <CreateNewObjectButton
                 objectLabel='Organizer'
-                to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
+                to={addUrl}
             />
         </>
     );

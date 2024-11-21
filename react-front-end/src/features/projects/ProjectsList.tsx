@@ -1,14 +1,12 @@
 import React from 'react';
 
 import {
-    Card,
-    CardHeader,
     CircularProgress,
-    Paper,
-    Typography
+    Paper
 } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
+import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
 import { PROJECT_LIMIT } from '@/utils/constants';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +21,8 @@ const ProjectsList: React.FC = () => {
     } = useGetProjectsQuery();
 
     const navigate = useNavigate();
+
+    const addUrl = "/projects/add"
 
     const handleClick = (e: any, projectId: number) => {
         e.preventDefault();
@@ -46,17 +46,16 @@ const ProjectsList: React.FC = () => {
         <>
             <ListViewTileWrap title="My Projects" count={projects.length} >
                 {projects.map((project) => (
-                    <Card key={`project-card-${project.id}`} sx={{ width: '100%' }}>
-                        <CardHeader
-                            title={<Typography variant='h6'> {project.name}</Typography>}
-                            onClick={(e) => handleClick(e, project.id)}
-                        />
-                    </Card>
+                    <TileWrapper
+                        title={project.name}
+                        id={project.id}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, project.id)}
+                    />
                 ))}
             </ListViewTileWrap>
             <CreateNewObjectButton
                 objectLabel='project'
-                to="/projects/add"
+                to={addUrl}
                 disabled={projects.length >= PROJECT_LIMIT}
             />
         </>
