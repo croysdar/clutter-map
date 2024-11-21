@@ -11,6 +11,7 @@ import SubmitButton from '@/components/forms/SubmitButton'
 import { TagField } from '@/components/forms/TagField'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import { Item } from './itemTypes'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -116,17 +117,33 @@ const EditItem = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButtonWithModal
-                entity={item}
-                id={item.id}
-                name={item.name}
-                entityType='Item'
-                mutation={useDeleteItemMutation}
+            <DeleteItemButton
+                item={item}
                 isDisabled={updateLoading}
                 redirectUrl={redirectUrl}
             />
         </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    item: Item,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteItemButton: React.FC<DeleteButtonProps> = ({ item, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={item}
+            id={item.id}
+            name={item.name}
+            entityType='Item'
+            mutation={useDeleteItemMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditItem

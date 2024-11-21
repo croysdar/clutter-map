@@ -3,12 +3,13 @@ import React from 'react'
 import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
-import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
+import { OrgUnit } from './orgUnitsTypes'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -101,18 +102,34 @@ const EditOrgUnit = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButtonWithModal
-                entity={orgUnit}
-                id={orgUnit.id}
-                name={orgUnit.name}
-                entityType='Organizer'
-                mutation={useDeleteOrgUnitMutation}
-                extraWarning='This will send all items within the organizer to the Clutter Stash.'
+            <DeleteOrgUnitButton
+                orgUnit={orgUnit}
                 isDisabled={updateLoading}
                 redirectUrl={redirectUrl}
             />
         </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    orgUnit: OrgUnit,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteOrgUnitButton: React.FC<DeleteButtonProps> = ({ orgUnit, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={orgUnit}
+            id={orgUnit.id}
+            name={orgUnit.name}
+            entityType='Organizer'
+            extraWarning='This will send all items within the organizer to the Clutter Stash.'
+            mutation={useDeleteOrgUnitMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditOrgUnit

@@ -3,12 +3,13 @@ import React from 'react'
 import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
-import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
+import { Project } from './projectsTypes'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -84,20 +85,34 @@ const EditProject = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButtonWithModal
-                entity={project}
-                id={project.id}
-                name={project.name}
-                entityType='Project'
-                mutation={useDeleteProjectMutation}
-                extraWarning='This will delete all rooms, organizers and items within.'
+            <DeleteButton
+                project={project}
                 isDisabled={updateLoading}
                 redirectUrl={redirectUrl}
             />
-
-
         </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    project: Project,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteButton: React.FC<DeleteButtonProps> = ({ project, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={project}
+            id={project.id}
+            name={project.name}
+            entityType='Project'
+            extraWarning='This will delete all rooms, organizers and items within.'
+            mutation={useDeleteProjectMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditProject

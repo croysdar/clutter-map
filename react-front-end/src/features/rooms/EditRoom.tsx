@@ -3,12 +3,13 @@ import React from 'react'
 import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
-import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
+import { Room } from './roomsTypes'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -98,19 +99,33 @@ const EditRoom = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButtonWithModal
-                entity={room}
-                id={room.id}
-                name={room.name}
-                entityType='Room'
-                mutation={useDeleteRoomMutation}
-                extraWarning='This will send all organizers within the room to the Clutter Stash.'
+            <DeleteRoomButton
+                room={room}
                 isDisabled={updateLoading}
                 redirectUrl={redirectUrl}
             />
-
         </EditCardWrapper>
     )
+}
+
+type DeleteButtonProps = {
+    room: Room,
+    isDisabled: boolean
+    redirectUrl: string
+}
+
+const DeleteRoomButton: React.FC<DeleteButtonProps> = ({ room, isDisabled, redirectUrl }) => {
+    return (
+        <DeleteEntityButtonWithModal
+            entity={room}
+            id={room.id}
+            name={room.name}
+            entityType='Room'
+            mutation={useDeleteRoomMutation}
+            isDisabled={isDisabled}
+            redirectUrl={redirectUrl}
+        />
+    );
 }
 
 export default EditRoom
