@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 
 import { QuantityField } from '@/components/QuantityField';
 import { TagField } from '@/components/TagField';
+import AppTextField from '@/components/common/AppTextField';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
-import { Button, TextField } from '@mui/material';
+import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
@@ -61,33 +62,24 @@ export const AddItem = () => {
         <AddNewCardWrapper title="Add a New Item">
             <form onSubmit={handleSubmit}>
                 {/* Item Name */}
-                <TextField
+                <AppTextField
                     label="Item Name"
 
                     id="itemName"
                     name="name"
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Item Description */}
-                <TextField
+                <AppTextField
                     label="Item Description"
 
                     id="itemDescription"
                     name="description"
 
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Item Quantity */}

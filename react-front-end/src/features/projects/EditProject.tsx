@@ -1,11 +1,12 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Button, Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import AppTextField from '@/components/common/AppTextField'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
-import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
+import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -63,7 +64,7 @@ const EditProject = () => {
         <EditCardWrapper title="Edit Project">
             <form onSubmit={handleSubmit}>
                 {/* Project Name */}
-                <TextField
+                <AppTextField
                     label="Project Name"
 
                     id="projectName"
@@ -71,11 +72,6 @@ const EditProject = () => {
                     defaultValue={project.name}
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

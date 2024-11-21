@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import AppTextField from '@/components/common/AppTextField';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
+import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
-import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 
 interface AddProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -42,18 +43,13 @@ export const AddProject = () => {
         <AddNewCardWrapper title="Add a New Project">
             <form onSubmit={handleSubmit}>
                 {/* Project Name */}
-                <TextField
+                <AppTextField
                     label="Project Name"
 
                     id="projectName"
                     name="name"
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

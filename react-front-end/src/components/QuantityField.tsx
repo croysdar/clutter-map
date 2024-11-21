@@ -1,6 +1,6 @@
 import React from "react";
 
-import TextField from "@mui/material/TextField";
+import AppTextField from "./common/AppTextField";
 
 interface QuantityFieldProps {
     quantity: number;
@@ -21,7 +21,7 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({ quantity, onQuanti
     };
 
     return (
-        <TextField
+        <AppTextField
             label="Quantity"
 
             id="itemQuantity"
@@ -30,10 +30,7 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({ quantity, onQuanti
             value={quantity}
             onChange={handleQuantityChange}
             required
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
+
             inputProps={{
                 inputMode: "numeric", // for mobile keyboard
             }}

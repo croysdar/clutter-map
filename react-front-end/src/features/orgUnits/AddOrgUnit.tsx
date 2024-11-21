@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { Button, TextField } from '@mui/material';
+import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import AppTextField from '@/components/common/AppTextField';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
@@ -53,33 +54,24 @@ export const AddOrgUnit = () => {
         <AddNewCardWrapper title="Add a New Organizational Unit">
             <form onSubmit={handleSubmit}>
                 {/* OrgUnit Name */}
-                <TextField
+                <AppTextField
                     label="OrgUnit Name"
 
                     id="orgUnitName"
                     name="name"
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* OrgUnit Description */}
-                <TextField
+                <AppTextField
                     label="OrgUnit Description"
 
                     id="orgUnitDescription"
                     name="description"
 
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

@@ -1,8 +1,9 @@
 import React from 'react'
 
-import { Button, Card, CircularProgress, TextField, Typography } from '@mui/material'
+import { Button, Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import AppTextField from '@/components/common/AppTextField'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
@@ -65,7 +66,7 @@ const EditRoom = () => {
         <EditCardWrapper title="Edit Room">
             <form onSubmit={handleSubmit}>
                 {/* Room Name */}
-                <TextField
+                <AppTextField
                     label="Room Name"
 
                     id="roomName"
@@ -73,27 +74,18 @@ const EditRoom = () => {
                     defaultValue={room.name}
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Room Description */}
-                <TextField
+                <AppTextField
                     label="Room Description"
 
                     id="roomDescription"
                     name="description"
                     defaultValue={room.description}
 
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

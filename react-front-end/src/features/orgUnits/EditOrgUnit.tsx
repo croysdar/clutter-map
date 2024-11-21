@@ -1,11 +1,12 @@
 import React from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Button, Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import AppTextField from '@/components/common/AppTextField'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
-import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
+import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -67,7 +68,7 @@ const EditOrgUnit = () => {
         <EditCardWrapper title="Edit Organizational Unit">
             <form onSubmit={handleSubmit}>
                 {/* OrgUnit Name */}
-                <TextField
+                <AppTextField
                     label="OrgUnit Name"
 
                     id="orgUnitName"
@@ -75,27 +76,18 @@ const EditOrgUnit = () => {
                     defaultValue={orgUnit.name}
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* OrgUnit Description */}
-                <TextField
+                <AppTextField
                     label="OrgUnit Description"
 
                     id="orgUnitDescription"
                     name="description"
                     defaultValue={orgUnit.description}
 
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

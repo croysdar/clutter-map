@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 
-import { Button, Card, CardContent, CardHeader, CircularProgress, TextField, Typography } from '@mui/material'
+import { Button, Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import AppTextField from '@/components/common/AppTextField'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 import { QuantityField } from '@/components/QuantityField'
 import { TagField } from '@/components/TagField'
 import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
-import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -78,30 +79,22 @@ const EditItem = () => {
         <EditCardWrapper title="Edit Item">
             <form onSubmit={handleSubmit}>
                 {/* Item Name */}
-                <TextField
+                <AppTextField
                     label="Item Name"
                     id="itemName"
                     name="name"
                     defaultValue={item.name}
                     required
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Item Description */}
-                <TextField
+                <AppTextField
                     label="Item Description"
                     id="itemDescription"
                     name="description"
                     defaultValue={item.description}
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Item Quantity */}

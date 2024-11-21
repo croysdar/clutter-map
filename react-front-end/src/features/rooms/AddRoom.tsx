@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
+import AppTextField from '@/components/common/AppTextField';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
+import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
-import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -52,33 +53,24 @@ export const AddRoom = () => {
         <AddNewCardWrapper title="Add a New Room">
             <form onSubmit={handleSubmit}>
                 {/* Room Name */}
-                <TextField
+                <AppTextField
                     label="Room Name"
 
                     id="roomName"
                     name="name"
 
                     required
-
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Room Description */}
-                <TextField
+                <AppTextField
                     label="Room Description"
 
                     id="roomDescription"
                     name="description"
 
-                    fullWidth
                     multiline
                     rows={4}
-                    margin="normal"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* Submit Button */}

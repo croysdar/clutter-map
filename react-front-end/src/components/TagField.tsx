@@ -1,5 +1,6 @@
-import { Box, Chip, TextField } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import { useState } from "react";
+import AppTextField from "./common/AppTextField";
 
 interface TagFieldProps {
     tags: string[];
@@ -37,15 +38,14 @@ export const TagField: React.FC<TagFieldProps> = ({ tags, onTagsChange }) => {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-                fullWidth
-                variant="outlined"
+            <AppTextField
                 label="Add a tag"
+                placeholder="Press Enter to add tag"
+
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}
-                placeholder="Press Enter to add tag"
             />
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
