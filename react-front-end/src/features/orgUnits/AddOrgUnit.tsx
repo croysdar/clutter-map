@@ -53,7 +53,7 @@ export const AddOrgUnit = () => {
     }
 
     return (
-        <AddNewCardWrapper title="Add a New Organizational Unit">
+        <AddNewCardWrapper title="Add a New Organizer">
             <form onSubmit={handleSubmit}>
                 {/* OrgUnit Name */}
                 <AppTextField
@@ -79,7 +79,7 @@ export const AddOrgUnit = () => {
                 {/* Submit Button */}
                 <SubmitButton
                     disabled={isLoading}
-                    label="Create Organizational Unit"
+                    label="Create Organizer"
                 />
             </form>
             <CancelButton

@@ -64,7 +64,7 @@ const OrgUnitsList: React.FC = () => {
                 ))}
             </ListViewTileWrap>
             <CreateNewObjectButton
-                objectLabel='Organizational Unit'
+                objectLabel='Organizer'
                 to={`/projects/${projectId}/rooms/${roomId}/org-units/add`}
             />
         </>

@@ -43,7 +43,7 @@ export const AddItem = () => {
         const form = e.currentTarget
 
         if (!orgUnit) {
-            console.log("Organizational Unit not found")
+            console.log("Organizer not found")
             return
         }
 

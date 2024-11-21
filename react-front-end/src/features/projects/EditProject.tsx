@@ -90,7 +90,7 @@ const EditProject = () => {
                 name={project.name}
                 entityType='Project'
                 mutation={useDeleteProjectMutation}
-                extraWarning='This will delete all rooms, organizational units and items within.'
+                extraWarning='This will delete all rooms, organizers and items within.'
                 isDisabled={updateLoading}
                 redirectUrl={redirectUrl}
             />

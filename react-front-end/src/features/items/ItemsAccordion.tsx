@@ -51,7 +51,7 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
     }
 
     if (!orgUnit) {
-        return <div>Organizational Unit not found.</div>
+        return <div>Organizer not found.</div>
     }
 
     return (

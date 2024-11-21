@@ -64,7 +64,7 @@ const EditOrgUnit = () => {
 
 
     return (
-        <EditCardWrapper title="Edit Organizational Unit">
+        <EditCardWrapper title="Edit Organizer">
             <form onSubmit={handleSubmit}>
                 {/* OrgUnit Name */}
                 <AppTextField
@@ -105,7 +105,7 @@ const EditOrgUnit = () => {
                 entity={orgUnit}
                 id={orgUnit.id}
                 name={orgUnit.name}
-                entityType='Organizational Unit'
+                entityType='Organizer'
                 mutation={useDeleteOrgUnitMutation}
                 extraWarning='This will send all items within the organizer to the Clutter Stash.'
                 isDisabled={updateLoading}

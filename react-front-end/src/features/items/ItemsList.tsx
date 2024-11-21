@@ -43,7 +43,7 @@ const ItemsList: React.FC = () => {
     }
 
     if (!orgUnit) {
-        return <div>Organizational unit not found.</div>
+        return <div>Organizer not found.</div>
     }
 
     return (
