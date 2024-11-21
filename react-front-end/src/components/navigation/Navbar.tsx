@@ -1,13 +1,17 @@
 import React from 'react';
 
-import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { rejectAuthStatus, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import NavMenuDrawer from './NavMenuDrawer';
 
+import Logo from '@/assets/images/logo.svg';
+
 const Navbar: React.FC = () => {
+    const isMobile = useMediaQuery('(max-width: 600px)');
+
     const userName = useAppSelector(selectCurrentUserName);
     const userFirstName = useAppSelector(selectCurrentUserFirstName);
     const dispatch = useAppDispatch();
@@ -20,24 +24,37 @@ const Navbar: React.FC = () => {
 
     return (
         <AppBar position="static" >
-            <Toolbar sx={{ justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Toolbar sx={{ justifyContent: 'space-between', height: '50px' }}>
+
+                {/* Drawer and Logo */}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <NavMenuDrawer />
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                            Clutter Map
-                        </Link>
-                    </Typography>
+                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                        }}>
+                            <Box sx={{ height: '30px', display: 'flex' }} >
+                                <img src={Logo} alt="Clutter Map Logo" />
+                            </Box>
+                            <Typography variant="h6" sx={{ whiteSpace: 'nowrap' }} >
+                                Clutter Map
+                            </Typography>
+                        </Box>
+                    </Link>
                 </Box>
 
+                {/* Greeting and Logout Button */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-
                     {
                         loggedIn &&
                         <>
-                            <Typography variant="body1" sx={{ marginRight: 2 }}>
-                                {`Hello, ${userFirstName || userName}`}
-                            </Typography>
+                            {!isMobile &&
+                                <Typography variant="body1" sx={{ marginRight: 2 }}>
+                                    {`Hello, ${userFirstName || userName}`}
+                                </Typography>
+                            }
 
                             <Button color="inherit" onClick={handleLogout}>
                                 Logout
@@ -45,6 +62,7 @@ const Navbar: React.FC = () => {
                         </>
                     }
                 </Box>
+
             </Toolbar>
         </AppBar>
     );
