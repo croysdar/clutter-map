@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, TextField } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { AddNewCardWrapper } from '@/pages/AddNewPage';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { QuantityField } from '@/components/QuantityField';
 import { TagField } from '@/components/TagField';
-import { AddNewCardWrapper } from '@/pages/AddNewPage';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 import { Button, TextField } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';

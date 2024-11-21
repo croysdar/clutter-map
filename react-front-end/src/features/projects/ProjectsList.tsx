@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
 import { PROJECT_LIMIT } from '@/utils/constants';
 import { useNavigate } from 'react-router-dom';
 import { useGetProjectsQuery } from './projectApi';

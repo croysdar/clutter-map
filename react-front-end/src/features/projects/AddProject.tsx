@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, Card, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
-import { AddNewCardWrapper } from '@/pages/AddNewPage';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 
 interface AddProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,

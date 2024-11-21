@@ -4,7 +4,7 @@ import { Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
-import { AddNewCardWrapper } from '@/pages/AddNewPage';
+import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,

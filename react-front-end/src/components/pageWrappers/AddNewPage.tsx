@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, Typography } from '@mui/material';
 import React from 'react';
 
-export type ListViewTileWrapProps = {
+export type WrapperProps = {
     title: string
     children: React.ReactNode
 }
 
-export const AddNewCardWrapper: React.FC<ListViewTileWrapProps> = ({ title, children }) => {
+export const AddNewCardWrapper: React.FC<WrapperProps> = ({ title, children }) => {
 
     return (
 

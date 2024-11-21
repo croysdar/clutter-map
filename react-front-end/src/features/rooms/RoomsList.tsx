@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import ProjectMenu from '../projects/ProjectMenu';

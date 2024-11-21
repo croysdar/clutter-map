@@ -10,7 +10,7 @@ import {
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
 import { useNavigate, useParams } from 'react-router-dom';
 import RoomMenu from '../rooms/RoomMenu';
 import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';

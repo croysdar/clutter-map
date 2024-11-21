@@ -11,7 +11,7 @@ import {
 
 import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
-import { ListViewTileWrap } from '@/pages/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
 import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from './itemApi';
