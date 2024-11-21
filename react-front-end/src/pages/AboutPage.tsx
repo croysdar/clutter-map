@@ -1,17 +1,11 @@
 import React from 'react';
 
-import { Box, List, ListItem, ListItemText, ListSubheader, Typography } from '@mui/material';
+import { StaticPageWrapper } from '@/components/pageWrappers/StaticPageWrapper';
+import { List, ListItem, ListItemText, ListSubheader, Typography } from '@mui/material';
 
 const AboutPage: React.FC = () => {
     return (
-        <Box
-            maxWidth="md"
-            sx={{
-                gap: 3,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-            }}>
+        <StaticPageWrapper>
             <Typography variant='h3'>
                 About Clutter Map
             </Typography>
@@ -213,7 +207,7 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
             </List>
-        </Box>
+        </StaticPageWrapper>
     )
 }
 

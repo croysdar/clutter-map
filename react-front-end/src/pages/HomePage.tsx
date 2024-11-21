@@ -1,9 +1,10 @@
 import React from 'react';
 
 import ButtonLink from '@/components/common/ButtonLink';
+import { StaticPageWrapper } from '@/components/pageWrappers/StaticPageWrapper';
 import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { CircularProgress, Typography } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 const HomePage: React.FC = () => {
@@ -21,12 +22,7 @@ const HomePage: React.FC = () => {
     }
 
     return (
-        <Box sx={{
-            gap: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
+        <StaticPageWrapper>
             <Typography variant='h3' sx={{ mb: 2 }}>
                 Welcome to Clutter Map
             </Typography>
@@ -72,7 +68,7 @@ const HomePage: React.FC = () => {
                     }}
                 />
             }
-        </Box>
+        </StaticPageWrapper>
     )
 }
 
