@@ -1,4 +1,4 @@
-import { baseApiSlice } from "@/api/baseApiSlice";
+import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewItem, Item, ItemUpdate, NewUnassignedItem } from "./itemTypes";
 
 export const itemApi = baseApiSlice.injectEndpoints({

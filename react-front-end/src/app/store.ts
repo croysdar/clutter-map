@@ -1,6 +1,6 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 
-import { baseApiSlice } from "@/api/baseApiSlice";
+import { baseApiSlice } from "@/services/baseApiSlice";
 
 import authReducer from "@/features/auth/authSlice"
 

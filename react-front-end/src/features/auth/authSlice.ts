@@ -1,4 +1,4 @@
-import { client } from "@/api/client";
+import { client } from "@/services/client";
 import { RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
 import { API_BASE_URL } from "@/utils/constants";

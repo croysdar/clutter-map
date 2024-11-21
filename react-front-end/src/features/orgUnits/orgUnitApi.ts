@@ -1,4 +1,4 @@
-import { baseApiSlice } from "@/api/baseApiSlice";
+import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewOrgUnit, NewUnassignedOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
 import { Item, ItemsAssign } from "../items/itemTypes";
 
