@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import AppTextField from '@/components/common/AppTextField';
+import CancelButton from '@/components/common/CancelButton';
+import SubmitButton from '@/components/common/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
@@ -21,6 +22,7 @@ export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
     const navigate = useNavigate()
     const { roomId, projectId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -75,26 +77,14 @@ export const AddOrgUnit = () => {
                 />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={isLoading}
-                >
-                    Create Organizational Unit
-                </Button>
+                    label="Create Organizational Unit"
+                />
             </form>
-            <Button
-                variant="text"
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={() => navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)}
-            >
-                Cancel
-            </Button>
-
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
         </AddNewCardWrapper>
     )
 }

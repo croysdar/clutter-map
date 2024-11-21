@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
-import { Button, Card, CircularProgress, Typography } from '@mui/material'
+import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import AppTextField from '@/components/common/AppTextField'
+import CancelButton from '@/components/common/CancelButton'
+import SubmitButton from '@/components/common/SubmitButton'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 import { QuantityField } from '@/components/QuantityField'
@@ -71,10 +73,6 @@ const EditItem = () => {
         }
     }
 
-    const handleCancelClick = () => {
-        navigate(redirectUrl)
-    }
-
     return (
         <EditCardWrapper title="Edit Item">
             <form onSubmit={handleSubmit}>
@@ -107,26 +105,15 @@ const EditItem = () => {
                 <TagField tags={tags} onTagsChange={setTags} />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={updateLoading}
-                >
-                    Save Changes
-                </Button>
+                    label="Save Changes"
+                />
             </form>
 
-            <Button
-                variant='text'
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={handleCancelClick}
-            >
-                Cancel
-            </Button>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
 
             {/* Delete button with a confirmation dialog */}
             <DeleteEntityButton

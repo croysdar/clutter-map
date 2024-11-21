@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { QuantityField } from '@/components/QuantityField';
 import { TagField } from '@/components/TagField';
 import AppTextField from '@/components/common/AppTextField';
+import CancelButton from '@/components/common/CancelButton';
+import SubmitButton from '@/components/common/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
-import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
@@ -24,7 +25,7 @@ export const AddItem = () => {
 
     const navigate = useNavigate()
     const { projectId, roomId, orgUnitId } = useParams();
-    const sourcePageUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
+    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 
@@ -50,7 +51,7 @@ export const AddItem = () => {
             await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
             form.reset()
 
-            navigate(sourcePageUrl);
+            navigate(redirectUrl);
         } catch (err) {
             console.error("Failed to create the item: ", err)
         }
@@ -92,25 +93,14 @@ export const AddItem = () => {
                 <TagField tags={tags} onTagsChange={setTags} />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={isLoading}
-                >
-                    Create Item
-                </Button>
+                    label="Create Item"
+                />
             </form>
-            <Button
-                variant="text"
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={() => navigate(sourcePageUrl)}
-            >
-                Cancel
-            </Button>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
         </AddNewCardWrapper>
     )
 }

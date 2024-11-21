@@ -1,8 +1,9 @@
 import React from 'react';
 
 import AppTextField from '@/components/common/AppTextField';
+import CancelButton from '@/components/common/CancelButton';
+import SubmitButton from '@/components/common/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
-import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAddNewProjectMutation } from './projectApi';
 
@@ -19,6 +20,7 @@ interface AddProjectFormElements extends HTMLFormElement {
 export const AddProject = () => {
     const [addNewProject, { isLoading }] = useAddNewProjectMutation()
     const navigate = useNavigate()
+    const redirectUrl = `/projects`
 
     const handleSubmit = async (e: React.FormEvent<AddProjectFormElements>) => {
         e.preventDefault()
@@ -53,27 +55,15 @@ export const AddProject = () => {
                 />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={isLoading}
-                >
-                    Create Project
-                </Button>
+                    label="Create Project"
+                />
             </form>
 
-            <Button
-                variant="text"
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={() => navigate('/projects')}
-
-            >
-                Cancel
-            </Button>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
         </AddNewCardWrapper>
     )
 }

@@ -1,9 +1,11 @@
 import React from 'react'
 
-import { Button, Card, CircularProgress, Typography } from '@mui/material'
+import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import AppTextField from '@/components/common/AppTextField'
+import CancelButton from '@/components/common/CancelButton'
+import SubmitButton from '@/components/common/SubmitButton'
 import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
@@ -19,7 +21,7 @@ interface EditProjectFormElements extends HTMLFormElement {
 const EditProject = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const sourcePageUrl = '/projects';
+    const redirectUrl = '/projects';
 
     const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 
@@ -52,12 +54,8 @@ const EditProject = () => {
 
         if (project && name) {
             await updateProject({ id: project.id, name: name })
-            navigate(sourcePageUrl)
+            navigate(redirectUrl)
         }
-    }
-
-    const handleCancelClick = () => {
-        navigate(sourcePageUrl)
     }
 
     return (
@@ -75,26 +73,15 @@ const EditProject = () => {
                 />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={updateLoading}
-                >
-                    Save Changes
-                </Button>
+                    label="Save Changes"
+                />
             </form>
 
-            <Button
-                variant='text'
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={handleCancelClick}
-            >
-                Cancel
-            </Button>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
 
             {/* Delete button with a confirmation dialog */}
             <DeleteEntityButton
@@ -105,8 +92,9 @@ const EditProject = () => {
                 mutation={useDeleteProjectMutation}
                 extraWarning='This will delete all rooms, organizational units and items within.'
                 isDisabled={updateLoading}
-                redirectUrl={sourcePageUrl}
+                redirectUrl={redirectUrl}
             />
+
 
         </EditCardWrapper>
     )

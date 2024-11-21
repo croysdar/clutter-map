@@ -1,8 +1,9 @@
 import React from 'react';
 
 import AppTextField from '@/components/common/AppTextField';
+import CancelButton from '@/components/common/CancelButton';
+import SubmitButton from '@/components/common/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
-import { Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
@@ -20,6 +21,7 @@ export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
     const navigate = useNavigate()
     const { projectId } = useParams();
+    const redirectUrl = `/projects/${projectId}/rooms`
 
     const { data: project } = useGetProjectQuery(projectId!);
 
@@ -42,7 +44,7 @@ export const AddRoom = () => {
             form.reset()
 
             // redirect to [this project]/rooms
-            navigate(`/projects/${projectId}/rooms`)
+            navigate(redirectUrl)
         } catch (err) {
             console.error("Failed to create the room: ", err)
         }
@@ -74,26 +76,14 @@ export const AddRoom = () => {
                 />
 
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ marginTop: 2 }}
+                <SubmitButton
                     disabled={isLoading}
-                >
-                    Create Room
-                </Button>
+                    label="Create Room"
+                />
             </form>
-            <Button
-                variant="text"
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={() => navigate(`/projects/${projectId}/rooms`)}
-
-            >
-                Cancel
-            </Button>
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
         </AddNewCardWrapper>
     )
 }
