@@ -1,6 +1,6 @@
 import { Box, Chip } from "@mui/material";
 import { useState } from "react";
-import AppTextField from "./common/AppTextField";
+import AppTextField from "./AppTextField";
 
 interface TagFieldProps {
     tags: string[];

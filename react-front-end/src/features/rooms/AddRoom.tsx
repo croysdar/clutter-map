@@ -1,9 +1,9 @@
 import React from 'react';
 
-import AppTextField from '@/components/common/AppTextField';
-import CancelButton from '@/components/common/CancelButton';
-import SubmitButton from '@/components/common/SubmitButton';
-import { AddNewCardWrapper } from '@/components/pageWrappers/AddNewPage';
+import AppTextField from '@/components/forms/AppTextField';
+import CancelButton from '@/components/forms/CancelButton';
+import SubmitButton from '@/components/forms/SubmitButton';
+import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';

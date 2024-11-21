@@ -5,8 +5,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import { Box, CircularProgress, Container } from '@mui/material';
 
-import AppBreadcrumbs from '@/components/Breadcrumbs';
-import Navbar from '@/components/Navbar';
+import AppBreadcrumbs from '@/components/navigation/Breadcrumbs';
+import Navbar from '@/components/navigation/Navbar';
 
 import { selectAuthStatus } from '@/features/auth/authSlice';
 

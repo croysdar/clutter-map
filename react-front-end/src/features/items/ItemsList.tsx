@@ -5,9 +5,9 @@ import {
     Paper
 } from '@mui/material';
 
-import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
+import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
-import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
@@ -59,7 +59,7 @@ const ItemsList: React.FC = () => {
                     />
                 ))}
             </ListViewTileWrap>
-            <CreateNewObjectButton
+            <CreateNewEntityButton
                 objectLabel='Item'
                 to={addUrl}
             />

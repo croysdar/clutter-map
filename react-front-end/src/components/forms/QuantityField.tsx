@@ -1,6 +1,6 @@
 import React from "react";
 
-import AppTextField from "./common/AppTextField";
+import AppTextField from "./AppTextField";
 
 interface QuantityFieldProps {
     quantity: number;

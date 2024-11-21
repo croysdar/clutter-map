@@ -2,9 +2,9 @@ import React from 'react';
 
 import { CircularProgress, Paper } from '@mui/material';
 
-import CreateNewObjectButton from '@/components/common/CreateNewObjectButton';
+import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
-import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPage';
+import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import RoomMenu from '../rooms/RoomMenu';
@@ -61,7 +61,7 @@ const OrgUnitsList: React.FC = () => {
                     />
                 ))}
             </ListViewTileWrap>
-            <CreateNewObjectButton
+            <CreateNewEntityButton
                 objectLabel='Organizer'
                 to={addUrl}
             />

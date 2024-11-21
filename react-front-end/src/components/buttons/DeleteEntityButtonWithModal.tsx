@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { DeleteForever } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { Project } from '@/features/projects/projectsTypes';
-import { Room } from '@/features/rooms/roomsTypes';
 import { Item } from '@/features/items/itemTypes';
 import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import { Project } from '@/features/projects/projectsTypes';
+import { Room } from '@/features/rooms/roomsTypes';
+import { DeleteForever } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 type DeleteEntityProps = {
     entity: Project | Room | OrgUnit | Item
@@ -20,7 +20,7 @@ type DeleteEntityProps = {
     mutation: Function
 }
 
-const DeleteEntityButton: React.FC<DeleteEntityProps> = ({ entity, isDisabled, redirectUrl, name, entityType, mutation, id, extraWarning }) => {
+const DeleteEntityButtonWithModal: React.FC<DeleteEntityProps> = ({ entity, isDisabled, redirectUrl, name, entityType, mutation, id, extraWarning }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOpen = () => setOpen(true)
@@ -67,4 +67,4 @@ const DeleteEntityButton: React.FC<DeleteEntityProps> = ({ entity, isDisabled, r
     )
 }
 
-export default DeleteEntityButton
+export default DeleteEntityButtonWithModal

@@ -3,11 +3,11 @@ import React from 'react'
 import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import AppTextField from '@/components/common/AppTextField'
-import CancelButton from '@/components/common/CancelButton'
-import SubmitButton from '@/components/common/SubmitButton'
-import DeleteEntityButton from '@/components/DeleteEntityButton'
-import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
+import AppTextField from '@/components/forms/AppTextField'
+import CancelButton from '@/components/forms/CancelButton'
+import SubmitButton from '@/components/forms/SubmitButton'
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
@@ -101,7 +101,7 @@ const EditOrgUnit = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButton
+            <DeleteEntityButtonWithModal
                 entity={orgUnit}
                 id={orgUnit.id}
                 name={orgUnit.name}

@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import AppTextField from '@/components/common/AppTextField'
-import CancelButton from '@/components/common/CancelButton'
-import SubmitButton from '@/components/common/SubmitButton'
-import DeleteEntityButton from '@/components/DeleteEntityButton'
-import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
-import { QuantityField } from '@/components/QuantityField'
-import { TagField } from '@/components/TagField'
+import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
+import AppTextField from '@/components/forms/AppTextField'
+import CancelButton from '@/components/forms/CancelButton'
+import { QuantityField } from '@/components/forms/QuantityField'
+import SubmitButton from '@/components/forms/SubmitButton'
+import { TagField } from '@/components/forms/TagField'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
@@ -116,7 +116,7 @@ const EditItem = () => {
             />
 
             {/* Delete button with a confirmation dialog */}
-            <DeleteEntityButton
+            <DeleteEntityButtonWithModal
                 entity={item}
                 id={item.id}
                 name={item.name}
