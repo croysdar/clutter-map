@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -59,68 +60,59 @@ const EditProject = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Project
-                    </Typography>
-                }
-            />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* Project Name */}
-                    <TextField
-                        label="Project Name"
+        <EditCardWrapper title="Edit Project">
+            <form onSubmit={handleSubmit}>
+                {/* Project Name */}
+                <TextField
+                    label="Project Name"
 
-                        id="projectName"
-                        name="name"
-                        defaultValue={project.name}
+                    id="projectName"
+                    name="name"
+                    defaultValue={project.name}
 
-                        required
+                    required
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
                     fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteEntityButton
-                    entity={project}
-                    id={project.id}
-                    name={project.name}
-                    entityType='Project'
-                    mutation={useDeleteProjectMutation}
-                    extraWarning='This will delete all rooms, organizational units and items within.'
-                    isDisabled={updateLoading}
-                    redirectUrl={sourcePageUrl}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
                 />
 
-            </CardContent>
-        </Card>
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    disabled={updateLoading}
+                >
+                    Save Changes
+                </Button>
+            </form>
+
+            <Button
+                variant='text'
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={handleCancelClick}
+            >
+                Cancel
+            </Button>
+
+            {/* Delete button with a confirmation dialog */}
+            <DeleteEntityButton
+                entity={project}
+                id={project.id}
+                name={project.name}
+                entityType='Project'
+                mutation={useDeleteProjectMutation}
+                extraWarning='This will delete all rooms, organizational units and items within.'
+                isDisabled={updateLoading}
+                redirectUrl={sourcePageUrl}
+            />
+
+        </EditCardWrapper>
     )
 }
 

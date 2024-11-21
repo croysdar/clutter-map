@@ -7,6 +7,7 @@ import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { QuantityField } from '@/components/QuantityField'
 import { TagField } from '@/components/TagField'
 import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -74,87 +75,77 @@ const EditItem = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Item
-                    </Typography>
-                }
-            />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* Item Name */}
-                    <TextField
-                        label="Item Name"
-                        id="itemName"
-                        name="name"
-                        defaultValue={item.name}
-                        required
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Item Description */}
-                    <TextField
-                        label="Item Description"
-                        id="itemDescription"
-                        name="description"
-                        defaultValue={item.description}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Item Quantity */}
-                    <QuantityField
-                        quantity={quantity}
-                        onQuantityChange={setQuantity}
-                    />
-
-                    {/* Item Tags */}
-                    <TagField tags={tags} onTagsChange={setTags} />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
+        <EditCardWrapper title="Edit Item">
+            <form onSubmit={handleSubmit}>
+                {/* Item Name */}
+                <TextField
+                    label="Item Name"
+                    id="itemName"
+                    name="name"
+                    defaultValue={item.name}
+                    required
                     fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteEntityButton
-                    entity={item}
-                    id={item.id}
-                    name={item.name}
-                    entityType='Item'
-                    mutation={useDeleteItemMutation}
-                    isDisabled={updateLoading}
-                    redirectUrl={redirectUrl}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
                 />
 
-            </CardContent>
-        </Card>
+                {/* Item Description */}
+                <TextField
+                    label="Item Description"
+                    id="itemDescription"
+                    name="description"
+                    defaultValue={item.description}
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
+
+                {/* Item Quantity */}
+                <QuantityField
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                />
+
+                {/* Item Tags */}
+                <TagField tags={tags} onTagsChange={setTags} />
+
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    disabled={updateLoading}
+                >
+                    Save Changes
+                </Button>
+            </form>
+
+            <Button
+                variant='text'
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={handleCancelClick}
+            >
+                Cancel
+            </Button>
+
+            {/* Delete button with a confirmation dialog */}
+            <DeleteEntityButton
+                entity={item}
+                id={item.id}
+                name={item.name}
+                entityType='Item'
+                mutation={useDeleteItemMutation}
+                isDisabled={updateLoading}
+                redirectUrl={redirectUrl}
+            />
+        </EditCardWrapper>
     )
 }
 

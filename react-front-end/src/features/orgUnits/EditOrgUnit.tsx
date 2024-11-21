@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import DeleteEntityButton from '@/components/DeleteEntityButton'
 import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
+import { EditCardWrapper } from '@/components/pageWrappers/EditPage'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -63,84 +64,74 @@ const EditOrgUnit = () => {
     }
 
     return (
-        <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-            <CardHeader
-                title={
-                    <Typography variant="h4" component="h2" gutterBottom align="center">
-                        Edit Organizational Unit
-                    </Typography>
-                }
-            />
-            <CardContent>
-                <form onSubmit={handleSubmit}>
-                    {/* OrgUnit Name */}
-                    <TextField
-                        label="OrgUnit Name"
+        <EditCardWrapper title="Edit Organizational Unit">
+            <form onSubmit={handleSubmit}>
+                {/* OrgUnit Name */}
+                <TextField
+                    label="OrgUnit Name"
 
-                        id="orgUnitName"
-                        name="name"
-                        defaultValue={orgUnit.name}
+                    id="orgUnitName"
+                    name="name"
+                    defaultValue={orgUnit.name}
 
-                        required
+                    required
 
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* OrgUnit Description */}
-                    <TextField
-                        label="OrgUnit Description"
-
-                        id="orgUnitDescription"
-                        name="description"
-                        defaultValue={orgUnit.description}
-
-                        fullWidth
-                        multiline
-                        rows={4}
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{ marginTop: 2 }}
-                        disabled={updateLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </form>
-
-                <Button
-                    variant='text'
                     fullWidth
-                    sx={{ marginTop: 2 }}
-                    onClick={handleCancelClick}
-                >
-                    Cancel
-                </Button>
-
-                {/* Delete button with a confirmation dialog */}
-                <DeleteEntityButton
-                    entity={orgUnit}
-                    id={orgUnit.id}
-                    name={orgUnit.name}
-                    entityType='Organizational Unit'
-                    mutation={useDeleteOrgUnitMutation}
-                    extraWarning='This will send all items within the organizer to the Clutter Stash.'
-                    isDisabled={updateLoading}
-                    redirectUrl={sourcePageUrl}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
                 />
 
-            </CardContent>
-        </Card>
+                {/* OrgUnit Description */}
+                <TextField
+                    label="OrgUnit Description"
+
+                    id="orgUnitDescription"
+                    name="description"
+                    defaultValue={orgUnit.description}
+
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                />
+
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ marginTop: 2 }}
+                    disabled={updateLoading}
+                >
+                    Save Changes
+                </Button>
+            </form>
+
+            <Button
+                variant='text'
+                fullWidth
+                sx={{ marginTop: 2 }}
+                onClick={handleCancelClick}
+            >
+                Cancel
+            </Button>
+
+            {/* Delete button with a confirmation dialog */}
+            <DeleteEntityButton
+                entity={orgUnit}
+                id={orgUnit.id}
+                name={orgUnit.name}
+                entityType='Organizational Unit'
+                mutation={useDeleteOrgUnitMutation}
+                extraWarning='This will send all items within the organizer to the Clutter Stash.'
+                isDisabled={updateLoading}
+                redirectUrl={sourcePageUrl}
+            />
+        </EditCardWrapper>
     )
 }
 
