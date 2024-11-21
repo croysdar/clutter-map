@@ -3,7 +3,7 @@ import React, { ReactElement } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { useAppSelector } from '@/hooks/useAppHooks';
-import { CircularProgress, Container } from '@mui/material';
+import { Box, CircularProgress, Container } from '@mui/material';
 
 import AppBreadcrumbs from '@/components/Breadcrumbs';
 import Navbar from '@/components/Navbar';
@@ -22,9 +22,9 @@ import EditRoom from '@/features/rooms/EditRoom';
 import RoomsList from '@/features/rooms/RoomsList';
 
 import { AddItem } from '@/features/items/AddItem';
+import ItemsList from '@/features/items/ItemsList';
 import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
-import ItemsList from '@/features/items/ItemsList';
 
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -44,17 +44,18 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
 const Pages: React.FC = () => {
     return (
         <BrowserRouter>
-            <Navbar />
-            <AppBreadcrumbs />
+            <Box sx={{ minHeight: '10vh' }}>
+                <Navbar />
+                <AppBreadcrumbs />
+            </Box>
             <Container
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    minHeight: '100vh',
+                    minHeight: '90vh',
                     textAlign: 'center',
-                    gap: 3
                 }}>
                 <Routes>
                     <Route path="/" Component={HomePage} />

@@ -3,7 +3,7 @@ import React from 'react';
 import ButtonLink from '@/components/common/ButtonLink';
 import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
-import { CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 const HomePage: React.FC = () => {
@@ -16,12 +16,17 @@ const HomePage: React.FC = () => {
             await dispatch(verifyToken({ idToken, provider: 'google' }));
             const jwt = localStorage.getItem('jwt');
             if (jwt)
-                await(dispatch(fetchUserInfo(jwt)));
+                await (dispatch(fetchUserInfo(jwt)));
         }
     }
 
     return (
-        <>
+        <Box sx={{
+            gap: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        }}>
             <Typography variant='h3' sx={{ mb: 2 }}>
                 Welcome to Clutter Map
             </Typography>
@@ -67,7 +72,7 @@ const HomePage: React.FC = () => {
                     }}
                 />
             }
-        </>
+        </Box>
     )
 }
 

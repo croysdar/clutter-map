@@ -1,9 +1,17 @@
-import { Container, List, ListItem, ListItemText, ListSubheader, Typography } from '@mui/material';
 import React from 'react';
+
+import { Box, List, ListItem, ListItemText, ListSubheader, Typography } from '@mui/material';
 
 const AboutPage: React.FC = () => {
     return (
-        <Container maxWidth="md">
+        <Box
+            maxWidth="md"
+            sx={{
+                gap: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+            }}>
             <Typography variant='h3'>
                 About Clutter Map
             </Typography>
@@ -197,7 +205,7 @@ const AboutPage: React.FC = () => {
                         Database
                     </Typography>
                 </ListSubheader>
-                <ListItem sx={{ py: 0 }}>
+                <ListItem sx={{ pt: 0, pb: 15 }}>
                     <ListItemText
                         primary="PostgreSQL"
                         secondary="Reliable relational database supporting complex data relationships, ideal for 
@@ -205,7 +213,7 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
             </List>
-        </Container>
+        </Box>
     )
 }
 
