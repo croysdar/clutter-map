@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
-import app.cluttermap.TestDataConstants;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;

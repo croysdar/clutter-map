@@ -38,7 +38,6 @@ import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;

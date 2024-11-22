@@ -53,8 +53,8 @@ const LinksMenu: React.FC<MenuProps> = ({ menuItems }) => {
                 id={`menu`}
                 onClose={handleClose}
             >
-                {menuItems.map((item) =>
-                    <MenuItem onClick={(e) => handleNavigationClick(e, item.url)}>
+                {menuItems.map((item, index) =>
+                    <MenuItem key={`menu-item-${index}`} onClick={(e) => handleNavigationClick(e, item.url)}>
                         {item.label}
                     </MenuItem>
                 )}
