@@ -24,7 +24,7 @@ interface EditRoomFormElements extends HTMLFormElement {
 const EditRoom = () => {
     const navigate = useNavigate();
     const { roomId, projectId } = useParams();
-    const redirectUrl = ROUTES.projectDetails(projectId!)
+    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
 
     const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
 

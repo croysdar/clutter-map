@@ -16,7 +16,6 @@ import { ROUTES } from '@/utils/constants';
 
 const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
-    const addUrl = ROUTES.orgUnitAdd(projectId!, roomId!)
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -69,7 +68,7 @@ const RoomDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Organizer'
-                to={addUrl}
+                to={ROUTES.orgUnitAdd(projectId!, roomId!)}
             />
         </>
     );

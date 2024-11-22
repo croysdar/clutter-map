@@ -26,8 +26,8 @@ interface EditItemFormElements extends HTMLFormElement {
 
 const EditItem = () => {
     const navigate = useNavigate();
-    const { itemId, projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
+    const { projectId, roomId, orgUnitId, itemId } = useParams();
+    const redirectUrl = ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId!)
 
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();

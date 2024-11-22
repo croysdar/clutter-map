@@ -26,7 +26,7 @@ export const AddItem = () => {
 
     const navigate = useNavigate()
     const { projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 

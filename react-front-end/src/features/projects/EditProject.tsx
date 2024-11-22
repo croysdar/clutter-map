@@ -23,7 +23,7 @@ interface EditProjectFormElements extends HTMLFormElement {
 const EditProject = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const redirectUrl = ROUTES.projects;
+    const redirectUrl = ROUTES.projectDetails(projectId!);
 
     const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 

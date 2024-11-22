@@ -24,8 +24,6 @@ const ProjectsList: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const addUrl = ROUTES.projectAdd
-
     const handleClick = (e: any, projectId: number) => {
         e.preventDefault();
 
@@ -60,7 +58,7 @@ const ProjectsList: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='project'
-                to={addUrl}
+                to={ROUTES.projectAdd}
                 disabled={projects.length >= PROJECT_LIMIT}
             />
         </>

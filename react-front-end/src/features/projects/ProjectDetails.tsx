@@ -22,8 +22,6 @@ const ProjectDetails: React.FC = () => {
 
     const { data: project } = useGetProjectQuery(projectId!);
 
-    const addUrl = ROUTES.roomAdd(projectId!);
-
     const {
         data: rooms = [],
         isLoading,
@@ -74,7 +72,7 @@ const ProjectDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='room'
-                to={addUrl}
+                to={ROUTES.roomAdd(projectId!)}
             />
         </>
     );

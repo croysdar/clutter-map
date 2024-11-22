@@ -24,7 +24,7 @@ interface EditOrgUnitFormElements extends HTMLFormElement {
 const EditOrgUnit = () => {
     const navigate = useNavigate();
     const { orgUnitId, roomId, projectId } = useParams();
-    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!);
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
     const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
 
