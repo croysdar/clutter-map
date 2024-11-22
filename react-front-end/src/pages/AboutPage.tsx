@@ -6,10 +6,6 @@ import { List, ListItem, ListItemText, ListSubheader, Typography } from '@mui/ma
 const AboutPage: React.FC = () => {
     return (
         <StaticPageWrapper>
-            <Typography variant='h3'>
-                About Clutter Map
-            </Typography>
-
             <Typography variant='h4' gutterBottom sx={{ mt: 3 }}>
                 What is Clutter Map?
             </Typography>
@@ -116,7 +112,7 @@ const AboutPage: React.FC = () => {
             </Typography>
             <List>
 
-                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0 }}>
+                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0, position: 'static' }}>
                     <Typography variant="h6" align='left'>
                         Infrastructure and Deployment
                     </Typography>
@@ -135,7 +131,7 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
 
-                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0 }}>
+                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0, position: 'static' }}>
                     <Typography variant="h6" align='left'>
                         Backend Development
                     </Typography>
@@ -149,7 +145,7 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
 
-                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0 }}>
+                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0, position: 'static' }}>
                     <Typography variant="h6" gutterBottom align='left'>
                         Authentication
                     </Typography>
@@ -162,7 +158,7 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
 
-                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0 }}>
+                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0, position: 'static' }}>
                     <Typography variant="h6" gutterBottom align='left'>
                         Frontend Development
                     </Typography>
@@ -194,12 +190,12 @@ const AboutPage: React.FC = () => {
                     />
                 </ListItem>
 
-                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0 }}>
+                <ListSubheader component="div" sx={{ bgcolor: 'transparent', pl: 0, position: 'static' }}>
                     <Typography variant="h6" gutterBottom align='left'>
                         Database
                     </Typography>
                 </ListSubheader>
-                <ListItem sx={{ pt: 0, pb: 15 }}>
+                <ListItem sx={{ pt: 0, pb: 10 }}>
                     <ListItemText
                         primary="PostgreSQL"
                         secondary="Reliable relational database supporting complex data relationships, ideal for 

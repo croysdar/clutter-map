@@ -16,6 +16,8 @@ export const StaticPageWrapper: React.FC<WrapperProps> = ({ children }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                my: 3,
+                mx: 1
             }}>
             {children}
         </Box>

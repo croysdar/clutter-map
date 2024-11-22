@@ -1,7 +1,7 @@
 import { appColors } from '@/assets/colors';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 
-const theme = createTheme({
+let theme = createTheme({
     palette: {
         primary: {
             main: appColors.primary,
@@ -39,7 +39,10 @@ const theme = createTheme({
             // color: appColors.textPrimary
         },
         // h3: {
-        //     color: appColors.textPrimary
+        // fontSize: '2rem',
+        // fontWeight: 700,
+        // lineHeight: 1.3,
+        // color: appColors.textPrimary
         // },
         // h4: {
         //     color: appColors.textPrimary
@@ -135,5 +138,7 @@ const theme = createTheme({
         // },
     },
 });
+
+theme = responsiveFontSizes(theme);
 
 export default theme;

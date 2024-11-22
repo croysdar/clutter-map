@@ -23,10 +23,10 @@ const HomePage: React.FC = () => {
 
     return (
         <StaticPageWrapper>
-            <Typography variant='h3' sx={{ mb: 2 }}>
+            <Typography variant='h1' sx={{ mb: 2 }}>
                 Welcome to Clutter Map
             </Typography>
-            <Typography variant='h6' sx={{ mb: 1, maxWidth: '80%' }}>
+            <Typography variant='h6' sx={{ mb: 1 }}>
                 Clutter Map is the ultimate tool to manage your space and map out your
                 clutter with ease. Know exactly where everything belongs, making it simple
                 to put things away or find what you need. Ideal for any space—from personal
@@ -35,7 +35,7 @@ const HomePage: React.FC = () => {
             </Typography>
             <Typography variant='subtitle1' sx={{ fontStyle: 'italic' }} color="textSecondary">
                 {/* Know where everything belongs. Make finding and storing easier. */}
-                Simplify your space. Find what you need, when you need it.
+                Find what you need, when you need it.
             </Typography>
             {
                 authStatus !== 'verified' &&
