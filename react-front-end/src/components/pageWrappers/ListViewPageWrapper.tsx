@@ -59,7 +59,6 @@ export const TileListWrapper: React.FC<TileWrapperProps> = ({ children, count })
         return `repeat(${columns}, 1fr)`;
     }
 
-    {/* Children displayed in a responsive grid */ }
     return (
         <Container sx={{
             display: 'grid',
