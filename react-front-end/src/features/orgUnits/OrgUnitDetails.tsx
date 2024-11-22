@@ -1,15 +1,14 @@
 import React from 'react';
 
+import { useNavigate, useParams } from 'react-router-dom';
+
 import {
     CircularProgress
 } from '@mui/material';
 
-import { useParams } from 'react-router-dom';
-
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
-import ItemMenu from '@/features/items/ItemMenu';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 
 import { ROUTES } from '@/utils/constants';
@@ -17,11 +16,9 @@ import { ROUTES } from '@/utils/constants';
 import { useGetItemsByOrgUnitQuery } from '@/features/items/itemApi';
 import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 
-
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
-    const addUrl = ROUTES.itemAdd(projectId!, roomId!, orgUnitId!)
 
     const {
         data: items = [],
@@ -29,6 +26,12 @@ const OrgUnitDetails: React.FC = () => {
         isError,
         error
     } = useGetItemsByOrgUnitQuery(orgUnitId!);
+
+    const navigate = useNavigate();
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>, itemId: number) => {
+        e.preventDefault();
+        navigate(ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId))
+    }
 
     if (isLoading) {
         return (
@@ -56,18 +59,17 @@ const OrgUnitDetails: React.FC = () => {
                 <TileListWrapper count={items.length} >
                     {items.map((item) => (
                         <TileWrapper
-                            // TODO make item details page
                             key={`tile-wrapper-org-unit-${item.id}`}
                             title={item.name}
                             id={item.id}
-                            elementLeft={<ItemMenu item={item} />}
+                            onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, item.id)}
                         />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Item'
-                to={addUrl}
+                to={ROUTES.itemAdd(projectId!, roomId!, orgUnitId!)}
             />
         </>
     );
