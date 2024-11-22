@@ -7,6 +7,7 @@ import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { Breadcrumbs, Link, Typography } from '@mui/material';
 
 import { Link as RouterLink, matchPath, useLocation } from 'react-router-dom';
+import { ROUTES } from '@/utils/constants';
 
 const AppBreadcrumbs: React.FC = () => {
     const location = useLocation();
@@ -34,25 +35,25 @@ const AppBreadcrumbs: React.FC = () => {
     const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId ?? '', { skip: !orgUnitId });
 
     const getBreadcrumbName = (path: string) => {
-        if (matchPath("/projects", path)) {
+        if (matchPath(ROUTES.projects, path)) {
             return 'Projects';
         }
 
-        if (projectId && path === `/projects/${projectId}`) return null;
+        if (projectId && path === ROUTES.projectDetails(projectId)) return null;
         if (matchPath("/projects/:projectId/rooms", path)) {
             if (projectLoading)
                 return '...'
             return projectData ? projectData.name : `Project ${projectId}`;
         }
 
-        if (roomId && path === `/projects/${projectId}/rooms/${roomId}`) return null;
+        if (roomId && projectId && path === ROUTES.roomDetails(projectId, roomId)) return null;
         if (matchPath("/projects/:projectId/rooms/:roomId/org-units", path)) {
             if (roomLoading)
                 return '...'
             return roomData ? roomData.name : `Room ${roomId}`;
         }
 
-        if (orgUnitId && path === `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}`) return null;
+        if (orgUnitId && roomId && projectId && path === ROUTES.orgUnitDetails(projectId, roomId, orgUnitId)) return null;
         if (matchPath("/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items", path)) {
             if (orgUnitLoading)
                 return '...'
@@ -65,7 +66,7 @@ const AppBreadcrumbs: React.FC = () => {
 
     return (
         <Breadcrumbs aria-label="breadcrumb" separator="›" sx={{ padding: '8px 16px' }} >
-            <Link component={RouterLink} to="/" color="inherit" underline='hover'>Home</Link>
+            <Link component={RouterLink} to={ROUTES.home} color="inherit" underline='hover'>Home</Link>
             {pathnames.map((value, index) => {
                 // Build the URL path up to the current level
                 const to = `/${pathnames.slice(0, index + 1).join('/')}`;

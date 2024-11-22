@@ -10,6 +10,7 @@ import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
 import { OrgUnit } from './orgUnitsTypes'
+import { ROUTES } from '@/utils/constants'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -23,7 +24,7 @@ interface EditOrgUnitFormElements extends HTMLFormElement {
 const EditOrgUnit = () => {
     const navigate = useNavigate();
     const { orgUnitId, roomId, projectId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`;
+    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!);
 
     const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
 

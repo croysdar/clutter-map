@@ -8,7 +8,7 @@ import {
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
-import { PROJECT_LIMIT } from '@/utils/constants';
+import { PROJECT_LIMIT, ROUTES } from '@/utils/constants';
 import { useNavigate } from 'react-router-dom';
 import { useGetProjectsQuery } from './projectApi';
 
@@ -22,12 +22,12 @@ const ProjectsList: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const addUrl = "/projects/add"
+    const addUrl = ROUTES.projectAdd
 
     const handleClick = (e: any, projectId: number) => {
         e.preventDefault();
 
-        navigate(`/projects/${projectId}/rooms`)
+        navigate(ROUTES.projectDetails(projectId))
     }
 
     if (isLoading) {
@@ -47,6 +47,7 @@ const ProjectsList: React.FC = () => {
             <ListViewTileWrap title="My Projects" count={projects.length} >
                 {projects.map((project) => (
                     <TileWrapper
+                        key={`tile-wrapper-org-unit-${project.id}`}
                         title={project.name}
                         id={project.id}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, project.id)}

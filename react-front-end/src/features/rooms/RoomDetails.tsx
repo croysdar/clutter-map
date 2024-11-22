@@ -9,10 +9,11 @@ import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import RoomMenu from './RoomMenu';
 import { useGetOrgUnitsByRoomQuery } from '../orgUnits/orgUnitApi';
+import { ROUTES } from '@/utils/constants';
 
 const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
-    const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/add`
+    const addUrl = ROUTES.orgUnitAdd(projectId!, roomId!)
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -26,7 +27,7 @@ const RoomDetails: React.FC = () => {
     const navigate = useNavigate();
     const handleClick = (e: React.MouseEvent<HTMLDivElement>, orgUnitId: number) => {
         e.preventDefault();
-        navigate(`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`)
+        navigate(ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!))
     }
 
     if (isLoading) {

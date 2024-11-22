@@ -14,6 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { selectAuthStatus } from '@/features/auth/authSlice';
 import { useAppSelector } from '@/hooks/useAppHooks';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/utils/constants';
 
 const NavMenuDrawer = () => {
     const [open, setOpen] = useState<boolean>(false);
@@ -37,7 +38,7 @@ const NavMenuDrawer = () => {
             </IconButton>
             <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
                 <List sx={{ width: 250 }} onClick={toggleDrawer(false)} >
-                    <NavLink label="Home" to="/" />
+                    <NavLink label="Home" to={ROUTES.home} />
                     <NavLink label="About" to="/about" />
                     {
                         loggedIn &&

@@ -10,6 +10,7 @@ import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
 import { Room } from './roomsTypes'
+import { ROUTES } from '@/utils/constants'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -23,7 +24,7 @@ interface EditRoomFormElements extends HTMLFormElement {
 const EditRoom = () => {
     const navigate = useNavigate();
     const { roomId, projectId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms`;
+    const redirectUrl = ROUTES.projectDetails(projectId!)
 
     const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
 

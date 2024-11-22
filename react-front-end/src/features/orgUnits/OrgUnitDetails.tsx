@@ -13,11 +13,12 @@ import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from './orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from '../items/itemApi';
 import ItemMenu from '../items/ItemMenu';
+import { ROUTES } from '@/utils/constants';
 
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
-    const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`
+    const addUrl = ROUTES.itemAdd(projectId!, roomId!, orgUnitId!)
 
     const {
         data: items = [],

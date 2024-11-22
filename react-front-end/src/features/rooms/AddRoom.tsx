@@ -7,6 +7,7 @@ import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from '../projects/projectApi';
 import { useAddNewRoomMutation } from './roomApi';
+import { ROUTES } from '@/utils/constants';
 
 interface AddRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -21,7 +22,7 @@ export const AddRoom = () => {
     const [addNewRoom, { isLoading }] = useAddNewRoomMutation()
     const navigate = useNavigate()
     const { projectId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms`
+    const redirectUrl = ROUTES.projectDetails(projectId!)
 
     const { data: project } = useGetProjectQuery(projectId!);
 

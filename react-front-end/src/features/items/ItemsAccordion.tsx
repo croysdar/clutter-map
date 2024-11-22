@@ -16,6 +16,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useGetItemsByOrgUnitQuery } from './itemApi';
+import { ROUTES } from '@/utils/constants';
 
 interface ItemsAccordionProps {
     orgUnitId: string
@@ -90,7 +91,7 @@ const ItemsAccordion: React.FC<ItemsAccordionProps> = ({ orgUnitId }) => {
             }
             <CreateNewEntityButton
                 objectLabel='item'
-                to={`/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`}
+                to={ROUTES.itemAdd(projectId!, roomId!, orgUnit.id!)}
             />
         </Container>
     );

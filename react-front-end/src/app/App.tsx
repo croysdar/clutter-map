@@ -25,6 +25,7 @@ import { Box, CircularProgress, Container } from '@mui/material';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import '../assets/styles/App.css';
+import { ROUTES } from '@/utils/constants';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
     const authStatus = useAppSelector(selectAuthStatus);
@@ -75,28 +76,29 @@ function App() {
                         textAlign: 'center',
                     }}>
                     <Routes>
-                        <Route path="/" Component={HomePage} />
-                        <Route path="/about" Component={AboutPage} />
+                        <Route path={ROUTES.home} Component={HomePage} />
+                        <Route path={ROUTES.about} Component={AboutPage} />
                         <Route path="/*"
                             element={
                                 <ProtectedRoute>
                                     <Routes>
-                                        <Route path="/projects" Component={ProjectsList} />
-                                        <Route path="/projects/:projectId" Component={ProjectDetails} />
-                                        <Route path="/projects/:projectId/edit" Component={EditProject} />
-                                        <Route path="/projects/add" Component={AddProject} />
+                                        <Route path={ROUTES.projects} Component={ProjectsList} />
 
-                                        <Route path="/projects/:projectId/rooms/add" Component={AddRoom} />
-                                        <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
+                                        <Route path={ROUTES.projectAdd} Component={AddProject} />
+                                        <Route path={ROUTES.projectDetails(":projectId")} Component={ProjectDetails} />
+                                        <Route path={ROUTES.projectEdit(":projectId")} Component={EditProject} />
 
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={RoomDetails} />
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
+                                        <Route path={ROUTES.roomAdd(":projectId")} Component={AddRoom} />
+                                        <Route path={ROUTES.roomDetails(":projectId", ":roomId")} Component={RoomDetails} />
+                                        <Route path={ROUTES.roomEdit(":projectId", ":roomId")} Component={EditRoom} />
 
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={OrgUnitDetails} />
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/add" Component={AddItem} />
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId/edit" Component={EditItem} />
-                                        {/* <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId" Component={ItemDetails} /> */}
+                                        <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} Component={AddOrgUnit} />
+                                        <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
+                                        <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} Component={EditOrgUnit} />
+
+                                        <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} Component={AddItem} />
+                                        {/* <Route path={ROUTES.itemDetails(":projectId", ":roomId", "orgUnitId", ":itemId")} Component={ItemDetails} /> */}
+                                        <Route path={ROUTES.itemEdit(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={EditItem} />
                                     </Routes>
                                 </ProtectedRoute>
                             }

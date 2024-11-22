@@ -12,13 +12,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useGetProjectQuery } from './projectApi';
 import ProjectMenu from './ProjectMenu';
 import { useGetRoomsByProjectQuery } from '../rooms/roomApi';
+import { ROUTES } from '@/utils/constants';
 
 const ProjectDetails: React.FC = () => {
     const { projectId } = useParams();
 
     const { data: project } = useGetProjectQuery(projectId!);
 
-    const addUrl = `/projects/${projectId}/rooms/add`
+    const addUrl = ROUTES.roomAdd(projectId!);
 
     const {
         data: rooms = [],
@@ -32,7 +33,7 @@ const ProjectDetails: React.FC = () => {
     const handleClick = (e: any, roomId: number) => {
         e.preventDefault();
 
-        navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+        navigate(ROUTES.roomDetails(projectId!, roomId))
     }
 
     if (isLoading) {
