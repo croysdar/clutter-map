@@ -7,10 +7,10 @@ import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 import { useNavigate, useParams } from 'react-router-dom';
-import RoomMenu from '../rooms/RoomMenu';
-import { useGetOrgUnitsByRoomQuery } from './orgUnitApi';
+import RoomMenu from './RoomMenu';
+import { useGetOrgUnitsByRoomQuery } from '../orgUnits/orgUnitApi';
 
-const OrgUnitsList: React.FC = () => {
+const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
     const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/add`
 
@@ -55,6 +55,7 @@ const OrgUnitsList: React.FC = () => {
             >
                 {orgUnits.map((orgUnit) => (
                     <TileWrapper
+                        key={`tile-wrapper-org-unit-${orgUnit.id}`}
                         title={orgUnit.name}
                         id={orgUnit.id}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)}
@@ -69,4 +70,4 @@ const OrgUnitsList: React.FC = () => {
     );
 };
 
-export default OrgUnitsList;
+export default RoomDetails;

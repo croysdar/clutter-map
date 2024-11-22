@@ -9,11 +9,11 @@ import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGetProjectQuery } from '../projects/projectApi';
-import ProjectMenu from '../projects/ProjectMenu';
-import { useGetRoomsByProjectQuery } from './roomApi';
+import { useGetProjectQuery } from './projectApi';
+import ProjectMenu from './ProjectMenu';
+import { useGetRoomsByProjectQuery } from '../rooms/roomApi';
 
-const RoomsList: React.FC = () => {
+const ProjectDetails: React.FC = () => {
     const { projectId } = useParams();
 
     const { data: project } = useGetProjectQuery(projectId!);
@@ -60,6 +60,7 @@ const RoomsList: React.FC = () => {
             >
                 {rooms.map((room) => (
                     <TileWrapper
+                        key={`tile-wrapper-org-unit-${room.id}`}
                         title={room.name}
                         id={room.id}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, room.id)}
@@ -74,4 +75,4 @@ const RoomsList: React.FC = () => {
     );
 };
 
-export default RoomsList;
+export default ProjectDetails;

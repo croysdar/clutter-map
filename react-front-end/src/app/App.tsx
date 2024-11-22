@@ -6,10 +6,10 @@ import Navbar from '@/components/navigation/Navbar';
 import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
 import { AddItem } from '@/features/items/AddItem';
 import EditItem from '@/features/items/EditItem';
-import ItemsList from '@/features/items/ItemsList';
+import OrgUnitDetails from '@/features/orgUnits/OrgUnitDetails';
 import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
 import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
-import OrgUnitsList from '@/features/orgUnits/OrgUnitsList';
+import RoomDetails from '@/features/rooms/RoomDetails';
 import { AddProject } from '@/features/projects/AddProject';
 import EditProject from '@/features/projects/EditProject';
 import ProjectDetails from '@/features/projects/ProjectDetails';
@@ -89,11 +89,11 @@ function App() {
                                         <Route path="/projects/:projectId/rooms/add" Component={AddRoom} />
                                         <Route path="/projects/:projectId/rooms/:roomId/edit" Component={EditRoom} />
 
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={OrgUnitsList} />
+                                        <Route path="/projects/:projectId/rooms/:roomId/org-units" Component={RoomDetails} />
                                         <Route path="/projects/:projectId/rooms/:roomId/org-units/add" Component={AddOrgUnit} />
                                         <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/edit" Component={EditOrgUnit} />
 
-                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={ItemsList} />
+                                        <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items" Component={OrgUnitDetails} />
                                         <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/add" Component={AddItem} />
                                         <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId/edit" Component={EditItem} />
                                         {/* <Route path="/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items/:itemId" Component={ItemDetails} /> */}

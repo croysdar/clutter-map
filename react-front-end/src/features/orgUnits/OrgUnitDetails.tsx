@@ -10,11 +10,11 @@ import { TileWrapper } from '@/components/common/TileWrapper';
 import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 import { useParams } from 'react-router-dom';
-import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
-import { useGetItemsByOrgUnitQuery } from './itemApi';
-import ItemMenu from './ItemMenu';
+import { useGetOrgUnitQuery } from './orgUnitApi';
+import { useGetItemsByOrgUnitQuery } from '../items/itemApi';
+import ItemMenu from '../items/ItemMenu';
 
-const ItemsList: React.FC = () => {
+const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
     const addUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`
@@ -53,6 +53,7 @@ const ItemsList: React.FC = () => {
                 {items.map((item) => (
                     <TileWrapper
                         // TODO make item details page
+                        key={`tile-wrapper-org-unit-${item.id}`}
                         title={item.name}
                         id={item.id}
                         elementLeft={<ItemMenu item={item} />}
@@ -67,4 +68,4 @@ const ItemsList: React.FC = () => {
     );
 };
 
-export default ItemsList;
+export default OrgUnitDetails;
