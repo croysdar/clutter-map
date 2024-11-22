@@ -98,46 +98,46 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/projects`
 
-- **GET `/`**  
+- **GET `/projects`**  
   Retrieves a list of all projects for the current user.  
   **Response**: `Iterable<Project>`
 
-- **GET `/{id}`**  
+- **GET `/projects/{id}`**  
   Retrieves a specific project by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Project`
 
-- **GET `/{id}/rooms`**  
+- **GET `/projects/{id}/rooms`**  
   Retrieves all rooms within a specific project by project ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Iterable<Room>`
 
-- **GET `/{projectId}/org-units/unassigned`**  
+- **GET `/projects/{projectId}/org-units/unassigned`**  
   Retrieves a list of unassigned organization units within a project (OrgUnits not linked to any room).  
   **Path Variable**:
 
   - `projectId` (Long): ID of the project.  
     **Response**: `List<OrgUnit>`
 
-- **GET `/{projectId}/items/unassigned`**  
+- **GET `/projects/{projectId}/items/unassigned`**  
   Retrieves a list of unassigned items within a project (items not linked to any organization unit).  
   **Path Variable**:
 
   - `projectId` (Long): ID of the project.  
     **Response**: `List<Item>`
 
-- **POST `/`**  
+- **POST `/projects`**  
   Adds a new project.  
   **Request Body**: `NewProjectDTO`  
   **Response**: `Project`
 
-- **PUT `/{id}`**  
+- **PUT `/projects/{id}`**  
   Updates an existing project.  
   **Path Variable**: `id` (Long)  
   **Request Body**: `UpdateProjectDTO`  
   **Response**: `Project`
 
-- **DELETE `/{id}`**  
+- **DELETE `/projects/{id}`**  
   Deletes a project by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Void`
@@ -146,38 +146,38 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/rooms`
 
-- **GET `/`**  
+- **GET `/rooms`**  
   Retrieves a list of all rooms for the current user.  
   **Response**: `Iterable<Room>`
 
-- **GET `/{id}`**  
+- **GET `/rooms/{id}`**  
   Retrieves a specific room by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Room`
 
-- **GET `/{id}/org-units`**  
+- **GET `/rooms/{id}/org-units`**  
   Retrieves all organization units within a specific room by room ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Iterable<OrgUnit>`
 
-- **POST `/`**  
+- **POST `/rooms`**  
   Adds a new room.  
   **Request Body**: `NewRoomDTO`  
   **Response**: `Room`
 
-- **PUT `/{id}`**  
+- **PUT `/rooms/{id}`**  
   Updates an existing room.  
   **Path Variable**: `id` (Long)  
   **Request Body**: `UpdateRoomDTO`  
   **Response**: `Room`
 
-- **PUT `/{roomId}/org-units`**  
+- **PUT `/rooms/{roomId}/org-units`**  
   Assigns organization units to a specific room.  
   **Path Variable**: `roomId` (Long): ID of the room.
   **Request Body**: `List<Long> orgUnitIds`  
   **Response**: `Room`
 
-- **DELETE `/{id}`**  
+- **DELETE `/rooms/{id}`**  
   Deletes a room by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Void`
@@ -186,46 +186,46 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/org-units`
 
-- **GET `/`**  
+- **GET `/org-units`**  
   Retrieves a list of all organization units for the current user.  
   **Response**: `Iterable<OrgUnit>`
 
-- **GET `/{id}`**  
+- **GET `/org-units/{id}`**  
   Retrieves a specific organization unit by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `OrgUnit`
 
-- **GET `/{id}/items`**  
+- **GET `/org-units/{id}/items`**  
   Retrieves all items within a specific organization unit by organization unit ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Iterable<Item>`
 
-- **POST `/`**  
+- **POST `/org-units`**  
   Adds a new organization unit.  
   **Request Body**: `NewOrgUnitDTO`  
   **Response**: `OrgUnit`
 
-- **PUT `/{id}`**  
+- **PUT `/org-units/{id}`**  
   Updates an existing organization unit.  
   **Path Variable**: `id` (Long)  
   **Request Body**: `UpdateOrgUnitDTO`  
   **Response**: `OrgUnit`
 
-- **PUT `/unassign`**  
+- **PUT `/org-units/unassign`**  
   Unassigns the specified org units from their rooms.
   Org Units must exist
   **Path Variable**: `id` (Long)  
   **Request Body**: `List<Long> orgUnitIds`  
   **Response**: `Iterable<OrgUnit>`
 
-- **PUT `/{id}/items`**  
+- **PUT `/org-units/{id}/items`**  
   Updates the items assigned to an existing organization unit.  
   Items must exist
   **Path Variable**: `id` (Long)  
   **Request Body**: `List<Long> itemIds`  
   **Response**: `Iterable<Item>`
 
-- **DELETE `/{id}`**  
+- **DELETE `/org-units/{id}`**  
   Deletes an organization unit by ID.  
   **Path Variable**: `id` (Long)  
   **Response**: `Void`
@@ -234,34 +234,34 @@ The project is organized into two main directories: `back-end` for the Spring Bo
 
 ### `/items`
 
-- **GET `/`**  
+- **GET `/items`**  
   Retrieves a list of all items.  
   **Response**: `Iterable<Item>`
 
-- **GET `/{id}`**  
+- **GET `/items/{id}`**  
   Retrieves a specific item by ID.  
   **Path Variable**: `id` (Long): ID of the item to retrieve.  
    **Response**: `Item`
 
-- **POST `/`**  
+- **POST `/items`**  
   Adds a new item to an organization unit.  
   **Request Body**: `NewItemDTO`  
   **Response**: `Item`
 
-- **PUT `/{id}`**  
+- **PUT `/items/{id}`**  
   Updates an existing item.  
   **Path Variable**: `id` (Long): ID of the item to update.  
   **Request Body**: `UpdateItemDTO`  
   **Response**: `Item`
 
-- **PUT `/unassign`**  
+- **PUT `/items/unassign`**  
   Unassigns the specified items from their org units.
   Items must exist
   **Path Variable**: `id` (Long)  
   **Request Body**: `List<Long> itemIds`  
   **Response**: `Iterable<Item>`
 
-- **DELETE `/{id}`**  
+- **DELETE `/items/{id}`**  
   Deletes an item by ID.  
   **Path Variable**:
   - `id` (Long): ID of the item to delete.  
