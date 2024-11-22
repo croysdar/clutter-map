@@ -9,6 +9,7 @@ import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
 import { useAddNewItemMutation } from './itemApi';
+import { ROUTES } from '@/utils/constants';
 
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -25,7 +26,7 @@ export const AddItem = () => {
 
     const navigate = useNavigate()
     const { projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
 
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
 

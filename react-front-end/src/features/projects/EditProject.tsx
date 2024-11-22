@@ -10,6 +10,7 @@ import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
 import { Project } from './projectsTypes'
+import { ROUTES } from '@/utils/constants'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -22,7 +23,7 @@ interface EditProjectFormElements extends HTMLFormElement {
 const EditProject = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const redirectUrl = '/projects';
+    const redirectUrl = ROUTES.projectDetails(projectId!);
 
     const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
 

@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import NavMenuDrawer from './NavMenuDrawer';
 
 import Logo from '@/assets/images/logo.svg';
+import { ROUTES } from '@/utils/constants';
 
 const Navbar: React.FC = () => {
     const isMobile = useMediaQuery('(max-width: 600px)');
@@ -29,7 +30,7 @@ const Navbar: React.FC = () => {
                 {/* Drawer and Logo */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <NavMenuDrawer />
-                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link to={ROUTES.home} style={{ textDecoration: 'none', color: 'inherit' }}>
                         <Box sx={{
                             display: 'flex',
                             alignItems: 'center',

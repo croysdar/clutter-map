@@ -1,11 +1,15 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import AppTextField from '@/components/forms/AppTextField';
 import CancelButton from '@/components/forms/CancelButton';
 import SubmitButton from '@/components/forms/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
-import { useNavigate } from 'react-router-dom';
-import { useAddNewProjectMutation } from './projectApi';
+
+import { useAddNewProjectMutation } from '@/features/projects/projectApi';
+
+import { ROUTES } from '@/utils/constants';
 
 interface AddProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -16,11 +20,10 @@ interface AddProjectFormElements extends HTMLFormElement {
     readonly elements: AddProjectFormFields
 }
 
-
 export const AddProject = () => {
     const [addNewProject, { isLoading }] = useAddNewProjectMutation()
     const navigate = useNavigate()
-    const redirectUrl = `/projects`
+    const redirectUrl = ROUTES.projects
 
     const handleSubmit = async (e: React.FormEvent<AddProjectFormElements>) => {
         e.preventDefault()

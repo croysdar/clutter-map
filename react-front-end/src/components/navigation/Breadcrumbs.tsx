@@ -1,90 +1,101 @@
 import React from 'react';
 
+import { Link as RouterLink, matchPath, useLocation } from 'react-router-dom';
+
+import { Breadcrumbs, Link, Typography } from '@mui/material';
+
+import { useGetItemQuery } from '@/features/items/itemApi';
 import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetProjectQuery } from '@/features/projects/projectApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 
-import { Breadcrumbs, Link, Typography } from '@mui/material';
-
-import { Link as RouterLink, matchPath, useLocation } from 'react-router-dom';
+import { ROUTES } from '@/utils/constants';
 
 const AppBreadcrumbs: React.FC = () => {
-    const location = useLocation();
+    const params = useExtractParams();
 
-    // Split the pathname into an array
-    const pathnames = location.pathname.split('/').filter(x => x);
-
-    const getObjectIdFromPath = (idIndex: number, objectName: string) => {
-        let objectId = (pathnames[idIndex - 1] === objectName) ? pathnames[idIndex] : null;
-
-        if (Number.isNaN(Number(objectId))) {
-            objectId = null;
-        }
-
-        return objectId;
-    }
-
-    // Extract project and room IDs from the URL if they exist
-    const projectId = getObjectIdFromPath(1, 'projects');
-    const roomId = getObjectIdFromPath(3, 'rooms');
-    const orgUnitId = getObjectIdFromPath(5, 'org-units');
+    const projectId = params["projectId"]
+    const roomId = params["roomId"]
+    const orgUnitId = params["orgUnitId"]
+    const itemId = params["itemId"]
 
     const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(projectId ?? '', { skip: !projectId });
     const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(roomId ?? '', { skip: !roomId });
     const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId ?? '', { skip: !orgUnitId });
+    const { data: itemData, isLoading: itemLoading } = useGetItemQuery(itemId ?? '', { skip: !itemId });
 
-    const getBreadcrumbName = (path: string) => {
-        if (matchPath("/projects", path)) {
-            return 'Projects';
-        }
-
-        if (projectId && path === `/projects/${projectId}`) return null;
-        if (matchPath("/projects/:projectId/rooms", path)) {
-            if (projectLoading)
-                return '...'
-            return projectData ? projectData.name : `Project ${projectId}`;
-        }
-
-        if (roomId && path === `/projects/${projectId}/rooms/${roomId}`) return null;
-        if (matchPath("/projects/:projectId/rooms/:roomId/org-units", path)) {
-            if (roomLoading)
-                return '...'
-            return roomData ? roomData.name : `Room ${roomId}`;
-        }
-
-        if (orgUnitId && path === `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}`) return null;
-        if (matchPath("/projects/:projectId/rooms/:roomId/org-units/:orgUnitId/items", path)) {
-            if (orgUnitLoading)
-                return '...'
-            return orgUnitData ? orgUnitData.name : `Organizer ${orgUnitId}`;
-        }
-
-        // Default fallback: return the last segment of the path
-        return path.split('/').pop() || '';
-    };
+    const { pathname } = useLocation();
+    const breadcrumbs = [
+        { label: "Home", to: ROUTES.home },
+        pathname.includes(ROUTES.about) && { label: "About", to: ROUTES.about },
+        pathname.includes(ROUTES.projects) && { label: "My Projects", to: ROUTES.projects },
+        projectId && {
+            label: projectLoading ? "Loading..." : projectData?.name || `Project ${projectId}`,
+            to: ROUTES.projectDetails(projectId),
+        },
+        roomId && {
+            label: roomLoading ? "Loading..." : roomData?.name || `Room ${roomId}`,
+            to: ROUTES.roomDetails(projectId!, roomId),
+        },
+        orgUnitId && {
+            label: orgUnitLoading ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
+            to: ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId),
+        },
+        itemId && {
+            label: itemLoading ? "Loading..." : itemData?.name || `Item ${itemId}`,
+            to: ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId),
+        },
+    ].filter(Boolean);
 
     return (
-        <Breadcrumbs aria-label="breadcrumb" separator="›" sx={{ padding: '8px 16px' }} >
-            <Link component={RouterLink} to="/" color="inherit" underline='hover'>Home</Link>
-            {pathnames.map((value, index) => {
-                // Build the URL path up to the current level
-                const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-
-                const breadcrumbName = getBreadcrumbName(to);
-
-                if (!breadcrumbName) return null
-
-                const isLast = index === pathnames.length - 1;
+        <Breadcrumbs aria-label="breadcrumb" separator="›" sx={{ padding: "8px 16px" }}>
+            {breadcrumbs.map((crumb, index) => {
+                if (!crumb) {
+                    return <></>
+                }
+                const isLast = index === breadcrumbs.length - 1;
                 return isLast ? (
-                    <Typography key={to}> {breadcrumbName}</Typography>
+                    <Typography key={crumb.to}>{crumb.label}</Typography>
                 ) : (
-                    <Typography key={to} color="inherit">
-                        <Link component={RouterLink} to={to} underline="hover">{breadcrumbName}</Link>
-                    </Typography>
+                    <Link
+                        key={crumb.to}
+                        component={RouterLink}
+                        to={crumb.to!}
+                        color="inherit"
+                        underline="hover"
+                    >
+                        {crumb.label}
+                    </Link>
                 );
             })}
         </Breadcrumbs>
-    )
+    );
 }
+
+export const useExtractParams = () => {
+    const { pathname } = useLocation();
+
+    // Generate route patterns dynamically from ROUTES
+    const routePatterns = Object.entries(ROUTES)
+        .filter(([_, value]) => typeof value === "function")
+        .map(([_, generateRoute]) =>
+            (generateRoute as Function)(
+                ":projectId",
+                ":roomId",
+                ":orgUnitId",
+                ":itemId"
+            )
+        );
+
+    // Attempt to match the current pathname against the generated route patterns
+    for (const route of routePatterns) {
+        const result = matchPath(route, pathname);
+        if (result?.params) {
+            return result.params as Record<string, string | undefined>;
+        }
+    }
+
+    return {}; // Return an empty object if no match is found
+};
 
 export default AppBreadcrumbs;

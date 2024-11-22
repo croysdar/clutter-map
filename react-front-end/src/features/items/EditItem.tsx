@@ -12,6 +12,7 @@ import { TagField } from '@/components/forms/TagField'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
 import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
 import { Item } from './itemTypes'
+import { ROUTES } from '@/utils/constants'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -25,8 +26,8 @@ interface EditItemFormElements extends HTMLFormElement {
 
 const EditItem = () => {
     const navigate = useNavigate();
-    const { itemId, projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items`
+    const { projectId, roomId, orgUnitId, itemId } = useParams();
+    const redirectUrl = ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId!)
 
     const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();

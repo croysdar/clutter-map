@@ -1,29 +1,15 @@
 import React from 'react';
-import { Paper, Typography, Container, Box } from '@mui/material';
 
-export type ListViewTileWrapProps = {
+import { Box, Container, Paper, Typography } from '@mui/material';
+
+export type DetailsPagePaperProps = {
     title: string
     subtitle?: string
-    children: React.ReactNode
+    children?: React.ReactNode
     menu?: React.ReactElement
-    count?: number
 }
 
-export const ListViewTileWrap: React.FC<ListViewTileWrapProps> = ({ title, subtitle, children, menu, count }) => {
-
-    const getNumColumns = (screenSize: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
-
-        const maxColumns = {
-            'xs': 1,
-            'sm': 2,
-            'md': 3,
-            'lg': 4,
-            'xl': 4
-        };
-
-        const columns = Math.min(count ?? maxColumns[screenSize], maxColumns[screenSize]);
-        return `repeat(${columns}, 1fr)`;
-    }
+export const DetailsPagePaper: React.FC<DetailsPagePaperProps> = ({ title, subtitle, children, menu }) => {
 
     return (
         <Paper sx={{ width: '100%', boxShadow: 3, pb: 6 }}>
@@ -46,23 +32,47 @@ export const ListViewTileWrap: React.FC<ListViewTileWrapProps> = ({ title, subti
                         </Typography>
                     )}
                 </Box>
-
-                {/* Children displayed in a responsive grid */}
-                <Container sx={{
-                    display: 'grid',
-                    gridTemplateColumns: {
-                        xs: getNumColumns('xs'),
-                        sm: getNumColumns('sm'),
-                        md: getNumColumns('md'),
-                        lg: getNumColumns('lg'),
-                        xl: getNumColumns('xl'),
-                    },
-                    gap: 3,
-                    marginTop: 3
-                }}>
-                    {children}
-                </Container>
+                {children}
             </Box>
         </Paper>
+    )
+}
+
+export type TileWrapperProps = {
+    children: React.ReactNode
+    count?: number
+}
+
+export const TileListWrapper: React.FC<TileWrapperProps> = ({ children, count }) => {
+
+    const getNumColumns = (screenSize: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
+
+        const maxColumns = {
+            'xs': 1,
+            'sm': 2,
+            'md': 3,
+            'lg': 4,
+            'xl': 4
+        };
+
+        const columns = Math.min(count ?? maxColumns[screenSize], maxColumns[screenSize]);
+        return `repeat(${columns}, 1fr)`;
+    }
+
+    return (
+        <Container sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+                xs: getNumColumns('xs'),
+                sm: getNumColumns('sm'),
+                md: getNumColumns('md'),
+                lg: getNumColumns('lg'),
+                xl: getNumColumns('xl'),
+            },
+            gap: 3,
+            marginTop: 3
+        }}>
+            {children}
+        </Container>
     )
 }

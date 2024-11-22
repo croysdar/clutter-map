@@ -8,6 +8,7 @@ import SubmitButton from '@/components/forms/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useGetRoomQuery } from '../rooms/roomApi';
 import { useAddNewOrgUnitMutation } from './orgUnitApi';
+import { ROUTES } from '@/utils/constants';
 
 interface AddOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -22,7 +23,7 @@ export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
     const navigate = useNavigate()
     const { roomId, projectId } = useParams();
-    const redirectUrl = `/projects/${projectId}/rooms/${roomId}/org-units`
+    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
 
     const { data: room } = useGetRoomQuery(roomId!);
 
@@ -46,7 +47,7 @@ export const AddOrgUnit = () => {
             form.reset()
 
             // redirect to [this room]/org-units
-            navigate(`/projects/${projectId}/rooms/${roomId}/org-units`)
+            navigate(redirectUrl)
         } catch (err) {
             console.error("Failed to create the orgUnit: ", err)
         }
