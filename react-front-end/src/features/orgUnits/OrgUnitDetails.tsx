@@ -1,19 +1,22 @@
 import React from 'react';
 
 import {
-    CircularProgress,
-    Paper
+    CircularProgress
 } from '@mui/material';
+
+import { useParams } from 'react-router-dom';
 
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
-import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
+import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import ItemMenu from '@/features/items/ItemMenu';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
-import { useParams } from 'react-router-dom';
-import { useGetOrgUnitQuery } from './orgUnitApi';
-import { useGetItemsByOrgUnitQuery } from '../items/itemApi';
-import ItemMenu from '../items/ItemMenu';
+
 import { ROUTES } from '@/utils/constants';
+
+import { useGetItemsByOrgUnitQuery } from '@/features/items/itemApi';
+import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
+
 
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
@@ -29,9 +32,9 @@ const OrgUnitDetails: React.FC = () => {
 
     if (isLoading) {
         return (
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <DetailsPagePaper title="">
                 <CircularProgress />
-            </Paper>
+            </DetailsPagePaper>
         );
     }
 
@@ -45,22 +48,23 @@ const OrgUnitDetails: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap
+            <DetailsPagePaper
                 title={orgUnit.name}
                 subtitle={orgUnit.description}
                 menu={<OrgUnitMenu orgUnit={orgUnit} />}
-                count={items.length}
             >
-                {items.map((item) => (
-                    <TileWrapper
-                        // TODO make item details page
-                        key={`tile-wrapper-org-unit-${item.id}`}
-                        title={item.name}
-                        id={item.id}
-                        elementLeft={<ItemMenu item={item} />}
-                    />
-                ))}
-            </ListViewTileWrap>
+                <TileListWrapper count={items.length} >
+                    {items.map((item) => (
+                        <TileWrapper
+                            // TODO make item details page
+                            key={`tile-wrapper-org-unit-${item.id}`}
+                            title={item.name}
+                            id={item.id}
+                            elementLeft={<ItemMenu item={item} />}
+                        />
+                    ))}
+                </TileListWrapper>
+            </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Item'
                 to={addUrl}

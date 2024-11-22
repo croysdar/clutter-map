@@ -1,16 +1,18 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import {
     CircularProgress,
-    Paper
 } from '@mui/material';
 
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
-import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
+import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+
 import { PROJECT_LIMIT, ROUTES } from '@/utils/constants';
-import { useNavigate } from 'react-router-dom';
-import { useGetProjectsQuery } from './projectApi';
+
+import { useGetProjectsQuery } from '@/features/projects/projectApi';
 
 const ProjectsList: React.FC = () => {
     const {
@@ -32,9 +34,9 @@ const ProjectsList: React.FC = () => {
 
     if (isLoading) {
         return (
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <DetailsPagePaper title="">
                 <CircularProgress />
-            </Paper>
+            </DetailsPagePaper>
         );
     }
 
@@ -44,16 +46,18 @@ const ProjectsList: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap title="My Projects" count={projects.length} >
-                {projects.map((project) => (
-                    <TileWrapper
-                        key={`tile-wrapper-org-unit-${project.id}`}
-                        title={project.name}
-                        id={project.id}
-                        onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, project.id)}
-                    />
-                ))}
-            </ListViewTileWrap>
+            <DetailsPagePaper title="My Projects" >
+                <TileListWrapper count={projects.length}>
+                    {projects.map((project) => (
+                        <TileWrapper
+                            key={`tile-wrapper-org-unit-${project.id}`}
+                            title={project.name}
+                            id={project.id}
+                            onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, project.id)}
+                        />
+                    ))}
+                </TileListWrapper>
+            </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='project'
                 to={addUrl}

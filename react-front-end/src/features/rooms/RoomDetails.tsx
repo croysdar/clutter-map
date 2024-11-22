@@ -1,14 +1,17 @@
 import React from 'react';
 
-import { CircularProgress, Paper } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import { CircularProgress } from '@mui/material';
 
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
-import { ListViewTileWrap } from '@/components/pageWrappers/ListViewPageWrapper';
+import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import RoomMenu from '@/features/rooms/RoomMenu';
+
+import { useGetOrgUnitsByRoomQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
-import { useNavigate, useParams } from 'react-router-dom';
-import RoomMenu from './RoomMenu';
-import { useGetOrgUnitsByRoomQuery } from '../orgUnits/orgUnitApi';
+
 import { ROUTES } from '@/utils/constants';
 
 const RoomDetails: React.FC = () => {
@@ -32,9 +35,9 @@ const RoomDetails: React.FC = () => {
 
     if (isLoading) {
         return (
-            <Paper sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <DetailsPagePaper title="">
                 <CircularProgress />
-            </Paper>
+            </DetailsPagePaper>
         );
     }
 
@@ -48,21 +51,22 @@ const RoomDetails: React.FC = () => {
 
     return (
         <>
-            <ListViewTileWrap
+            <DetailsPagePaper
                 title={room.name}
                 subtitle={room.description}
                 menu={<RoomMenu room={room} />}
-                count={orgUnits.length}
             >
-                {orgUnits.map((orgUnit) => (
-                    <TileWrapper
-                        key={`tile-wrapper-org-unit-${orgUnit.id}`}
-                        title={orgUnit.name}
-                        id={orgUnit.id}
-                        onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)}
-                    />
-                ))}
-            </ListViewTileWrap>
+                <TileListWrapper count={orgUnits.length} >
+                    {orgUnits.map((orgUnit) => (
+                        <TileWrapper
+                            key={`tile-wrapper-org-unit-${orgUnit.id}`}
+                            title={orgUnit.name}
+                            id={orgUnit.id}
+                            onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)}
+                        />
+                    ))}
+                </TileListWrapper>
+            </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Organizer'
                 to={addUrl}
