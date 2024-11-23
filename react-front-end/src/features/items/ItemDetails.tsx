@@ -1,15 +1,16 @@
 import React from 'react';
-
-import {
-    CircularProgress,
-    Typography
-} from '@mui/material';
-
-import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import { useParams } from 'react-router-dom';
-import { useGetItemQuery } from './itemApi';
-import ItemMenu from './ItemMenu';
+
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material';
+
+/* ------------- Components ------------- */
 import { RenderTags } from '@/components/forms/TagField';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
+import ItemMenu from '@/features/items/ItemMenu';
+
+/* ------------- Redux ------------- */
+import { useGetItemQuery } from '@/features/items/itemApi';
 
 const ItemDetails: React.FC = () => {
     const { itemId } = useParams();
@@ -26,15 +27,23 @@ const ItemDetails: React.FC = () => {
             <DetailsPagePaper title=''>
                 <CircularProgress />
             </DetailsPagePaper>
-        );
-    }
-
-    if (isError) {
-        return <div>{error.toString()}</div>
+        )
     }
 
     if (!item) {
-        return <div>Item not found.</div>
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'>Item not found</Typography>
+            </DetailsPagePaper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </DetailsPagePaper>
+        )
     }
 
     return (

@@ -1,16 +1,24 @@
 import React from 'react'
-
-import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material'
+
+/* ------------- Components ------------- */
 import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
-import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from './projectApi'
-import { Project } from './projectsTypes'
+
+/* ------------- Redux ------------- */
+import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation } from '@/features/projects/projectApi'
+
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants'
+
+/* ------------- Types ------------- */
+import { Project } from '@/features/projects/projectsTypes'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
@@ -25,7 +33,7 @@ const EditProject = () => {
     const { projectId } = useParams();
     const redirectUrl = ROUTES.projectDetails(projectId!);
 
-    const { data: project, isLoading: projectLoading } = useGetProjectQuery(projectId!);
+    const { data: project, isLoading: projectLoading, isError, error } = useGetProjectQuery(projectId!);
 
     const [
         updateProject,
@@ -34,17 +42,25 @@ const EditProject = () => {
 
     if (projectLoading) {
         return (
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <EditCardWrapper title=''>
                 <CircularProgress />
-            </Card>
+            </EditCardWrapper>
         )
     }
 
     if (!project) {
         return (
-            <section>
-                <Typography variant='h2'>Project not found!</Typography>
-            </section>
+            <EditCardWrapper title=''>
+                <Typography variant='h2'>Project not found</Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </EditCardWrapper>
         )
     }
 

@@ -1,16 +1,24 @@
 import React from 'react'
-
-import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material'
+
+/* ------------- Components ------------- */
 import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
-import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from './orgUnitApi'
-import { OrgUnit } from './orgUnitsTypes'
+
+/* ------------- Redux ------------- */
+import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation } from '@/features/orgUnits/orgUnitApi'
+
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants'
+
+/* ------------- Types ------------- */
+import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -26,7 +34,7 @@ const EditOrgUnit = () => {
     const { orgUnitId, roomId, projectId } = useParams();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
-    const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(orgUnitId!);
 
     const [
         updateOrgUnit,
@@ -35,19 +43,25 @@ const EditOrgUnit = () => {
 
     if (orgUnitLoading) {
         return (
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <EditCardWrapper title=''>
                 <CircularProgress />
-            </Card>
+            </EditCardWrapper>
         )
     }
 
     if (!orgUnit) {
         return (
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
-                <section>
-                    <Typography variant='h2'>OrgUnit not found!</Typography>
-                </section>
-            </Card>
+            <EditCardWrapper title=''>
+                <Typography variant='h2'>Organizer not found</Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </EditCardWrapper>
         )
     }
 

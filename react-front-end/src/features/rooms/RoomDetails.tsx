@@ -1,17 +1,20 @@
 import React from 'react';
-
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { CircularProgress } from '@mui/material';
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material';
 
+/* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
 import RoomMenu from '@/features/rooms/RoomMenu';
 
+/* ------------- Redux ------------- */
 import { useGetOrgUnitsByRoomQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
 
 const RoomDetails: React.FC = () => {
@@ -40,12 +43,20 @@ const RoomDetails: React.FC = () => {
         );
     }
 
-    if (isError) {
-        return <div>{error.toString()}</div>
+    if (!room) {
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'>Room not found</Typography>
+            </DetailsPagePaper>
+        )
     }
 
-    if (!room) {
-        return <div>Room not found.</div>
+    if (isError) {
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </DetailsPagePaper>
+        )
     }
 
     return (

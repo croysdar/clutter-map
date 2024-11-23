@@ -1,16 +1,24 @@
 import React from 'react'
-
-import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material'
+
+/* ------------- Components ------------- */
 import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
 import SubmitButton from '@/components/forms/SubmitButton'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
-import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from './roomApi'
-import { Room } from './roomsTypes'
+
+/* ------------- Redux ------------- */
+import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from '@/features/rooms/roomApi'
+
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants'
+
+/* ------------- Types ------------- */
+import { Room } from '@/features/rooms/roomsTypes'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,
@@ -26,7 +34,7 @@ const EditRoom = () => {
     const { roomId, projectId } = useParams();
     const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
 
-    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
+    const { data: room, isLoading: roomLoading, isError, error } = useGetRoomQuery(roomId!);
 
     const [
         updateRoom,
@@ -35,17 +43,25 @@ const EditRoom = () => {
 
     if (roomLoading) {
         return (
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <EditCardWrapper title=''>
                 <CircularProgress />
-            </Card>
+            </EditCardWrapper>
         )
     }
 
     if (!room) {
         return (
-            <section>
-                <Typography variant='h2'>Room not found!</Typography>
-            </section>
+            <EditCardWrapper title=''>
+                <Typography variant='h2'>Room not found</Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </EditCardWrapper>
         )
     }
 

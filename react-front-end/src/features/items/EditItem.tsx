@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-
-import { Card, CircularProgress, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material'
+
+/* ------------- Components ------------- */
 import DeleteEntityButtonWithModal from '@/components/buttons/DeleteEntityButtonWithModal'
 import AppTextField from '@/components/forms/AppTextField'
 import CancelButton from '@/components/forms/CancelButton'
@@ -10,9 +12,15 @@ import { QuantityField } from '@/components/forms/QuantityField'
 import SubmitButton from '@/components/forms/SubmitButton'
 import { TagField } from '@/components/forms/TagField'
 import { EditCardWrapper } from '@/components/pageWrappers/EditPageWrapper'
-import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from './itemApi'
-import { Item } from './itemTypes'
+
+/* ------------- Redux ------------- */
+import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from '@/features/items/itemApi'
+
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants'
+
+/* ------------- Types ------------- */
+import { Item } from '@/features/items/itemTypes'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -29,7 +37,7 @@ const EditItem = () => {
     const { projectId, roomId, orgUnitId, itemId } = useParams();
     const redirectUrl = ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId!)
 
-    const { data: item, isLoading: itemLoading } = useGetItemQuery(itemId!);
+    const { data: item, isLoading: itemLoading, isError, error } = useGetItemQuery(itemId!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
     // States to manage special input
@@ -47,17 +55,25 @@ const EditItem = () => {
 
     if (itemLoading) {
         return (
-            <Card sx={{ width: '100%', padding: 4, boxShadow: 3 }}>
+            <EditCardWrapper title=''>
                 <CircularProgress />
-            </Card>
+            </EditCardWrapper>
         )
     }
 
     if (!item) {
         return (
-            <section>
-                <Typography variant='h2'>Item not found!</Typography>
-            </section>
+            <EditCardWrapper title=''>
+                <Typography variant='h2'>Item not found</Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </EditCardWrapper>
         )
     }
 

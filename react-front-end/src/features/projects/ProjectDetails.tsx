@@ -1,21 +1,21 @@
 import React from 'react';
-
 import { useNavigate, useParams } from 'react-router-dom';
 
-import {
-    CircularProgress
-} from '@mui/material';
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material';
 
+/* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
 import ProjectMenu from '@/features/projects/ProjectMenu';
 
-import { ROUTES } from '@/utils/constants';
-
-import { useGetRoomsByProjectQuery } from '@/features/rooms/roomApi';
+/* ------------- Redux ------------- */
 import { useGetProjectQuery } from '@/features/projects/projectApi';
+import { useGetRoomsByProjectQuery } from '@/features/rooms/roomApi';
 
+/* ------------- Constants ------------- */
+import { ROUTES } from '@/utils/constants';
 
 const ProjectDetails: React.FC = () => {
     const { projectId } = useParams();
@@ -45,12 +45,20 @@ const ProjectDetails: React.FC = () => {
         );
     }
 
-    if (isError) {
-        return <div>{error.toString()}</div>
+    if (!project) {
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'>Project not found</Typography>
+            </DetailsPagePaper>
+        )
     }
 
-    if (!project) {
-        return <div>Project not found.</div>
+    if (isError) {
+        return (
+            <DetailsPagePaper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </DetailsPagePaper>
+        )
     }
 
     return (
