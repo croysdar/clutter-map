@@ -12,13 +12,13 @@ import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper'
 import { ItemListWithCheckBoxes } from '@/features/items/RenderItems';
 
 /* ------------- Redux ------------- */
-import { useGetItemsByOrgUnitQuery, useUnassignItemsFromOrgUnitMutation } from "@/features/items/itemApi";
-import { useGetOrgUnitQuery } from "@/features/orgUnits/orgUnitApi";
+import { useGetItemsByOrgUnitQuery, useGetItemsQuery, useUnassignItemsFromOrgUnitMutation } from "@/features/items/itemApi";
+import { useAssignItemsToOrgUnitMutation, useGetOrgUnitQuery } from "@/features/orgUnits/orgUnitApi";
 
 /* ------------- Constants ------------- */
 import { ROUTES } from "@/utils/constants";
 
-const RemoveOrgUnitItems = () => {
+export const RemoveOrgUnitItems = () => {
     const { orgUnitId, roomId, projectId } = useParams();
     const navigate = useNavigate();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
@@ -70,7 +70,6 @@ const RemoveOrgUnitItems = () => {
     return (
         <DetailsPagePaper title="Remove items" subtitle={orgUnit.name}>
             <ItemListWithCheckBoxes items={items} checkedItems={itemsToRemove} setCheckedItems={setItemsToRemove} />
-
             <SubmitButton
                 onClick={(e) => handleSubmit(e)}
                 disabled={unassignLoading}
@@ -83,4 +82,69 @@ const RemoveOrgUnitItems = () => {
     )
 }
 
-export default RemoveOrgUnitItems;
+export const AssignItemsToOrgUnit = () => {
+    const { orgUnitId, roomId, projectId } = useParams();
+    const navigate = useNavigate();
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
+
+    const { data: items, isLoading: itemsLoading, isError, error } = useGetItemsByOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
+
+    const { data: projectItems } = useGetItemsQuery();
+    const itemBank = projectItems?.filter((item) => String(item.orgUnitId) !== orgUnitId) || [];
+
+    const [itemsToAdd, setItemsToAdd] = useState<number[]>([]);
+
+    const [
+        assignItems,
+        { isLoading: assignLoading }
+    ] = useAssignItemsToOrgUnitMutation();
+
+    if (itemsLoading || orgUnitLoading) {
+        return (
+            <EditCardWrapper title=''>
+                <CircularProgress />
+            </EditCardWrapper>
+        )
+    }
+
+    if (!items || !orgUnit) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'>Organizer not found</Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    if (isError) {
+        return (
+            <EditCardWrapper title=''>
+                <Typography variant='h2'> {error.toString()} </Typography>
+            </EditCardWrapper>
+        )
+    }
+
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        if (itemsToAdd.length) {
+            await assignItems({ orgUnitId: orgUnit.id, itemIds: itemsToAdd });
+        }
+
+        navigate(redirectUrl);
+    }
+
+    return (
+        <DetailsPagePaper title="Move Items" subtitle={orgUnit.name}>
+            <ItemListWithCheckBoxes items={itemBank} checkedItems={itemsToAdd} setCheckedItems={setItemsToAdd} showCurrentOrgUnit />
+            <SubmitButton
+                onClick={(e) => handleSubmit(e)}
+                disabled={assignLoading}
+                label="Move Items"
+            />
+            <CancelButton
+                onClick={() => navigate(redirectUrl)}
+            />
+        </DetailsPagePaper>
+    )
+}

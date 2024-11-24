@@ -18,8 +18,12 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
             url: ROUTES.orgUnitEdit(projectId!, roomId!, orgUnit.id)
         },
         {
-            label: "Remove Items",
+            label: "Remove Items From Organizer",
             url: ROUTES.orgUnitRemoveItems(projectId!, roomId!, orgUnit.id)
+        },
+        {
+            label: "Move Items to Organizer",
+            url: ROUTES.orgUnitAssignItems(projectId!, roomId!, orgUnit.id)
         },
     ]
 

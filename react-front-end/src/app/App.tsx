@@ -1,9 +1,14 @@
 import { ReactElement, useEffect } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+/* ------------- Material UI ------------- */
+import { Box, CircularProgress, Container } from '@mui/material';
+
+/* ------------- Components ------------- */
 import AppBreadcrumbs from '@/components/navigation/Breadcrumbs';
 import Navbar from '@/components/navigation/Navbar';
 
-import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+/* ------------- Pages ------------- */
 import { AddItem } from '@/features/items/AddItem';
 import EditItem from '@/features/items/EditItem';
 import ItemDetails from '@/features/items/ItemDetails';
@@ -17,17 +22,17 @@ import ProjectsList from '@/features/projects/ProjectsList';
 import { AddRoom } from '@/features/rooms/AddRoom';
 import EditRoom from '@/features/rooms/EditRoom';
 import RoomDetails from '@/features/rooms/RoomDetails';
-
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
+import { AssignItemsToOrgUnit, RemoveOrgUnitItems } from '@/features/orgUnits/EditOrgUnitItems';
 import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
 
-import { Box, CircularProgress, Container } from '@mui/material';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+/* ------------- Redux ------------- */
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
+import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
 
+/* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
 import '../assets/styles/App.css';
-import RemoveOrgUnitItems from '@/features/orgUnits/EditOrgUnitItems';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
     const authStatus = useAppSelector(selectAuthStatus);
@@ -98,6 +103,7 @@ function App() {
                                         <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
                                         <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} Component={EditOrgUnit} />
                                         <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":roomId", ":orgUnitId")} Component={RemoveOrgUnitItems} />
+                                        <Route path={ROUTES.orgUnitAssignItems(":projectId", ":roomId", ":orgUnitId")} Component={AssignItemsToOrgUnit} />
 
                                         <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} Component={AddItem} />
                                         <Route path={ROUTES.itemDetails(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={ItemDetails} />

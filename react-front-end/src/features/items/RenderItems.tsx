@@ -32,13 +32,14 @@ export const ItemTile: React.FC<ItemTileProps> = ({ item, onClick }) => {
 type ItemListItemProps = {
     item: Item
     onClick: Function
-
     checked: boolean
+    showCurrentOrgUnit?: boolean
 }
 export const ItemListItem: React.FC<ItemListItemProps> = ({
     item,
     onClick,
     checked,
+    showCurrentOrgUnit
 }) => {
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -66,6 +67,19 @@ export const ItemListItem: React.FC<ItemListItemProps> = ({
                             {truncateText(item.name, 50)}
                         </Typography>
                     </ListItemText>
+                    {
+                        showCurrentOrgUnit &&
+                        <ListItemText sx={{ flex: 1 }}>
+                            <Typography variant='body1' >
+                                {
+                                    item.orgUnitName ?
+                                        truncateText(item.orgUnitName, 50)
+                                        :
+                                        "Item is stashed"
+                                }
+                            </Typography>
+                        </ListItemText>
+                    }
                     <ListItemText sx={{ flex: 2 }}>
                         <Typography variant='body1'>
                             {truncateText(item.description, 100)}
@@ -101,11 +115,13 @@ type ItemListWithCheckBoxesProps = {
     items: Item[]
     checkedItems: number[]
     setCheckedItems: Function
+    showCurrentOrgUnit?: boolean
 }
 export const ItemListWithCheckBoxes: React.FC<ItemListWithCheckBoxesProps> = ({
     items,
     checkedItems,
-    setCheckedItems
+    setCheckedItems,
+    showCurrentOrgUnit
 }) => {
     const handleCheckItem = (e: React.MouseEvent<HTMLDivElement>, itemId: number) => {
         setCheckedItems((prev: number[]) =>
@@ -120,6 +136,7 @@ export const ItemListWithCheckBoxes: React.FC<ItemListWithCheckBoxesProps> = ({
                         item={item}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleCheckItem(e, item.id)}
                         checked={checkedItems.includes(item.id)}
+                        showCurrentOrgUnit={showCurrentOrgUnit}
                     />
                     <Divider />
                 </>

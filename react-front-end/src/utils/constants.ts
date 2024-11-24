@@ -31,6 +31,8 @@ export const ROUTES = {
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/edit`,
     orgUnitRemoveItems: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/remove`,
+    orgUnitAssignItems: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/assign`,
 
     itemAdd: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`,
