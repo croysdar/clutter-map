@@ -55,7 +55,6 @@ export const AddRoom = () => {
 
         <AddNewCardWrapper title="Add a New Room">
             <form onSubmit={handleSubmit}>
-                {/* Room Name */}
                 <AppTextField
                     label="Room Name"
 
@@ -65,7 +64,6 @@ export const AddRoom = () => {
                     required
                 />
 
-                {/* Room Description */}
                 <AppTextField
                     label="Room Description"
 
@@ -76,7 +74,6 @@ export const AddRoom = () => {
                     rows={4}
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={isLoading}
                     label="Create Room"

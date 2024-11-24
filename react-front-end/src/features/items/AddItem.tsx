@@ -63,7 +63,6 @@ export const AddItem = () => {
     return (
         <AddNewCardWrapper title="Add a New Item">
             <form onSubmit={handleSubmit}>
-                {/* Item Name */}
                 <AppTextField
                     label="Item Name"
 
@@ -73,7 +72,6 @@ export const AddItem = () => {
                     required
                 />
 
-                {/* Item Description */}
                 <AppTextField
                     label="Item Description"
 
@@ -84,16 +82,13 @@ export const AddItem = () => {
                     rows={4}
                 />
 
-                {/* Item Quantity */}
                 <QuantityField
                     quantity={quantity}
                     onQuantityChange={setQuantity}
                 />
 
-                {/* Item Tags */}
                 <TagField tags={tags} onTagsChange={setTags} />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={isLoading}
                     label="Create Item"

@@ -78,11 +78,9 @@ const EditOrgUnit = () => {
         }
     }
 
-
     return (
         <EditCardWrapper title="Edit Organizer">
             <form onSubmit={handleSubmit}>
-                {/* OrgUnit Name */}
                 <AppTextField
                     label="OrgUnit Name"
 
@@ -93,7 +91,6 @@ const EditOrgUnit = () => {
                     required
                 />
 
-                {/* OrgUnit Description */}
                 <AppTextField
                     label="OrgUnit Description"
 
@@ -105,7 +102,6 @@ const EditOrgUnit = () => {
                     rows={4}
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={updateLoading}
                     label="Save Changes"
@@ -146,5 +142,6 @@ const DeleteOrgUnitButton: React.FC<DeleteButtonProps> = ({ orgUnit, isDisabled,
         />
     );
 }
+
 
 export default EditOrgUnit

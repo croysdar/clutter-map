@@ -47,7 +47,6 @@ export const AddProject = () => {
     return (
         <AddNewCardWrapper title="Add a New Project">
             <form onSubmit={handleSubmit}>
-                {/* Project Name */}
                 <AppTextField
                     label="Project Name"
 
@@ -57,7 +56,6 @@ export const AddProject = () => {
                     required
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={isLoading}
                     label="Create Project"
