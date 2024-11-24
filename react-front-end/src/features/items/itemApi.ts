@@ -14,8 +14,8 @@ export const itemApi = baseApiSlice.injectEndpoints({
 
         getItemsByOrgUnit: builder.query<Item[], string>({
             query: (orgUnitID) => `/org-units/${orgUnitID}/items`,
-            providesTags: (result = []) => [
-                'Item',
+            providesTags: (result = [], error, orgUnitID) => [
+                { type: 'OrgUnit', id: orgUnitID },
                 ...result.map(({ id }) => ({ type: 'Item', id } as const))
             ]
         }),
@@ -54,13 +54,15 @@ export const itemApi = baseApiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: 'Item', id: arg.id }]
         }),
 
-        unassignItemsFromOrgUnit: builder.mutation<Item[], Number[]>({
+        unassignItemsFromOrgUnit: builder.mutation<Item[], number[]>({
             query: itemIds => ({
                 url: '/items/unassign',
                 method: 'PUT',
                 body: itemIds
             }),
-            invalidatesTags: ['Item', 'OrgUnit']
+            invalidatesTags: (result, error, itemIds) => [
+                ...itemIds.map((id) => ({ type: 'Item', id } as const))
+            ]
         }),
 
         /* ------------- DELETE Operations ------------- */

@@ -60,7 +60,11 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
                 url: `/org-units/${orgUnitId}/items`,
                 method: 'PUT',
                 body: itemIds
-            })
+            }),
+            invalidatesTags: (result, error, { itemIds, orgUnitId }) => [
+                { type: 'OrgUnit', id: orgUnitId } as const,
+                ...itemIds.map((id) => ({ type: 'Item', id } as const))
+            ]
         }),
 
         unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], Number[]>({
@@ -88,7 +92,10 @@ export const {
     useGetOrgUnitsQuery,
     useGetOrgUnitsByRoomQuery,
     useGetOrgUnitQuery,
-    useUpdateOrgUnitMutation,
     useAddNewOrgUnitMutation,
+    useAddNewUnassignedOrgUnitMutation,
+    useUpdateOrgUnitMutation,
+    useAssignItemsToOrgUnitMutation,
+    useUnassignOrgUnitsFromRoomMutation,
     useDeleteOrgUnitMutation,
 } = orgUnitApi;
