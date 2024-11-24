@@ -16,7 +16,11 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
         {
             label: "Edit Organizer",
             url: ROUTES.orgUnitEdit(projectId!, roomId!, orgUnit.id)
-        }
+        },
+        {
+            label: "Remove Items",
+            url: ROUTES.orgUnitRemoveItems(projectId!, roomId!, orgUnit.id)
+        },
     ]
 
     return <LinksMenu menuItems={menuItems} />

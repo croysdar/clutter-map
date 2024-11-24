@@ -79,7 +79,9 @@ export const {
     useGetItemsQuery,
     useGetItemsByOrgUnitQuery,
     useGetItemQuery,
-    useUpdateItemMutation,
     useAddNewItemMutation,
+    useAddNewUnassignedItemMutation,
+    useUpdateItemMutation,
+    useUnassignItemsFromOrgUnitMutation,
     useDeleteItemMutation,
 } = itemApi;

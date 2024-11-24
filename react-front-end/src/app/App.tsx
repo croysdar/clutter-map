@@ -27,6 +27,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { ROUTES } from '@/utils/constants';
 import '../assets/styles/App.css';
+import RemoveOrgUnitItems from '@/features/orgUnits/EditOrgUnitItems';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
     const authStatus = useAppSelector(selectAuthStatus);
@@ -96,6 +97,7 @@ function App() {
                                         <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} Component={AddOrgUnit} />
                                         <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
                                         <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} Component={EditOrgUnit} />
+                                        <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":roomId", ":orgUnitId")} Component={RemoveOrgUnitItems} />
 
                                         <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} Component={AddItem} />
                                         <Route path={ROUTES.itemDetails(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={ItemDetails} />
