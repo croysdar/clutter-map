@@ -4,6 +4,8 @@ export interface Item {
     description: string;
     tags: string[]
     quantity: number;
+    orgUnitId?: number,
+    orgUnitName?: string,
 }
 
 export type NewItem = Pick<Item, 'name' | 'description' | 'tags' | 'quantity'> | { orgUnitId: string }
