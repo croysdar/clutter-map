@@ -6,8 +6,8 @@ import { CircularProgress, Typography } from '@mui/material';
 
 /* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { TileWrapper } from '@/components/common/TileWrapper';
-import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { TileListWrapper, TileWrapper } from '@/components/common/TileWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import ProjectMenu from '@/features/projects/ProjectMenu';
 
 /* ------------- Redux ------------- */

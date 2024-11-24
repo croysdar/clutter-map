@@ -6,8 +6,7 @@ import { CircularProgress, Typography } from '@mui/material';
 
 /* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { TileWrapper } from '@/components/common/TileWrapper';
-import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 
 /* ------------- Redux ------------- */
@@ -16,6 +15,7 @@ import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
+import { TileListWrapper } from '@/components/common/TileWrapper';
 
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
