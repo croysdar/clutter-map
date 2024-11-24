@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { MoreVert } from '@mui/icons-material';
-import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +39,7 @@ const LinksMenu: React.FC<MenuProps> = ({ menuItems }) => {
     }
 
     return (
-        <>
+        <Box sx={{ display: 'flex', justifyContent: 'right' }}>
             <Tooltip title="Settings">
                 <IconButton
                     onClick={handleClick}
@@ -59,7 +59,7 @@ const LinksMenu: React.FC<MenuProps> = ({ menuItems }) => {
                     </MenuItem>
                 )}
             </Menu>
-        </>
+        </Box>
     );
 }
 
