@@ -12,7 +12,7 @@ import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper'
 import { ItemListWithCheckBoxes } from '@/features/items/RenderItems';
 
 /* ------------- Redux ------------- */
-import { useGetItemsByOrgUnitQuery, useGetItemsQuery, useUnassignItemsFromOrgUnitMutation } from "@/features/items/itemApi";
+import { useGetItemsByOrgUnitQuery, useGetItemsByProjectQuery, useUnassignItemsFromOrgUnitMutation } from "@/features/items/itemApi";
 import { useAssignItemsToOrgUnitMutation, useGetOrgUnitQuery } from "@/features/orgUnits/orgUnitApi";
 
 /* ------------- Constants ------------- */
@@ -87,10 +87,9 @@ export const AssignItemsToOrgUnit = () => {
     const navigate = useNavigate();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
-    const { data: items, isLoading: itemsLoading, isError, error } = useGetItemsByOrgUnitQuery(orgUnitId!);
-    const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: projectItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(projectId!);
 
-    const { data: projectItems } = useGetItemsQuery();
     const itemBank = projectItems?.filter((item) => String(item.orgUnitId) !== orgUnitId) || [];
 
     const [itemsToAdd, setItemsToAdd] = useState<number[]>([]);
@@ -108,7 +107,7 @@ export const AssignItemsToOrgUnit = () => {
         )
     }
 
-    if (!items || !orgUnit) {
+    if (!projectItems || !orgUnit) {
         return (
             <EditCardWrapper title=''>
                 <Typography variant='h2'>Organizer not found</Typography>

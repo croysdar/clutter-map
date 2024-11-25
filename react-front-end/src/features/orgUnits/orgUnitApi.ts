@@ -15,8 +15,16 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
 
         getOrgUnitsByRoom: builder.query<OrgUnit[], string>({
             query: (roomID) => `/rooms/${roomID}/org-units`,
-            providesTags: (result = []) => [
-                'OrgUnit',
+            providesTags: (result = [], error, roomID) => [
+                { type: 'Room', id: roomID },
+                ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
+            ]
+        }),
+
+        getOrgUnitsByProject: builder.query<OrgUnit[], string>({
+            query: (projectId) => `/projects/${projectId}/org-units`,
+            providesTags: (result = [], error, projectId) => [
+                { type: 'Project', id: projectId },
                 ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
             ]
         }),
@@ -91,6 +99,7 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
 export const {
     useGetOrgUnitsQuery,
     useGetOrgUnitsByRoomQuery,
+    useGetOrgUnitsByProjectQuery,
     useGetOrgUnitQuery,
     useAddNewOrgUnitMutation,
     useAddNewUnassignedOrgUnitMutation,

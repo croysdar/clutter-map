@@ -20,6 +20,14 @@ export const itemApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
+        getItemsByProject: builder.query<Item[], string>({
+            query: (projectId) => `/projects/${projectId}/items`,
+            providesTags: (result = [], error, projectID) => [
+                { type: 'Project', id: projectID },
+                ...result.map(({ id }) => ({ type: 'Item', id } as const))
+            ]
+        }),
+
         getItem: builder.query<Item, string>({
             query: (itemId) => `/items/${itemId}`,
             providesTags: (result, error, arg) => [{ type: 'Item', id: arg }]
@@ -80,6 +88,7 @@ export const itemApi = baseApiSlice.injectEndpoints({
 export const {
     useGetItemsQuery,
     useGetItemsByOrgUnitQuery,
+    useGetItemsByProjectQuery,
     useGetItemQuery,
     useAddNewItemMutation,
     useAddNewUnassignedItemMutation,

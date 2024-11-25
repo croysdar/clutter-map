@@ -115,7 +115,7 @@ class ProjectControllerTests {
     }
 
     @Test
-    void getOneProject_ShouldReturnProject_WhenProjectExists() throws Exception {
+    void getOneProject_ShouldReturnProject_WhenValid() throws Exception {
         // Arrange: Set up a mock project and stub the service to return it when
         // searched by ID
         Project project = new TestDataFactory.ProjectBuilder().name("Test Project").user(mockUser).build();
@@ -174,6 +174,78 @@ class ProjectControllerTests {
 
         // Act: Perform a GET request to the /projects/1/rooms endpoint
         mockMvc.perform(get("/projects/1/rooms"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("PROJECT with ID 1 not found."));
+
+        // Assert: Ensure the service method was called to attempt to retrieve the
+        // project
+        verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getProjectOrgUnits_ShouldReturnOrgUnits_WhenProjectExists() throws Exception {
+        // Arrange: Set up a project with a room and mock the service to return the
+        // project
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
+        project.setOrgUnits(Collections.singletonList(orgUnit));
+        when(projectService.getProjectById(1L)).thenReturn(project);
+
+        // Act: Perform a GET request to the /projects/1/org-units endpoint
+        mockMvc.perform(get("/projects/1/org-units"))
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected orgUnit name
+                .andExpect(jsonPath("$[0].name").value(orgUnit.getName()));
+
+        // Assert: Ensure the service method was called to retrieve the project by ID
+        verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getProjectOrgUnits_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw ProjectNotFoundException when retrieving
+        // rooms for a non-existent project
+        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
+
+        // Act: Perform a GET request to the /projects/1/org-units endpoint
+        mockMvc.perform(get("/projects/1/org-units"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("PROJECT with ID 1 not found."));
+
+        // Assert: Ensure the service method was called to attempt to retrieve the
+        // project
+        verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getProjectItems_ShouldReturnItems_WhenProjectExists() throws Exception {
+        // Arrange: Set up a project with a room and mock the service to return the
+        // project
+        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Item item = new TestDataFactory.ItemBuilder().project(project).build();
+        project.setItems(Collections.singletonList(item));
+        when(projectService.getProjectById(1L)).thenReturn(project);
+
+        // Act: Perform a GET request to the /projects/1/items endpoint
+        mockMvc.perform(get("/projects/1/items"))
+                .andExpect(status().isOk())
+
+                // Assert: Verify the response contains the expected item name
+                .andExpect(jsonPath("$[0].name").value(item.getName()));
+
+        // Assert: Ensure the service method was called to retrieve the project by ID
+        verify(projectService).getProjectById(1L);
+    }
+
+    @Test
+    void getProjectItems_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
+        // Arrange: Mock the service to throw ProjectNotFoundException when retrieving
+        // rooms for a non-existent project
+        when(projectService.getProjectById(1L)).thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L));
+
+        // Act: Perform a GET request to the /projects/1/items endpoint
+        mockMvc.perform(get("/projects/1/items"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("PROJECT with ID 1 not found."));
 

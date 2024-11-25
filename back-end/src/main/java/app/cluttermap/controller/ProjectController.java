@@ -60,6 +60,18 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectById(id).getRooms());
     }
 
+    @GetMapping("/{id}/org-units")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
+    public ResponseEntity<Iterable<OrgUnit>> getProjectOrgUnits(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(projectService.getProjectById(id).getOrgUnits());
+    }
+
+    @GetMapping("/{id}/items")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
+    public ResponseEntity<Iterable<Item>> getProjectItems(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(projectService.getProjectById(id).getItems());
+    }
+
     @GetMapping("/{projectId}/org-units/unassigned")
     @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
     public ResponseEntity<Iterable<OrgUnit>> getUnassignedOrgUnitsByProjectId(@PathVariable Long projectId) {
