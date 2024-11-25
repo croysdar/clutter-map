@@ -70,18 +70,20 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
                 body: itemIds
             }),
             invalidatesTags: (result, error, { itemIds, orgUnitId }) => [
-                { type: 'OrgUnit', id: orgUnitId } as const,
+                { type: 'OrgUnit', id: orgUnitId },
                 ...itemIds.map((id) => ({ type: 'Item', id } as const))
             ]
         }),
 
-        unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], Number[]>({
+        unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], number[]>({
             query: orgUnitIds => ({
                 url: '/org-units/unassign',
                 method: 'PUT',
                 body: orgUnitIds
             }),
-            invalidatesTags: ['OrgUnit', 'Room']
+            invalidatesTags: (result, error, orgUnitIds) => [
+                ...orgUnitIds.map((id) => ({ type: 'OrgUnit', id } as const))
+            ]
         }),
 
         /* ------------- DELETE Operations ------------- */
