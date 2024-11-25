@@ -72,7 +72,7 @@ public class RoomController {
     }
 
     @PutMapping("/{roomId}/org-units")
-    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'roomId')")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
     public ResponseEntity<Iterable<OrgUnit>> assignOrgUnitsToRoom(
             @PathVariable Long roomId,
             @RequestBody List<Long> orgUnitIds) {
