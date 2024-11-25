@@ -22,6 +22,10 @@ export const ROUTES = {
         `/projects/${projectId}/rooms/${roomId}`,
     roomEdit: (projectId: string | number, roomId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/edit`,
+    roomRemoveOrgUnits: (projectId: string | number, roomId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/remove`,
+    roomAssignOrgUnits: (projectId: string | number, roomId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/assign`,
 
     orgUnitAdd: (projectId: string | number, roomId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/add`,

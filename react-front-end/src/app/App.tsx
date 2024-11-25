@@ -14,6 +14,7 @@ import EditItem from '@/features/items/EditItem';
 import ItemDetails from '@/features/items/ItemDetails';
 import { AddOrgUnit } from '@/features/orgUnits/AddOrgUnit';
 import EditOrgUnit from '@/features/orgUnits/EditOrgUnit';
+import { AssignItemsToOrgUnit, RemoveOrgUnitItems } from '@/features/orgUnits/EditOrgUnitItems';
 import OrgUnitDetails from '@/features/orgUnits/OrgUnitDetails';
 import { AddProject } from '@/features/projects/AddProject';
 import EditProject from '@/features/projects/EditProject';
@@ -21,14 +22,14 @@ import ProjectDetails from '@/features/projects/ProjectDetails';
 import ProjectsList from '@/features/projects/ProjectsList';
 import { AddRoom } from '@/features/rooms/AddRoom';
 import EditRoom from '@/features/rooms/EditRoom';
+import { AssignOrgUnitsToRoom, RemoveRoomOrgUnits } from '@/features/rooms/EditRoomOrgUnits';
 import RoomDetails from '@/features/rooms/RoomDetails';
-import { AssignItemsToOrgUnit, RemoveOrgUnitItems } from '@/features/orgUnits/EditOrgUnitItems';
 import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
-import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
@@ -98,6 +99,8 @@ function App() {
                                         <Route path={ROUTES.roomAdd(":projectId")} Component={AddRoom} />
                                         <Route path={ROUTES.roomDetails(":projectId", ":roomId")} Component={RoomDetails} />
                                         <Route path={ROUTES.roomEdit(":projectId", ":roomId")} Component={EditRoom} />
+                                        <Route path={ROUTES.roomRemoveOrgUnits(":projectId", ":roomId")} Component={RemoveRoomOrgUnits} />
+                                        <Route path={ROUTES.roomAssignOrgUnits(":projectId", ":roomId")} Component={AssignOrgUnitsToRoom} />
 
                                         <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} Component={AddOrgUnit} />
                                         <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
