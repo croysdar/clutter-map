@@ -6,9 +6,10 @@ import { CircularProgress, Typography } from '@mui/material';
 
 /* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { TileWrapper } from '@/components/common/TileWrapper';
-import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { TileListWrapper } from '@/components/common/TileWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import RoomMenu from '@/features/rooms/RoomMenu';
+import { OrgUnitTile } from '../orgUnits/RenderOrgUnit';
 
 /* ------------- Redux ------------- */
 import { useGetOrgUnitsByRoomQuery } from '@/features/orgUnits/orgUnitApi';
@@ -68,12 +69,7 @@ const RoomDetails: React.FC = () => {
             >
                 <TileListWrapper count={orgUnits.length} >
                     {orgUnits.map((orgUnit) => (
-                        <TileWrapper
-                            key={`tile-wrapper-org-unit-${orgUnit.id}`}
-                            title={orgUnit.name}
-                            id={orgUnit.id}
-                            onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)}
-                        />
+                        <OrgUnitTile orgUnit={orgUnit} onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)} />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>

@@ -22,6 +22,10 @@ export const ROUTES = {
         `/projects/${projectId}/rooms/${roomId}`,
     roomEdit: (projectId: string | number, roomId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/edit`,
+    roomRemoveOrgUnits: (projectId: string | number, roomId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/remove`,
+    roomAssignOrgUnits: (projectId: string | number, roomId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/assign`,
 
     orgUnitAdd: (projectId: string | number, roomId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/add`,
@@ -29,6 +33,10 @@ export const ROUTES = {
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}`,
     orgUnitEdit: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/edit`,
+    orgUnitRemoveItems: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/remove`,
+    orgUnitAssignItems: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
+        `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/assign`,
 
     itemAdd: (projectId: string | number, roomId: string | number, orgUnitId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/add`,

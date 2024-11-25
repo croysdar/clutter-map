@@ -15,8 +15,9 @@ export const roomsApi = baseApiSlice.injectEndpoints({
 
         getRoomsByProject: builder.query<Room[], string>({
             query: (projectID) => `/projects/${projectID}/rooms`,
-            providesTags: (result = []) => [
+            providesTags: (result = [], error, projectID) => [
                 'Room',
+                { type: 'Project', id: projectID },
                 ...result.map(({ id }) => ({ type: 'Room', id } as const))
             ]
         }),
@@ -51,7 +52,11 @@ export const roomsApi = baseApiSlice.injectEndpoints({
                 url: `/rooms/${roomId}/org-units`,
                 method: 'PUT',
                 body: orgUnitIds
-            })
+            }),
+            invalidatesTags: (result, error, { orgUnitIds, roomId }) => [
+                { type: "Room", id: roomId },
+                ...orgUnitIds.map((id) => ({ type: 'OrgUnit', id } as const))
+            ]
         }),
 
         /* ------------- DELETE Operations ------------- */
@@ -71,6 +76,7 @@ export const {
     useGetRoomsByProjectQuery,
     useGetRoomQuery,
     useUpdateRoomMutation,
+    useAssignOrgUnitsToRoomMutation,
     useAddNewRoomMutation,
     useDeleteRoomMutation,
 } = roomsApi;

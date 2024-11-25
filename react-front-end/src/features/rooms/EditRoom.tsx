@@ -81,7 +81,6 @@ const EditRoom = () => {
     return (
         <EditCardWrapper title="Edit Room">
             <form onSubmit={handleSubmit}>
-                {/* Room Name */}
                 <AppTextField
                     label="Room Name"
 
@@ -92,7 +91,6 @@ const EditRoom = () => {
                     required
                 />
 
-                {/* Room Description */}
                 <AppTextField
                     label="Room Description"
 
@@ -104,7 +102,6 @@ const EditRoom = () => {
                     rows={4}
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={updateLoading}
                     label="Save Changes"

@@ -7,8 +7,8 @@ import {
 } from '@mui/material';
 
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { TileWrapper } from '@/components/common/TileWrapper';
-import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { TileListWrapper, TileWrapper } from '@/components/common/TileWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 
 import { PROJECT_LIMIT, ROUTES } from '@/utils/constants';
 

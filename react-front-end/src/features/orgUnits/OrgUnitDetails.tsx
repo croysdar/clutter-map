@@ -6,9 +6,10 @@ import { CircularProgress, Typography } from '@mui/material';
 
 /* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { TileWrapper } from '@/components/common/TileWrapper';
-import { DetailsPagePaper, TileListWrapper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
+import { ItemTile } from '@/features/items/RenderItems';
+import { TileListWrapper } from '@/components/common/TileWrapper';
 
 /* ------------- Redux ------------- */
 import { useGetItemsByOrgUnitQuery } from '@/features/items/itemApi';
@@ -20,6 +21,7 @@ import { ROUTES } from '@/utils/constants';
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
     const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
+    const navigate = useNavigate();
 
     const {
         data: items = [],
@@ -27,12 +29,6 @@ const OrgUnitDetails: React.FC = () => {
         isError,
         error
     } = useGetItemsByOrgUnitQuery(orgUnitId!);
-
-    const navigate = useNavigate();
-    const handleClick = (e: React.MouseEvent<HTMLDivElement>, itemId: number) => {
-        e.preventDefault();
-        navigate(ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId))
-    }
 
     if (isLoading) {
         return (
@@ -58,6 +54,10 @@ const OrgUnitDetails: React.FC = () => {
         )
     }
 
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>, itemId: number) => {
+        e.preventDefault();
+        navigate(ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId))
+    }
 
     return (
         <>
@@ -68,12 +68,7 @@ const OrgUnitDetails: React.FC = () => {
             >
                 <TileListWrapper count={items.length} >
                     {items.map((item) => (
-                        <TileWrapper
-                            key={`tile-wrapper-org-unit-${item.id}`}
-                            title={item.name}
-                            id={item.id}
-                            onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, item.id)}
-                        />
+                        <ItemTile item={item} onClick={handleClick} />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>

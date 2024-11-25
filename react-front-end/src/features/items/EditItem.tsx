@@ -94,7 +94,6 @@ const EditItem = () => {
     return (
         <EditCardWrapper title="Edit Item">
             <form onSubmit={handleSubmit}>
-                {/* Item Name */}
                 <AppTextField
                     label="Item Name"
                     id="itemName"
@@ -103,7 +102,6 @@ const EditItem = () => {
                     required
                 />
 
-                {/* Item Description */}
                 <AppTextField
                     label="Item Description"
                     id="itemDescription"
@@ -113,16 +111,13 @@ const EditItem = () => {
                     rows={4}
                 />
 
-                {/* Item Quantity */}
                 <QuantityField
                     quantity={quantity}
                     onQuantityChange={setQuantity}
                 />
 
-                {/* Item Tags */}
                 <TagField tags={tags} onTagsChange={setTags} />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={updateLoading}
                     label="Save Changes"

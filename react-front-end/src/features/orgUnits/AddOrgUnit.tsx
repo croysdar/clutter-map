@@ -56,7 +56,6 @@ export const AddOrgUnit = () => {
     return (
         <AddNewCardWrapper title="Add a New Organizer">
             <form onSubmit={handleSubmit}>
-                {/* OrgUnit Name */}
                 <AppTextField
                     label="OrgUnit Name"
 
@@ -66,7 +65,6 @@ export const AddOrgUnit = () => {
                     required
                 />
 
-                {/* OrgUnit Description */}
                 <AppTextField
                     label="OrgUnit Description"
 
@@ -77,7 +75,6 @@ export const AddOrgUnit = () => {
                     rows={4}
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={isLoading}
                     label="Create Organizer"

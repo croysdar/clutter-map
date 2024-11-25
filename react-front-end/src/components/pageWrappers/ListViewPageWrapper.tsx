@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Container, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 
 export type DetailsPagePaperProps = {
     title: string
@@ -12,8 +12,8 @@ export type DetailsPagePaperProps = {
 export const DetailsPagePaper: React.FC<DetailsPagePaperProps> = ({ title, subtitle, children, menu }) => {
 
     return (
-        <Paper sx={{ width: '100%', boxShadow: 3 }}>
-            <Box sx={{ position: 'relative', px: 1, py: 2 }}>
+        <Paper sx={{ width: '100%', boxShadow: 3, padding: 4 }}>
+            <Box sx={{ position: 'relative', px: 1, pb: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', mx: 1 }}>
                     {/* Title and Menu (Top Row) */}
                     <Box
@@ -62,49 +62,10 @@ export const DetailsPagePaper: React.FC<DetailsPagePaperProps> = ({ title, subti
                     )}
                 </Box>
 
-                <Box sx={{ pb: 2 }}>
+                <Box>
                     {children}
                 </Box>
             </Box>
         </Paper>
-    )
-}
-
-export type TileWrapperProps = {
-    children: React.ReactNode
-    count?: number
-}
-
-export const TileListWrapper: React.FC<TileWrapperProps> = ({ children, count }) => {
-
-    const getNumColumns = (screenSize: 'xs' | 'sm' | 'md' | 'lg' | 'xl') => {
-
-        const maxColumns = {
-            'xs': 1,
-            'sm': 2,
-            'md': 3,
-            'lg': 4,
-            'xl': 4
-        };
-
-        const columns = Math.min(count ?? maxColumns[screenSize], maxColumns[screenSize]);
-        return `repeat(${columns}, 1fr)`;
-    }
-
-    return (
-        <Container sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-                xs: getNumColumns('xs'),
-                sm: getNumColumns('sm'),
-                md: getNumColumns('md'),
-                lg: getNumColumns('lg'),
-                xl: getNumColumns('xl'),
-            },
-            gap: 3,
-            marginTop: 3
-        }}>
-            {children}
-        </Container>
     )
 }

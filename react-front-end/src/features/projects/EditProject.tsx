@@ -79,7 +79,6 @@ const EditProject = () => {
     return (
         <EditCardWrapper title="Edit Project">
             <form onSubmit={handleSubmit}>
-                {/* Project Name */}
                 <AppTextField
                     label="Project Name"
 
@@ -90,7 +89,6 @@ const EditProject = () => {
                     required
                 />
 
-                {/* Submit Button */}
                 <SubmitButton
                     disabled={updateLoading}
                     label="Save Changes"

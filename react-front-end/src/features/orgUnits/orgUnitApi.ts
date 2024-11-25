@@ -15,8 +15,16 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
 
         getOrgUnitsByRoom: builder.query<OrgUnit[], string>({
             query: (roomID) => `/rooms/${roomID}/org-units`,
-            providesTags: (result = []) => [
-                'OrgUnit',
+            providesTags: (result = [], error, roomID) => [
+                { type: 'Room', id: roomID },
+                ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
+            ]
+        }),
+
+        getOrgUnitsByProject: builder.query<OrgUnit[], string>({
+            query: (projectId) => `/projects/${projectId}/org-units`,
+            providesTags: (result = [], error, projectId) => [
+                { type: 'Project', id: projectId },
                 ...result.map(({ id }) => ({ type: 'OrgUnit', id } as const))
             ]
         }),
@@ -60,16 +68,22 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
                 url: `/org-units/${orgUnitId}/items`,
                 method: 'PUT',
                 body: itemIds
-            })
+            }),
+            invalidatesTags: (result, error, { itemIds, orgUnitId }) => [
+                { type: 'OrgUnit', id: orgUnitId },
+                ...itemIds.map((id) => ({ type: 'Item', id } as const))
+            ]
         }),
 
-        unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], Number[]>({
+        unassignOrgUnitsFromRoom: builder.mutation<OrgUnit[], number[]>({
             query: orgUnitIds => ({
                 url: '/org-units/unassign',
                 method: 'PUT',
                 body: orgUnitIds
             }),
-            invalidatesTags: ['OrgUnit', 'Room']
+            invalidatesTags: (result, error, orgUnitIds) => [
+                ...orgUnitIds.map((id) => ({ type: 'OrgUnit', id } as const))
+            ]
         }),
 
         /* ------------- DELETE Operations ------------- */
@@ -87,8 +101,12 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
 export const {
     useGetOrgUnitsQuery,
     useGetOrgUnitsByRoomQuery,
+    useGetOrgUnitsByProjectQuery,
     useGetOrgUnitQuery,
-    useUpdateOrgUnitMutation,
     useAddNewOrgUnitMutation,
+    useAddNewUnassignedOrgUnitMutation,
+    useUpdateOrgUnitMutation,
+    useAssignItemsToOrgUnitMutation,
+    useUnassignOrgUnitsFromRoomMutation,
     useDeleteOrgUnitMutation,
 } = orgUnitApi;
