@@ -3,6 +3,7 @@ package app.cluttermap.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class ItemService {
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
+    private final ItemService self;
 
     /* ------------- Constructor ------------- */
     public ItemService(
@@ -38,12 +40,14 @@ public class ItemService {
             ItemRepository itemRepository,
             SecurityService securityService,
             ProjectService projectService,
-            OrgUnitService orgUnitService) {
+            OrgUnitService orgUnitService,
+            @Lazy ItemService self) {
         this.orgUnitRepository = orgUnitRepository;
         this.itemRepository = itemRepository;
         this.securityService = securityService;
         this.projectService = projectService;
         this.orgUnitService = orgUnitService;
+        this.self = self;
     }
 
     /* ------------- CRUD Operations ------------- */
@@ -69,13 +73,16 @@ public class ItemService {
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
         if (itemDTO.getOrgUnitId() == null) {
-            return createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
+            if (itemDTO.getProjectId() == null) {
+                throw new IllegalArgumentException("Either OrgUnitId or ProjectId must be provided.");
+            }
+            return self.createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
         }
-        return createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
+        return self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
-    private Item createItemInOrgUnit(NewItemDTO itemDTO, Long orgUnitId) {
+    public Item createItemInOrgUnit(NewItemDTO itemDTO, Long orgUnitId) {
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(orgUnitId);
 
         Item newItem = new Item(
@@ -88,7 +95,7 @@ public class ItemService {
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
-    private Item createUnassignedItem(NewItemDTO itemDTO, Long projectId) {
+    public Item createUnassignedItem(NewItemDTO itemDTO, Long projectId) {
         Project project = projectService.getProjectById(projectId);
 
         Item newItem = new Item(
@@ -103,7 +110,7 @@ public class ItemService {
     /* --- Update Operation (PUT) --- */
     @Transactional
     public Item updateItem(Long id, UpdateItemDTO itemDTO) {
-        Item _item = getItemById(id);
+        Item _item = self.getItemById(id);
         _item.setName(itemDTO.getName());
         if (itemDTO.getDescription() != null) {
             _item.setDescription(itemDTO.getDescription());
@@ -122,7 +129,7 @@ public class ItemService {
     @Transactional
     public void deleteItem(Long id) {
         // Make sure item exists first
-        getItemById(id);
+        self.getItemById(id);
         itemRepository.deleteById(id);
     }
 
@@ -134,7 +141,7 @@ public class ItemService {
         List<Item> updatedItems = new ArrayList<>();
 
         for (Long itemId : itemIds) {
-            Item item = getItemById(itemId);
+            Item item = self.getItemById(itemId);
 
             validateSameProject(item, targetOrgUnit);
 
@@ -152,7 +159,7 @@ public class ItemService {
     public Iterable<Item> unassignItems(List<Long> itemIds) {
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
-            Item item = getItemById(itemId);
+            Item item = self.getItemById(itemId);
             if (item.getOrgUnit() != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
