@@ -64,6 +64,9 @@ public class OrgUnit {
             Room room) {
         this.name = name;
         this.description = description;
+        if (room == null) {
+            throw new IllegalArgumentException("Room cannot be null for this constructor.");
+        }
         this.room = room;
         this.project = room.getProject();
     }
