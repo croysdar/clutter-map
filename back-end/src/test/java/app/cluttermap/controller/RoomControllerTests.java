@@ -417,14 +417,14 @@ class RoomControllerTests {
                 .andExpect(status().isNoContent());
 
         // Assert: Ensure the service method was called to delete the room by ID
-        verify(roomService).deleteRoom(1L);
+        verify(roomService).deleteRoomById(1L);
     }
 
     @Test
     void deleteOneRoom_ShouldReturnNotFound_WhenRoomDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw RoomNotFoundException when deleting a
         // non-existent room
-        doThrow(new ResourceNotFoundException(ResourceType.ROOM, 1L)).when(roomService).deleteRoom(1L);
+        doThrow(new ResourceNotFoundException(ResourceType.ROOM, 1L)).when(roomService).deleteRoomById(1L);
 
         // Act: Perform a DELETE request to the /rooms/1 endpoint
         mockMvc.perform(delete("/rooms/1"))
@@ -432,6 +432,6 @@ class RoomControllerTests {
                 .andExpect(content().string("ROOM with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the room
-        verify(roomService).deleteRoom(1L);
+        verify(roomService).deleteRoomById(1L);
     }
 }

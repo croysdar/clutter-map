@@ -389,7 +389,7 @@ public class ItemServiceTests {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         // Act: Delete the item using the service
-        itemService.deleteItem(itemId);
+        itemService.deleteItemById(itemId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -404,7 +404,7 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to delete the item and expect a
         // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItem(1L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItemById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(itemRepository, never()).deleteById(anyLong());

@@ -320,7 +320,7 @@ public class ItemServiceSecurityTests {
             doNothing().when(itemRepository).deleteById(1L);
 
             // Act: Call the method under test
-            itemService.deleteItem(1L);
+            itemService.deleteItemById(1L);
 
             // Assert: Validate successful deletion
             verify(itemRepository).deleteById(1L);
@@ -328,7 +328,7 @@ public class ItemServiceSecurityTests {
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
-                    () -> itemService.deleteItem(resourceId),
+                    () -> itemService.deleteItemById(resourceId),
                     "AccessDeniedException should be thrown when the user lacks ownership.");
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).deleteById(1L);

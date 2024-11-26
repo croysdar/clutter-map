@@ -96,7 +96,7 @@ public class ProjectController {
     /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOneProject(@PathVariable("id") Long id) {
-        projectService.deleteProject(id);
+        projectService.deleteProjectById(id);
         return ResponseEntity.noContent().build();
     }
 }

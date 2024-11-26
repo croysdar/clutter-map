@@ -74,9 +74,7 @@ public class RoomService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteRoom(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, roomId));
+    public void deleteRoomById(Long roomId) {
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 }

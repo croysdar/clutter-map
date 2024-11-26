@@ -68,7 +68,7 @@ public class ProjectService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteProject(Long id) {
+    public void deleteProjectById(Long id) {
         // Make sure project exists first
         getProjectById(id);
         projectRepository.deleteById(id);

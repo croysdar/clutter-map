@@ -118,7 +118,7 @@ public class OrgUnitService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteOrgUnit(Long orgUnitId) {
+    public void deleteOrgUnitById(Long orgUnitId) {
         OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
         orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }

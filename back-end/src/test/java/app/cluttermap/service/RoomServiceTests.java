@@ -261,7 +261,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
 
         // Act: Delete the room using the service
-        roomService.deleteRoom(roomId);
+        roomService.deleteRoomById(roomId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -275,7 +275,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Attempt to delete the room and expect a RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoom(1L));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoomById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(roomRepository, never()).deleteById(anyLong());

@@ -455,14 +455,14 @@ class ItemControllerTests {
                 .andExpect(status().isNoContent());
 
         // Assert: Ensure the service method was called to delete the item by ID
-        verify(itemService).deleteItem(1L);
+        verify(itemService).deleteItemById(1L);
     }
 
     @Test
     void deleteOneItem_ShouldReturnNotFound_WhenItemDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw ResourceNotFoundException when deleting a
         // non-existent item
-        doThrow(new ResourceNotFoundException(ResourceType.ITEM, 1L)).when(itemService).deleteItem(1L);
+        doThrow(new ResourceNotFoundException(ResourceType.ITEM, 1L)).when(itemService).deleteItemById(1L);
 
         // Act: Perform a DELETE request to the /items/1 endpoint
         mockMvc.perform(delete("/items/1"))
@@ -470,7 +470,7 @@ class ItemControllerTests {
                 .andExpect(content().string("ITEM with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the item
-        verify(itemService).deleteItem(1L);
+        verify(itemService).deleteItemById(1L);
     }
 
 }

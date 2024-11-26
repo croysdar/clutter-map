@@ -302,7 +302,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
 
         // Act: Delete the orgUnit using the service
-        orgUnitService.deleteOrgUnit(orgUnitId);
+        orgUnitService.deleteOrgUnitById(orgUnitId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -317,7 +317,7 @@ public class OrgUnitServiceTests {
 
         // Act & Assert: Attempt to delete the orgUnit and expect a
         // OrgUnitNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnitById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(orgUnitRepository, never()).deleteById(anyLong());

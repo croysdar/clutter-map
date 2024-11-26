@@ -456,14 +456,14 @@ class ProjectControllerTests {
                 .andExpect(status().isNoContent());
 
         // Assert: Ensure the service method was called to delete the project by ID
-        verify(projectService).deleteProject(1L);
+        verify(projectService).deleteProjectById(1L);
     }
 
     @Test
     void deleteOneProject_ShouldReturnNotFound_WhenProjectDoesNotExist() throws Exception {
         // Arrange: Mock the service to throw ProjectNotFoundException when deleting a
         // non-existent project
-        doThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L)).when(projectService).deleteProject(1L);
+        doThrow(new ResourceNotFoundException(ResourceType.PROJECT, 1L)).when(projectService).deleteProjectById(1L);
 
         // Act: Perform a DELETE request to the /projects/1 endpoint
         mockMvc.perform(delete("/projects/1"))
@@ -471,7 +471,7 @@ class ProjectControllerTests {
                 .andExpect(content().string("PROJECT with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the project
-        verify(projectService).deleteProject(1L);
+        verify(projectService).deleteProjectById(1L);
     }
 
 }

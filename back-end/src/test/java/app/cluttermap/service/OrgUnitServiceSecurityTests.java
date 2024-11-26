@@ -322,14 +322,14 @@ public class OrgUnitServiceSecurityTests {
             doNothing().when(orgUnitRepository).deleteById(1L);
 
             // Act: Call the method under test
-            orgUnitService.deleteOrgUnit(1L);
+            orgUnitService.deleteOrgUnitById(1L);
 
             // Assert: Validate successful deletion
             verify(orgUnitRepository).delete(any(OrgUnit.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
-                    () -> orgUnitService.deleteOrgUnit(resourceId),
+                    () -> orgUnitService.deleteOrgUnitById(resourceId),
                     "AccessDeniedException should be thrown when the user lacks ownership.");
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).deleteById(1L);

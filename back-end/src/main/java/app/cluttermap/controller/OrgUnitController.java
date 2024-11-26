@@ -83,7 +83,7 @@ public class OrgUnitController {
     /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {
-        orgUnitService.deleteOrgUnit(id);
+        orgUnitService.deleteOrgUnitById(id);
         return ResponseEntity.noContent().build();
     }
 }

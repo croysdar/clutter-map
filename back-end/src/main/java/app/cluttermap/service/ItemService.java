@@ -127,7 +127,7 @@ public class ItemService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteItem(Long id) {
+    public void deleteItemById(Long id) {
         // Make sure item exists first
         self.getItemById(id);
         itemRepository.deleteById(id);

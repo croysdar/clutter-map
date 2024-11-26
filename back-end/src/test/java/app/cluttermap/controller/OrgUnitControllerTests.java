@@ -496,7 +496,7 @@ class OrgUnitControllerTests {
                 .andExpect(status().isNoContent());
 
         // Assert: Ensure the service method was called to delete the orgUnit by ID
-        verify(orgUnitService).deleteOrgUnit(1L);
+        verify(orgUnitService).deleteOrgUnitById(1L);
     }
 
     @Test
@@ -504,7 +504,7 @@ class OrgUnitControllerTests {
         // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
         // non-existent orgUnit
         doThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 1L)).when(orgUnitService)
-                .deleteOrgUnit(1L);
+                .deleteOrgUnitById(1L);
 
         // Act: Perform a DELETE request to the /org-units/1 endpoint
         mockMvc.perform(delete("/org-units/1"))
@@ -512,6 +512,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the orgUnit
-        verify(orgUnitService).deleteOrgUnit(1L);
+        verify(orgUnitService).deleteOrgUnitById(1L);
     }
 }
