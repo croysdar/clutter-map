@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -59,6 +60,8 @@ public class RoomServiceTests {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(roomService, "self", roomService);
+
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
     }

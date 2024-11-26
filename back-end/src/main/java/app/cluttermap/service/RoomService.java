@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +22,18 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
+    private final RoomService self;
 
     /* ------------- Constructor ------------- */
     public RoomService(
             RoomRepository roomRepository,
             SecurityService securityService,
-            ProjectService projectService) {
+            ProjectService projectService,
+            @Lazy RoomService self) {
         this.roomRepository = roomRepository;
         this.securityService = securityService;
         this.projectService = projectService;
+        this.self = self;
     }
 
     /* ------------- CRUD Operations ------------- */
@@ -49,11 +53,11 @@ public class RoomService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
-        return createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+        return self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
-    private Room createRoomInProject(NewRoomDTO roomDTO, Long projectId) {
+    public Room createRoomInProject(NewRoomDTO roomDTO, Long projectId) {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 
         Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);
@@ -63,7 +67,7 @@ public class RoomService {
     /* --- Update Operation (PUT) --- */
     @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
-        Room _room = getRoomById(id);
+        Room _room = self.getRoomById(id);
         _room.setName(roomDTO.getName());
         if (roomDTO.getDescription() != null) {
             _room.setDescription(roomDTO.getDescription());
@@ -75,6 +79,7 @@ public class RoomService {
     /* --- Delete Operation (DELETE) --- */
     @Transactional
     public void deleteRoomById(Long roomId) {
+        Room room = self.getRoomById(roomId);
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 }
