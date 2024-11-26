@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -55,6 +56,7 @@ public class OrgUnitService {
         return orgUnitRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, id));
@@ -64,16 +66,14 @@ public class OrgUnitService {
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
         if (orgUnitDTO.getRoomId() == null) {
-            // Check if the item is being created as unassigned to a room
-            Project project = projectService.getProjectById(orgUnitDTO.getProjectIdAsLong());
-            OrgUnit newOrgUnit = new OrgUnit(
-                    orgUnitDTO.getName(),
-                    orgUnitDTO.getDescription(),
-                    project);
-            return orgUnitRepository.save(newOrgUnit);
-
+            return createUnassignedOrgUnit(orgUnitDTO, orgUnitDTO.getProjectIdAsLong());
         }
-        Room room = roomService.getRoomById(orgUnitDTO.getRoomIdAsLong());
+        return createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
+    private OrgUnit createOrgUnitInRoom(NewOrgUnitDTO orgUnitDTO, Long roomId) {
+        Room room = roomService.getRoomById(roomId);
 
         OrgUnit newOrgUnit = new OrgUnit(
                 orgUnitDTO.getName(),
@@ -82,6 +82,17 @@ public class OrgUnitService {
         return orgUnitRepository.save(newOrgUnit);
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    private OrgUnit createUnassignedOrgUnit(NewOrgUnitDTO orgUnitDTO, Long projectId) {
+        Project project = projectService.getProjectById(projectId);
+        OrgUnit newOrgUnit = new OrgUnit(
+                orgUnitDTO.getName(),
+                orgUnitDTO.getDescription(),
+                project);
+        return orgUnitRepository.save(newOrgUnit);
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
     public Iterable<OrgUnit> getUnassignedOrgUnitsByProjectId(Long projectId) {
         return orgUnitRepository.findUnassignedOrgUnitsByProjectId(projectId);
     }
@@ -113,8 +124,6 @@ public class OrgUnitService {
 
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
 
-        // TODO allow partial success
-
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = getOrgUnitById(orgUnitId);
 
@@ -133,7 +142,6 @@ public class OrgUnitService {
     @Transactional
     public Iterable<OrgUnit> unassignOrgUnits(List<Long> orgUnitIds) {
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
-        // TODO Allow partial success
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = getOrgUnitById(orgUnitId);
             if (orgUnit.getRoom() != null) {

@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -39,6 +40,7 @@ public class RoomService {
         return roomRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
     public Room getRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, id));
@@ -47,6 +49,11 @@ public class RoomService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
+        return createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    private Room createRoomInProject(NewRoomDTO roomDTO, Long projectId) {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 
         Room newRoom = new Room(roomDTO.getName(), roomDTO.getDescription(), project);

@@ -412,7 +412,6 @@ class ItemControllerTests {
         verify(itemService).unassignItems(itemIds);
     }
 
-    // TODO: Allow partial success
     @Test
     void unassignItems_ItemNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up item IDs, including a non-existent item ID
@@ -438,7 +437,7 @@ class ItemControllerTests {
 
         String message = String.format(ItemService.ACCESS_DENIED_STRING, 1L);
 
-        doThrow(new AccessDeniedException(message)).when(itemService).checkOwnershipForItems(itemIds);
+        doThrow(new AccessDeniedException(message)).when(itemService).unassignItems(itemIds);
 
         // Act & Assert: Expect an AccessDeniedException when attempting to unassign
         // items

@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -35,6 +36,7 @@ public class ProjectService {
         return projectRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));

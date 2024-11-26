@@ -372,7 +372,6 @@ class RoomControllerTests {
                 .andExpect(content().string("ROOM with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up Room ID and list with a non-existent Org Unit ID
@@ -390,7 +389,6 @@ class RoomControllerTests {
                 .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_OrgUnitInDifferentProject_ShouldReturnBadRequest()
             throws Exception {

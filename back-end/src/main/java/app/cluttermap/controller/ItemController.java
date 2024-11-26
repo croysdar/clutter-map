@@ -37,22 +37,18 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Item> getOneItem(@PathVariable("id") Long id) {
         return ResponseEntity.ok(itemService.getItemById(id));
     }
 
     /* ------------- POST Operations ------------- */
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#itemDTO.getOrgUnitId(), 'org-unit')")
     public ResponseEntity<Item> addOneItem(@Valid @RequestBody NewItemDTO itemDTO) {
-        // TODO: Make sure owner check works here when item is unassigned
         return ResponseEntity.ok(itemService.createItem(itemDTO));
     }
 
     /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Item> updateOneItem(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateItemDTO itemDTO) {
         return ResponseEntity.ok(itemService.updateItem(id, itemDTO));
@@ -60,13 +56,11 @@ public class ItemController {
 
     @PutMapping("/unassign")
     public ResponseEntity<Iterable<Item>> unassignItems(@RequestBody List<Long> itemIds) {
-        itemService.checkOwnershipForItems(itemIds);
         return ResponseEntity.ok(itemService.unassignItems(itemIds));
     }
 
     /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public ResponseEntity<Void> deleteOneItem(@PathVariable("id") Long id) {
         itemService.deleteItem(id);
         return ResponseEntity.noContent().build();

@@ -43,35 +43,29 @@ public class OrgUnitController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
         return ResponseEntity.ok(orgUnitService.getOrgUnitById(id));
     }
 
     @GetMapping("/{id}/items")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<Iterable<Item>> getOrgUnitItems(@PathVariable("id") Long id) {
         return ResponseEntity.ok(orgUnitService.getOrgUnitById(id).getItems());
     }
 
     /* ------------- POST Operations ------------- */
     @PostMapping()
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitDTO.getRoomId(), 'room')")
     public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
-        // TODO: Make sure owner check works here when org unit is unassigned
         return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
     }
 
     /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
         return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
     }
 
     @PutMapping("/{orgUnitId}/items")
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
     public ResponseEntity<Iterable<Item>> assignItemsToOrgUnit(
             @PathVariable Long orgUnitId,
             @RequestBody List<Long> itemIds) {
@@ -88,7 +82,6 @@ public class OrgUnitController {
 
     /* ------------- DELETE Operations ------------- */
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
     public ResponseEntity<Void> deleteOneOrgUnit(@PathVariable("id") Long id) {
         orgUnitService.deleteOrgUnit(id);
         return ResponseEntity.noContent().build();

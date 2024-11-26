@@ -392,7 +392,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignItemsToOrgUnit_ItemNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up Org Unit ID and list with a non-existent item ID
@@ -410,7 +409,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ITEM with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignItemsToOrgUnit_ItemInDifferentProject_ShouldReturnBadRequest() throws Exception {
         // Arrange: Set up a item IDs and target OrgUnit ID
@@ -455,7 +453,6 @@ class OrgUnitControllerTests {
         verify(orgUnitService).unassignOrgUnits(orgUnitIds);
     }
 
-    // TODO: Allow partial success
     @Test
     void unassignOrgUnits_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up item IDs, including a non-existent item ID

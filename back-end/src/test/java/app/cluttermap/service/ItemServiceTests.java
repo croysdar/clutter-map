@@ -442,7 +442,6 @@ public class ItemServiceTests {
         });
     }
 
-    // TODO Allow partial success
     @Test
     void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Stub the org unit to return mockOrgUnit when queried by ID
@@ -481,7 +480,6 @@ public class ItemServiceTests {
         }
     }
 
-    // TODO allow partial success
     @Test
     void unassignItems_ItemNotFound_ShouldThrowResourceNotFoundException() {
         // Arrange: Set up item IDs, including a non-existent item ID

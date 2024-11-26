@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -53,11 +54,13 @@ public class ItemService {
         return itemRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
     public List<Item> getUnassignedItemsByProjectId(Long projectId) {
         return itemRepository.findUnassignedItemsByProjectId(projectId);
     }
@@ -66,18 +69,14 @@ public class ItemService {
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
         if (itemDTO.getOrgUnitId() == null) {
-            // Check if the item is being created as unassigned to an org unit
-            Project project = projectService.getProjectById(itemDTO.getProjectIdAsLong());
-
-            Item newItem = new Item(
-                    itemDTO.getName(),
-                    itemDTO.getDescription(),
-                    itemDTO.getTags(),
-                    itemDTO.getQuantity(),
-                    project);
-            return itemRepository.save(newItem);
+            return createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
         }
-        OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());
+        return createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    private Item createItemInOrgUnit(NewItemDTO itemDTO, Long orgUnitId) {
+        OrgUnit orgUnit = orgUnitService.getOrgUnitById(orgUnitId);
 
         Item newItem = new Item(
                 itemDTO.getName(),
@@ -85,6 +84,19 @@ public class ItemService {
                 itemDTO.getTags(),
                 itemDTO.getQuantity(),
                 orgUnit);
+        return itemRepository.save(newItem);
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    private Item createUnassignedItem(NewItemDTO itemDTO, Long projectId) {
+        Project project = projectService.getProjectById(projectId);
+
+        Item newItem = new Item(
+                itemDTO.getName(),
+                itemDTO.getDescription(),
+                itemDTO.getTags(),
+                itemDTO.getQuantity(),
+                project);
         return itemRepository.save(newItem);
     }
 
@@ -138,8 +150,6 @@ public class ItemService {
 
     @Transactional
     public Iterable<Item> unassignItems(List<Long> itemIds) {
-        // TODO allow for partial success
-
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
             Item item = getItemById(itemId);
@@ -149,26 +159,6 @@ public class ItemService {
             updatedItems.add(item);
         }
         return updatedItems;
-
-        // Potential partial success code:
-        // Fetch all items at once for the provided IDs
-        // Iterable<Item> items = itemRepository.findAllById(itemIds);
-
-        // If no items are found, throw an exception
-        // if (items.isEmpty()) {
-        // throw new ItemsNotFoundException("None of the specified items were found: " +
-        // itemIds);
-        // }
-
-        // List<Item> updatedItems = new ArrayList<>();
-        // for (Item item : items) {
-        // if (item.getOrgUnit() != null) {
-        // unassignItemFromOrgUnit(item, item.getOrgUnit());
-        // }
-        // updatedItems.add(item);
-        // }
-
-        // return updatedItems;
     }
 
     /* ------------- Ownership and Security Checks ------------- */
