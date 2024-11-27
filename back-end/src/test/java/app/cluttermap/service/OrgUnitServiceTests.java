@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -69,6 +70,8 @@ public class OrgUnitServiceTests {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(orgUnitService, "self", orgUnitService);
+
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
@@ -299,7 +302,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.findById(orgUnitId)).thenReturn(Optional.of(orgUnit));
 
         // Act: Delete the orgUnit using the service
-        orgUnitService.deleteOrgUnit(orgUnitId);
+        orgUnitService.deleteOrgUnitById(orgUnitId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -314,7 +317,7 @@ public class OrgUnitServiceTests {
 
         // Act & Assert: Attempt to delete the orgUnit and expect a
         // OrgUnitNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnit(1L));
+        assertThrows(ResourceNotFoundException.class, () -> orgUnitService.deleteOrgUnitById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(orgUnitRepository, never()).deleteById(anyLong());
@@ -339,7 +342,6 @@ public class OrgUnitServiceTests {
         assertThat(assignedOrgUnits).allMatch(orgUnit -> orgUnit.getRoom().equals(targetRoom));
     }
 
-    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
         // Arrange: Set up target Room ID and a non-existent org unit ID
@@ -353,7 +355,6 @@ public class OrgUnitServiceTests {
         });
     }
 
-    // TODO allow partial success
     @Test
     void assignOrgUnitsToRoom_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Create org units with a different project than the target room
@@ -390,7 +391,6 @@ public class OrgUnitServiceTests {
         }
     }
 
-    // TODO allow partial success
     @Test
     void unassignOrgUnitsFromRoom_OrgUnitNotFound_ShouldThrowOrgUnitNotFoundException() {
         // Arrange: Set up org unit IDs, including a non-existent org unit ID

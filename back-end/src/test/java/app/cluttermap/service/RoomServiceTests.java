@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -59,6 +60,8 @@ public class RoomServiceTests {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(roomService, "self", roomService);
+
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
     }
@@ -261,7 +264,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
 
         // Act: Delete the room using the service
-        roomService.deleteRoom(roomId);
+        roomService.deleteRoomById(roomId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -275,7 +278,7 @@ public class RoomServiceTests {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert: Attempt to delete the room and expect a RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoom(1L));
+        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoomById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(roomRepository, never()).deleteById(anyLong());

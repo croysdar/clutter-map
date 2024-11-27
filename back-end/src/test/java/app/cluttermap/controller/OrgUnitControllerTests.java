@@ -392,7 +392,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignItemsToOrgUnit_ItemNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up Org Unit ID and list with a non-existent item ID
@@ -410,7 +409,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ITEM with ID 999 not found."));
     }
 
-    // TODO allow partial success
     @Test
     void assignItemsToOrgUnit_ItemInDifferentProject_ShouldReturnBadRequest() throws Exception {
         // Arrange: Set up a item IDs and target OrgUnit ID
@@ -455,7 +453,6 @@ class OrgUnitControllerTests {
         verify(orgUnitService).unassignOrgUnits(orgUnitIds);
     }
 
-    // TODO: Allow partial success
     @Test
     void unassignOrgUnits_OrgUnitNotFound_ShouldReturnNotFound() throws Exception {
         // Arrange: Set up item IDs, including a non-existent item ID
@@ -499,7 +496,7 @@ class OrgUnitControllerTests {
                 .andExpect(status().isNoContent());
 
         // Assert: Ensure the service method was called to delete the orgUnit by ID
-        verify(orgUnitService).deleteOrgUnit(1L);
+        verify(orgUnitService).deleteOrgUnitById(1L);
     }
 
     @Test
@@ -507,7 +504,7 @@ class OrgUnitControllerTests {
         // Arrange: Mock the service to throw OrgUnitNotFoundException when deleting a
         // non-existent orgUnit
         doThrow(new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, 1L)).when(orgUnitService)
-                .deleteOrgUnit(1L);
+                .deleteOrgUnitById(1L);
 
         // Act: Perform a DELETE request to the /org-units/1 endpoint
         mockMvc.perform(delete("/org-units/1"))
@@ -515,6 +512,6 @@ class OrgUnitControllerTests {
                 .andExpect(content().string("ORGANIZATIONAL_UNIT with ID 1 not found."));
 
         // Assert: Ensure the service method was called to attempt to delete the orgUnit
-        verify(orgUnitService).deleteOrgUnit(1L);
+        verify(orgUnitService).deleteOrgUnitById(1L);
     }
 }

@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -79,6 +80,8 @@ public class ItemServiceTests {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(itemService, "self", itemService);
+
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
@@ -386,7 +389,7 @@ public class ItemServiceTests {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         // Act: Delete the item using the service
-        itemService.deleteItem(itemId);
+        itemService.deleteItemById(itemId);
 
         // Assert: Verify that the repository's delete method was called with the
         // correct ID
@@ -401,7 +404,7 @@ public class ItemServiceTests {
 
         // Act & Assert: Attempt to delete the item and expect a
         // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItem(1L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItemById(1L));
 
         // Assert: Verify that the repository's delete method was never called
         verify(itemRepository, never()).deleteById(anyLong());
@@ -442,7 +445,6 @@ public class ItemServiceTests {
         });
     }
 
-    // TODO Allow partial success
     @Test
     void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
         // Arrange: Stub the org unit to return mockOrgUnit when queried by ID
@@ -481,7 +483,6 @@ public class ItemServiceTests {
         }
     }
 
-    // TODO allow partial success
     @Test
     void unassignItems_ItemNotFound_ShouldThrowResourceNotFoundException() {
         // Arrange: Set up item IDs, including a non-existent item ID

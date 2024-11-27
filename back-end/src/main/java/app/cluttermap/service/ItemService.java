@@ -3,7 +3,9 @@ package app.cluttermap.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -30,6 +32,7 @@ public class ItemService {
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
+    private final ItemService self;
 
     /* ------------- Constructor ------------- */
     public ItemService(
@@ -37,12 +40,14 @@ public class ItemService {
             ItemRepository itemRepository,
             SecurityService securityService,
             ProjectService projectService,
-            OrgUnitService orgUnitService) {
+            OrgUnitService orgUnitService,
+            @Lazy ItemService self) {
         this.orgUnitRepository = orgUnitRepository;
         this.itemRepository = itemRepository;
         this.securityService = securityService;
         this.projectService = projectService;
         this.orgUnitService = orgUnitService;
+        this.self = self;
     }
 
     /* ------------- CRUD Operations ------------- */
@@ -53,11 +58,13 @@ public class ItemService {
         return itemRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
     public List<Item> getUnassignedItemsByProjectId(Long projectId) {
         return itemRepository.findUnassignedItemsByProjectId(projectId);
     }
@@ -66,18 +73,17 @@ public class ItemService {
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
         if (itemDTO.getOrgUnitId() == null) {
-            // Check if the item is being created as unassigned to an org unit
-            Project project = projectService.getProjectById(itemDTO.getProjectIdAsLong());
-
-            Item newItem = new Item(
-                    itemDTO.getName(),
-                    itemDTO.getDescription(),
-                    itemDTO.getTags(),
-                    itemDTO.getQuantity(),
-                    project);
-            return itemRepository.save(newItem);
+            if (itemDTO.getProjectId() == null) {
+                throw new IllegalArgumentException("Either OrgUnitId or ProjectId must be provided.");
+            }
+            return self.createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
         }
-        OrgUnit orgUnit = orgUnitService.getOrgUnitById(itemDTO.getOrgUnitIdAsLong());
+        return self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
+    }
+
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    public Item createItemInOrgUnit(NewItemDTO itemDTO, Long orgUnitId) {
+        OrgUnit orgUnit = orgUnitService.getOrgUnitById(orgUnitId);
 
         Item newItem = new Item(
                 itemDTO.getName(),
@@ -88,10 +94,23 @@ public class ItemService {
         return itemRepository.save(newItem);
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    public Item createUnassignedItem(NewItemDTO itemDTO, Long projectId) {
+        Project project = projectService.getProjectById(projectId);
+
+        Item newItem = new Item(
+                itemDTO.getName(),
+                itemDTO.getDescription(),
+                itemDTO.getTags(),
+                itemDTO.getQuantity(),
+                project);
+        return itemRepository.save(newItem);
+    }
+
     /* --- Update Operation (PUT) --- */
     @Transactional
     public Item updateItem(Long id, UpdateItemDTO itemDTO) {
-        Item _item = getItemById(id);
+        Item _item = self.getItemById(id);
         _item.setName(itemDTO.getName());
         if (itemDTO.getDescription() != null) {
             _item.setDescription(itemDTO.getDescription());
@@ -108,9 +127,9 @@ public class ItemService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteItem(Long id) {
+    public void deleteItemById(Long id) {
         // Make sure item exists first
-        getItemById(id);
+        self.getItemById(id);
         itemRepository.deleteById(id);
     }
 
@@ -122,7 +141,7 @@ public class ItemService {
         List<Item> updatedItems = new ArrayList<>();
 
         for (Long itemId : itemIds) {
-            Item item = getItemById(itemId);
+            Item item = self.getItemById(itemId);
 
             validateSameProject(item, targetOrgUnit);
 
@@ -138,37 +157,15 @@ public class ItemService {
 
     @Transactional
     public Iterable<Item> unassignItems(List<Long> itemIds) {
-        // TODO allow for partial success
-
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
-            Item item = getItemById(itemId);
+            Item item = self.getItemById(itemId);
             if (item.getOrgUnit() != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
             updatedItems.add(item);
         }
         return updatedItems;
-
-        // Potential partial success code:
-        // Fetch all items at once for the provided IDs
-        // Iterable<Item> items = itemRepository.findAllById(itemIds);
-
-        // If no items are found, throw an exception
-        // if (items.isEmpty()) {
-        // throw new ItemsNotFoundException("None of the specified items were found: " +
-        // itemIds);
-        // }
-
-        // List<Item> updatedItems = new ArrayList<>();
-        // for (Item item : items) {
-        // if (item.getOrgUnit() != null) {
-        // unassignItemFromOrgUnit(item, item.getOrgUnit());
-        // }
-        // updatedItems.add(item);
-        // }
-
-        // return updatedItems;
     }
 
     /* ------------- Ownership and Security Checks ------------- */

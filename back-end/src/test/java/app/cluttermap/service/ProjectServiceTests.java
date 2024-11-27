@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -49,6 +50,8 @@ public class ProjectServiceTests {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(projectService, "self", projectService);
+
         mockUser = new User("mockProviderId");
     }
 
@@ -213,7 +216,7 @@ public class ProjectServiceTests {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         // Act: Call the service to delete the project by ID
-        projectService.deleteProject(projectId);
+        projectService.deleteProjectById(projectId);
 
         // Assert: Verify that the repository's deleteById method was called with the
         // correct ID
@@ -228,7 +231,7 @@ public class ProjectServiceTests {
 
         // Act & Assert: Verify that attempting to delete a non-existent project throws
         // ProjectNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> projectService.deleteProject(1L));
+        assertThrows(ResourceNotFoundException.class, () -> projectService.deleteProjectById(1L));
 
         // Assert: Verify that deleteById was never called on the repository, as the
         // project does not exist

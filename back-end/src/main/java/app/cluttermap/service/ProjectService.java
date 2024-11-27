@@ -1,5 +1,7 @@
 package app.cluttermap.service;
 
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import app.cluttermap.exception.ResourceNotFoundException;
@@ -20,11 +22,16 @@ public class ProjectService {
     /* ------------- Injected Dependencies ------------- */
     private final ProjectRepository projectRepository;
     private final SecurityService securityService;
+    private final ProjectService self;
 
     /* ------------- Constructor ------------- */
-    public ProjectService(ProjectRepository projectRepository, SecurityService securityService) {
+    public ProjectService(
+            ProjectRepository projectRepository,
+            SecurityService securityService,
+            @Lazy ProjectService self) {
         this.projectRepository = projectRepository;
         this.securityService = securityService;
+        this.self = self;
     }
 
     /* ------------- CRUD Operations ------------- */
@@ -35,6 +42,7 @@ public class ProjectService {
         return projectRepository.findByOwnerId(user.getId());
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));
@@ -57,7 +65,7 @@ public class ProjectService {
     /* --- Update Operation (PUT) --- */
     @Transactional
     public Project updateProject(Long id, UpdateProjectDTO projectDTO) {
-        Project _project = getProjectById(id);
+        Project _project = self.getProjectById(id);
 
         _project.setName(projectDTO.getName());
 
@@ -66,9 +74,9 @@ public class ProjectService {
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteProject(Long id) {
+    public void deleteProjectById(Long id) {
         // Make sure project exists first
-        getProjectById(id);
+        self.getProjectById(id);
         projectRepository.deleteById(id);
     }
 }

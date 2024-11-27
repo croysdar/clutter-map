@@ -61,6 +61,9 @@ public class Item {
         this.description = description;
         this.tags = tags;
         this.quantity = quantity;
+        if (orgUnit == null) {
+            throw new IllegalArgumentException("OrgUnit cannot be null for this constructor.");
+        }
         this.orgUnit = orgUnit;
         this.project = orgUnit.getProject();
     }
