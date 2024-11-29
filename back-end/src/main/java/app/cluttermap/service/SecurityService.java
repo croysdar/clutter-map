@@ -79,13 +79,13 @@ public class SecurityService {
                 OrgUnit orgUnit = orgUnitRepository.findById(resourceId)
                         .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, resourceId));
 
-                return orgUnit.getRoom().getProject().getOwner().getId().equals(currentUserId);
+                return orgUnit.getProject().getOwner().getId().equals(currentUserId);
 
             case "item":
                 Item item = itemRepository.findById(resourceId)
                         .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, resourceId));
 
-                return item.getOrgUnit().getRoom().getProject().getOwner().getId().equals(currentUserId);
+                return item.getProject().getOwner().getId().equals(currentUserId);
         }
 
         return false;
