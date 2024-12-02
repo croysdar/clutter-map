@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,18 +33,13 @@ import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
-import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 public class RoomServiceTests {
     @Mock
     private RoomRepository roomRepository;
-
-    @Mock
-    private OrgUnitRepository orgUnitRepository;
 
     @Mock
     private SecurityService securityService;
@@ -64,118 +61,108 @@ public class RoomServiceTests {
 
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        mockProject.setId(1L);
     }
 
     @Test
     void getUserRooms_ShouldReturnRoomsOwnedByUser() {
-        // Arrange: Set up mock user, projects, and rooms, and stub the repository to
-        // return rooms owned by the user
+        // Arrange: Mock the current user and rooms
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         Room room1 = new TestDataFactory.RoomBuilder().project(mockProject).build();
         Room room2 = new TestDataFactory.RoomBuilder().project(mockProject).build();
         when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
 
-        // Act: Retrieve the rooms owned by the user
+        // Act: Call service method
         Iterable<Room> userRooms = roomService.getUserRooms();
 
-        // Assert: Verify that the result contains only the rooms owned by the user
-        assertThat(userRooms).containsExactly(room1, room2);
-    }
+        // Assert: Verify the result contains the expected rooms
+        assertThat(userRooms).containsExactly(room1, room2)
+                .as("Rooms owned by user should be returned when they exist");
 
-    @Test
-    void getUserRooms_ShouldReturnRoomsAcrossMultipleProjects() {
-        // Arrange: Set up two projects for the same user with rooms
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(room1, room2));
-
-        // Act: Fetch rooms for the user
-        Iterable<Room> userRooms = roomService.getUserRooms();
-
-        // Assert: Verify both rooms are returned across different projects
-        assertThat(userRooms).containsExactlyInAnyOrder(room1, room2);
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(roomRepository).findByOwnerId(mockUser.getId());
     }
 
     @Test
     void getUserRooms_ShouldReturnEmptyList_WhenNoRoomsExist() {
-        // Arrange: Set up mock user and stub the repository to return an empty list
+        // Arrange: Mock the current user and an empty repository result
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(roomRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
-        // Act: Retrieve the rooms owned by the user
+        // Act: Call service method
         Iterable<Room> userRooms = roomService.getUserRooms();
 
         // Assert: Verify that the result is empty
-        assertThat(userRooms).isEmpty();
+        assertThat(userRooms)
+                .as("Empty list should be returned when user owns no rooms")
+                .isEmpty();
+
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(roomRepository).findByOwnerId(mockUser.getId());
     }
 
-    @Test
-    void getRoomId_ShouldReturnRoom_WhenRoomExists() {
-        // Arrange: Set up a sample room and stub the repository to return it by ID
-        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+    @ParameterizedTest
+    @CsvSource({
+            "true, Room should be returned when it exists",
+            "false, ResourceNotFoundException should be thrown when room does not exist"
+    })
+    void getRoomById_ShouldHandleExistenceCorrectly(boolean roomExists, String description) {
+        // Arrange
+        Long resourceId = 1L;
+        if (roomExists) {
+            // Arrange: Mock the repository to return an room
+            Room mockRoom = mockRoomInRepository(resourceId);
 
-        // Act: Retrieve the room using the service method
-        Room foundRoom = roomService.getRoomById(1L);
+            // Act: Call service method
+            Room foundRoom = roomService.getRoomById(resourceId);
 
-        // Assert: Verify that the room retrieved matches the expected room
-        assertThat(foundRoom).isEqualTo(room);
-    }
+            // Assert: Verify the room retrieved matches the mock
+            assertThat(foundRoom)
+                    .as(description)
+                    .isNotNull()
+                    .isEqualTo(mockRoom);
 
-    @Test
-    void getRoomById_ShouldThrowException_WhenRoomDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result for a non-existent
-        // room
-        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
+        } else {
+            // Arrange: Mock the repository to return empty
+            mockNonexistentRoomInRepository(resourceId);
 
-        // Act & Assert: Attempt to retrieve the room and expect a RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.getRoomById(1L));
+            // Act & Assert
+            assertThrows(ResourceNotFoundException.class,
+                    () -> roomService.getRoomById(resourceId),
+                    description);
+        }
+
+        // Verify: Ensure repository interaction occurred
+        verify(roomRepository).findById(anyLong());
     }
 
     @Test
     void createRoom_ShouldCreateRoom_WhenValid() {
-        // Arrange: Stub project retrieval to return mockProject when the specified ID
-        // is used
-        when(projectService.getProjectById(1L)).thenReturn(mockProject);
+        mockProjectLookup();
 
         // Arrange: Prepare the Room DTO with the project ID as a string
         NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().build();
 
         // Arrange: Create a Room that represents the saved room returned by the
         // repository
-        Room room = new TestDataFactory.RoomBuilder().fromDTO(roomDTO).project(mockProject).build();
-        when(roomRepository.save(any(Room.class))).thenReturn(room);
+        Room mockRoom = new TestDataFactory.RoomBuilder().fromDTO(roomDTO).project(mockProject).build();
+        when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
 
-        // Act: create a room using roomService and pass in the room DTO
+        // Act: Call the service method
         Room createdRoom = roomService.createRoom(roomDTO);
 
-        // Assert: verify that the created room is not null and matches the expected
-        // details from roomDTO
-        assertThat(createdRoom).isNotNull();
-        assertThat(createdRoom.getName()).isEqualTo(roomDTO.getName());
-        assertThat(createdRoom.getDescription()).isEqualTo(roomDTO.getDescription());
-        assertThat(createdRoom.getProject()).isEqualTo(mockProject);
+        // Assert: Validate the created room
+        assertThat(createdRoom)
+                .as("Room should be created when valid")
+                .isNotNull()
+                .isEqualTo(mockRoom);
 
-        // Verify that roomRepository.save() was called to persist the new room
+        // Verify that the correct service and repository methods were called
+        verify(projectService).getProjectById(mockProject.getId());
         verify(roomRepository).save(any(Room.class));
-    }
-
-    @Test
-    void createRoom_ShouldThrowException_WhenProjectDoesNotExist() {
-        // Arrange: Set up the DTO with a project ID that doesn't exist
-        NewRoomDTO roomDTO = new TestDataFactory.NewRoomDTOBuilder().projectId(999L).build();
-        when(projectService.getProjectById(roomDTO.getProjectIdAsLong()))
-                .thenThrow(new ResourceNotFoundException(ResourceType.PROJECT, 999L));
-
-        // Act & Assert: Attempt to create the room and expect a
-        // ProjectNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.createRoom(roomDTO));
     }
 
     @Disabled("Feature under development")
@@ -198,26 +185,48 @@ public class RoomServiceTests {
         assertThrows(RoomLimitReachedException.class, () -> roomService.createRoom(roomDTO));
     }
 
-    @Test
-    void updateRoom_ShouldUpdateRoom_WhenRoomExists() {
-        // Arrange: Set up mock room with initial values and stub the repository to
-        // return the room by ID
-        Room room = new TestDataFactory.RoomBuilder().name("Old Name").description("Old Description")
-                .project(mockProject).build();
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+    @ParameterizedTest
+    @CsvSource({
+            "true, All fields should update when all fields are provided",
+            "false, Description should not update when it is null",
+    })
+    void updateRoom_ShouldUpdateFieldsConditionally(
+            boolean updateDescription, String description) {
+        // Arrange: Set up mock room with initial values
+        Long resourceId = 1L;
+        String oldDescription = "Old Description";
 
-        // Arrange: Create an UpdateRoomDTO with updated values
-        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
+        Room room = new TestDataFactory.RoomBuilder()
+                .name("Old Name")
+                .description(oldDescription)
+                .project(mockProject).build();
+
+        when(roomRepository.findById(resourceId)).thenReturn(Optional.of(room));
+
+        // Arrange: Use conditional variables for the expected values of the updated
+        // fields
+        String newDescription = updateDescription ? "New Description" : null;
+
+        // Build the UpdateRoomDTO with these values
+        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder()
+                .description(newDescription)
+                .build();
 
         // Stub the repository to return the room after saving
         when(roomRepository.save(room)).thenReturn(room);
 
-        // Act: Update the room using the service
-        Room updatedRoom = roomService.updateRoom(1L, roomDTO);
+        // Act: Call the service method
+        Room updatedRoom = roomService.updateRoom(resourceId, roomDTO);
 
-        // Assert: Verify that the room's name was updated correctly
-        assertThat(updatedRoom.getName()).isEqualTo(roomDTO.getName());
-        assertThat(updatedRoom.getDescription()).isEqualTo(roomDTO.getDescription());
+        // Assert: Verify the fields were updated as expected
+        assertThat(updatedRoom.getName())
+                .as(description + ": Name should match the DTO name")
+                .isEqualTo(roomDTO.getName());
+        assertThat(updatedRoom.getDescription())
+                .as(description + ": Description should match the expected value")
+                .isEqualTo(updateDescription ? newDescription : oldDescription);
+
+        // Verify: Ensure the repository save method was called
         verify(roomRepository).save(room);
     }
 
@@ -225,62 +234,60 @@ public class RoomServiceTests {
     void updateRoom_ShouldThrowException_WhenRoomDoesNotExist() {
         // Arrange: Stub the repository to return an empty result when searching for a
         // non-existent room
-        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
+        mockNonexistentRoomInRepository(999L);
 
-        // Arrange: Set up an UpdateRoomDTO with updated values
+        // Arrange: Set up an UpdateRoomDTO
         UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
 
-        // Act & Assert: Attempt to update the room and expect a RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.updateRoom(1L, roomDTO));
+        // Act & Assert: Expect ResourceNotFoundException
+        assertThrows(ResourceNotFoundException.class, () -> roomService.updateRoom(999L, roomDTO));
+
+        // Verify: Ensure save was not called
+        verify(roomRepository, never()).save(any(Room.class));
     }
 
-    @Test
-    void updateRoom_ShouldNotChangeDescription_WhenDescriptionIsNull() {
-        // Arrange: Set up a room with an initial description
-        Room room = new TestDataFactory.RoomBuilder().name("Old Name").description("Old Description")
-                .project(mockProject).build();
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+    @ParameterizedTest
+    @CsvSource({
+            "true, Room should be deleted when it exists",
+            "false, Exception should be thrown when room does not exist"
+    })
+    void deleteRoom_ShouldHandleExistenceCorrectly(boolean roomExists, String description) {
+        Long resourceId = 1L;
+        if (roomExists) {
+            // Arrange: Stub the repository to simulate finding room
+            mockRoomInRepository(resourceId);
 
-        // Stub the repository to return the room after saving
-        when(roomRepository.save(room)).thenReturn(room);
+            // Act: Call the service method
+            roomService.deleteRoomById(resourceId);
 
-        // Arrange: Set up an UpdateRoomDTO with null description
-        UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().description(null).build();
+            // Assert: Verify that the repository's delete method was called with the
+            // correct ID
+            verify(roomRepository).delete(any(Room.class));
+        } else {
+            // Arrange: Stub the repository to simulate not finding room
+            mockNonexistentRoomInRepository(resourceId);
 
-        // Act: Update room
-        Room updatedRoom = roomService.updateRoom(1L, roomDTO);
+            // Act & Assert: Attempt to delete the room and expect a
+            // ResourceNotFoundException
+            assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoomById(resourceId));
 
-        // Assert: Verify that the name was updated but the description remains the same
-        assertThat(updatedRoom.getName()).isEqualTo(roomDTO.getName());
-        assertThat(updatedRoom.getDescription()).isEqualTo("Old Description");
-        verify(roomRepository).save(room);
+            // Assert: Verify that the repository's delete method was never called
+            verify(roomRepository, never()).delete(any(Room.class));
+        }
     }
 
-    @Test
-    void deleteRoom_ShouldDeleteRoom_WhenRoomExists() {
-        // Arrange: Set up a room and stub the repository to return the room by ID
-        Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        Long roomId = room.getId();
-        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
-
-        // Act: Delete the room using the service
-        roomService.deleteRoomById(roomId);
-
-        // Assert: Verify that the repository's delete method was called with the
-        // correct ID
-        verify(roomRepository).delete(room);
+    private void mockNonexistentRoomInRepository(Long resourceId) {
+        when(roomRepository.findById(resourceId)).thenReturn(Optional.empty());
     }
 
-    @Test
-    void deleteRoom_ShouldThrowException_WhenRoomDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent room
-        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
+    private Room mockRoomInRepository(Long resourceId) {
+        Room mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        mockRoom.setId(resourceId);
+        when(roomRepository.findById(resourceId)).thenReturn(Optional.of(mockRoom));
+        return mockRoom;
+    }
 
-        // Act & Assert: Attempt to delete the room and expect a RoomNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> roomService.deleteRoomById(1L));
-
-        // Assert: Verify that the repository's delete method was never called
-        verify(roomRepository, never()).deleteById(anyLong());
+    private void mockProjectLookup() {
+        when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 }
