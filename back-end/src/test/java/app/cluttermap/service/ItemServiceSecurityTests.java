@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,8 +74,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getItemById_UserHasOwnership",
-            "false, getItemById_UserLacksOwnership"
+            "true, Item should be retrieved successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void getItemById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -87,12 +88,12 @@ public class ItemServiceSecurityTests {
             // Act: Call the method under test
             Item item = itemService.getItemById(resourceId);
             // Assert: Item should be retrieved successfully
-            assertNotNull(item, "Item should not be null when the user has ownership.");
+            assertNotNull(item, description);
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.getItemById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -101,8 +102,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getUnassignedItemsByProjectId_UserHasOwnership",
-            "false, getUnassignedItemsByProjectId_UserLacksOwnership"
+            "true, Unassigned items should be retrieved when user has ownership of the project",
+            "false, AccessDeniedException should be thrown when user lacks ownership of the project"
     })
     @WithMockUser(username = "testUser")
     void getUnassignedItemsByProjectId_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -119,16 +120,14 @@ public class ItemServiceSecurityTests {
             List<Item> items = itemService.getUnassignedItemsByProjectId(mockProject.getId());
 
             // Assert: Validate retrieved items
-            assertAll(
-                    () -> assertNotNull(items, "Items list should not be null when the user has ownership."),
-                    () -> assertEquals(1, items.size(), "Items list should contain exactly 1 item."));
+            assertAll(() -> assertNotNull(items, description));
             verify(itemRepository).findUnassignedItemsByProjectId(resourceId);
 
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.getUnassignedItemsByProjectId(mockProject.getId()),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -137,10 +136,10 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, project, createItem_UserHasOwnership",
-            "false, project, createItem_UserLacksOwnership",
-            "true, org-unit, createItem_UserHasOwnership",
-            "false, org-unit, createItem_UserLacksOwnership",
+            "true, project, Item should be created successfully when user has ownership of the project",
+            "false, project, AccessDeniedException should be thrown when user lacks ownership of the project",
+            "true, org-unit, Item should be created successfully when user has ownership of the org unit",
+            "false, org-unit, AccessDeniedException should be thrown when user lacks ownership of the org unit",
     })
     @WithMockUser(username = "testUser")
     void createItem_ShouldRespectOwnership(boolean isOwner, String resourceType, String description) {
@@ -174,13 +173,13 @@ public class ItemServiceSecurityTests {
             Item item = itemService.createItem(itemDTO);
 
             // Assert: Validate item creation
-            assertNotNull(item, "Item should not be null when the user has ownership.");
+            assertNotNull(item, description);
             verify(itemRepository).save(any(Item.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.createItem(itemDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).save(any(Item.class));
         }
@@ -191,8 +190,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, updateItem_UserHasOwnership",
-            "false, updateItem_UserLacksOwnership"
+            "true, Item should be updated successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void updateItem_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -211,13 +210,13 @@ public class ItemServiceSecurityTests {
             Item item = itemService.updateItem(resourceId, itemDTO);
 
             // Assert: Validate successful update
-            assertNotNull(item, "Item should not be null when the user has ownership.");
+            assertNotNull(item, description);
             verify(itemRepository).save(any(Item.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.updateItem(resourceId, itemDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).save(any(Item.class));
         }
@@ -228,8 +227,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, assignItemsToOrgUnit_UserHasOwnership",
-            "false, assignItemsToOrgUnit_UserLacksOwnership"
+            "true, Items should be assigned to org unit successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void assignItemsToOrgUnit_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -247,8 +246,7 @@ public class ItemServiceSecurityTests {
             // Assert: Validate successful assignment
             assertAll(
                     () -> assertNotNull(items, "Items list should not be null when the user has ownership."),
-                    () -> assertEquals(mockOrgUnit, mockItem.getOrgUnit(),
-                            "Item's org unit should be updated to the target org unit."));
+                    () -> assertEquals(mockOrgUnit, mockItem.getOrgUnit(), description));
 
             // Verify: Ensure org unit retrieval occurred
             verify(orgUnitService).getOrgUnitById(mockOrgUnit.getId());
@@ -256,7 +254,7 @@ public class ItemServiceSecurityTests {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.assignItemsToOrgUnit(List.of(resourceId), mockOrgUnit.getId()),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
 
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).save(any(Item.class));
@@ -268,8 +266,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, unassignItems_UserHasOwnership",
-            "false, unassignItems_UserLacksOwnership"
+            "true, Items should be unassigned successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void unassignItems_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -287,13 +285,13 @@ public class ItemServiceSecurityTests {
             Iterable<Item> items = itemService.unassignItems(List.of(1L));
 
             // Assert: Validate successful unassignment
-            assertNotNull(items, "Items list should not be null when the user has ownership.");
+            assertNotNull(items, description);
             verify(orgUnitRepository).save(any(OrgUnit.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.unassignItems(List.of(resourceId)),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
 
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).save(any(Item.class));
@@ -305,8 +303,8 @@ public class ItemServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, deleteById_UserHasOwnership",
-            "false, deleteById_UserLacksOwnership"
+            "true, Item should be deleted successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -323,13 +321,15 @@ public class ItemServiceSecurityTests {
             itemService.deleteItemById(1L);
 
             // Assert: Validate successful deletion
-            verify(itemRepository).deleteById(1L);
+            assertThatCode(() -> verify(itemRepository).deleteById(1L))
+                    .as(description)
+                    .doesNotThrowAnyException();
 
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> itemService.deleteItemById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure item repository save is never invoked
             verify(itemRepository, never()).deleteById(1L);
         }

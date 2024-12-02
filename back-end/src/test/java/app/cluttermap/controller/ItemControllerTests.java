@@ -364,29 +364,6 @@ class ItemControllerTests {
     }
 
     @Test
-    void updateOneItem_ShouldSetQuantity1_WhenQuantityNull() throws Exception {
-        // Arrange: Set up a UpdateItemDTO with a null quantity
-        UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder().quantity(null).build();
-
-        Item updatedItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
-
-        when(itemService.updateItem(eq(1L), any(UpdateItemDTO.class))).thenReturn(updatedItem);
-
-        // Act: Perform a PUT request to the /items endpoint with the null quantity
-        mockMvc.perform(put("/items/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(itemDTO)))
-
-                .andExpect(status().isOk())
-
-                // Assert: Verify the response contains the expected item quantity
-                .andExpect(jsonPath("$.quantity").value(1));
-
-        // Assert: Ensure the service method was called to update the item
-        verify(itemService).updateItem(eq(1L), any(UpdateItemDTO.class));
-    }
-
-    @Test
     void unassignItems_Success() throws Exception {
         // Arrange: Set up itemIds, and simulate a successful unassign
         List<Long> itemIds = List.of(1L, 2L, 3L);

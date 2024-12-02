@@ -17,6 +17,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,80 +59,102 @@ public class ProjectServiceTests {
 
     @Test
     void getUserProjects_ShouldReturnProjectsOwnedByUser() {
-        // Arrange: Set up the current user and mock the projects they own
+        // Arrange: Mock the current user and projects
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(project1, project2));
 
-        // Act: Call the service to retrieve all projects owned by the user
+        // Act: Call service method
         Iterable<Project> userProjects = projectService.getUserProjects();
 
         // Assert: Verify that the returned projects match the expected projects
-        assertThat(userProjects).containsExactly(project1, project2);
+        assertThat(userProjects).containsExactly(project1, project2)
+                .as("Projects owned by user should be returned when they exist");
+
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(projectRepository).findByOwnerId(mockUser.getId());
     }
 
     @Test
     void getUserProjects_ShouldReturnEmptyList_WhenNoProjectsExist() {
-        // Arrange: Set up the current user and mock their projects to return an empty
-        // list
+        // Arrange: Mock the current user and an empty repository result
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
-        // Act: Call the service to retrieve projects owned by the user
+        // Act: Call service method
         Iterable<Project> userProjects = projectService.getUserProjects();
 
         // Assert: Verify that the returned projects list is empty
-        assertThat(userProjects).isEmpty();
+        assertThat(userProjects)
+                .as("Empty list should be returned when user owns no projects")
+                .isEmpty();
+
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(projectRepository).findByOwnerId(mockUser.getId());
     }
 
-    @Test
-    void getProjectById_ShouldReturnProject_WhenProjectExists() {
-        // Arrange: Prepare a sample project and stub the repository to return it when
-        // searched by ID
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+    @ParameterizedTest
+    @CsvSource({
+            "true, Project should be returned when it exists",
+            "false, ResourceNotFoundException should be thrown when project project not exist"
+    })
+    void getProjectById_ShouldHandleExistenceCorrectly(boolean projectExists, String description) {
+        // Arrange
+        Long resourceId = 1L;
+        if (projectExists) {
+            // Arrange: Mock the repository to return an project
+            Project mockProject = mockProjectInRepository(resourceId);
 
-        // Act: Call the service method to retrieve the project by ID
-        Project foundProject = projectService.getProjectById(1L);
+            // Act: Call service method
+            Project foundProject = projectService.getProjectById(resourceId);
 
-        // Assert: Verify that the retrieved project matches the expected project
-        assertThat(foundProject).isEqualTo(project);
-    }
+            // Assert: Verify the project retrieved matches the mock
+            assertThat(foundProject)
+                    .as(description)
+                    .isNotNull()
+                    .isEqualTo(mockProject);
 
-    @Test
-    void getProjectById_ShouldThrowException_WhenProjectDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent project ID
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        } else {
+            // Arrange: Mock the repository to return empty
+            mockNonexistentProjectInRepository(resourceId);
 
-        // Act & Assert: Verify that calling getProjectById throws
-        // ProjectNotFoundException for a missing project
-        assertThrows(ResourceNotFoundException.class, () -> projectService.getProjectById(1L));
+            // Act & Assert
+            assertThrows(ResourceNotFoundException.class,
+                    () -> projectService.getProjectById(resourceId),
+                    description);
+        }
+
+        // Verify: Ensure repository interaction occurred
+        verify(projectRepository).findById(anyLong());
     }
 
     @Test
     void createProject_ShouldCreateProject_WhenValid() {
-        // Arrange: Set up mocks for the current user and their existing projects
+        // Arrange: Set up mocks for the current user with no existing project
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(projectRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
         // Arrange: Create a DTO for the new project and set up a mock project to return
         // on save
         NewProjectDTO projectDTO = new TestDataFactory.NewProjectDTOBuilder().build();
-        Project newProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
-        when(projectRepository.save(any(Project.class))).thenReturn(newProject);
+        Project mockProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
+        when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
 
-        // Act: Call the service to create the project
+        // Act: Call service method
         Project createdProject = projectService.createProject(projectDTO);
 
-        // Assert: Verify the project was created with the expected properties
-        assertThat(createdProject).isNotNull();
-        assertThat(createdProject.getName()).isEqualTo(projectDTO.getName());
-        assertThat(createdProject.getOwner()).isEqualTo(mockUser);
+        // Assert: Validate the created project
+        assertThat(createdProject)
+                .as("Project should be created when valid")
+                .isNotNull()
+                .isEqualTo(mockProject);
 
-        // Assert: Ensure the project was saved in the repository
+        // Verify that the correct service and repository methods were called
+        verify(securityService).getCurrentUser();
         verify(projectRepository).save(any(Project.class));
     }
 
@@ -207,34 +231,44 @@ public class ProjectServiceTests {
         assertThrows(ResourceNotFoundException.class, () -> projectService.updateProject(1L, projectDTO));
     }
 
-    @Test
-    void deleteProject_ShouldDeleteProject_WhenProjectExists() {
-        // Arrange: Set up an existing project and mock the repository to return it when
-        // searched by ID
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Long projectId = project.getId();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+    @ParameterizedTest
+    @CsvSource({
+            "true, Project should be deleted when it exists",
+            "false, Exception should be thrown when project does not exist"
+    })
+    void deleteProject_ShouldHandleExistenceCorrectly(boolean projectExists, String description) {
+        Long resourceId = 1L;
+        if (projectExists) {
+            // Arrange: Stub the repository to simulate finding project
+            mockProjectInRepository(resourceId);
 
-        // Act: Call the service to delete the project by ID
-        projectService.deleteProjectById(projectId);
+            // Act: Call the service method
+            projectService.deleteProjectById(resourceId);
 
-        // Assert: Verify that the repository's deleteById method was called with the
-        // correct ID
-        verify(projectRepository).deleteById(projectId);
+            // Assert: Verify that the repository's delete method was called with the
+            // correct ID
+            verify(projectRepository).deleteById(resourceId);
+        } else {
+            // Arrange: Stub the repository to simulate not finding project
+            mockNonexistentProjectInRepository(resourceId);
+
+            // Act & Assert: Attempt to delete the project and expect a
+            // ResourceNotFoundException
+            assertThrows(ResourceNotFoundException.class, () -> projectService.deleteProjectById(resourceId));
+
+            // Assert: Verify that the repository's delete method was never called
+            verify(projectRepository, never()).delete(any(Project.class));
+        }
     }
 
-    @Test
-    void deleteProject_ShouldThrowException_WhenProjectDoesNotExist() {
-        // Arrange: Mock the repository to return an empty result when searching for a
-        // non-existent project ID
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+    private void mockNonexistentProjectInRepository(Long resourceId) {
+        when(projectRepository.findById(resourceId)).thenReturn(Optional.empty());
+    }
 
-        // Act & Assert: Verify that attempting to delete a non-existent project throws
-        // ProjectNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> projectService.deleteProjectById(1L));
-
-        // Assert: Verify that deleteById was never called on the repository, as the
-        // project does not exist
-        verify(projectRepository, never()).deleteById(anyLong());
+    private Project mockProjectInRepository(Long resourceId) {
+        Project mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        mockProject.setId(resourceId);
+        when(projectRepository.findById(resourceId)).thenReturn(Optional.of(mockProject));
+        return mockProject;
     }
 }

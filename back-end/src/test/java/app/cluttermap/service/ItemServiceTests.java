@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,7 +42,6 @@ import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -83,173 +85,162 @@ public class ItemServiceTests {
         ReflectionTestUtils.setField(itemService, "self", itemService);
 
         mockUser = new User("mockProviderId");
+
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        mockProject.setId(1L);
+
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        mockRoom.setId(1L);
+
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
         mockOrgUnit.setId(1L);
     }
 
     @Test
     void getUserItems_ShouldReturnItemsOwnedByUser() {
-        // Arrange: Set up mock user, projects, and items, and stub the repository to
-        // return items owned by the user
+        // Arrange: Mock the current user and items
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         Item item1 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-
+        Item item2 = new TestDataFactory.ItemBuilder().project(mockProject).build();
         when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
 
-        // Act: Retrieve the items owned by the user
+        // Act: Call service method
         Iterable<Item> userItems = itemService.getUserItems();
 
-        // Assert: Verify that the result contains only the items owned by the user
-        assertThat(userItems).containsExactly(item1, item2);
-    }
+        // Assert: Verify the result contains the expected items
+        assertThat(userItems).containsExactly(item1, item2)
+                .as("Items owned by user should be returned when they exist");
 
-    @Test
-    void getUserItems_ShouldReturnItemsAcrossMultipleProjects() {
-        // Arrange: Set up two projects for the same user with items
-        Project project1 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
-
-        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit1).build();
-        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit2).build();
-
-        when(securityService.getCurrentUser()).thenReturn(mockUser);
-        when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(List.of(item1, item2));
-
-        // Act: Fetch items for the user
-        Iterable<Item> userItems = itemService.getUserItems();
-
-        // Assert: Verify both items are returned across different projects
-        assertThat(userItems).containsExactlyInAnyOrder(item1, item2);
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(itemRepository).findByOwnerId(mockUser.getId());
     }
 
     @Test
     void getUserItems_ShouldReturnEmptyList_WhenNoItemsExist() {
-        // Arrange: Set up mock user and stub the repository to return an empty list
+        // Arrange: Mock the current user and an empty repository result
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         when(itemRepository.findByOwnerId(mockUser.getId())).thenReturn(Collections.emptyList());
 
-        // Act: Retrieve the items owned by the user
+        // Act: Call service method
         Iterable<Item> userItems = itemService.getUserItems();
 
-        // Assert: Verify that the result is empty
-        assertThat(userItems).isEmpty();
+        // Assert: Verify the result is empty
+        assertThat(userItems)
+                .as("Empty list should be returned when user owns no items")
+                .isEmpty();
+
+        // Verify dependencies are called as expected
+        verify(securityService).getCurrentUser();
+        verify(itemRepository).findByOwnerId(mockUser.getId());
     }
 
-    @Test
-    void getItemById_ShouldReturnItem_WhenItemExists() {
-        // Arrange: Set up a sample org unit and stub the repository to return it by ID
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+    @ParameterizedTest
+    @CsvSource({
+            "true, Item should be returned when it exists",
+            "false, ResourceNotFoundException should be thrown when item does not exist"
+    })
+    void getItemById_ShouldHandleExistenceCorrectly(boolean itemExists, String description) {
+        // Arrange
+        Long resourceId = 1L;
+        if (itemExists) {
+            // Arrange: Mock the repository to return an item
+            Item mockItem = mockAssignedItemInRepository(resourceId);
 
-        // Act: Retrieve the org unit using the service method
-        Item foundItem = itemService.getItemById(1L);
+            // Act: Call service method
+            Item foundItem = itemService.getItemById(resourceId);
 
-        // Assert: Verify that the item retrieved matches the expected item
-        assertThat(foundItem).isEqualTo(item);
+            // Assert: Verify the item retrieved matches the mock
+            assertThat(foundItem)
+                    .as(description)
+                    .isNotNull()
+                    .isEqualTo(mockItem);
+
+        } else {
+            // Arrange: Mock the repository to return empty
+            mockNonexistentItemInRepository(resourceId);
+
+            // Act & Assert
+            assertThrows(ResourceNotFoundException.class,
+                    () -> itemService.getItemById(resourceId),
+                    description);
+        }
+
+        // Verify: Ensure repository interaction occurred
+        verify(itemRepository).findById(anyLong());
     }
 
-    @Test
-    void getItemById_ShouldThrowException_WhenItemDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result for a non-existent
-        // item
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+    @ParameterizedTest
+    @CsvSource({
+            "true, Unassigned item should be returned when the project has unassigned items",
+            "false, Empty list should be returned when the project has no unassigned items"
+    })
+    void getUnassignedItemsByProjectId_ShouldReturnCorrectItems(boolean unassignedItemsExist,
+            String description) {
+        // Arrange: Prepare mock data
+        List<Item> mockItems = unassignedItemsExist
+                ? List.of(new TestDataFactory.ItemBuilder().project(mockProject).build())
+                : List.of();
 
-        // Act & Assert: Attempt to retrieve the item and expect a
-        // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(1L));
-    }
-
-    @Test
-    void getUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
-        // Arrange: Mock repository method
-        Long projectId = 1L;
-        Item unassignedItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(List.of(unassignedItem));
-
-        // Act: Call service method
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
-
-        // Assert: Verify correct items are returned
-        assertThat(unassignedItems).containsExactly(unassignedItem);
-    }
-
-    @Test
-    void getUnassignedItemsByNonExistentProjectId_ShouldReturnEmptyList() {
-        // Arrange: Use a project ID that does not exist
-        Long nonExistentProjectId = 999L;
-        when(itemRepository.findUnassignedItemsByProjectId(nonExistentProjectId)).thenReturn(List.of());
+        Long projectId = mockProject.getId();
+        when(itemRepository.findUnassignedItemsByProjectId(projectId)).thenReturn(mockItems);
 
         // Act: Call the service method
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(nonExistentProjectId);
+        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
 
-        // Assert: Verify that the result is an empty list
-        assertThat(unassignedItems).isEmpty();
+        // Assert: Verify the result
+        assertThat(unassignedItems)
+                .as(description)
+                .isEqualTo(mockItems);
+
+        // Verify: Ensure repository interaction occurred
+        verify(itemRepository).findUnassignedItemsByProjectId(projectId);
     }
 
-    @Test
-    void createItem_ShouldCreateItem_WhenValid() {
-        // Arrange: Stub org unit retrieval to return mockOrgUnit when the specified ID
-        // is used
-        when(orgUnitService.getOrgUnitById(1L)).thenReturn(mockOrgUnit);
+    @ParameterizedTest
+    @CsvSource({
+            "true, Item should be created in the org unit when orgUnitId is provided",
+            "false, Item should be created as unassigned when projectId is provided and orgUnitId is null"
+    })
+    void createItem_ShouldCreateItem(boolean isOrgUnitProvided, String description) {
+        Long orgUnitId = isOrgUnitProvided ? mockOrgUnit.getId() : null;
+        Long projectId = isOrgUnitProvided ? null : mockProject.getId();
 
-        // Arrange: Prepare the Item DTO
-        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().build();
+        // Arrange: Prepare the Item DTO based on the parameters
+        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder()
+                .orgUnitId(orgUnitId)
+                .projectId(projectId)
+                .build();
 
-        // Arrange: Create an Item that represents the saved item returned by
-        // the repository
-        Item item = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        Item mockItem;
+        if (isOrgUnitProvided) {
+            // Mock org unit and corresponding item
+            mockOrgUnitLookup();
+            mockItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).orgUnit(mockOrgUnit).build();
+        } else {
+            // Mock project and corresponding item
+            mockProjectLookup();
+            mockItem = new TestDataFactory.ItemBuilder().fromDTO(itemDTO).project(mockProject).build();
+        }
 
-        // Act: create a item using itemService and pass in the item DTO
+        when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
+
+        // Act: Call the service method
         Item createdItem = itemService.createItem(itemDTO);
 
-        // Assert: verify that the created item is not null and matches the expected
-        // details from itemDTO
-        assertThat(createdItem).isNotNull();
-        assertThat(createdItem.getName()).isEqualTo(itemDTO.getName());
-        assertThat(createdItem.getDescription()).isEqualTo(itemDTO.getDescription());
-        assertThat(createdItem.getOrgUnit()).isEqualTo(mockOrgUnit);
+        // Assert: Validate the created item
+        assertThat(createdItem)
+                .as(description)
+                .isNotNull()
+                .isEqualTo(mockItem);
 
-        // Verify that itemRepository.save() was called to persist the new item
-        verify(itemRepository).save(any(Item.class));
-    }
-
-    @Test
-    void createItem_ShouldCreateItem_WhenProjectExistsAndOrgUnitIdNull() {
-        // Arrange: Stub project retrieval to return mockProject when the specified ID
-        // is used
-        when(projectService.getProjectById(1L)).thenReturn(mockProject);
-
-        // Arrange: Prepare the Item DTO with the org unit ID as null
-        NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().orgUnitId(null).build();
-
-        // Arrange: Create a mock Item that represents the saved Item returned by
-        // the repository
-        Item item = new TestDataFactory.ItemBuilder().project(mockProject).build();
-
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
-
-        // Act: create a item using itemService and pass in the item DTO
-        Item createdItem = itemService.createItem(itemDTO);
-
-        // Assert: verify that the created item is not null and matches the expected
-        // details from itemDTO
-        assertThat(createdItem).isNotNull();
-        assertThat(createdItem.getName()).isEqualTo(itemDTO.getName());
-        assertThat(createdItem.getDescription()).isEqualTo(itemDTO.getDescription());
-        assertThat(createdItem.getProject()).isEqualTo(mockProject);
-
-        // Verify that itemRepository.save() was called to persist the new item
+        // Verify that the correct service and repository methods were called
+        if (isOrgUnitProvided) {
+            verify(orgUnitService).getOrgUnitById(orgUnitId);
+        } else {
+            verify(projectService).getProjectById(projectId);
+        }
         verify(itemRepository).save(any(Item.class));
     }
 
@@ -264,7 +255,7 @@ public class ItemServiceTests {
         mockOrgUnit.setItems(items);
 
         // Stub the repository to return the room and items
-        when(projectService.getProjectById(1L)).thenReturn(mockProject);
+        mockProjectLookup();
         when(itemRepository.findByOwnerId(1L)).thenReturn(items);
 
         NewItemDTO itemDTO = new TestDataFactory.NewItemDTOBuilder().build();
@@ -273,228 +264,224 @@ public class ItemServiceTests {
         assertThrows(ItemLimitReachedException.class, () -> itemService.createItem(itemDTO));
     }
 
-    @Test
-    void updateItem_ShouldUpdateItem_WhenItemExists() {
-        // Arrange: Set up mock item with initial values and stub the repository to
-        // return the item by ID
+    @ParameterizedTest
+    @CsvSource({
+            "true, true, true, All fields should update when all fields are provided",
+            "true, false, true, Description should not update when it is null",
+            "false, true, true, Tags should not update when they are null",
+            "true, true, false, Quantity should not update when it is null"
+    })
+    void updateItem_ShouldUpdateFieldsConditionally(
+            boolean updateDescription, boolean updateTags, boolean updateQuantity, String description) {
+        // Arrange: Set up mock item with initial values
+        Long resourceId = 1L;
+        List<String> oldTags = List.of("Old tag 1", "Old tag 2");
+        String oldDescription = "Old Description";
+        Integer oldQuantity = 10;
 
         Item item = new TestDataFactory.ItemBuilder()
                 .name("Old Name")
-                .description("Old Description")
-                .tags(List.of("Old tag 1", "Old tag 2"))
-                .quantity(10)
+                .description(oldDescription)
+                .tags(oldTags)
+                .quantity(oldQuantity)
                 .orgUnit(mockOrgUnit).build();
 
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.findById(resourceId)).thenReturn(Optional.of(item));
 
-        // Arrange: Create an UpdateItemDTO with updated values
-        UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder().build();
+        // Arrange: Use conditional variables for the expected values of the updated
+        // fields
+        String newDescription = updateDescription ? "New Description" : null;
+        List<String> newTags = updateTags ? List.of("New Tag 1", "New Tag 2") : null;
+        Integer newQuantity = updateQuantity ? 5 : null;
+
+        // Build the UpdateItemDTO with these values
+        UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
+                .description(newDescription)
+                .tags(newTags)
+                .quantity(newQuantity)
+                .build();
 
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
-        // Act: Update the item using the service
-        Item updatedItem = itemService.updateItem(1L, itemDTO);
+        // Act: Call the service method
+        Item updatedItem = itemService.updateItem(resourceId, itemDTO);
 
-        // Assert: Verify that the item's name was updated correctly
-        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
-        assertThat(updatedItem.getDescription()).isEqualTo(itemDTO.getDescription());
-        assertThat(updatedItem.getTags()).isEqualTo(itemDTO.getTags());
-        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
+        // Assert: Verify the fields were updated as expected
+        assertThat(updatedItem.getName())
+                .as(description + ": Name should match the DTO name")
+                .isEqualTo(itemDTO.getName());
+        assertThat(updatedItem.getDescription())
+                .as(description + ": Description should match the expected value")
+                .isEqualTo(updateDescription ? newDescription : oldDescription);
+        assertThat(updatedItem.getTags())
+                .as(description + ": Tags should match the expected value")
+                .isEqualTo(updateTags ? newTags : oldTags);
+        assertThat(updatedItem.getQuantity())
+                .as(description + ": Quantity should match the expected value")
+                .isEqualTo(updateQuantity ? newQuantity : oldQuantity);
+
+        // Verify: Ensure the repository save method was called
         verify(itemRepository).save(item);
     }
 
     @Test
     void updateItem_ShouldThrowException_WhenItemDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent item
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+        // Arrange: Stub the repository to return an empty result for non-existent item
+        Long nonExistentItemId = 999L;
+        mockNonexistentItemInRepository(nonExistentItemId);
 
-        // Arrange: Set up an UpdateItemDTO with updated values
+        // Arrange: Set up an UpdateItemDTO
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder().build();
 
-        // Act & Assert: Attempt to update the item and expect a
-        // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.updateItem(1L, itemDTO));
+        // Act & Assert: Expect ResourceNotFoundException
+        assertThrows(ResourceNotFoundException.class, () -> itemService.updateItem(nonExistentItemId, itemDTO));
+
+        // Verify: Ensure save was not called
+        verify(itemRepository, never()).save(any(Item.class));
     }
 
-    @Test
-    void updateItem_ShouldNotChangeDescription_WhenDescriptionIsNull() {
-        // Arrange: Set up a item with initial values
-        Item item = new TestDataFactory.ItemBuilder()
-                .name("Old Name")
-                .description("Old Description")
-                .tags(List.of("Old tag 1", "Old tag 2"))
-                .quantity(10)
-                .orgUnit(mockOrgUnit).build();
+    @ParameterizedTest
+    @CsvSource({
+            "true, Item should be deleted when it exists",
+            "false, Exception should be thrown when item does not exist"
+    })
+    void deleteItem_ShouldHandleExistenceCorrectly(boolean itemExists, String description) {
+        Long resourceId = 1L;
+        if (itemExists) {
+            // Arrange: Stub the repository to simulate finding item
+            mockAssignedItemInRepository(resourceId);
 
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+            // Act: Call the service method
+            itemService.deleteItemById(resourceId);
 
-        // Stub the repository to return the item after saving
-        when(itemRepository.save(item)).thenReturn(item);
+            // Assert: Verify that the repository's delete method was called with the
+            // correct ID
+            verify(itemRepository).deleteById(resourceId);
+        } else {
+            // Arrange: Stub the repository to simulate not finding item
+            mockNonexistentItemInRepository(resourceId);
 
-        // Arrange: Set up an UpdateItemDTO with null description
-        UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
-                .description(null)
-                .build();
+            // Act & Assert: Attempt to delete the item and expect a
+            // ResourceNotFoundException
+            assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItemById(resourceId));
 
-        // Act: Update item
-        Item updatedItem = itemService.updateItem(1L, itemDTO);
-
-        // Assert: Verify that the name was updated but the description remains the same
-        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
-        assertThat(updatedItem.getDescription()).isEqualTo("Old Description");
-        assertThat(updatedItem.getTags()).isEqualTo(itemDTO.getTags());
-        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
-        verify(itemRepository).save(item);
+            // Assert: Verify that the repository's delete method was never called
+            verify(itemRepository, never()).deleteById(anyLong());
+        }
     }
 
-    @Test
-    void updateItem_ShouldNotChangeTags_WhenTagsIsNull() {
-        // Arrange: Set up a item with initial values
-        List<String> oldTags = List.of("Old tag 1", "Old tag 2");
-        Item item = new TestDataFactory.ItemBuilder()
-                .name("Old Name")
-                .description("Old Description")
-                .tags(oldTags)
-                .quantity(10)
-                .orgUnit(mockOrgUnit).build();
+    @ParameterizedTest
+    @CsvSource({
+            "true, Item should be successfully assigned to the org unit",
+            "false, ResourceNotFoundException should be thrown when item does not exist"
+    })
+    void assignItemsToOrgUnit_ShouldHandleExistenceCorrectly(boolean itemExists, String description) {
+        // Arrange: Use the existing mockOrgUnit as the target
+        mockOrgUnitLookup();
 
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-
-        // Stub the repository to return the item after saving
-        when(itemRepository.save(item)).thenReturn(item);
-
-        // Arrange: Set up an UpdateItemDTO with null tags
-        UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
-                .tags(null)
-                .build();
-
-        // Act: Update item
-        Item updatedItem = itemService.updateItem(1L, itemDTO);
-
-        // Assert: Verify that the name was updated but the tags remain the same
-        assertThat(updatedItem.getName()).isEqualTo(itemDTO.getName());
-        assertThat(updatedItem.getDescription()).isEqualTo(itemDTO.getDescription());
-        assertThat(updatedItem.getTags()).isEqualTo(oldTags);
-        assertThat(updatedItem.getQuantity()).isEqualTo(itemDTO.getQuantity());
-        verify(itemRepository).save(item);
-    }
-
-    @Test
-    void deleteItem_ShouldDeleteItem_WhenItemExists() {
-        // Arrange: Set up a item and stub the repository to return the item by ID
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        Long itemId = item.getId();
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-
-        // Act: Delete the item using the service
-        itemService.deleteItemById(itemId);
-
-        // Assert: Verify that the repository's delete method was called with the
-        // correct ID
-        verify(itemRepository).deleteById(itemId);
-    }
-
-    @Test
-    void deleteItem_ShouldThrowException_WhenItemDoesNotExist() {
-        // Arrange: Stub the repository to return an empty result when searching for a
-        // non-existent item
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Attempt to delete the item and expect a
-        // ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> itemService.deleteItemById(1L));
-
-        // Assert: Verify that the repository's delete method was never called
-        verify(itemRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    void assignItemsToOrgUnit_Success() {
-        // Arrange: Create target OrgUnit and mock items to move
-        OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        when(orgUnitService.getOrgUnitById(10L)).thenReturn(targetOrgUnit);
-
-        Item item1 = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        Item item2 = new TestDataFactory.ItemBuilder().project(mockProject).build();
-
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
-        when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
-
-        // Act: Move items in batch
-        Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(List.of(1L, 2L),
-                10L);
-
-        // Assert: Verify items are updated
-        assertThat(movedItems).allMatch(item -> item.getOrgUnit().equals(targetOrgUnit));
-    }
-
-    @Test
-    void assignItemsToOrgUnit_ItemNotFound_ShouldThrowResourceNotFoundException() {
-        // Arrange: Set up target OrgUnit ID and non-existent item ID
-        OrgUnit targetOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        when(orgUnitService.getOrgUnitById(targetOrgUnit.getId())).thenReturn(targetOrgUnit);
-
-        Long nonExistentItemId = 999L;
-        when(itemRepository.findById(nonExistentItemId)).thenReturn(Optional.empty());
-
-        // Act & Assert: Expect ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> {
-            itemService.assignItemsToOrgUnit(List.of(nonExistentItemId), targetOrgUnit.getId());
-        });
-    }
-
-    @Test
-    void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
-        // Arrange: Stub the org unit to return mockOrgUnit when queried by ID
-        when(orgUnitService.getOrgUnitById(mockOrgUnit.getId())).thenReturn(mockOrgUnit);
-
-        // Arrange: Create an item with a different project than mockOrgUnit
-        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Item itemWithDifferentProject = new TestDataFactory.ItemBuilder().project(differentProject).build();
-
-        itemWithDifferentProject.setId(2L);
-        when(itemRepository.findById(itemWithDifferentProject.getId()))
-                .thenReturn(Optional.of(itemWithDifferentProject));
-
-        // Act & Assert: Expect IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, () -> {
-            itemService.assignItemsToOrgUnit(List.of(itemWithDifferentProject.getId()),
+        // Arrange: Mock items to move
+        Long resourceId = 1L;
+        if (itemExists) {
+            mockUnassignedItemInRepository(resourceId);
+            // Act: Call the service method
+            Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(List.of(resourceId),
                     mockOrgUnit.getId());
-        });
-    }
 
-    @Test
-    void unassignItem_Success() {
-        // Arrange: Create items and associate items with the mock orgUnit
-        Item item1 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        Item item2 = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
+            // Assert: Verify that the item is assigned to the target org unit
+            assertThat(movedItems)
+                    .as(description)
+                    .allMatch(item -> item.getOrgUnit().equals(mockOrgUnit));
 
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item1));
-        when(itemRepository.findById(2L)).thenReturn(Optional.of(item2));
+            // Verify interactions
+            verify(itemRepository).findById(resourceId);
+            verify(orgUnitRepository).save(any(OrgUnit.class));
+        } else {
+            mockNonexistentItemInRepository(resourceId);
+            // Assert: Expect ResourceNotFoundException
+            assertThrows(ResourceNotFoundException.class,
+                    () -> itemService.assignItemsToOrgUnit(List.of(resourceId), mockOrgUnit.getId()),
+                    description);
 
-        // Act: Unassign the items from the orgUnit
-        Iterable<Item> updatedItems = itemService.unassignItems(List.of(1L, 2L));
-
-        // Assert: Verify that each item is no longer associated with the orgUnit
-        for (Item updatedItem : updatedItems) {
-            assertThat(updatedItem.getOrgUnit()).isNull();
+            // Verify no interactions with the repository save method
+            verify(itemRepository, never()).save(any(Item.class));
         }
     }
 
     @Test
+    void assignItemsToOrgUnit_ShouldHandleAssignedAndUnassignedItems() {
+        // Arrange: Use the existing mockOrgUnit as the target
+        mockOrgUnitLookup();
+
+        // Mock unassigned items
+        Item unassignedItem1 = mockUnassignedItemInRepository(1L);
+        Item unassignedItem2 = mockUnassignedItemInRepository(2L);
+
+        // Mock a previously assigned item
+        OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        Item assignedItem = mockAssignedItemInRepository(3L, previousOrgUnit);
+
+        // Act: Assign multiple items
+        Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(
+                List.of(unassignedItem1.getId(), unassignedItem2.getId(), assignedItem.getId()),
+                mockOrgUnit.getId());
+
+        // Assert: Verify all items are assigned to the target org unit
+        assertThat(movedItems).allMatch(item -> item.getOrgUnit().equals(mockOrgUnit));
+
+        // Verify unassignment and reassignment for the previously assigned item
+        verify(orgUnitRepository).save(previousOrgUnit); // Unassign
+        verify(orgUnitRepository, times(3)).save(mockOrgUnit); // Assign all items
+        verify(itemRepository, times(3)).findById(anyLong());
+    }
+
+    @Test
+    void assignItemsToOrgUnit_DifferentProject_ShouldThrowIllegalArgumentException() {
+        // Arrange: Use the existing mockOrgUnit as the target
+        mockOrgUnitLookup();
+
+        // Mock an item from a different project
+        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Item itemWithDifferentProject = new TestDataFactory.ItemBuilder().project(differentProject).build();
+        when(itemRepository.findById(2L)).thenReturn(Optional.of(itemWithDifferentProject));
+
+        // Act & Assert: Expect IllegalArgumentException
+        assertThrows(IllegalArgumentException.class,
+                () -> itemService.assignItemsToOrgUnit(List.of(2L), mockOrgUnit.getId()),
+                "Should throw IllegalArgumentException for items from different projects");
+
+        // Verify: Ensure no repository updates occurred
+        verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
+    void unassignItem_Success() {
+        // Arrange: Mock items and associate them with the org unit
+        Item item1 = mockAssignedItemInRepository(1L);
+        Item item2 = mockAssignedItemInRepository(2L);
+
+        // Act: Call the service method
+        Iterable<Item> unassignedItems = itemService.unassignItems(List.of(item1.getId(), item2.getId()));
+
+        // Assert: Verify that each item's org unit is null
+        unassignedItems.forEach(item -> assertThat(item.getOrgUnit()).isNull());
+
+        // Verify repository interactions
+        verify(itemRepository, times(2)).findById(anyLong());
+        verify(orgUnitRepository, times(2)).save(any(OrgUnit.class));
+    }
+
+    @Test
     void unassignItems_ItemNotFound_ShouldThrowResourceNotFoundException() {
-        // Arrange: Set up item IDs, including a non-existent item ID
-        List<Long> itemIds = List.of(999L);
+        // Arrange: Set up a non-existent item ID
+        Long nonExistentItemId = 999L;
+        mockNonexistentItemInRepository(nonExistentItemId);
 
-        // Simulate ItemNotFoundException for the non-existent item
-        when(itemRepository.findById(999L)).thenThrow(new ResourceNotFoundException(ResourceType.ITEM, 999L));
+        // Act & Assert: Expect ResourceNotFoundException
+        assertThrows(ResourceNotFoundException.class, () -> itemService.unassignItems(List.of(nonExistentItemId)));
 
-        // Act & Assert: Expect ItemNotFoundException
-        assertThrows(ResourceNotFoundException.class, () -> {
-            itemService.unassignItems(itemIds);
-        });
+        // Verify: Ensure save was never called
+        verify(itemRepository, never()).save(any(Item.class));
     }
 
     @Test
@@ -507,5 +494,38 @@ public class ItemServiceTests {
         assertThrows(AccessDeniedException.class, () -> {
             itemService.checkOwnershipForItems(itemIds);
         });
+    }
+
+    private void mockNonexistentItemInRepository(Long resourceId) {
+        when(itemRepository.findById(resourceId)).thenReturn(Optional.empty());
+    }
+
+    private Item mockAssignedItemInRepository(Long resourceId) {
+        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
+        mockItem.setId(resourceId);
+        when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
+        return mockItem;
+    }
+
+    private Item mockAssignedItemInRepository(Long resourceId, OrgUnit orgUnit) {
+        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
+        mockItem.setId(resourceId);
+        when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
+        return mockItem;
+    }
+
+    private Item mockUnassignedItemInRepository(Long resourceId) {
+        Item mockItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
+        mockItem.setId(resourceId);
+        when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
+        return mockItem;
+    }
+
+    private void mockOrgUnitLookup() {
+        when(orgUnitService.getOrgUnitById(mockOrgUnit.getId())).thenReturn(mockOrgUnit);
+    }
+
+    private void mockProjectLookup() {
+        when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 }

@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,8 +56,8 @@ public class ProjectServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getProjectById_UserHasOwnership",
-            "false, getProjectById_UserLacksOwnership"
+            "true, Project should be retrieved successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void getProjectById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -69,12 +70,12 @@ public class ProjectServiceSecurityTests {
             // Act: Call the method under test
             Project project = projectService.getProjectById(resourceId);
             // Assert: Project should be retrieved successfully
-            assertNotNull(project, "Project should not be null when the user has ownership.");
+            assertNotNull(project, description);
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> projectService.getProjectById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -83,8 +84,8 @@ public class ProjectServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, updateProject_UserHasOwnership",
-            "false, updateProject_UserLacksOwnership"
+            "true, Project should be updated successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void updateProject_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -103,13 +104,13 @@ public class ProjectServiceSecurityTests {
             Project project = projectService.updateProject(resourceId, projectDTO);
 
             // Assert: Validate successful update
-            assertNotNull(project, "Project should not be null when the user has ownership.");
+            assertNotNull(project, description);
             verify(projectRepository).save(any(Project.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> projectService.updateProject(resourceId, projectDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure project repository save is never invoked
             verify(projectRepository, never()).save(any(Project.class));
         }
@@ -120,8 +121,8 @@ public class ProjectServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, deleteById_UserHasOwnership",
-            "false, deleteById_UserLacksOwnership"
+            "true, Project should be deleted successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -138,12 +139,14 @@ public class ProjectServiceSecurityTests {
             projectService.deleteProjectById(resourceId);
 
             // Assert: Validate successful deletion
-            verify(projectRepository).deleteById(resourceId);
+            assertThatCode(() -> verify(projectRepository).deleteById(resourceId))
+                    .as(description)
+                    .doesNotThrowAnyException();
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> projectService.deleteProjectById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure project repository save is never invoked
             verify(projectRepository, never()).deleteById(1L);
         }

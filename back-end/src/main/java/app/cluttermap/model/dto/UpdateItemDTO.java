@@ -23,7 +23,7 @@ public class UpdateItemDTO {
         this.name = name;
         this.description = description;
         this.tags = tags;
-        this.quantity = (quantity != null) ? quantity : 1;
+        this.quantity = quantity;
     }
 
     /* ------------- Getters ------------- */

@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,8 +64,8 @@ public class RoomServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getRoomById_UserHasOwnership",
-            "false, getRoomById_UserLacksOwnership"
+            "true, Room should be retrieved successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void getRoomById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -77,12 +78,12 @@ public class RoomServiceSecurityTests {
             // Act: Call the method under test
             Room room = roomService.getRoomById(resourceId);
             // Assert: Room should be retrieved successfully
-            assertNotNull(room, "Room should not be null when the user has ownership.");
+            assertNotNull(room, description);
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> roomService.getRoomById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -91,8 +92,8 @@ public class RoomServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, createRoom_UserHasOwnership",
-            "false, createRoom_UserLacksOwnership",
+            "true, Room should be created successfully when user has ownership of the project",
+            "false,AccessDeniedException should be thrown when user lacks ownership of the project",
     })
     @WithMockUser(username = "testUser")
     void createRoom_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -117,13 +118,13 @@ public class RoomServiceSecurityTests {
             Room room = roomService.createRoom(roomDTO);
 
             // Assert: Validate room creation
-            assertNotNull(room, "Room should not be null when the user has ownership.");
+            assertNotNull(room, description);
             verify(roomRepository).save(any(Room.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> roomService.createRoom(roomDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure room repository save is never invoked
             verify(roomRepository, never()).save(any(Room.class));
         }
@@ -134,8 +135,8 @@ public class RoomServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, updateRoom_UserHasOwnership",
-            "false, updateRoom_UserLacksOwnership"
+            "true, Room should be updated successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void updateRoom_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -154,13 +155,13 @@ public class RoomServiceSecurityTests {
             Room room = roomService.updateRoom(resourceId, roomDTO);
 
             // Assert: Validate successful update
-            assertNotNull(room, "Room should not be null when the user has ownership.");
+            assertNotNull(room, description);
             verify(roomRepository).save(any(Room.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> roomService.updateRoom(resourceId, roomDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure room repository save is never invoked
             verify(roomRepository, never()).save(any(Room.class));
         }
@@ -171,8 +172,8 @@ public class RoomServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, deleteById_UserHasOwnership",
-            "false, deleteById_UserLacksOwnership"
+            "true, Room should be deleted successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -189,12 +190,15 @@ public class RoomServiceSecurityTests {
             roomService.deleteRoomById(resourceId);
 
             // Assert: Validate successful deletion
-            verify(roomRepository).delete(any(Room.class));
+            assertThatCode(() -> verify(roomRepository).delete(any(Room.class)))
+                    .as(description)
+                    .doesNotThrowAnyException();
+
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> roomService.deleteRoomById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure room repository save is never invoked
             verify(roomRepository, never()).deleteById(1L);
         }
