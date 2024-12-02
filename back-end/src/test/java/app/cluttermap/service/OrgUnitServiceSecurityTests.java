@@ -1,5 +1,6 @@
 package app.cluttermap.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -74,8 +75,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getOrgUnitById_UserHasOwnership",
-            "false, getOrgUnitById_UserLacksOwnership"
+            "true, Org Unit should be retrieved successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void getOrgUnitById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -88,12 +89,12 @@ public class OrgUnitServiceSecurityTests {
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.getOrgUnitById(resourceId);
             // Assert: OrgUnit should be retrieved successfully
-            assertNotNull(orgUnit, "OrgUnit should not be null when the user has ownership.");
+            assertNotNull(orgUnit, description);
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.getOrgUnitById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -102,8 +103,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, getUnassignedOrgUnitsByProjectId_UserHasOwnership",
-            "false, getUnassignedOrgUnitsByProjectId_UserLacksOwnership"
+            "true, Unassigned org units should be retrieved when user has ownership of the project",
+            "false, AccessDeniedException should be thrown when user lacks ownership of the project"
     })
     @WithMockUser(username = "testUser")
     void getUnassignedOrgUnitsByProjectId_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -122,7 +123,7 @@ public class OrgUnitServiceSecurityTests {
 
             // Assert: Validate retrieved orgUnits
             assertAll(
-                    () -> assertNotNull(orgUnits, "OrgUnits list should not be null when the user has ownership."),
+                    () -> assertNotNull(orgUnits, description),
                     () -> assertEquals(1, orgUnits.size(), "OrgUnits list should contain exactly 1 org unit."));
             verify(orgUnitRepository).findUnassignedOrgUnitsByProjectId(resourceId);
 
@@ -130,7 +131,7 @@ public class OrgUnitServiceSecurityTests {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.getUnassignedOrgUnitsByProjectId(mockProject.getId()),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
         }
 
         // Verify: Ensure ownership check was invoked
@@ -139,10 +140,10 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, project, createOrgUnit_UserHasOwnership",
-            "false, project, createOrgUnit_UserLacksOwnership",
-            "true, room, createOrgUnit_UserHasOwnership",
-            "false, room, createOrgUnit_UserLacksOwnership",
+            "true, project, Item should be created successfully when user has ownership of the project",
+            "false, project, AccessDeniedException should be thrown when user lacks ownership of the project",
+            "true, room, Org Unit should be created successfully when user has ownership of the room",
+            "false, room, AccessDeniedException should be thrown when user lacks ownership of the org unit",
     })
     @WithMockUser(username = "testUser")
     void createOrgUnit_ShouldRespectOwnership(boolean isOwner, String resourceType, String description) {
@@ -176,13 +177,13 @@ public class OrgUnitServiceSecurityTests {
             OrgUnit orgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
 
             // Assert: Validate orgUnit creation
-            assertNotNull(orgUnit, "OrgUnit should not be null when the user has ownership.");
+            assertNotNull(orgUnit, description);
             verify(orgUnitRepository).save(any(OrgUnit.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.createOrgUnit(orgUnitDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).save(any(OrgUnit.class));
         }
@@ -193,8 +194,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, updateOrgUnit_UserHasOwnership",
-            "false, updateOrgUnit_UserLacksOwnership"
+            "true, Org Unit should be updated successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void updateOrgUnit_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -213,13 +214,13 @@ public class OrgUnitServiceSecurityTests {
             OrgUnit orgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
 
             // Assert: Validate successful update
-            assertNotNull(orgUnit, "OrgUnit should not be null when the user has ownership.");
+            assertNotNull(orgUnit, description);
             verify(orgUnitRepository).save(any(OrgUnit.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.updateOrgUnit(resourceId, orgUnitDTO),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).save(any(OrgUnit.class));
         }
@@ -230,8 +231,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, assignOrgUnitsToRoom_UserHasOwnership",
-            "false, assignOrgUnitsToRoom_UserLacksOwnership"
+            "true, Org Units should be assigned to room successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void assignOrgUnitsToRoom_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -250,7 +251,7 @@ public class OrgUnitServiceSecurityTests {
             assertAll(
                     () -> assertNotNull(orgUnits, "OrgUnits list should not be null when the user has ownership."),
                     () -> assertEquals(mockRoom, mockOrgUnit.getRoom(),
-                            "OrgUnit's room should be updated to the target room."));
+                            description));
 
             // Verify: Ensure room retrieval occurred
             verify(roomService).getRoomById(mockRoom.getId());
@@ -258,7 +259,7 @@ public class OrgUnitServiceSecurityTests {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.assignOrgUnitsToRoom(List.of(resourceId), mockOrgUnit.getId()),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
 
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).save(any(OrgUnit.class));
@@ -270,8 +271,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, unassignOrgUnits_UserHasOwnership",
-            "false, unassignOrgUnits_UserLacksOwnership"
+            "true, Org Units should be unassigned successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void unassignOrgUnits_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -289,13 +290,13 @@ public class OrgUnitServiceSecurityTests {
             Iterable<OrgUnit> orgUnits = orgUnitService.unassignOrgUnits(List.of(1L));
 
             // Assert: Validate successful unassignment
-            assertNotNull(orgUnits, "OrgUnits list should not be null when the user has ownership.");
+            assertNotNull(orgUnits, description);
             verify(roomRepository).save(any(Room.class));
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.unassignOrgUnits(List.of(resourceId)),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
 
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).save(any(OrgUnit.class));
@@ -307,8 +308,8 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, deleteById_UserHasOwnership",
-            "false, deleteById_UserLacksOwnership"
+            "true, Org Unit should be deleted successfully when user has ownership",
+            "false, AccessDeniedException should be thrown when user lacks ownership"
     })
     @WithMockUser(username = "testUser")
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
@@ -325,12 +326,14 @@ public class OrgUnitServiceSecurityTests {
             orgUnitService.deleteOrgUnitById(1L);
 
             // Assert: Validate successful deletion
-            verify(orgUnitRepository).delete(any(OrgUnit.class));
+            assertThatCode(() -> verify(orgUnitRepository).delete(any(OrgUnit.class)))
+                    .as(description)
+                    .doesNotThrowAnyException();
         } else {
             // Act & Assert: Validate access denial
             assertThrows(AccessDeniedException.class,
                     () -> orgUnitService.deleteOrgUnitById(resourceId),
-                    "AccessDeniedException should be thrown when the user lacks ownership.");
+                    description);
             // Verify: Ensure orgUnit repository save is never invoked
             verify(orgUnitRepository, never()).deleteById(1L);
         }
