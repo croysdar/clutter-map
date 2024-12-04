@@ -44,6 +44,10 @@ public class User {
     @JsonManagedReference
     private List<Project> projects = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = false)
+    @JsonManagedReference
+    private List<Event> events = new ArrayList<>();
+
     /* ------------- Constructors ------------- */
     // NOTE: Constructors should list parameters in the same order as the fields for
     // consistency.
@@ -134,6 +138,14 @@ public class User {
         this.projects = projects;
     }
 
+    public List<Event> getEvents() {
+        return this.events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+
     /* ------------- Custom Builders (Fluent Methods) ------------- */
 
     public User id(Long id) {
@@ -181,6 +193,19 @@ public class User {
         return this;
     }
 
+    public User events(List<Event> events) {
+        setEvents(events);
+        return this;
+    }
+
+    /* ------------- Lifecycle Callback Methods ------------- */
+
+    @PreRemove
+    private void preRemove() {
+        for (Event event : events) {
+            event.setUser(null);
+        }
+    }
 
     /* ------------- Equals, HashCode, and ToString ------------- */
 
@@ -213,6 +238,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", createdAt=" + createdAt +
                 ", projects=" + (projects != null ? projects.size() : "null") +
+                ", events=" + (events != null ? events.size() : "null") +
                 '}';
     }
 }

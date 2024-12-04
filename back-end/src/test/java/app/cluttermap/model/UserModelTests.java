@@ -77,6 +77,7 @@ class UserModelTests {
 
         assertThat(result).contains("providerId=null");
         assertThat(result).contains("projects=0");
+        assertThat(result).contains("events=0");
     }
 
     @Test
@@ -92,11 +93,13 @@ class UserModelTests {
         user.setCreatedAt(new Date());
 
         user.setProjects(List.of(new Project(), new Project(), new Project()));
+        user.setEvents(List.of(new Event(), new Event(), new Event(), new Event(), new Event()));
 
         String result = user.toString();
 
         assertThat(result).contains("providerId=google-oauth2|12345");
         assertThat(result).contains("projects=3");
+        assertThat(result).contains("events=5");
     }
 
 }

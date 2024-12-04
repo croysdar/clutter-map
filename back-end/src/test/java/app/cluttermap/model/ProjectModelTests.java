@@ -58,6 +58,7 @@ public class ProjectModelTests {
         assertThat(result).contains("rooms=0");
         assertThat(result).contains("orgUnits=0");
         assertThat(result).contains("items=0");
+        assertThat(result).contains("events=0");
     }
 
     @Test
@@ -74,6 +75,7 @@ public class ProjectModelTests {
         project.setRooms(List.of(new Room(), new Room(), new Room()));
         project.setOrgUnits(List.of(new OrgUnit(), new OrgUnit()));
         project.setItems(List.of(new Item(), new Item(), new Item(), new Item(), new Item()));
+        project.setEvents(List.of(new Event(), new Event(), new Event()));
 
         String result = project.toString();
 
@@ -81,5 +83,6 @@ public class ProjectModelTests {
         assertThat(result).contains("rooms=3");
         assertThat(result).contains("orgUnits=2");
         assertThat(result).contains("items=5");
+        assertThat(result).contains("events=3");
     }
 }

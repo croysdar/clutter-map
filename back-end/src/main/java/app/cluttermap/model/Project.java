@@ -48,6 +48,10 @@ public class Project {
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Event> events = new ArrayList<>();
+
     /* ------------- Constructors ------------- */
     // NOTE: Constructors should list parameters in the same order as the fields for
     // consistency.
@@ -114,6 +118,15 @@ public class Project {
     public void setItems(List<Item> items) {
         this.items = items;
     }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+
     /* ------------- Custom Builders (Fluent Methods) ------------- */
 
     public Project id(Long id) {
@@ -146,6 +159,11 @@ public class Project {
         return this;
     }
 
+    public Project events(List<Event> events) {
+        setEvents(events);
+        return this;
+    }
+
     /* ------------- Equals, HashCode, and ToString ------------- */
 
     @Override
@@ -173,6 +191,7 @@ public class Project {
                 ", rooms=" + (rooms != null ? rooms.size() : "null") +
                 ", orgUnits=" + (orgUnits != null ? orgUnits.size() : "null") +
                 ", items=" + (items != null ? items.size() : "null") +
+                ", events=" + (events != null ? events.size() : "null") +
                 '}';
     }
 
