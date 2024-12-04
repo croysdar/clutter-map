@@ -2,6 +2,8 @@ package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -46,5 +48,36 @@ public class RoomModelTests {
 
         // Assert: Verify that the orgUnits collection is empty after removal
         assertThat(room.getOrgUnits()).isEmpty();
+    }
+
+    @Test
+    void toString_ShouldHandleNullFields() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setName("Living Room");
+
+        String result = room.toString();
+
+        assertThat(result).contains("project=null");
+        assertThat(result).contains("orgUnits=0");
+    }
+
+    @Test
+    void toString_ShouldDisplaySummaryForPopulatedRoom() {
+        Project project = new Project();
+        project.setName("Home Project");
+
+        Room room = new Room();
+        room.setId(1L);
+        room.setName("Living Room");
+        room.setDescription("Main living area");
+        room.setProject(project);
+
+        room.setOrgUnits(List.of(new OrgUnit(), new OrgUnit(), new OrgUnit()));
+
+        String result = room.toString();
+
+        assertThat(result).contains("project=Home Project");
+        assertThat(result).contains("orgUnits=3");
     }
 }

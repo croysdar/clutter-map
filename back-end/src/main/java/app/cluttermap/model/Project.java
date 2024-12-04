@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "projects")
@@ -113,4 +114,66 @@ public class Project {
     public void setItems(List<Item> items) {
         this.items = items;
     }
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Project id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Project name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Project owner(User owner) {
+        setOwner(owner);
+        return this;
+    }
+
+    public Project rooms(List<Room> rooms) {
+        setRooms(rooms);
+        return this;
+    }
+
+    public Project orgUnits(List<OrgUnit> orgUnits) {
+        setOrgUnits(orgUnits);
+        return this;
+    }
+
+    public Project items(List<Item> items) {
+        setItems(items);
+        return this;
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Project)) {
+            return false;
+        }
+        Project project = (Project) o;
+        return Objects.equals(id, project.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", owner=" + (owner != null ? owner.getUsername() : "null") +
+                ", rooms=" + (rooms != null ? rooms.size() : "null") +
+                ", orgUnits=" + (orgUnits != null ? orgUnits.size() : "null") +
+                ", items=" + (items != null ? items.size() : "null") +
+                '}';
+    }
+
 }

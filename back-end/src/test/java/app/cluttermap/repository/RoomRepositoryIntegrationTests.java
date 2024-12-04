@@ -64,8 +64,7 @@ public class RoomRepositoryIntegrationTests {
         List<Room> user1Rooms = roomRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the room owned by user1 is returned
-        assertThat(user1Rooms).hasSize(1);
-        assertThat(user1Rooms.get(0).getName()).isEqualTo("Room Owned by User 1");
+        assertThat(user1Rooms).containsExactly(room1);
 
         // Assert: Confirm that the room list does not contain a room owned by user2
         assertThat(user1Rooms).doesNotContain(room2);
@@ -80,10 +79,9 @@ public class RoomRepositoryIntegrationTests {
         Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
-        List<String> roomNames = List.of("OrgUnit 1", "OrgUnit 2", "OrgUnit 3");
-        Room room1 = new TestDataFactory.RoomBuilder().name(roomNames.get(0)).project(project).build();
-        Room room2 = new TestDataFactory.RoomBuilder().name(roomNames.get(1)).project(project).build();
-        Room room3 = new TestDataFactory.RoomBuilder().name(roomNames.get(2)).project(project).build();
+        Room room1 = new TestDataFactory.RoomBuilder().project(project).build();
+        Room room2 = new TestDataFactory.RoomBuilder().project(project).build();
+        Room room3 = new TestDataFactory.RoomBuilder().project(project).build();
 
         roomRepository.saveAll(List.of(room1, room2, room3));
 
@@ -91,9 +89,7 @@ public class RoomRepositoryIntegrationTests {
         List<Room> ownerRooms = roomRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all rooms owned by the user are returned
-        assertThat(ownerRooms).hasSize(3);
-        assertThat(ownerRooms).extracting(Room::getName)
-                .containsExactlyInAnyOrder(roomNames.toArray(new String[0]));
+        assertThat(ownerRooms).containsExactlyInAnyOrder(room1, room2, room3);
 
     }
 

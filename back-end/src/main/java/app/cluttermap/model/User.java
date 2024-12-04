@@ -1,5 +1,10 @@
 package app.cluttermap.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -11,11 +16,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "app_users")
@@ -130,5 +132,87 @@ public class User {
 
     public void setProjects(List<Project> projects) {
         this.projects = projects;
+    }
+
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public User id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public User providerId(String providerId) {
+        setProviderId(providerId);
+        return this;
+    }
+
+    public User provider(String provider) {
+        setProvider(provider);
+        return this;
+    }
+
+    public User username(String username) {
+        setUsername(username);
+        return this;
+    }
+
+    public User firstName(String firstName) {
+        setFirstName(firstName);
+        return this;
+    }
+
+    public User lastName(String lastName) {
+        setLastName(lastName);
+        return this;
+    }
+
+    public User email(String email) {
+        setEmail(email);
+        return this;
+    }
+
+    public User createdAt(Date createdAt) {
+        setCreatedAt(createdAt);
+        return this;
+    }
+
+    public User projects(List<Project> projects) {
+        setProjects(projects);
+        return this;
+    }
+
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User user = (User) o;
+
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", providerId=" + providerId +
+                ", provider='" + provider + '\'' +
+                ", username='" + username + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", createdAt=" + createdAt +
+                ", projects=" + (projects != null ? projects.size() : "null") +
+                '}';
     }
 }

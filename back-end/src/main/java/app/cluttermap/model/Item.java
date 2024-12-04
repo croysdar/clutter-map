@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "items")
@@ -154,4 +155,70 @@ public class Item {
         this.project = project;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Item id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Item name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Item description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public Item tags(List<String> tags) {
+        setTags(tags);
+        return this;
+    }
+
+    public Item quantity(Integer quantity) {
+        setQuantity(quantity);
+        return this;
+    }
+
+    public Item orgUnit(OrgUnit orgUnit) {
+        setOrgUnit(orgUnit);
+        return this;
+    }
+
+    public Item project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Item)) {
+            return false;
+        }
+        Item item = (Item) o;
+        return Objects.equals(id, item.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", tags=" + tags +
+                ", quantity=" + quantity +
+                ", orgUnit=" + (orgUnit != null ? orgUnit.getName() : "null") +
+                ", project=" + (project != null ? project.getName() : "null") +
+                '}';
+    }
 }

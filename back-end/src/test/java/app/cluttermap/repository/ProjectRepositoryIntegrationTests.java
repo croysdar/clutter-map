@@ -64,8 +64,7 @@ public class ProjectRepositoryIntegrationTests {
         List<Project> user1Projects = projectRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the project owned by user1 is returned
-        assertThat(user1Projects).hasSize(1);
-        assertThat(user1Projects.get(0).getName()).isEqualTo("Project Owned by User 1");
+        assertThat(user1Projects).containsExactly(project1);
 
         // Assert: Confirm that the project list does not contain a project owned by
         // user2
@@ -76,9 +75,9 @@ public class ProjectRepositoryIntegrationTests {
     void findByOwner_ShouldReturnAllProjectsOwnedByUser() {
         // Arrange: Set up a user with multiple projects
         User owner = new User("ownerProviderId");
-        Project project1 = new Project("Project 1", owner);
-        Project project2 = new Project("Project 2", owner);
-        Project project3 = new Project("Project 3", owner);
+        Project project1 = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Project project2 = new TestDataFactory.ProjectBuilder().user(owner).build();
+        Project project3 = new TestDataFactory.ProjectBuilder().user(owner).build();
 
         // Arrange: Save the user and their projects to the repositories
         userRepository.save(owner);
@@ -88,9 +87,7 @@ public class ProjectRepositoryIntegrationTests {
         List<Project> ownerProjects = projectRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all projects owned by the user are returned
-        assertThat(ownerProjects).hasSize(3);
-        assertThat(ownerProjects).extracting(Project::getName).containsExactlyInAnyOrder("Project 1", "Project 2",
-                "Project 3");
+        assertThat(ownerProjects).containsExactlyInAnyOrder(project1, project2, project3);
     }
 
     @Test

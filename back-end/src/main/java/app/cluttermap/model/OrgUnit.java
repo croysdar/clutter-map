@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "org_units")
@@ -145,6 +146,38 @@ public class OrgUnit {
         this.items = items;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public OrgUnit id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public OrgUnit name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public OrgUnit description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public OrgUnit room(Room room) {
+        setRoom(room);
+        return this;
+    }
+
+    public OrgUnit project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    public OrgUnit items(List<Item> items) {
+        setItems(items);
+        return this;
+    }
+
     /* ------------- Utility Methods ------------- */
 
     public void addItem(Item item) {
@@ -168,5 +201,35 @@ public class OrgUnit {
         for (Item item : items) {
             item.setOrgUnit(null); // Unassign each item before OrgUnit deletion
         }
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof OrgUnit)) {
+            return false;
+        }
+        OrgUnit orgUnit = (OrgUnit) o;
+        return Objects.equals(id, orgUnit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "OrgUnit{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", room=" + (room != null ? room.getName() : "null") +
+                ", project=" + (project != null ? project.getName() : "null") +
+                ", items=" + (items != null ? items.size() : "null") +
+                '}';
     }
 }

@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "rooms")
@@ -102,6 +103,33 @@ public class Room {
         this.orgUnits = orgUnits;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Room id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Room name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Room description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public Room project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    public Room orgUnits(List<OrgUnit> orgUnits) {
+        setOrgUnits(orgUnits);
+        return this;
+    }
+
     /* ------------- Utility Methods ------------- */
 
     public void addOrgUnit(OrgUnit orgUnit) {
@@ -126,4 +154,34 @@ public class Room {
             orgUnit.setRoom(null); // Unassign each orgUnit before Room deletion
         }
     }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Room)) {
+            return false;
+        }
+        Room room = (Room) o;
+        return Objects.equals(id, room.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Room{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", project=" + (project != null ? project.getName() : "null") +
+                ", orgUnits=" + (orgUnits != null ? orgUnits.size() : "null") +
+                '}';
+    }
+
 }

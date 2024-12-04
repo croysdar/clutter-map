@@ -16,7 +16,6 @@ import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 
 @SpringBootTest
@@ -32,9 +31,6 @@ public class ItemRepositoryIntegrationTests {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
     private OrgUnitRepository orgUnitRepository;
 
     @Autowired
@@ -44,7 +40,6 @@ public class ItemRepositoryIntegrationTests {
     void setUp() {
         userRepository.deleteAll();
         projectRepository.deleteAll();
-        roomRepository.deleteAll();
         orgUnitRepository.deleteAll();
         itemRepository.deleteAll();
     }
@@ -60,25 +55,15 @@ public class ItemRepositoryIntegrationTests {
         Project project2 = new TestDataFactory.ProjectBuilder().user(user2).build();
         projectRepository.saveAll(List.of(project1, project2));
 
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-        roomRepository.saveAll(List.of(room1, room2));
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
-        orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
-
-        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by User 1").orgUnit(orgUnit1).build();
-        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by User 2").orgUnit(orgUnit2).build();
-
+        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by User 1").project(project1).build();
+        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by User 2").project(project2).build();
         itemRepository.saveAll(List.of(item1, item2));
 
         // Act: Retrieve items associated with user1
         List<Item> user1Items = itemRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the item owned by user1 is returned
-        assertThat(user1Items).hasSize(1);
-        assertThat(user1Items.get(0).getName()).isEqualTo("Item Owned by User 1");
+        assertThat(user1Items).containsExactly(item1);
 
         // Assert: Confirm that the item list does not contain a item owned by
         // user2
@@ -94,16 +79,12 @@ public class ItemRepositoryIntegrationTests {
         Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        roomRepository.save(room);
-
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         orgUnitRepository.save(orgUnit);
 
-        List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
-        Item item1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).orgUnit(orgUnit).build();
-        Item item2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).orgUnit(orgUnit).build();
-        Item item3 = new TestDataFactory.ItemBuilder().name(itemNames.get(2)).orgUnit(orgUnit).build();
+        Item item1 = new TestDataFactory.ItemBuilder().project(project).build();
+        Item item2 = new TestDataFactory.ItemBuilder().project(project).build();
+        Item item3 = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
 
         itemRepository.saveAll(List.of(item1, item2, item3));
 
@@ -111,8 +92,7 @@ public class ItemRepositoryIntegrationTests {
         List<Item> ownerItems = itemRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all items owned by the user are returned
-        assertThat(ownerItems).hasSize(3);
-        assertThat(ownerItems).extracting(Item::getName).containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
+        assertThat(ownerItems).containsExactlyInAnyOrder(item1, item2, item3);
     }
 
     @Test
@@ -136,9 +116,8 @@ public class ItemRepositoryIntegrationTests {
         Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
         projectRepository.save(project);
 
-        List<String> itemNames = List.of("Item 1", "Item 2");
-        Item unassignedItem1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).project(project).build();
-        Item unassignedItem2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).project(project).build();
+        Item unassignedItem1 = new TestDataFactory.ItemBuilder().project(project).build();
+        Item unassignedItem2 = new TestDataFactory.ItemBuilder().project(project).build();
 
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
         orgUnitRepository.save(orgUnit);
@@ -152,8 +131,7 @@ public class ItemRepositoryIntegrationTests {
         List<Item> unassignedItems = itemRepository.findUnassignedItemsByProjectId(project.getId());
 
         // Assert: Verify only unassigned items are returned
-        assertThat(unassignedItems).extracting(Item::getName)
-                .containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
+        assertThat(unassignedItems).containsExactlyInAnyOrder(unassignedItem1, unassignedItem2);
     }
 
     @Test

@@ -91,11 +91,6 @@ class UserRepositoryIntegrationTests {
 
         // Assert: Verify that only one project remains and the removed project was
         // deleted as an orphan
-        assertThat(projectRepository.findAll()).hasSize(1);
-        assertThat(projectRepository.findAll())
-                .hasSize(1)
-                .extracting(Project::getName)
-                .containsExactly("Project 2");
+        assertThat(projectRepository.findAll()).containsExactly(project2);
     }
-
 }
