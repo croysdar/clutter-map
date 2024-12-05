@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +29,7 @@ import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.util.ResourceType;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -51,7 +51,7 @@ public class ProjectServiceSecurityTests {
     void setUp() {
         mockProject = createMockProject();
 
-        when(securityService.isResourceOwner(anyLong(), anyString())).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), any(ResourceType.class))).thenReturn(true);
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ public class ProjectServiceSecurityTests {
     void getProjectById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -91,7 +91,7 @@ public class ProjectServiceSecurityTests {
     void updateProject_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
@@ -128,7 +128,7 @@ public class ProjectServiceSecurityTests {
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {

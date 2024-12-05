@@ -1,10 +1,13 @@
 package app.cluttermap.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -21,19 +24,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.TestDataFactory;
-import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
-import app.cluttermap.model.Item;
-import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
 import app.cluttermap.repository.UserRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -53,6 +53,9 @@ class SecurityServiceTests {
 
     @Mock
     private ItemRepository itemRepository;
+
+    @Mock
+    private EntityResolutionService entityResolutionService;
 
     @InjectMocks
     private SecurityService securityService;
@@ -106,118 +109,41 @@ class SecurityServiceTests {
     }
 
     @Test
-    void isResourceOwner_ShouldReturnTrue_WhenUserOwnsProject() {
-        // Arrange: Mock the current user and a project owned by that user
+    void isResourceOwner_ShouldReturnTrue_WhenUserOwnsEntity() {
+        // Arrange
         setUpJwtAuthentication(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+
         Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        project.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        // project.setId(1L);
 
-        // Act: Check if the user owns the project
-        boolean isOwner = securityService.isResourceOwner(1L, "project");
+        when(entityResolutionService.resolveProject(ResourceType.PROJECT, 1L)).thenReturn(project);
 
-        // Assert: Verify that the user is identified as the owner
+        // Act
+        boolean isOwner = securityService.isResourceOwner(1L, ResourceType.PROJECT);
+
+        // Assert
         assertTrue(isOwner);
+        verify(entityResolutionService, times(1)).resolveProject(ResourceType.PROJECT, 1L);
     }
 
     @Test
-    void isResourceOwner_ShouldThrowException_WhenProjectNotFound() {
-        // Arrange: Mock the current user
-        setUpJwtAuthentication(1L);
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Verify that ProjectNotFoundException is thrown
-        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "project"));
-    }
-
-    @Test
-    void isResourceOwner_ShouldReturnTrue_WhenUserOwnsRoom() {
-        // Arrange: Mock the current user, project, and room owned by that user
-        setUpJwtAuthentication(1L);
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        room.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
-
-        // Act: Check if the user owns the room
-        boolean isOwner = securityService.isResourceOwner(1L, "room");
-
-        // Assert: Verify that the user is identified as the owner
-        assertTrue(isOwner);
-    }
-
-    @Test
-    void isResourceOwner_ShouldThrowException_WhenRoomNotFound() {
-        // Arrange: Mock the current user
+    void isResourceOwner_ShouldReturnFalse_WhenUserDoesNotOwnEntity() {
+        // Arrange
         setUpJwtAuthentication(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert: Verify that RoomNotFoundException is thrown
-        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "room"));
-    }
+        User anotherUser = new User("otherProviderId");
+        anotherUser.setId(2L);
 
-    @Test
-    void isResourceOwner_ShouldReturnTrue_WhenUserOwnsOrgUnit() {
-        // Arrange: Mock the current user, project, room, and org unit
-        setUpJwtAuthentication(1L);
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        orgUnit.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
+        Project project = new TestDataFactory.ProjectBuilder().user(anotherUser).build();
+        when(entityResolutionService.resolveProject(ResourceType.PROJECT, 1L)).thenReturn(project);
 
-        // Act: Check if the user owns the org unit
-        boolean isOwner = securityService.isResourceOwner(1L, "org-unit");
+        // Act
+        boolean isOwner = securityService.isResourceOwner(1L, ResourceType.PROJECT);
 
-        // Assert: Verify that the user is identified as the owner
-        assertTrue(isOwner);
-    }
-
-    @Test
-    void isResourceOwner_ShouldThrowException_WhenOrgUnitNotFound() {
-        // Arrange: Mock the current user
-        setUpJwtAuthentication(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Verify that OrgUnitNotFoundException is thrown
-        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "org-unit"));
-    }
-
-    @Test
-    void isResourceOwner_ShouldReturnTrue_WhenUserOwnsItem() {
-        // Arrange: Mock the current user, project, room, org unit, and item
-        setUpJwtAuthentication(1L);
-        Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
-
-        item.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-
-        // Act: Check if the user owns the item
-        boolean isOwner = securityService.isResourceOwner(1L, "item");
-
-        // Assert: Verify that the user is identified as the owner
-        assertTrue(isOwner);
-    }
-
-    @Test
-    void isResourceOwner_ShouldThrowException_WhenItemNotFound() {
-        // Arrange: Mock the current user
-        setUpJwtAuthentication(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert: Verify that ResourceNotFoundException is thrown
-        assertThrows(ResourceNotFoundException.class, () -> securityService.isResourceOwner(1L, "item"));
+        // Assert
+        assertFalse(isOwner);
+        verify(entityResolutionService, times(1)).resolveProject(ResourceType.PROJECT, 1L);
     }
 }

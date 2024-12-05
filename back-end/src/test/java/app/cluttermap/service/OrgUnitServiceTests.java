@@ -39,6 +39,7 @@ import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -461,7 +462,7 @@ public class OrgUnitServiceTests {
         // Overwrite the default stub for `isResourceOwner` to deny access to the org
         // unit
         List<Long> orgUnitIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("org-unit"))).thenReturn(false);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ORGANIZATIONAL_UNIT))).thenReturn(false);
 
         // Act & Assert:
         assertThrows(AccessDeniedException.class, () -> {

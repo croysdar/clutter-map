@@ -42,7 +42,7 @@ public class ProjectService {
         return projectRepository.findByOwnerId(user.getId());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'PROJECT')")
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, id));

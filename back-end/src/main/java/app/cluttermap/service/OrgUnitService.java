@@ -60,7 +60,7 @@ public class OrgUnitService {
         return orgUnitRepository.findByOwnerId(user.getId());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'org-unit')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'ORGANIZATIONAL_UNIT')")
     public OrgUnit getOrgUnitById(Long id) {
         return orgUnitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, id));
@@ -78,7 +78,7 @@ public class OrgUnitService {
         return self.createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#roomId, 'ROOM')")
     public OrgUnit createOrgUnitInRoom(NewOrgUnitDTO orgUnitDTO, Long roomId) {
         Room room = roomService.getRoomById(roomId);
 
@@ -89,7 +89,7 @@ public class OrgUnitService {
         return orgUnitRepository.save(newOrgUnit);
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public OrgUnit createUnassignedOrgUnit(NewOrgUnitDTO orgUnitDTO, Long projectId) {
         Project project = projectService.getProjectById(projectId);
         OrgUnit newOrgUnit = new OrgUnit(
@@ -99,7 +99,7 @@ public class OrgUnitService {
         return orgUnitRepository.save(newOrgUnit);
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public List<OrgUnit> getUnassignedOrgUnitsByProjectId(Long projectId) {
         return orgUnitRepository.findUnassignedOrgUnitsByProjectId(projectId);
     }
@@ -161,7 +161,7 @@ public class OrgUnitService {
     /* ------------- Ownership and Security Checks ------------- */
     public void checkOwnershipForOrgUnits(List<Long> orgUnitIds) {
         for (Long id : orgUnitIds) {
-            if (!securityService.isResourceOwner(id, "org-unit")) {
+            if (!securityService.isResourceOwner(id, ResourceType.ORGANIZATIONAL_UNIT)) {
                 throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
             }
         }

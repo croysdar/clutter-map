@@ -58,13 +58,13 @@ public class ItemService {
         return itemRepository.findByOwnerId(user.getId());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'item')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'ITEM')")
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, id));
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public List<Item> getUnassignedItemsByProjectId(Long projectId) {
         return itemRepository.findUnassignedItemsByProjectId(projectId);
     }
@@ -81,7 +81,7 @@ public class ItemService {
         return self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'org-unit')")
+    @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'ORGANIZATIONAL_UNIT')")
     public Item createItemInOrgUnit(NewItemDTO itemDTO, Long orgUnitId) {
         OrgUnit orgUnit = orgUnitService.getOrgUnitById(orgUnitId);
 
@@ -94,7 +94,7 @@ public class ItemService {
         return itemRepository.save(newItem);
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public Item createUnassignedItem(NewItemDTO itemDTO, Long projectId) {
         Project project = projectService.getProjectById(projectId);
 
@@ -171,7 +171,7 @@ public class ItemService {
     /* ------------- Ownership and Security Checks ------------- */
     public void checkOwnershipForItems(List<Long> itemIds) {
         for (Long id : itemIds) {
-            if (!securityService.isResourceOwner(id, "item")) {
+            if (!securityService.isResourceOwner(id, ResourceType.ITEM)) {
                 throw new AccessDeniedException(String.format(ACCESS_DENIED_STRING, id));
             }
         }

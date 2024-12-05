@@ -77,9 +77,9 @@ class ItemControllerTests {
         when(securityService.getCurrentUser()).thenReturn(mockUser);
 
         // Stub isResourceOwner to allow access to protected resources
-        when(securityService.isResourceOwner(anyLong(), eq("orgUnit"))).thenReturn(true);
-        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(true);
-        when(securityService.isResourceOwner(anyLong(), eq("project"))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ORGANIZATIONAL_UNIT))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ITEM))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.PROJECT))).thenReturn(true);
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper();

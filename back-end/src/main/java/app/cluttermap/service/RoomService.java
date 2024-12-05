@@ -44,7 +44,7 @@ public class RoomService {
         return roomRepository.findByOwnerId(user.getId());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'ROOM')")
     public Room getRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, id));
@@ -56,7 +56,7 @@ public class RoomService {
         return self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public Room createRoomInProject(NewRoomDTO roomDTO, Long projectId) {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 

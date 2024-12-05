@@ -42,6 +42,7 @@ import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -488,7 +489,7 @@ public class ItemServiceTests {
     void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnItem() {
         // Overwrite the default stub for `isResourceOwner` to deny access to the item
         List<Long> itemIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(false);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ITEM))).thenReturn(false);
 
         // Act & Assert:
         assertThrows(AccessDeniedException.class, () -> {
