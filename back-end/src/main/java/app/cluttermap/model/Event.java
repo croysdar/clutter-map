@@ -41,7 +41,6 @@ public class Event {
     @NotNull
     private EventActionType action;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = true)
     private String payload;
 
@@ -213,7 +212,7 @@ public class Event {
                 ", action=" + action +
                 ", timestamp=" + timestamp +
                 ", user=" + (user != null ? user.getUsername() : "null") +
-                ", project=" + (project != null ? project.getName() : "null") +
+                ", project=" + (project != null ? project.getId() : "null") +
                 '}';
     }
 }
