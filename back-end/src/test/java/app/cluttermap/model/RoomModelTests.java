@@ -58,26 +58,27 @@ public class RoomModelTests {
 
         String result = room.toString();
 
-        assertThat(result).contains("project=null");
-        assertThat(result).contains("orgUnits=0");
+        assertThat(result).contains("projectId=null");
     }
 
     @Test
     void toString_ShouldDisplaySummaryForPopulatedRoom() {
-        Project project = new Project();
-        project.setName("Home Project");
+        Project project = new TestDataFactory.ProjectBuilder().id(10L).user(new User("")).build();
 
-        Room room = new Room();
-        room.setId(1L);
-        room.setName("Living Room");
-        room.setDescription("Main living area");
-        room.setProject(project);
+        Room room = new TestDataFactory.RoomBuilder()
+                .id(20L)
+                .name("Living Room")
+                .description("Main living area")
+                .project(project)
+                .build();
 
         room.setOrgUnits(List.of(new OrgUnit(), new OrgUnit(), new OrgUnit()));
 
         String result = room.toString();
 
-        assertThat(result).contains("project=Home Project");
-        assertThat(result).contains("orgUnits=3");
+        assertThat(result).contains("id=20");
+        assertThat(result).contains("name='Living Room'");
+        assertThat(result).contains("description='Main living area'");
+        assertThat(result).contains("projectId=10");
     }
 }

@@ -266,8 +266,7 @@ public class ProjectServiceTests {
     }
 
     private Project mockProjectInRepository(Long resourceId) {
-        Project mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(resourceId);
+        Project mockProject = new TestDataFactory.ProjectBuilder().id(resourceId).user(mockUser).build();
         when(projectRepository.findById(resourceId)).thenReturn(Optional.of(mockProject));
         return mockProject;
     }

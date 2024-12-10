@@ -37,7 +37,7 @@ public class OrgUnitModelTests {
         OrgUnit orgUnit = new OrgUnit("Test OrgUnit", "OrgUnit Description", room);
 
         // Act: Add a item to the orgUnit
-        Item item = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
+        Item item = new TestDataFactory.ItemBuilder().id(1L).orgUnit(orgUnit).build();
         orgUnit.getItems().add(item);
 
         // Assert: Verify that the item was added to the orgUnit's items
@@ -61,26 +61,23 @@ public class OrgUnitModelTests {
 
         String result = orgUnit.toString();
 
-        assertThat(result).contains("room=null");
-        assertThat(result).contains("project=null");
-        assertThat(result).contains("items=0");
+        assertThat(result).contains("roomId=null");
+        assertThat(result).contains("projectId=null");
     }
 
     @Test
     void toString_ShouldDisplaySummaryForFullOrgUnit() {
         // Arrange
-        Room room = new Room();
-        room.setName("Living Room");
+        Project project = new TestDataFactory.ProjectBuilder().id(5L).user(new User("")).build();
 
-        Project project = new Project();
-        project.setName("Home Project");
+        Room room = new TestDataFactory.RoomBuilder().id(20L).project(project).build();
 
-        OrgUnit orgUnit = new OrgUnit();
-        orgUnit.setId(1L);
-        orgUnit.setName("Shelf");
-        orgUnit.setDescription("A wooden shelf in the living room");
-        orgUnit.setRoom(room);
-        orgUnit.setProject(project);
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder()
+                .id(1L)
+                .name("Shelf")
+                .description("A wooden shelf in the living room")
+                .room(room)
+                .build();
 
         orgUnit.setItems(List.of(new Item(), new Item(), new Item())); // 3 items
 
@@ -91,8 +88,7 @@ public class OrgUnitModelTests {
         assertThat(result).contains("id=1");
         assertThat(result).contains("name='Shelf'");
         assertThat(result).contains("description='A wooden shelf in the living room'");
-        assertThat(result).contains("room=Living Room");
-        assertThat(result).contains("project=Home Project");
-        assertThat(result).contains("items=3");
+        assertThat(result).contains("projectId=5");
+        assertThat(result).contains("roomId=20");
     }
 }

@@ -59,47 +59,46 @@ public class EntityResolutionServiceTests {
         mockUser.setId(1L);
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
     }
 
     @Test
     void resolveProject_ShouldReturnProject_WhenEntityTypeIsProject() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(mockProject));
+        when(projectRepository.findById(mockProject.getId())).thenReturn(Optional.of(mockProject));
 
         // Act
-        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.PROJECT, 1L);
+        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.PROJECT, mockProject.getId());
 
         // Assert
         assertNotNull(resolvedProject);
         assertEquals(mockProject, resolvedProject);
-        verify(projectRepository, times(1)).findById(1L);
+        verify(projectRepository, times(1)).findById(mockProject.getId());
     }
 
     @Test
     void resolveProject_ShouldThrowException_WhenProjectNotFound() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        when(projectRepository.findById(mockProject.getId())).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(ResourceNotFoundException.class,
-                () -> entityResolutionService.resolveProject(ResourceType.PROJECT, 1L));
-        verify(projectRepository, times(1)).findById(1L);
+                () -> entityResolutionService.resolveProject(ResourceType.PROJECT, mockProject.getId()));
+        verify(projectRepository, times(1)).findById(mockProject.getId());
     }
 
     @Test
     void resolveProject_ShouldReturnProject_WhenEntityTypeIsRoom() {
         // Arrange
         Room room = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
 
         // Act
-        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ROOM, 1L);
+        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ROOM, room.getId());
 
         // Assert
         assertNotNull(resolvedProject);
         assertEquals(mockProject, resolvedProject);
-        verify(roomRepository, times(1)).findById(1L);
+        verify(roomRepository, times(1)).findById(room.getId());
     }
 
     @Test
@@ -117,15 +116,16 @@ public class EntityResolutionServiceTests {
     void resolveProject_ShouldReturnProject_WhenEntityTypeIsOrgUnit() {
         // Arrange
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
 
         // Act
-        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ORGANIZATIONAL_UNIT, 1L);
+        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ORGANIZATIONAL_UNIT,
+                orgUnit.getId());
 
         // Assert
         assertNotNull(resolvedProject);
         assertEquals(mockProject, resolvedProject);
-        verify(orgUnitRepository, times(1)).findById(1L);
+        verify(orgUnitRepository, times(1)).findById(orgUnit.getId());
     }
 
     @Test
@@ -143,15 +143,15 @@ public class EntityResolutionServiceTests {
     void resolveProject_ShouldReturnProject_WhenEntityTypeIsItem() {
         // Arrange
         Item item = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
 
         // Act
-        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ITEM, 1L);
+        Project resolvedProject = entityResolutionService.resolveProject(ResourceType.ITEM, item.getId());
 
         // Assert
         assertNotNull(resolvedProject);
         assertEquals(mockProject, resolvedProject);
-        verify(itemRepository, times(1)).findById(1L);
+        verify(itemRepository, times(1)).findById(item.getId());
     }
 
     @Test

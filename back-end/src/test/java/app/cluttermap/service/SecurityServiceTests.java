@@ -115,7 +115,6 @@ class SecurityServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
 
         Project project = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        // project.setId(1L);
 
         when(entityResolutionService.resolveProject(ResourceType.PROJECT, 1L)).thenReturn(project);
 

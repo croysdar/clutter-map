@@ -199,4 +199,20 @@ public class ItemService {
         orgUnit.removeItem(item); // Manages both sides of the relationship
         return orgUnitRepository.save(orgUnit);
     }
+
+    public Item copyItem(Item original) {
+        if (original == null) {
+            return null;
+        }
+        Item copy = new Item();
+        copy.setId(original.getId());
+        copy.setName(original.getName());
+        copy.setDescription(original.getDescription());
+        copy.setQuantity(original.getQuantity());
+        copy.setTags(new ArrayList<>(original.getTags()));
+        copy.setProject(original.getProject());
+        copy.setOrgUnit(original.getOrgUnit());
+        return copy;
+    }
+
 }

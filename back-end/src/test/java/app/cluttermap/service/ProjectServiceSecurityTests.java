@@ -158,7 +158,6 @@ public class ProjectServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
 
         return project;

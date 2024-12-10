@@ -341,14 +341,12 @@ public class ItemServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
         return project;
     }
 
     private OrgUnit createMockOrgUnit(Project project) {
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        orgUnit.setId(1L);
         when(orgUnitService.getOrgUnitById(orgUnit.getId())).thenReturn(orgUnit);
 
         return orgUnit;
@@ -356,8 +354,7 @@ public class ItemServiceSecurityTests {
 
     private Item createMockItem(Project project) {
         Item item = new TestDataFactory.ItemBuilder().project(project).build();
-        item.setId(1L);
-        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
 
         return item;
     }

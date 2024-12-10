@@ -198,6 +198,30 @@ public class User {
         return this;
     }
 
+    /* ------------- Utility Methods ------------- */
+
+    public void addProject(Project project) {
+        if (!projects.contains(project)) {
+            projects.add(project);
+        }
+        project.setOwner(this);
+    }
+
+    public void removeProject(Project project) {
+        projects.remove(project);
+    }
+
+    public void addEvent(Event event) {
+        if (!events.contains(event)) {
+            events.add(event);
+        }
+        event.setUser(this);
+    }
+
+    public void removeProject(Event event) {
+        events.remove(event);
+    }
+
     /* ------------- Lifecycle Callback Methods ------------- */
 
     @PreRemove

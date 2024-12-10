@@ -75,10 +75,8 @@ public class OrgUnitServiceTests {
         mockUser = new User("mockProviderId");
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
 
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        mockRoom.setId(1L);
     }
 
     @Test
@@ -379,7 +377,7 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void assignOrgUnitsToROom_ShouldHandleAssignedAndUnassignedOrgUnits() {
+    void assignOrgUnitsToRoom_ShouldHandleAssignedAndUnassignedOrgUnits() {
         // Arrange: Use the existing mockRoom as the target
         mockRoomLookup();
 
@@ -388,7 +386,7 @@ public class OrgUnitServiceTests {
         OrgUnit unassignedOrgUnit2 = mockUnassignedOrgUnitInRepository(2L);
 
         // Mock a previously assigned org unit
-        Room previousRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        Room previousRoom = new TestDataFactory.RoomBuilder().id(10L).project(mockProject).build();
         OrgUnit assignedOrgUnit = mockAssignedOrgUnitInRepository(3L, previousRoom);
 
         // Act: Assign multiple org units
@@ -411,7 +409,7 @@ public class OrgUnitServiceTests {
         mockRoomLookup();
 
         // Mock an org unit from a different project
-        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project differentProject = new TestDataFactory.ProjectBuilder().id(2L).user(mockUser).build();
         OrgUnit orgUnitWithDifferentProject = new TestDataFactory.OrgUnitBuilder().project(differentProject).build();
         when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnitWithDifferentProject));
 
@@ -475,22 +473,19 @@ public class OrgUnitServiceTests {
     }
 
     private OrgUnit mockAssignedOrgUnitInRepository(Long resourceId) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).room(mockRoom).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }
 
     private OrgUnit mockAssignedOrgUnitInRepository(Long resourceId, Room room) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).room(room).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }
 
     private OrgUnit mockUnassignedOrgUnitInRepository(Long resourceId) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).project(mockProject).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }

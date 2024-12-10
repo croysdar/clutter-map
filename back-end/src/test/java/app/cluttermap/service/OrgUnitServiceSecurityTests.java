@@ -345,14 +345,12 @@ public class OrgUnitServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
         return project;
     }
 
     private Room createMockRoom(Project project) {
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        room.setId(1L);
         when(roomService.getRoomById(room.getId())).thenReturn(room);
 
         return room;
@@ -360,8 +358,7 @@ public class OrgUnitServiceSecurityTests {
 
     private OrgUnit createMockOrgUnit(Project project) {
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        orgUnit.setId(1L);
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
 
         return orgUnit;
     }

@@ -40,7 +40,7 @@ public class Item {
     private OrgUnit orgUnit;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     @JsonBackReference
     private Project project;
 
@@ -49,7 +49,7 @@ public class Item {
     // consistency.
 
     // No-Arg constructor for Hibernate
-    protected Item() {
+    public Item() {
     }
 
     public Item(
@@ -217,8 +217,8 @@ public class Item {
                 ", description='" + description + '\'' +
                 ", tags=" + tags +
                 ", quantity=" + quantity +
-                ", orgUnit=" + (orgUnit != null ? orgUnit.getName() : "null") +
-                ", project=" + (project != null ? project.getName() : "null") +
+                ", orgUnitId=" + (orgUnit != null ? orgUnit.getId() : "null") +
+                ", projectId=" + (project != null ? project.getId() : "null") +
                 '}';
     }
 }

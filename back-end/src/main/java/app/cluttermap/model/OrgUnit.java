@@ -41,7 +41,7 @@ public class OrgUnit {
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     @JsonBackReference
     private Project project;
 
@@ -227,9 +227,8 @@ public class OrgUnit {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", room=" + (room != null ? room.getName() : "null") +
-                ", project=" + (project != null ? project.getName() : "null") +
-                ", items=" + (items != null ? items.size() : "null") +
+                ", roomId=" + (room != null ? room.getId() : "null") +
+                ", projectId=" + (project != null ? project.getId() : "null") +
                 '}';
     }
 }

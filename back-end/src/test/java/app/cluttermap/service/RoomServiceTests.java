@@ -61,7 +61,6 @@ public class RoomServiceTests {
 
         mockUser = new User("mockProviderId");
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
     }
 
     @Test
@@ -281,8 +280,7 @@ public class RoomServiceTests {
     }
 
     private Room mockRoomInRepository(Long resourceId) {
-        Room mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        mockRoom.setId(resourceId);
+        Room mockRoom = new TestDataFactory.RoomBuilder().id(resourceId).project(mockProject).build();
         when(roomRepository.findById(resourceId)).thenReturn(Optional.of(mockRoom));
         return mockRoom;
     }

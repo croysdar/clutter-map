@@ -164,6 +164,41 @@ public class Project {
         return this;
     }
 
+    /* ------------- Utility Methods ------------- */
+
+    public void addRoom(Room room) {
+        if (!rooms.contains(room)) {
+            rooms.add(room);
+        }
+        room.setProject(this);
+    }
+
+    public void removeRoom(Room room) {
+        rooms.remove(room);
+    }
+
+    public void addOrgUnit(OrgUnit orgUnit) {
+        if (!orgUnits.contains(orgUnit)) {
+            orgUnits.add(orgUnit);
+        }
+        orgUnit.setProject(this);
+    }
+
+    public void removeOrgUnit(OrgUnit orgUnit) {
+        orgUnits.remove(orgUnit);
+    }
+
+    public void addItem(Item item) {
+        if (!items.contains(item)) {
+            items.add(item);
+        }
+        item.setProject(this);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
     /* ------------- Equals, HashCode, and ToString ------------- */
 
     @Override

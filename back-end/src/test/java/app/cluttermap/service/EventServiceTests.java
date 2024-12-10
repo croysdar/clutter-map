@@ -80,7 +80,6 @@ public class EventServiceTests {
         mockUser.setUsername("mockUser");
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
         mockProject.setName("Test Project");
         mockProject.setOwner(mockUser);
     }
@@ -155,10 +154,9 @@ public class EventServiceTests {
         when(securityService.getCurrentUser()).thenReturn(user);
 
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
-        Room room = new TestDataFactory.RoomBuilder().name("Room 1").description("Test room").project(project).build();
-        room.setId(2L);
+        Room room = new TestDataFactory.RoomBuilder().id(2L).name("Room 1").description("Test room").project(project)
+                .build();
 
         when(entityResolutionService.resolveProject(any(ResourceType.class), anyLong())).thenReturn(project);
 
@@ -184,15 +182,12 @@ public class EventServiceTests {
         when(securityService.getCurrentUser()).thenReturn(user);
 
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
-        Room oldRoom = new TestDataFactory.RoomBuilder().name("Old Room").description("Old Description")
+        Room oldRoom = new TestDataFactory.RoomBuilder().id(2L).name("Old Room").description("Old Description")
                 .project(project).build();
-        oldRoom.setId(2L);
 
-        Room newRoom = new TestDataFactory.RoomBuilder().name("New Room").description("New Description")
+        Room newRoom = new TestDataFactory.RoomBuilder().id(2L).name("New Room").description("New Description")
                 .project(project).build();
-        newRoom.setId(2L);
 
         when(entityResolutionService.resolveProject(ResourceType.ROOM, oldRoom.getId())).thenReturn(project);
 

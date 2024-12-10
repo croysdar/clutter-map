@@ -1,6 +1,7 @@
 package app.cluttermap.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -88,13 +90,10 @@ public class ItemServiceTests {
         mockUser = new User("mockProviderId");
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
 
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        mockRoom.setId(1L);
 
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        mockOrgUnit.setId(1L);
     }
 
     @Test
@@ -275,7 +274,6 @@ public class ItemServiceTests {
     void updateItem_ShouldUpdateFieldsConditionally(
             boolean updateDescription, boolean updateTags, boolean updateQuantity, String description) {
         // Arrange: Set up mock item with initial values
-        Long resourceId = 1L;
         List<String> oldTags = List.of("Old tag 1", "Old tag 2");
         String oldDescription = "Old Description";
         Integer oldQuantity = 10;
@@ -286,17 +284,20 @@ public class ItemServiceTests {
                 .tags(oldTags)
                 .quantity(oldQuantity)
                 .orgUnit(mockOrgUnit).build();
+        Long resourceId = item.getId();
 
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(item));
 
         // Arrange: Use conditional variables for the expected values of the updated
         // fields
+        String newName = "New Name";
         String newDescription = updateDescription ? "New Description" : null;
         List<String> newTags = updateTags ? List.of("New Tag 1", "New Tag 2") : null;
         Integer newQuantity = updateQuantity ? 5 : null;
 
         // Build the UpdateItemDTO with these values
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
+                .name(newName)
                 .description(newDescription)
                 .tags(newTags)
                 .quantity(newQuantity)
@@ -308,17 +309,22 @@ public class ItemServiceTests {
         // Act: Call the service method
         Item updatedItem = itemService.updateItem(resourceId, itemDTO);
 
-        // Assert: Verify the fields were updated as expected
-        assertThat(updatedItem.getName())
-                .as(description + ": Name should match the DTO name")
-                .isEqualTo(itemDTO.getName());
-        assertThat(updatedItem.getDescription())
+        // Capture the saved item to verify fields
+        ArgumentCaptor<Item> savedItemCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(savedItemCaptor.capture());
+        Item savedItem = savedItemCaptor.getValue();
+
+        // Assert: Add descriptions for field checks
+        assertThat(savedItem.getName())
+                .as(description + ": Name should match the expected value")
+                .isEqualTo(newName);
+        assertThat(savedItem.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
-        assertThat(updatedItem.getTags())
+        assertThat(savedItem.getTags())
                 .as(description + ": Tags should match the expected value")
                 .isEqualTo(updateTags ? newTags : oldTags);
-        assertThat(updatedItem.getQuantity())
+        assertThat(savedItem.getQuantity())
                 .as(description + ": Quantity should match the expected value")
                 .isEqualTo(updateQuantity ? newQuantity : oldQuantity);
 
@@ -340,6 +346,26 @@ public class ItemServiceTests {
 
         // Verify: Ensure save was not called
         verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
+    void copyItem_ShouldProduceIdenticalCopy() {
+        Item original = new TestDataFactory.ItemBuilder()
+                .id(1L)
+                .name("Original Name")
+                .description("Original Description")
+                .tags(List.of("Tag1"))
+                .quantity(1)
+                .project(mockProject)
+                .build();
+
+        Item copy = itemService.copyItem(original);
+
+        // Assert that all fields are identical
+        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
+
+        // Verify the copy is a new instance, not the same reference
+        assertNotSame(copy, original);
     }
 
     @ParameterizedTest
@@ -419,7 +445,7 @@ public class ItemServiceTests {
         Item unassignedItem2 = mockUnassignedItemInRepository(2L);
 
         // Mock a previously assigned item
-        OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().id(10L).project(mockProject).build();
         Item assignedItem = mockAssignedItemInRepository(3L, previousOrgUnit);
 
         // Act: Assign multiple items
@@ -442,7 +468,7 @@ public class ItemServiceTests {
         mockOrgUnitLookup();
 
         // Mock an item from a different project
-        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project differentProject = new TestDataFactory.ProjectBuilder().id(2L).user(mockUser).build();
         Item itemWithDifferentProject = new TestDataFactory.ItemBuilder().project(differentProject).build();
         when(itemRepository.findById(2L)).thenReturn(Optional.of(itemWithDifferentProject));
 
@@ -502,22 +528,19 @@ public class ItemServiceTests {
     }
 
     private Item mockAssignedItemInRepository(Long resourceId) {
-        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).orgUnit(mockOrgUnit).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }
 
     private Item mockAssignedItemInRepository(Long resourceId, OrgUnit orgUnit) {
-        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).orgUnit(orgUnit).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }
 
     private Item mockUnassignedItemInRepository(Long resourceId) {
-        Item mockItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).project(mockProject).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }

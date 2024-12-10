@@ -52,9 +52,8 @@ public class EventRepositoryIntegrationTests {
         mockUser.setUsername("mockUser");
         userRepository.save(mockUser);
 
-        mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setName("Test Project");
-        projectRepository.save(mockProject);
+        mockProject = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().name("Test Project").user(mockUser).build());
     }
 
     @Test
@@ -134,9 +133,8 @@ public class EventRepositoryIntegrationTests {
     @Test
     void findAllEventsInProject_ShouldOnlyReturnEventsForSpecifiedProject() {
         // Arrange: Create events for two projects
-        Project otherProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        otherProject.setName("Other Project");
-        projectRepository.save(otherProject);
+        Project otherProject = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().name("Other Project").user(mockUser).build());
 
         Event event1 = new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser);
         Event event2 = new Event(ResourceType.ROOM, 2L, EventActionType.CREATE, null, otherProject, mockUser);
