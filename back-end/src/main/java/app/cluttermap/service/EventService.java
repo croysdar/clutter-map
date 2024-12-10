@@ -23,7 +23,6 @@ import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.repository.EventRepository;
-import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 
@@ -33,7 +32,6 @@ public class EventService {
     private final EventRepository eventRepository;
     private final SecurityService securityService;
     private final EntityResolutionService entityResolutionService;
-    private final ProjectRepository projectRepository;
 
     private final EventService self;
 
@@ -45,12 +43,10 @@ public class EventService {
             SecurityService securityService,
             EntityResolutionService entityResolutionService,
             EventRepository eventRepository,
-            ProjectRepository projectRepository,
             @Lazy EventService self) {
         this.entityResolutionService = entityResolutionService;
         this.securityService = securityService;
         this.eventRepository = eventRepository;
-        this.projectRepository = projectRepository;
         this.self = self;
     }
 

@@ -33,6 +33,7 @@ public class OrgUnitService {
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final RoomService roomService;
+    private final EventService eventService;
     private final OrgUnitService self;
 
     /* ------------- Constructor ------------- */
@@ -43,12 +44,14 @@ public class OrgUnitService {
             SecurityService securityService,
             ProjectService projectService,
             RoomService roomService,
+            EventService eventService,
             @Lazy OrgUnitService self) {
         this.roomRepository = roomRepository;
         this.orgUnitRepository = orgUnitRepository;
         this.securityService = securityService;
         this.projectService = projectService;
         this.roomService = roomService;
+        this.eventService = eventService;
         this.self = self;
     }
 
@@ -69,13 +72,18 @@ public class OrgUnitService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public OrgUnit createOrgUnit(NewOrgUnitDTO orgUnitDTO) {
+        OrgUnit orgUnit;
         if (orgUnitDTO.getRoomId() == null) {
             if (orgUnitDTO.getProjectId() == null) {
                 throw new IllegalArgumentException("Either RoomId or ProjectId must be provided.");
             }
-            return self.createUnassignedOrgUnit(orgUnitDTO, orgUnitDTO.getProjectIdAsLong());
+            orgUnit = self.createUnassignedOrgUnit(orgUnitDTO, orgUnitDTO.getProjectIdAsLong());
+        } else {
+            orgUnit = self.createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
         }
-        return self.createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
+
+        eventService.logCreateEvent(ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(), orgUnit);
+        return orgUnit;
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#roomId, 'ROOM')")
@@ -108,19 +116,27 @@ public class OrgUnitService {
     @Transactional
     public OrgUnit updateOrgUnit(Long id, UpdateOrgUnitDTO orgUnitDTO) {
         OrgUnit _orgUnit = self.getOrgUnitById(id);
+        OrgUnit oldOrgUnit = _orgUnit.copy();
+
         _orgUnit.setName(orgUnitDTO.getName());
         if (orgUnitDTO.getDescription() != null) {
             _orgUnit.setDescription(orgUnitDTO.getDescription());
         }
 
-        return orgUnitRepository.save(_orgUnit);
+        OrgUnit updatedOrgUnit = orgUnitRepository.save(_orgUnit);
+
+        eventService.logUpdateEvent(ResourceType.ORGANIZATIONAL_UNIT, id, oldOrgUnit, _orgUnit);
+
+        return updatedOrgUnit;
     }
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteOrgUnitById(Long orgUnitId) {
-        OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
+    public void deleteOrgUnitById(Long id) {
+        OrgUnit orgUnit = self.getOrgUnitById(id);
         orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
+
+        eventService.logDeleteEvent(ResourceType.ORGANIZATIONAL_UNIT, id);
     }
 
     /* ------------- Complex Operations ------------- */

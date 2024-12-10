@@ -1,7 +1,6 @@
 package app.cluttermap.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -33,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.item.ItemLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -72,6 +72,9 @@ public class ItemServiceTests {
 
     @Mock
     private OrgUnitService orgUnitService;
+
+    @Mock
+    private EventService eventService;
 
     @InjectMocks
     private ItemService itemService;
@@ -226,6 +229,9 @@ public class ItemServiceTests {
 
         when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
 
+        // Arrange: Mock event logging
+        mockLogCreateEvent();
+
         // Act: Call the service method
         Item createdItem = itemService.createItem(itemDTO);
 
@@ -242,6 +248,9 @@ public class ItemServiceTests {
             verify(projectService).getProjectById(projectId);
         }
         verify(itemRepository).save(any(Item.class));
+
+        // Assert: Verify event logging
+        verify(eventService).logCreateEvent(eq(ResourceType.ITEM), eq(mockItem.getId()), eq(mockItem));
     }
 
     @Disabled("Feature under development")
@@ -290,14 +299,13 @@ public class ItemServiceTests {
 
         // Arrange: Use conditional variables for the expected values of the updated
         // fields
-        String newName = "New Name";
         String newDescription = updateDescription ? "New Description" : null;
         List<String> newTags = updateTags ? List.of("New Tag 1", "New Tag 2") : null;
         Integer newQuantity = updateQuantity ? 5 : null;
 
         // Build the UpdateItemDTO with these values
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
-                .name(newName)
+                .name("New Name")
                 .description(newDescription)
                 .tags(newTags)
                 .quantity(newQuantity)
@@ -305,6 +313,9 @@ public class ItemServiceTests {
 
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
+
+        // Arrange: Mock event logging
+        mockLogUpdateEvent();
 
         // Act: Call the service method
         Item updatedItem = itemService.updateItem(resourceId, itemDTO);
@@ -317,7 +328,7 @@ public class ItemServiceTests {
         // Assert: Add descriptions for field checks
         assertThat(savedItem.getName())
                 .as(description + ": Name should match the expected value")
-                .isEqualTo(newName);
+                .isEqualTo(itemDTO.getName());
         assertThat(savedItem.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
@@ -328,8 +339,12 @@ public class ItemServiceTests {
                 .as(description + ": Quantity should match the expected value")
                 .isEqualTo(updateQuantity ? newQuantity : oldQuantity);
 
-        // Verify: Ensure the repository save method was called
-        verify(itemRepository).save(item);
+        // Verify the event was logged
+        verify(eventService).logUpdateEvent(
+                eq(ResourceType.ITEM),
+                eq(resourceId),
+                eq(item),
+                eq(updatedItem));
     }
 
     @Test
@@ -348,26 +363,6 @@ public class ItemServiceTests {
         verify(itemRepository, never()).save(any(Item.class));
     }
 
-    @Test
-    void copyItem_ShouldProduceIdenticalCopy() {
-        Item original = new TestDataFactory.ItemBuilder()
-                .id(1L)
-                .name("Original Name")
-                .description("Original Description")
-                .tags(List.of("Tag1"))
-                .quantity(1)
-                .project(mockProject)
-                .build();
-
-        Item copy = itemService.copyItem(original);
-
-        // Assert that all fields are identical
-        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
-
-        // Verify the copy is a new instance, not the same reference
-        assertNotSame(copy, original);
-    }
-
     @ParameterizedTest
     @CsvSource({
             "true, Item should be deleted when it exists",
@@ -379,12 +374,20 @@ public class ItemServiceTests {
             // Arrange: Stub the repository to simulate finding item
             mockAssignedItemInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the service method
             itemService.deleteItemById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(itemRepository).deleteById(resourceId);
+
+            // Assert: Verify event logging
+            verify(eventService).logDeleteEvent(
+                    eq(ResourceType.ITEM),
+                    eq(resourceId));
         } else {
             // Arrange: Stub the repository to simulate not finding item
             mockNonexistentItemInRepository(resourceId);
@@ -551,5 +554,17 @@ public class ItemServiceTests {
 
     private void mockProjectLookup() {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }

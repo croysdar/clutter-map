@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,12 +30,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.room.RoomLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -46,6 +50,9 @@ public class RoomServiceTests {
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private EventService eventService;
 
     @InjectMocks
     private RoomService roomService;
@@ -150,6 +157,9 @@ public class RoomServiceTests {
         Room mockRoom = new TestDataFactory.RoomBuilder().fromDTO(roomDTO).project(mockProject).build();
         when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
 
+        // Arrange: Mock event logging
+        mockLogCreateEvent();
+
         // Act: Call the service method
         Room createdRoom = roomService.createRoom(roomDTO);
 
@@ -162,6 +172,10 @@ public class RoomServiceTests {
         // Verify that the correct service and repository methods were called
         verify(projectService).getProjectById(mockProject.getId());
         verify(roomRepository).save(any(Room.class));
+
+        // Assert: Verify event logging
+        verify(eventService).logCreateEvent(eq(ResourceType.ROOM), eq(mockRoom.getId()),
+                eq(mockRoom));
     }
 
     @Disabled("Feature under development")
@@ -214,19 +228,31 @@ public class RoomServiceTests {
         // Stub the repository to return the room after saving
         when(roomRepository.save(room)).thenReturn(room);
 
+        // Arrange: Mock event logging
+        mockLogUpdateEvent();
+
         // Act: Call the service method
         Room updatedRoom = roomService.updateRoom(resourceId, roomDTO);
 
+        // Capture the saved room to verify fields
+        ArgumentCaptor<Room> savedRoomCaptor = ArgumentCaptor.forClass(Room.class);
+        verify(roomRepository).save(savedRoomCaptor.capture());
+        Room savedOrgUnit = savedRoomCaptor.getValue();
+
         // Assert: Verify the fields were updated as expected
-        assertThat(updatedRoom.getName())
+        assertThat(savedOrgUnit.getName())
                 .as(description + ": Name should match the DTO name")
                 .isEqualTo(roomDTO.getName());
-        assertThat(updatedRoom.getDescription())
+        assertThat(savedOrgUnit.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
 
-        // Verify: Ensure the repository save method was called
-        verify(roomRepository).save(room);
+        // Verify the event was logged
+        verify(eventService).logUpdateEvent(
+                eq(ResourceType.ROOM),
+                eq(resourceId),
+                eq(room),
+                eq(updatedRoom));
     }
 
     @Test
@@ -256,12 +282,19 @@ public class RoomServiceTests {
             // Arrange: Stub the repository to simulate finding room
             mockRoomInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the service method
             roomService.deleteRoomById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(roomRepository).delete(any(Room.class));
+
+            verify(eventService).logDeleteEvent(
+                    eq(ResourceType.ROOM),
+                    eq(resourceId));
         } else {
             // Arrange: Stub the repository to simulate not finding room
             mockNonexistentRoomInRepository(resourceId);
@@ -287,5 +320,17 @@ public class RoomServiceTests {
 
     private void mockProjectLookup() {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }

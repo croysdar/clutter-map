@@ -22,6 +22,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
+    private final EventService eventService;
     private final RoomService self;
 
     /* ------------- Constructor ------------- */
@@ -29,10 +30,12 @@ public class RoomService {
             RoomRepository roomRepository,
             SecurityService securityService,
             ProjectService projectService,
+            EventService eventService,
             @Lazy RoomService self) {
         this.roomRepository = roomRepository;
         this.securityService = securityService;
         this.projectService = projectService;
+        this.eventService = eventService;
         this.self = self;
     }
 
@@ -53,7 +56,11 @@ public class RoomService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
-        return self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+        Room room = self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+
+        eventService.logCreateEvent(ResourceType.ROOM, room.getId(), room);
+
+        return room;
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
@@ -68,18 +75,26 @@ public class RoomService {
     @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = self.getRoomById(id);
+        Room oldRoom = _room.copy();
+
         _room.setName(roomDTO.getName());
         if (roomDTO.getDescription() != null) {
             _room.setDescription(roomDTO.getDescription());
         }
 
-        return roomRepository.save(_room);
+        Room updatedRoom = roomRepository.save(_room);
+
+        eventService.logUpdateEvent(ResourceType.ROOM, id, oldRoom, updatedRoom);
+
+        return updatedRoom;
     }
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteRoomById(Long roomId) {
-        Room room = self.getRoomById(roomId);
+    public void deleteRoomById(Long id) {
+        Room room = self.getRoomById(id);
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
+
+        eventService.logDeleteEvent(ResourceType.ROOM, id);
     }
 }

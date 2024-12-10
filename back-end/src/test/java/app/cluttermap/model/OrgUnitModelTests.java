@@ -1,6 +1,7 @@
 package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.List;
 
@@ -90,5 +91,25 @@ public class OrgUnitModelTests {
         assertThat(result).contains("description='A wooden shelf in the living room'");
         assertThat(result).contains("projectId=5");
         assertThat(result).contains("roomId=20");
+    }
+
+    @Test
+    void copyOrgUnit_ShouldProduceIdenticalCopy() {
+        User user = new User("userProviderId");
+        Project project = new TestDataFactory.ProjectBuilder().user(user).build();
+        OrgUnit original = new TestDataFactory.OrgUnitBuilder()
+                .id(1L)
+                .name("Original Name")
+                .description("Original Description")
+                .project(project)
+                .build();
+
+        OrgUnit copy = original.copy();
+
+        // Assert that all fields are identical
+        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
+
+        // Verify the copy is a new instance, not the same reference
+        assertNotSame(copy, original);
     }
 }

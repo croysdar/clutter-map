@@ -32,6 +32,7 @@ public class ItemService {
     private final SecurityService securityService;
     private final ProjectService projectService;
     private final OrgUnitService orgUnitService;
+    private final EventService eventService;
     private final ItemService self;
 
     /* ------------- Constructor ------------- */
@@ -41,12 +42,14 @@ public class ItemService {
             SecurityService securityService,
             ProjectService projectService,
             OrgUnitService orgUnitService,
+            EventService eventService,
             @Lazy ItemService self) {
         this.orgUnitRepository = orgUnitRepository;
         this.itemRepository = itemRepository;
         this.securityService = securityService;
         this.projectService = projectService;
         this.orgUnitService = orgUnitService;
+        this.eventService = eventService;
         this.self = self;
     }
 
@@ -72,13 +75,18 @@ public class ItemService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public Item createItem(NewItemDTO itemDTO) {
+        Item item;
         if (itemDTO.getOrgUnitId() == null) {
             if (itemDTO.getProjectId() == null) {
                 throw new IllegalArgumentException("Either OrgUnitId or ProjectId must be provided.");
             }
-            return self.createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
+            item = self.createUnassignedItem(itemDTO, itemDTO.getProjectIdAsLong());
+        } else {
+            item = self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
         }
-        return self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
+
+        eventService.logCreateEvent(ResourceType.ITEM, item.getId(), item);
+        return item;
     }
 
     @PreAuthorize("@securityService.isResourceOwner(#orgUnitId, 'ORGANIZATIONAL_UNIT')")
@@ -111,6 +119,8 @@ public class ItemService {
     @Transactional
     public Item updateItem(Long id, UpdateItemDTO itemDTO) {
         Item _item = self.getItemById(id);
+        Item oldItem = _item.copy();
+
         _item.setName(itemDTO.getName());
         if (itemDTO.getDescription() != null) {
             _item.setDescription(itemDTO.getDescription());
@@ -122,7 +132,11 @@ public class ItemService {
             _item.setTags(itemDTO.getTags());
         }
 
-        return itemRepository.save(_item);
+        Item updatedItem = itemRepository.save(_item);
+
+        eventService.logUpdateEvent(ResourceType.ITEM, id, oldItem, _item);
+
+        return updatedItem;
     }
 
     /* --- Delete Operation (DELETE) --- */
@@ -131,6 +145,8 @@ public class ItemService {
         // Make sure item exists first
         self.getItemById(id);
         itemRepository.deleteById(id);
+
+        eventService.logDeleteEvent(ResourceType.ITEM, id);
     }
 
     /* ------------- Complex Operations ------------- */
@@ -199,20 +215,4 @@ public class ItemService {
         orgUnit.removeItem(item); // Manages both sides of the relationship
         return orgUnitRepository.save(orgUnit);
     }
-
-    public Item copyItem(Item original) {
-        if (original == null) {
-            return null;
-        }
-        Item copy = new Item();
-        copy.setId(original.getId());
-        copy.setName(original.getName());
-        copy.setDescription(original.getDescription());
-        copy.setQuantity(original.getQuantity());
-        copy.setTags(new ArrayList<>(original.getTags()));
-        copy.setProject(original.getProject());
-        copy.setOrgUnit(original.getOrgUnit());
-        return copy;
-    }
-
 }

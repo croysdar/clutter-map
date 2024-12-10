@@ -2,6 +2,7 @@ package app.cluttermap.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -19,7 +20,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Table(name = "org_units")
@@ -230,5 +230,15 @@ public class OrgUnit {
                 ", roomId=" + (room != null ? room.getId() : "null") +
                 ", projectId=" + (project != null ? project.getId() : "null") +
                 '}';
+    }
+
+    public OrgUnit copy() {
+        OrgUnit copy = new OrgUnit();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setProject(this.getProject());
+        copy.setRoom(this.getRoom());
+        return copy;
     }
 }

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -58,6 +60,9 @@ public class OrgUnitServiceTests {
 
     @Mock
     private RoomService roomService;
+
+    @Mock
+    private EventService eventService;
 
     @InjectMocks
     private OrgUnitService orgUnitService;
@@ -209,6 +214,9 @@ public class OrgUnitServiceTests {
 
         when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
+        // Arrange: Mock event logging
+        mockLogCreateEvent();
+
         // Act: Call the service method
         OrgUnit createdOrgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
 
@@ -225,6 +233,10 @@ public class OrgUnitServiceTests {
             verify(projectService).getProjectById(projectId);
         }
         verify(orgUnitRepository).save(any(OrgUnit.class));
+
+        // Assert: Verify event logging
+        verify(eventService).logCreateEvent(eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
+                eq(mockOrgUnit));
     }
 
     @Disabled("Feature under development")
@@ -271,25 +283,38 @@ public class OrgUnitServiceTests {
 
         // Build the UpdateOrgUnitDTO with these values
         UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder()
+                .name("New Name")
                 .description(newDescription)
                 .build();
 
         // Stub the repository to return the org unit after saving
         when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
 
+        // Arrange: Mock event logging
+        mockLogUpdateEvent();
+
         // Act: Call the service method
         OrgUnit updatedOrgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
 
+        // Capture the saved org unit to verify fields
+        ArgumentCaptor<OrgUnit> savedOrgUnitCaptor = ArgumentCaptor.forClass(OrgUnit.class);
+        verify(orgUnitRepository).save(savedOrgUnitCaptor.capture());
+        OrgUnit savedOrgUnit = savedOrgUnitCaptor.getValue();
+
         // Assert: Verify the fields were updated as expected
-        assertThat(updatedOrgUnit.getName())
+        assertThat(savedOrgUnit.getName())
                 .as(description + ": Name should match the DTO name")
                 .isEqualTo(orgUnitDTO.getName());
-        assertThat(updatedOrgUnit.getDescription())
+        assertThat(savedOrgUnit.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
 
-        // Verify: Ensure the repository save method was called
-        verify(orgUnitRepository).save(orgUnit);
+        // Verify the event was logged
+        verify(eventService).logUpdateEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT),
+                eq(resourceId),
+                eq(orgUnit),
+                eq(updatedOrgUnit));
     }
 
     @Test
@@ -320,12 +345,20 @@ public class OrgUnitServiceTests {
             // Arrange: Stub the repository to simulate finding org unit
             mockAssignedOrgUnitInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the service method
             orgUnitService.deleteOrgUnitById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(orgUnitRepository).delete(any(OrgUnit.class));
+
+            // Verify the event was logged
+            verify(eventService).logDeleteEvent(
+                    eq(ResourceType.ORGANIZATIONAL_UNIT),
+                    eq(resourceId));
         } else {
             // Arrange: Stub the repository to simulate not finding org unit
             mockNonexistentOrgUnitInRepository(resourceId);
@@ -496,5 +529,17 @@ public class OrgUnitServiceTests {
 
     private void mockProjectLookup() {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }

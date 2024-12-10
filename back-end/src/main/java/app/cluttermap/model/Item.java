@@ -1,6 +1,8 @@
 package app.cluttermap.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Table(name = "items")
@@ -49,7 +50,7 @@ public class Item {
     // consistency.
 
     // No-Arg constructor for Hibernate
-    public Item() {
+    protected Item() {
     }
 
     public Item(
@@ -220,5 +221,17 @@ public class Item {
                 ", orgUnitId=" + (orgUnit != null ? orgUnit.getId() : "null") +
                 ", projectId=" + (project != null ? project.getId() : "null") +
                 '}';
+    }
+
+    public Item copy() {
+        Item copy = new Item();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setQuantity(this.getQuantity());
+        copy.setTags(new ArrayList<>(this.getTags()));
+        copy.setProject(this.getProject());
+        copy.setOrgUnit(this.getOrgUnit());
+        return copy;
     }
 }

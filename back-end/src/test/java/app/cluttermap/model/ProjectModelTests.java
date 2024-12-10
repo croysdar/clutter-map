@@ -1,6 +1,7 @@
 package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.List;
 
@@ -84,5 +85,25 @@ public class ProjectModelTests {
         assertThat(result).contains("orgUnits=2");
         assertThat(result).contains("items=5");
         assertThat(result).contains("events=3");
+    }
+
+    @Test
+    void copyProject_ShouldProduceIdenticalCopy() {
+        User user = new User("userProviderId");
+        Project original = new TestDataFactory.ProjectBuilder()
+                .id(1L)
+                .name("Original Name")
+                .user(user).build();
+
+        Project copy = original.copy();
+        // We don't copy the owner, but to use recursive to check equality,
+        // it must be set
+        copy.setOwner(user);
+
+        // Assert that all fields are identical
+        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
+
+        // Verify the copy is a new instance, not the same reference
+        assertNotSame(copy, original);
     }
 }

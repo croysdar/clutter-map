@@ -183,4 +183,12 @@ public class Room {
                 '}';
     }
 
+    public Room copy() {
+        Room copy = new Room();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setProject(this.getProject());
+        return copy;
+    }
 }

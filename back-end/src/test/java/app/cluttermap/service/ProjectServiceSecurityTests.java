@@ -25,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.UpdateProjectDTO;
@@ -44,6 +45,9 @@ public class ProjectServiceSecurityTests {
 
     @MockBean
     private SecurityService securityService;
+
+    @MockBean
+    private EventService eventService;
 
     private Project mockProject;
 
@@ -100,6 +104,9 @@ public class ProjectServiceSecurityTests {
             // Mock repository behavior for authorized access
             when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
 
+            // Arrange: Mock event logging
+            mockLogUpdateEvent();
+
             // Act: Call the method under test
             Project project = projectService.updateProject(resourceId, projectDTO);
 
@@ -135,6 +142,9 @@ public class ProjectServiceSecurityTests {
             // Mock repository behavior for authorized access
             doNothing().when(projectRepository).deleteById(1L);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the method under test
             projectService.deleteProjectById(resourceId);
 
@@ -163,4 +173,11 @@ public class ProjectServiceSecurityTests {
         return project;
     }
 
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
+    }
 }

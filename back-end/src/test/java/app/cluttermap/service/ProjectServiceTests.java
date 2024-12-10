@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,11 +30,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.project.ProjectLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -42,6 +46,9 @@ public class ProjectServiceTests {
 
     @Mock
     private SecurityService securityService;
+
+    @Mock
+    private EventService eventService;
 
     @InjectMocks
     private ProjectService projectService;
@@ -144,6 +151,9 @@ public class ProjectServiceTests {
         Project mockProject = new TestDataFactory.ProjectBuilder().fromDTO(projectDTO).user(mockUser).build();
         when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
 
+        // Arrange: Mock event logging
+        mockLogCreateEvent();
+
         // Act: Call service method
         Project createdProject = projectService.createProject(projectDTO);
 
@@ -156,6 +166,10 @@ public class ProjectServiceTests {
         // Verify that the correct service and repository methods were called
         verify(securityService).getCurrentUser();
         verify(projectRepository).save(any(Project.class));
+
+        // Assert: Verify event logging
+        verify(eventService).logCreateEvent(eq(ResourceType.PROJECT), eq(mockProject.getId()),
+                eq(mockProject));
     }
 
     @Test
@@ -198,8 +212,9 @@ public class ProjectServiceTests {
     void updateProject_ShouldUpdateProject_WhenProjectExists() {
         // Arrange: Set up an existing project and mock the repository to return it when
         // searched by ID
+        Long resourceId = 1L;
         Project project = new TestDataFactory.ProjectBuilder().name("Old Name").user(mockUser).build();
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(projectRepository.findById(resourceId)).thenReturn(Optional.of(project));
 
         // Arrange: Prepare the DTO with the updated project name
         UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
@@ -207,14 +222,26 @@ public class ProjectServiceTests {
         // Arrange: Mock the repository save to return the updated project
         when(projectRepository.save(project)).thenReturn(project);
 
+        // Arrange: Mock event logging
+        mockLogUpdateEvent();
+
         // Act: Call the service to update the project's name
-        Project updatedProject = projectService.updateProject(1L, projectDTO);
+        Project updatedProject = projectService.updateProject(resourceId, projectDTO);
+
+        // Capture the saved project to verify fields
+        ArgumentCaptor<Project> savedProjectCaptor = ArgumentCaptor.forClass(Project.class);
+        verify(projectRepository).save(savedProjectCaptor.capture());
+        Project savedProject = savedProjectCaptor.getValue();
 
         // Assert: Verify that the project's name was updated as expected
-        assertThat(updatedProject.getName()).isEqualTo(projectDTO.getName());
+        assertThat(savedProject.getName()).isEqualTo(projectDTO.getName());
 
-        // Assert: Ensure the repository save method was called to persist the changes
-        verify(projectRepository).save(project);
+        // Verify the event was logged
+        verify(eventService).logUpdateEvent(
+                eq(ResourceType.PROJECT),
+                eq(resourceId),
+                eq(project),
+                eq(updatedProject));
     }
 
     @Test
@@ -242,12 +269,20 @@ public class ProjectServiceTests {
             // Arrange: Stub the repository to simulate finding project
             mockProjectInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the service method
             projectService.deleteProjectById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(projectRepository).deleteById(resourceId);
+
+            // Verify the event was logged
+            verify(eventService).logDeleteEvent(
+                    eq(ResourceType.PROJECT),
+                    eq(resourceId));
         } else {
             // Arrange: Stub the repository to simulate not finding project
             mockNonexistentProjectInRepository(resourceId);
@@ -269,5 +304,17 @@ public class ProjectServiceTests {
         Project mockProject = new TestDataFactory.ProjectBuilder().id(resourceId).user(mockUser).build();
         when(projectRepository.findById(resourceId)).thenReturn(Optional.of(mockProject));
         return mockProject;
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }

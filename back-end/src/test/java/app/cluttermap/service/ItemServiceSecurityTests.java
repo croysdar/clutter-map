@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -59,6 +60,9 @@ public class ItemServiceSecurityTests {
     private OrgUnitRepository orgUnitRepository;
 
     @MockBean
+    private EventService eventService;
+
+    @MockBean
     private SecurityService securityService;
 
     private Project mockProject;
@@ -69,7 +73,7 @@ public class ItemServiceSecurityTests {
         mockProject = createMockProject();
         mockItem = createMockItem(mockProject);
         when(securityService.isResourceOwner(anyLong(), any(ResourceType.class))).thenReturn(true);
-        when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
+        // when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 
     @ParameterizedTest
@@ -164,10 +168,12 @@ public class ItemServiceSecurityTests {
 
         // Arrange: Configure security service
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
-
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
+
+            // Arrange: Mock event logging
+            mockLogCreateEvent();
 
             // Act: Call the method under test
             Item item = itemService.createItem(itemDTO);
@@ -205,6 +211,9 @@ public class ItemServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
+
+            // Arrange: Mock event logging
+            mockLogUpdateEvent();
 
             // Act: Call the method under test
             Item item = itemService.updateItem(resourceId, itemDTO);
@@ -317,6 +326,9 @@ public class ItemServiceSecurityTests {
             // Mock repository behavior for authorized access
             doNothing().when(itemRepository).deleteById(1L);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the method under test
             itemService.deleteItemById(1L);
 
@@ -341,6 +353,7 @@ public class ItemServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
+        when(projectService.getProjectById(project.getId())).thenReturn(project);
 
         return project;
     }
@@ -363,5 +376,17 @@ public class ItemServiceSecurityTests {
         OrgUnit mockOrgUnit = createMockOrgUnit(mockProject);
         mockItem.setOrgUnit(mockOrgUnit);
         when(itemRepository.findById(mockItem.getId())).thenReturn(Optional.of(mockItem));
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }

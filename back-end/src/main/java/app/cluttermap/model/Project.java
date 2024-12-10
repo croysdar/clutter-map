@@ -2,6 +2,7 @@ package app.cluttermap.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -17,7 +18,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Table(name = "projects")
@@ -230,4 +230,10 @@ public class Project {
                 '}';
     }
 
+    public Project copy() {
+        Project copy = new Project();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        return copy;
+    }
 }

@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -57,6 +58,9 @@ public class OrgUnitServiceSecurityTests {
 
     @MockBean
     private RoomRepository roomRepository;
+
+    @MockBean
+    private EventService eventService;
 
     @MockBean
     private SecurityService securityService;
@@ -173,6 +177,9 @@ public class OrgUnitServiceSecurityTests {
             // Mock repository behavior for authorized access
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
+            // Arrange: Mock event logging
+            mockLogCreateEvent();
+
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
 
@@ -209,6 +216,9 @@ public class OrgUnitServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
+
+            // Arrange: Mock event logging
+            mockLogUpdateEvent();
 
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
@@ -322,6 +332,9 @@ public class OrgUnitServiceSecurityTests {
             // Mock repository behavior for authorized access
             doNothing().when(orgUnitRepository).deleteById(1L);
 
+            // Arrange: Mock event logging
+            mockLogDeleteEvent();
+
             // Act: Call the method under test
             orgUnitService.deleteOrgUnitById(1L);
 
@@ -367,5 +380,17 @@ public class OrgUnitServiceSecurityTests {
         Room mockRoom = createMockRoom(mockProject);
         mockOrgUnit.setRoom(mockRoom);
         when(orgUnitRepository.findById(mockOrgUnit.getId())).thenReturn(Optional.of(mockOrgUnit));
+    }
+
+    private void mockLogCreateEvent() {
+        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogUpdateEvent() {
+        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
+    private void mockLogDeleteEvent() {
+        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
     }
 }
