@@ -168,7 +168,7 @@ public class EventServiceTests {
 
         // Assert
         assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.CREATE, user);
-        assertEquals("{\"id\":2,\"name\":\"Room 1\",\"description\":\"Test room\",\"orgUnits\":[]}",
+        assertEquals("{\"name\":\"Room 1\",\"description\":\"Test room\"}",
                 event.getPayload());
         assertEquals(project, event.getProject());
         verify(eventRepository, times(1)).save(event);

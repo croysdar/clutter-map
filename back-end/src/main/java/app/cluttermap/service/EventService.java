@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -16,7 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.model.Event;
@@ -35,7 +38,6 @@ public class EventService {
 
     private final EventService self;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     /* ------------- Constructor ------------- */
@@ -79,8 +81,22 @@ public class EventService {
     /* --- Create Operation (POST) --- */
     public Event logCreateEvent(ResourceType entityType, Long entityId, Object entityState) {
         Event event = initializeEvent(entityType, entityId, EventActionType.CREATE);
-        event.setPayload(convertToJson(entityState));
+
+        // Preprocess entityState to remove unnecessary fields
+        Map<String, Object> filteredState = filterFieldsForCreateEvent(entityState);
+        event.setPayload(convertToJson(filteredState));
+
         return self.save(event);
+    }
+
+    private Map<String, Object> filterFieldsForCreateEvent(Object entityState) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
+        Map<String, Object> filteredState = mapper.convertValue(entityState, new TypeReference<Map<String, Object>>() {
+        });
+        filteredState.remove("id"); // Remove the 'id' field
+        return filteredState;
     }
 
     public Event logUpdateEvent(ResourceType entityType, Long entityId, Object oldEntityState, Object newEntityState) {
@@ -107,8 +123,11 @@ public class EventService {
     }
 
     public String convertToJson(Object object) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY); // Exclude empty collections
+
         try {
-            return objectMapper.writeValueAsString(object);
+            return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             logger.error("Failed to convert object to JSON: " + object, e);
             throw new RuntimeException("Error converting to JSON", e);
@@ -134,7 +153,21 @@ public class EventService {
 
                 // Include only changed fields
                 if ((oldValue != null && !oldValue.equals(newValue)) || (oldValue == null && newValue != null)) {
-                    changes.put(field.getName(), newValue);
+                    // Check if the field is a nested object with an 'id' field
+                    Field idField = getIdField(field.getType());
+                    if (idField != null) {
+                        idField.setAccessible(true);
+                        Long oldId = oldValue != null ? (Long) idField.get(oldValue) : null;
+                        Long newId = newValue != null ? (Long) idField.get(newValue) : null;
+
+                        // Add only the IDs if they differ
+                        if (!Objects.equals(oldId, newId)) {
+                            changes.put(field.getName() + "Id", newId);
+                        }
+                    } else {
+                        // For other fields, store the new value
+                        changes.put(field.getName(), newValue);
+                    }
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Error accessing field: " + field.getName(), e);
@@ -157,5 +190,16 @@ public class EventService {
         event.setUser(currentUser);
         event.setProject(entityResolutionService.resolveProject(entityType, entityId));
         return event;
+    }
+
+    /**
+     * Checks if a class has an 'id' field and returns it if found.
+     */
+    private Field getIdField(Class<?> clazz) {
+        try {
+            return clazz.getDeclaredField("id");
+        } catch (NoSuchFieldException e) {
+            return null; // Not all classes will have an 'id' field
+        }
     }
 }
