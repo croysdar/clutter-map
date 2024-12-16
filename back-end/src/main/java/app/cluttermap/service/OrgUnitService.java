@@ -160,6 +160,8 @@ public class OrgUnitService {
                 unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
             }
             assignOrgUnitToRoom(orgUnit, targetRoom);
+            eventService.logUpdateEvent(ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(),
+                    buildRoomIdChangePayload(targetRoom.getId()));
             updatedOrgUnits.add(orgUnit);
         }
         return updatedOrgUnits;
@@ -172,6 +174,8 @@ public class OrgUnitService {
             OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
             if (orgUnit.getRoom() != null) {
                 unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
+                eventService.logUpdateEvent(ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(),
+                        buildRoomIdChangePayload(null));
             }
             updatedOrgUnits.add(orgUnit);
         }
@@ -233,4 +237,9 @@ public class OrgUnitService {
         return changes;
     }
 
+    private Map<String, Object> buildRoomIdChangePayload(Long newRoomId) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("roomId", newRoomId);
+        return payload;
+    }
 }

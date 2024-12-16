@@ -448,9 +448,8 @@ public class OrgUnitServiceTests {
         // Arrange: Use the existing mockRoom as the target
         mockRoomLookup();
 
-        // Mock unassigned org units
+        // Mock unassigned org unit
         OrgUnit unassignedOrgUnit1 = mockUnassignedOrgUnitInRepository(1L);
-        OrgUnit unassignedOrgUnit2 = mockUnassignedOrgUnitInRepository(2L);
 
         // Mock a previously assigned org unit
         Room previousRoom = new TestDataFactory.RoomBuilder().id(10L).project(mockProject).build();
@@ -458,7 +457,7 @@ public class OrgUnitServiceTests {
 
         // Act: Assign multiple org units
         Iterable<OrgUnit> movedOrgUnits = orgUnitService.assignOrgUnitsToRoom(
-                List.of(unassignedOrgUnit1.getId(), unassignedOrgUnit2.getId(), assignedOrgUnit.getId()),
+                List.of(unassignedOrgUnit1.getId(), assignedOrgUnit.getId()),
                 mockRoom.getId());
 
         // Assert: Verify all org units are assigned to the target room
@@ -466,8 +465,30 @@ public class OrgUnitServiceTests {
 
         // Verify unassignment and reassignment for the previously assigned org unit
         verify(roomRepository).save(previousRoom); // Unassign
-        verify(roomRepository, times(3)).save(mockRoom); // Assign all org units
-        verify(orgUnitRepository, times(3)).findById(anyLong());
+        verify(roomRepository, times(2)).save(mockRoom); // Assign all org units
+        verify(orgUnitRepository, times(2)).findById(anyLong());
+
+        // Verify logUpdateEvent is called for all org units
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(eventService, times(2)).logUpdateEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT),
+                anyLong(),
+                payloadCaptor.capture());
+
+        // Assert: Verify the payloads contain the expected changes
+        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
+
+        assertThat(capturedPayloads).hasSize(2);
+
+        // Verify payload for the first item
+        assertThat(capturedPayloads.get(0))
+                .containsEntry("roomId", mockRoom.getId());
+
+        // Verify payload for the second item
+        assertThat(capturedPayloads.get(1))
+                .containsEntry("roomId", mockRoom.getId());
     }
 
     @Test
@@ -505,6 +526,28 @@ public class OrgUnitServiceTests {
         // Verify repository interactions
         verify(orgUnitRepository, times(2)).findById(anyLong());
         verify(roomRepository, times(2)).save(any(Room.class));
+
+        // Verify logUpdateEvent is called for both items
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(eventService, times(2)).logUpdateEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT),
+                anyLong(),
+                payloadCaptor.capture());
+
+        // Assert: Verify the payloads contain the expected changes
+        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
+
+        assertThat(capturedPayloads).hasSize(2);
+
+        // Verify payload for the first item
+        assertThat(capturedPayloads.get(0))
+                .containsEntry("roomId", null);
+
+        // Verify payload for the second item
+        assertThat(capturedPayloads.get(1))
+                .containsEntry("roomId", null);
     }
 
     @Test

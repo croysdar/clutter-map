@@ -169,6 +169,7 @@ public class ItemService {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
             assignItemToOrgUnit(item, targetOrgUnit);
+            eventService.logUpdateEvent(ResourceType.ITEM, item.getId(), buildOrgUnitIdChangePayload(targetOrgUnitId));
             updatedItems.add(item);
         }
         return updatedItems;
@@ -181,6 +182,7 @@ public class ItemService {
             Item item = self.getItemById(itemId);
             if (item.getOrgUnit() != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
+                eventService.logUpdateEvent(ResourceType.ITEM, item.getId(), buildOrgUnitIdChangePayload(null));
             }
             updatedItems.add(item);
         }
@@ -248,5 +250,11 @@ public class ItemService {
         }
 
         return changes;
+    }
+
+    private Map<String, Object> buildOrgUnitIdChangePayload(Long newOrgUnitId) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orgUnitId", newOrgUnitId);
+        return payload;
     }
 }
