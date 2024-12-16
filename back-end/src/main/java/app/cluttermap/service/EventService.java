@@ -79,29 +79,14 @@ public class EventService {
     }
 
     /* --- Create Operation (POST) --- */
-    public Event logCreateEvent(ResourceType entityType, Long entityId, Object entityState) {
+    public Event logCreateEvent(ResourceType entityType, Long entityId, Map<String, Object> payload) {
         Event event = initializeEvent(entityType, entityId, EventActionType.CREATE);
-
-        // Preprocess entityState to remove unnecessary fields
-        Map<String, Object> filteredState = filterFieldsForCreateEvent(entityState);
-        event.setPayload(convertToJson(filteredState));
-
+        event.setPayload(convertToJson(payload));
         return self.save(event);
     }
 
-    private Map<String, Object> filterFieldsForCreateEvent(Object entityState) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-        Map<String, Object> filteredState = mapper.convertValue(entityState, new TypeReference<Map<String, Object>>() {
-        });
-        filteredState.remove("id"); // Remove the 'id' field
-        return filteredState;
-    }
-
-    public Event logUpdateEvent(ResourceType entityType, Long entityId, Object oldEntityState, Object newEntityState) {
+    public Event logUpdateEvent(ResourceType entityType, Long entityId, Map<String, Object> changes) {
         Event event = initializeEvent(entityType, entityId, EventActionType.UPDATE);
-        Map<String, Object> changes = detectChanges(oldEntityState, newEntityState);
         event.setPayload(convertToJson(changes));
         return self.save(event);
     }

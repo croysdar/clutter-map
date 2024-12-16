@@ -1,5 +1,9 @@
 package app.cluttermap.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -58,7 +62,7 @@ public class RoomService {
     public Room createRoom(NewRoomDTO roomDTO) {
         Room room = self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
 
-        eventService.logCreateEvent(ResourceType.ROOM, room.getId(), room);
+        eventService.logCreateEvent(ResourceType.ROOM, room.getId(), buildCreatePayload(room));
 
         return room;
     }
@@ -84,7 +88,7 @@ public class RoomService {
 
         Room updatedRoom = roomRepository.save(_room);
 
-        eventService.logUpdateEvent(ResourceType.ROOM, id, oldRoom, updatedRoom);
+        eventService.logUpdateEvent(ResourceType.ROOM, id, buildChangePayload(oldRoom, updatedRoom));
 
         return updatedRoom;
     }
@@ -96,5 +100,25 @@ public class RoomService {
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
 
         eventService.logDeleteEvent(ResourceType.ROOM, id);
+    }
+
+    private Map<String, Object> buildCreatePayload(Room room) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", room.getName());
+        payload.put("description", room.getDescription());
+        return payload;
+    }
+
+    private Map<String, Object> buildChangePayload(Room oldRoom, Room newRoom) {
+        Map<String, Object> changes = new HashMap<>();
+
+        if (!Objects.equals(oldRoom.getName(), newRoom.getName())) {
+            changes.put("name", newRoom.getName());
+        }
+        if (!Objects.equals(oldRoom.getDescription(), newRoom.getDescription())) {
+            changes.put("description", newRoom.getDescription());
+        }
+
+        return changes;
     }
 }

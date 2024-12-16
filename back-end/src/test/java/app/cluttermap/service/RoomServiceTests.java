@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -173,9 +174,20 @@ public class RoomServiceTests {
         verify(projectService).getProjectById(mockProject.getId());
         verify(roomRepository).save(any(Room.class));
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Assert: Verify event logging
         verify(eventService).logCreateEvent(eq(ResourceType.ROOM), eq(mockRoom.getId()),
-                eq(mockRoom));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdRoom.getName());
+        assertThat(capturedPayload)
+                .containsEntry("description", createdRoom.getDescription());
     }
 
     @Disabled("Feature under development")
@@ -232,27 +244,42 @@ public class RoomServiceTests {
         mockLogUpdateEvent();
 
         // Act: Call the service method
-        Room updatedRoom = roomService.updateRoom(resourceId, roomDTO);
+        roomService.updateRoom(resourceId, roomDTO);
 
         // Capture the saved room to verify fields
         ArgumentCaptor<Room> savedRoomCaptor = ArgumentCaptor.forClass(Room.class);
         verify(roomRepository).save(savedRoomCaptor.capture());
-        Room savedOrgUnit = savedRoomCaptor.getValue();
+        Room savedRoom = savedRoomCaptor.getValue();
 
         // Assert: Verify the fields were updated as expected
-        assertThat(savedOrgUnit.getName())
+        assertThat(savedRoom.getName())
                 .as(description + ": Name should match the DTO name")
                 .isEqualTo(roomDTO.getName());
-        assertThat(savedOrgUnit.getDescription())
+        assertThat(savedRoom.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
+
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Verify the event was logged
         verify(eventService).logUpdateEvent(
                 eq(ResourceType.ROOM),
                 eq(resourceId),
-                eq(room),
-                eq(updatedRoom));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedRoom.getName());
+        if (updateDescription) {
+            assertThat(capturedPayload)
+                    .containsEntry("description", savedRoom.getDescription());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("description", savedRoom.getDescription());
+        }
     }
 
     @Test
@@ -327,7 +354,7 @@ public class RoomServiceTests {
     }
 
     private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
     }
 
     private void mockLogDeleteEvent() {

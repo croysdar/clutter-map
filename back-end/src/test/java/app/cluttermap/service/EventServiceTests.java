@@ -163,8 +163,13 @@ public class EventServiceTests {
         // Mock save behavior for event repository
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        // Build the expected payload
+        Map<String, Object> expectedPayload = new HashMap<>();
+        expectedPayload.put("name", room.getName());
+        expectedPayload.put("description", room.getDescription());
+
         // Act
-        Event event = eventService.logCreateEvent(ResourceType.ROOM, room.getId(), room);
+        Event event = eventService.logCreateEvent(ResourceType.ROOM, room.getId(), expectedPayload);
 
         // Assert
         assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.CREATE, user);
@@ -194,8 +199,12 @@ public class EventServiceTests {
         // Mock save behavior for event repository
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        // Build the expected payload
+        Map<String, Object> expectedPayload = new HashMap<>();
+        expectedPayload.put("name", newRoom.getName());
+        expectedPayload.put("description", newRoom.getDescription());
         // Act
-        Event event = eventService.logUpdateEvent(ResourceType.ROOM, oldRoom.getId(), oldRoom, newRoom);
+        Event event = eventService.logUpdateEvent(ResourceType.ROOM, oldRoom.getId(), expectedPayload);
 
         // Assert
         assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.UPDATE, user);

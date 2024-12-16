@@ -239,7 +239,7 @@ public class RoomServiceSecurityTests {
     }
 
     private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
     }
 
     private void mockLogDeleteEvent() {

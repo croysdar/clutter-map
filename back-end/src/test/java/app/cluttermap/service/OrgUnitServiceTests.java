@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -234,9 +235,27 @@ public class OrgUnitServiceTests {
         }
         verify(orgUnitRepository).save(any(OrgUnit.class));
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Assert: Verify event logging
         verify(eventService).logCreateEvent(eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
-                eq(mockOrgUnit));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdOrgUnit.getName());
+        assertThat(capturedPayload)
+                .containsEntry("description", createdOrgUnit.getDescription());
+        if (isRoomProvided) {
+            assertThat(capturedPayload)
+                    .containsEntry("roomId", createdOrgUnit.getRoomId());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("roomId", createdOrgUnit.getRoomId());
+        }
     }
 
     @Disabled("Feature under development")
@@ -294,7 +313,7 @@ public class OrgUnitServiceTests {
         mockLogUpdateEvent();
 
         // Act: Call the service method
-        OrgUnit updatedOrgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
+        orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
 
         // Capture the saved org unit to verify fields
         ArgumentCaptor<OrgUnit> savedOrgUnitCaptor = ArgumentCaptor.forClass(OrgUnit.class);
@@ -309,12 +328,27 @@ public class OrgUnitServiceTests {
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Verify the event was logged
         verify(eventService).logUpdateEvent(
                 eq(ResourceType.ORGANIZATIONAL_UNIT),
                 eq(resourceId),
-                eq(orgUnit),
-                eq(updatedOrgUnit));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedOrgUnit.getName());
+        if (updateDescription) {
+            assertThat(capturedPayload)
+                    .containsEntry("description", savedOrgUnit.getDescription());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("description", savedOrgUnit.getDescription());
+        }
     }
 
     @Test
@@ -536,7 +570,7 @@ public class OrgUnitServiceTests {
     }
 
     private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
     }
 
     private void mockLogDeleteEvent() {

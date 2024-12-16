@@ -1,5 +1,9 @@
 package app.cluttermap.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -65,7 +69,7 @@ public class ProjectService {
         Project project = projectRepository.save(
                 newProject);
 
-        eventService.logCreateEvent(ResourceType.PROJECT, project.getId(), project);
+        eventService.logCreateEvent(ResourceType.PROJECT, project.getId(), buildCreatePayload(project));
 
         return project;
     }
@@ -80,7 +84,7 @@ public class ProjectService {
 
         Project updatedProject = projectRepository.save(_project);
 
-        eventService.logUpdateEvent(ResourceType.PROJECT, id, oldProject, _project);
+        eventService.logUpdateEvent(ResourceType.PROJECT, id, buildChangePayload(oldProject, updatedProject));
 
         return updatedProject;
     }
@@ -93,5 +97,21 @@ public class ProjectService {
         projectRepository.deleteById(id);
 
         eventService.logDeleteEvent(ResourceType.PROJECT, id);
+    }
+
+    private Map<String, Object> buildCreatePayload(Project project) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", project.getName());
+        return payload;
+    }
+
+    private Map<String, Object> buildChangePayload(Project oldProject, Project newProject) {
+        Map<String, Object> changes = new HashMap<>();
+
+        if (!Objects.equals(oldProject.getName(), newProject.getName())) {
+            changes.put("name", newProject.getName());
+        }
+
+        return changes;
     }
 }

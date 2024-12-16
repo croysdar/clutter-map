@@ -1,7 +1,10 @@
 package app.cluttermap.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
@@ -82,7 +85,7 @@ public class OrgUnitService {
             orgUnit = self.createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
         }
 
-        eventService.logCreateEvent(ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(), orgUnit);
+        eventService.logCreateEvent(ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(), buildCreatePayload(orgUnit));
         return orgUnit;
     }
 
@@ -125,7 +128,8 @@ public class OrgUnitService {
 
         OrgUnit updatedOrgUnit = orgUnitRepository.save(_orgUnit);
 
-        eventService.logUpdateEvent(ResourceType.ORGANIZATIONAL_UNIT, id, oldOrgUnit, _orgUnit);
+        eventService.logUpdateEvent(ResourceType.ORGANIZATIONAL_UNIT, id,
+                buildChangePayload(oldOrgUnit, updatedOrgUnit));
 
         return updatedOrgUnit;
     }
@@ -205,4 +209,28 @@ public class OrgUnitService {
         room.removeOrgUnit(orgUnit); // Manages both sides of the relationship
         return roomRepository.save(room);
     }
+
+    private Map<String, Object> buildCreatePayload(OrgUnit orgUnit) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", orgUnit.getName());
+        payload.put("description", orgUnit.getDescription());
+        if (orgUnit.getRoom() != null) {
+            payload.put("roomId", orgUnit.getRoom().getId());
+        }
+        return payload;
+    }
+
+    private Map<String, Object> buildChangePayload(OrgUnit oldOrgUnit, OrgUnit newOrgUnit) {
+        Map<String, Object> changes = new HashMap<>();
+
+        if (!Objects.equals(oldOrgUnit.getName(), newOrgUnit.getName())) {
+            changes.put("name", newOrgUnit.getName());
+        }
+        if (!Objects.equals(oldOrgUnit.getDescription(), newOrgUnit.getDescription())) {
+            changes.put("description", newOrgUnit.getDescription());
+        }
+
+        return changes;
+    }
+
 }

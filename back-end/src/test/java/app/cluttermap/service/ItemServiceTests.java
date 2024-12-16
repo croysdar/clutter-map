@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -249,8 +250,30 @@ public class ItemServiceTests {
         }
         verify(itemRepository).save(any(Item.class));
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Assert: Verify event logging
-        verify(eventService).logCreateEvent(eq(ResourceType.ITEM), eq(mockItem.getId()), eq(mockItem));
+        verify(eventService).logCreateEvent(eq(ResourceType.ITEM), eq(mockItem.getId()), payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdItem.getName());
+        assertThat(capturedPayload)
+                .containsEntry("description", createdItem.getDescription());
+        assertThat(capturedPayload)
+                .containsEntry("tags", createdItem.getTags());
+        assertThat(capturedPayload)
+                .containsEntry("quantity", createdItem.getQuantity());
+        if (isOrgUnitProvided) {
+            assertThat(capturedPayload)
+                    .containsEntry("orgUnitId", createdItem.getOrgUnitId());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("orgUnitId", createdItem.getOrgUnitId());
+        }
     }
 
     @Disabled("Feature under development")
@@ -276,8 +299,8 @@ public class ItemServiceTests {
     @ParameterizedTest
     @CsvSource({
             "true, true, true, All fields should update when all fields are provided",
-            "true, false, true, Description should not update when it is null",
-            "false, true, true, Tags should not update when they are null",
+            "false, true, true, Description should not update when it is null",
+            "true, false, true, Tags should not update when they are null",
             "true, true, false, Quantity should not update when it is null"
     })
     void updateItem_ShouldUpdateFieldsConditionally(
@@ -318,7 +341,7 @@ public class ItemServiceTests {
         mockLogUpdateEvent();
 
         // Act: Call the service method
-        Item updatedItem = itemService.updateItem(resourceId, itemDTO);
+        itemService.updateItem(resourceId, itemDTO);
 
         // Capture the saved item to verify fields
         ArgumentCaptor<Item> savedItemCaptor = ArgumentCaptor.forClass(Item.class);
@@ -339,12 +362,41 @@ public class ItemServiceTests {
                 .as(description + ": Quantity should match the expected value")
                 .isEqualTo(updateQuantity ? newQuantity : oldQuantity);
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Verify the event was logged
         verify(eventService).logUpdateEvent(
                 eq(ResourceType.ITEM),
                 eq(resourceId),
-                eq(item),
-                eq(updatedItem));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedItem.getName());
+        if (updateDescription) {
+            assertThat(capturedPayload)
+                    .containsEntry("description", savedItem.getDescription());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("description", savedItem.getDescription());
+        }
+        if (updateTags) {
+            assertThat(capturedPayload)
+                    .containsEntry("tags", savedItem.getTags());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("tags", savedItem.getTags());
+        }
+        if (updateQuantity) {
+            assertThat(capturedPayload)
+                    .containsEntry("quantity", savedItem.getQuantity());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("quantity", savedItem.getQuantity());
+        }
     }
 
     @Test
@@ -561,7 +613,7 @@ public class ItemServiceTests {
     }
 
     private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
     }
 
     private void mockLogDeleteEvent() {

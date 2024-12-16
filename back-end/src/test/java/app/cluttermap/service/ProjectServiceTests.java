@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -167,9 +168,18 @@ public class ProjectServiceTests {
         verify(securityService).getCurrentUser();
         verify(projectRepository).save(any(Project.class));
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Assert: Verify event logging
         verify(eventService).logCreateEvent(eq(ResourceType.PROJECT), eq(mockProject.getId()),
-                eq(mockProject));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdProject.getName());
     }
 
     @Test
@@ -226,7 +236,7 @@ public class ProjectServiceTests {
         mockLogUpdateEvent();
 
         // Act: Call the service to update the project's name
-        Project updatedProject = projectService.updateProject(resourceId, projectDTO);
+        projectService.updateProject(resourceId, projectDTO);
 
         // Capture the saved project to verify fields
         ArgumentCaptor<Project> savedProjectCaptor = ArgumentCaptor.forClass(Project.class);
@@ -236,12 +246,20 @@ public class ProjectServiceTests {
         // Assert: Verify that the project's name was updated as expected
         assertThat(savedProject.getName()).isEqualTo(projectDTO.getName());
 
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
         // Verify the event was logged
         verify(eventService).logUpdateEvent(
                 eq(ResourceType.PROJECT),
                 eq(resourceId),
-                eq(project),
-                eq(updatedProject));
+                payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedProject.getName());
     }
 
     @Test
@@ -311,7 +329,7 @@ public class ProjectServiceTests {
     }
 
     private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
     }
 
     private void mockLogDeleteEvent() {

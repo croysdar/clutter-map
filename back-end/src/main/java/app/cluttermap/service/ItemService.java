@@ -1,7 +1,10 @@
 package app.cluttermap.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
@@ -85,7 +88,7 @@ public class ItemService {
             item = self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
         }
 
-        eventService.logCreateEvent(ResourceType.ITEM, item.getId(), item);
+        eventService.logCreateEvent(ResourceType.ITEM, item.getId(), buildCreatePayload(item));
         return item;
     }
 
@@ -134,7 +137,7 @@ public class ItemService {
 
         Item updatedItem = itemRepository.save(_item);
 
-        eventService.logUpdateEvent(ResourceType.ITEM, id, oldItem, _item);
+        eventService.logUpdateEvent(ResourceType.ITEM, id, buildChangePayload(oldItem, updatedItem));
 
         return updatedItem;
     }
@@ -214,5 +217,36 @@ public class ItemService {
     private OrgUnit unassignItemFromOrgUnit(Item item, OrgUnit orgUnit) {
         orgUnit.removeItem(item); // Manages both sides of the relationship
         return orgUnitRepository.save(orgUnit);
+    }
+
+    private Map<String, Object> buildCreatePayload(Item item) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", item.getName());
+        payload.put("description", item.getDescription());
+        payload.put("quantity", item.getQuantity());
+        payload.put("tags", item.getTags());
+        if (item.getOrgUnit() != null) {
+            payload.put("orgUnitId", item.getOrgUnit().getId());
+        }
+        return payload;
+    }
+
+    private Map<String, Object> buildChangePayload(Item oldItem, Item newItem) {
+        Map<String, Object> changes = new HashMap<>();
+
+        if (!Objects.equals(oldItem.getName(), newItem.getName())) {
+            changes.put("name", newItem.getName());
+        }
+        if (!Objects.equals(oldItem.getDescription(), newItem.getDescription())) {
+            changes.put("description", newItem.getDescription());
+        }
+        if (!Objects.equals(oldItem.getQuantity(), newItem.getQuantity())) {
+            changes.put("quantity", newItem.getQuantity());
+        }
+        if (!Objects.equals(oldItem.getTags(), newItem.getTags())) {
+            changes.put("tags", newItem.getTags());
+        }
+
+        return changes;
     }
 }
