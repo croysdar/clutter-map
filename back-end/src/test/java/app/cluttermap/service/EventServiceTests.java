@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,6 +61,9 @@ public class EventServiceTests {
 
     @Mock
     private ItemService itemService;
+
+    @Mock
+    private ProjectAccessService projectAccessService;
 
     @Mock
     private EventRepository eventRepository;
@@ -130,12 +135,15 @@ public class EventServiceTests {
     void getChangedEntitiesSince_ShouldReturnMappedResults() {
         // Arrange
         LocalDateTime since = LocalDateTime.now().minusDays(1);
+        List<Long> accessibleProjectIds = List.of(1L, 2L);
         List<Object[]> mockResults = List.of(
                 new Object[] { ResourceType.ROOM, 1L },
                 new Object[] { ResourceType.ROOM, 2L },
                 new Object[] { ResourceType.PROJECT, 1L });
 
-        when(eventRepository.findChangesSince(since)).thenReturn(mockResults);
+        when(projectAccessService.getAccessibleProjectIds()).thenReturn(accessibleProjectIds);
+
+        when(eventRepository.findChangesSince(eq(since), anyList())).thenReturn(mockResults);
 
         // Act
         Map<ResourceType, Set<Long>> changes = eventService.getChangedEntitiesSince(since);
@@ -144,7 +152,10 @@ public class EventServiceTests {
         assertThat(changes).hasSize(2);
         assertThat(changes.get(ResourceType.ROOM)).containsExactlyInAnyOrder(1L, 2L);
         assertThat(changes.get(ResourceType.PROJECT)).containsExactly(1L);
-        verify(eventRepository, times(1)).findChangesSince(since);
+
+        // Verify interactions
+        verify(projectAccessService, times(1)).getAccessibleProjectIds();
+        verify(eventRepository, times(1)).findChangesSince(since, accessibleProjectIds);
     }
 
     @Test

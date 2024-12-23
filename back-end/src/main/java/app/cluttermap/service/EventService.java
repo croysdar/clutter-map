@@ -2,6 +2,7 @@ package app.cluttermap.service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.cluttermap.model.Event;
@@ -34,6 +34,7 @@ public class EventService {
     /* ------------- Injected Dependencies ------------- */
     private final EventRepository eventRepository;
     private final SecurityService securityService;
+    private final ProjectAccessService projectAccessService;
     private final EntityResolutionService entityResolutionService;
 
     private final EventService self;
@@ -43,10 +44,12 @@ public class EventService {
     /* ------------- Constructor ------------- */
     public EventService(
             SecurityService securityService,
+            ProjectAccessService projectAccessService,
             EntityResolutionService entityResolutionService,
             EventRepository eventRepository,
             @Lazy EventService self) {
         this.entityResolutionService = entityResolutionService;
+        this.projectAccessService = projectAccessService;
         this.securityService = securityService;
         this.eventRepository = eventRepository;
         this.self = self;
@@ -66,7 +69,12 @@ public class EventService {
     }
 
     public Map<ResourceType, Set<Long>> getChangedEntitiesSince(LocalDateTime since) {
-        List<Object[]> rawResults = eventRepository.findChangesSince(since);
+        List<Long> projectIds = projectAccessService.getAccessibleProjectIds();
+
+        if (projectIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Object[]> rawResults = eventRepository.findChangesSince(since, projectIds);
 
         Map<ResourceType, Set<Long>> changes = new HashMap<>();
         for (Object[] result : rawResults) {

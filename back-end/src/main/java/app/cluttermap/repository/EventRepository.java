@@ -25,6 +25,8 @@ public interface EventRepository extends CrudRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.project = :project ORDER BY e.timestamp DESC")
     Page<Event> findAllEventsInProject(Project project, Pageable pageable);
 
-    @Query("SELECT DISTINCT e.entityType, e.entityId FROM Event e WHERE e.timestamp > :since")
-    List<Object[]> findChangesSince(@Param("since") LocalDateTime since);
+    @Query("SELECT DISTINCT e.entityType, e.entityId FROM Event e WHERE e.timestamp > :since AND e.project.id IN :projectIds")
+    List<Object[]> findChangesSince(
+            @Param("since") LocalDateTime since,
+            @Param("projectIds") List<Long> projectIds);
 }

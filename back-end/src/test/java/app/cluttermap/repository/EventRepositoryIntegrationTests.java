@@ -207,7 +207,7 @@ public class EventRepositoryIntegrationTests {
 
         // Act: Retrieve changes since a specific timestamp
         LocalDateTime since = LocalDateTime.now().minusDays(1);
-        List<Object[]> changes = eventRepository.findChangesSince(since);
+        List<Object[]> changes = eventRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify distinct entity types and IDs are returned
         assertThat(changes).hasSize(3);
@@ -231,7 +231,7 @@ public class EventRepositoryIntegrationTests {
 
         // Act: Retrieve changes since a specific timestamp
         LocalDateTime since = LocalDateTime.now().minusDays(1);
-        List<Object[]> changes = eventRepository.findChangesSince(since);
+        List<Object[]> changes = eventRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify only recent events are returned
         assertThat(changes).hasSize(1);
@@ -247,7 +247,9 @@ public class EventRepositoryIntegrationTests {
         eventRepository.save(new Event(ResourceType.PROJECT, 1L, EventActionType.CREATE, null, mockProject, mockUser));
 
         // Act
-        List<Object[]> changes = eventRepository.findChangesSince(LocalDateTime.now().minusDays(1));
+        List<Object[]> changes = eventRepository.findChangesSince(
+                LocalDateTime.now().minusDays(1),
+                List.of(mockProject.getId()));
 
         // Assert
         assertThat(changes).allMatch(change -> change.length == 2);
