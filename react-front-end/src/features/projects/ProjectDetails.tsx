@@ -10,7 +10,6 @@ import { TileListWrapper, TileWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
 import { EntityEventsContainer } from '@/features/events/RenderEvents';
 import ProjectMenu from '@/features/projects/ProjectMenu';
-import { EntityEventsContainer } from '@/features/events/RenderEvents';
 
 /* ------------- Redux ------------- */
 import { useGetProjectQuery } from '@/features/projects/projectApi';
@@ -19,7 +18,6 @@ import { useGetRoomsByProjectQuery } from '@/features/rooms/roomApi';
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
-import { ResourceType } from '@/types/types';
 
 const ProjectDetails: React.FC = () => {
     const { projectId } = useParams();
