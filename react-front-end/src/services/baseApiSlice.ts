@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-import { API_BASE_URL } from '@/utils/constants'
+import { API_BASE_URL } from '@/utils/constants';
 import { getCsrfTokenFromCookies } from '@/utils/utils';
 
 export const baseApiSlice = createApi({
@@ -21,7 +21,7 @@ export const baseApiSlice = createApi({
         }
     }),
 
-    tagTypes: ['Room', 'Project', 'OrgUnit', 'Item'],
+    tagTypes: ['Room', 'Project', 'OrgUnit', 'Item', 'Event'],
 
     endpoints: builder => ({
 

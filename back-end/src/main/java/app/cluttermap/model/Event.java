@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
@@ -128,12 +129,32 @@ public class Event {
         return this.project;
     }
 
+    @JsonProperty("projectId")
+    public Long getProjectId() {
+        return project.getId();
+    }
+
+    @JsonProperty("projectName")
+    public String getProjectName() {
+        return project.getName();
+    }
+
     public void setProject(Project project) {
         this.project = project;
     }
 
     public User getUser() {
         return this.user;
+    }
+
+    @JsonProperty("userId")
+    public Long getUserId() {
+        return user.getId();
+    }
+
+    @JsonProperty("userName")
+    public String getUserName() {
+        return user.getUsername();
     }
 
     public void setUser(User user) {
