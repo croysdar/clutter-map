@@ -1,5 +1,6 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
+import { ResourceType } from "@/types/types";
 
 export const projectApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -34,7 +35,10 @@ export const projectApi = baseApiSlice.injectEndpoints({
                 method: 'PUT',
                 body: project
             }),
-            invalidatesTags: (result, error, arg) => [{ type: 'Project', id: arg.id }]
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Project', id: arg.id },
+                { type: 'Event', id: `${ResourceType.PROJECT}-${arg.id}` }
+            ]
         }),
 
         /* ------------- DELETE Operations ------------- */

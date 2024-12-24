@@ -6,16 +6,18 @@ import { CircularProgress, Typography } from '@mui/material';
 
 /* ------------- Components ------------- */
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
-import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
-import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
-import { ItemTile } from '@/features/items/RenderItems';
 import { TileListWrapper } from '@/components/common/TileWrapper';
+import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { EntityEventsContainer } from '@/features/events/RenderEvents';
+import { ItemTile } from '@/features/items/RenderItems';
+import OrgUnitMenu from '@/features/orgUnits/OrgUnitMenu';
 
 /* ------------- Redux ------------- */
 import { useGetItemsByOrgUnitQuery } from '@/features/items/itemApi';
 import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 
 /* ------------- Constants ------------- */
+import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
 
 const OrgUnitDetails: React.FC = () => {
@@ -76,6 +78,7 @@ const OrgUnitDetails: React.FC = () => {
                 objectLabel='Item'
                 to={ROUTES.itemAdd(projectId!, roomId!, orgUnitId!)}
             />
+            <EntityEventsContainer entityId={orgUnit.id} entityType={ResourceType.ORGANIZATIONAL_UNIT} />
         </>
     );
 };
