@@ -1,6 +1,7 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
 import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
+import { ResourceType } from "@/types/types";
 
 export const projectApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
