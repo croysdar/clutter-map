@@ -87,20 +87,17 @@ public class EventService {
     }
 
     /* --- Create Operation (POST) --- */
-    public Event logCreateEvent(ResourceType entityType, Long entityId, Map<String, Object> payload) {
-        Event event = initializeEvent(entityType, entityId, EventActionType.CREATE);
-        event.setPayload(convertToJson(payload));
-        return self.save(event);
-    }
+    public Event logEvent(
+            ResourceType entityType,
+            Long entityId,
+            EventActionType actionType,
+            Map<String, Object> payload) {
+        Event event = initializeEvent(entityType, entityId, actionType);
 
-    public Event logUpdateEvent(ResourceType entityType, Long entityId, Map<String, Object> changes) {
-        Event event = initializeEvent(entityType, entityId, EventActionType.UPDATE);
-        event.setPayload(convertToJson(changes));
-        return self.save(event);
-    }
+        if (payload != null) {
+            event.setPayload(convertToJson(payload));
+        }
 
-    public Event logDeleteEvent(ResourceType entityType, Long entityId) {
-        Event event = initializeEvent(entityType, entityId, EventActionType.DELETE);
         return self.save(event);
     }
 
@@ -175,12 +172,12 @@ public class EventService {
         if (entityType == null || entityId == null || actionType == null) {
             throw new IllegalArgumentException("Entity type, ID, and action type must not be null");
         }
-        User currentUser = securityService.getCurrentUser();
         Event event = new Event();
         event.setEntityType(entityType);
         event.setEntityId(entityId);
         event.setAction(actionType);
-        event.setUser(currentUser);
+        User user = securityService.getCurrentUser();
+        event.setUser(user);
         event.setProject(entityResolutionService.resolveProject(entityType, entityId));
         return event;
     }

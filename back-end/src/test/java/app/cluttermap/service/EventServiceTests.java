@@ -180,7 +180,9 @@ public class EventServiceTests {
         expectedPayload.put("description", room.getDescription());
 
         // Act
-        Event event = eventService.logCreateEvent(ResourceType.ROOM, room.getId(), expectedPayload);
+        Event event = eventService.logEvent(
+                ResourceType.ROOM, room.getId(),
+                EventActionType.CREATE, expectedPayload);
 
         // Assert
         assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.CREATE, user);
@@ -215,7 +217,9 @@ public class EventServiceTests {
         expectedPayload.put("name", newRoom.getName());
         expectedPayload.put("description", newRoom.getDescription());
         // Act
-        Event event = eventService.logUpdateEvent(ResourceType.ROOM, oldRoom.getId(), expectedPayload);
+        Event event = eventService.logEvent(
+                ResourceType.ROOM, oldRoom.getId(),
+                EventActionType.UPDATE, expectedPayload);
 
         // Assert
         assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.UPDATE, user);

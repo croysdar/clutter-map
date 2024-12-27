@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,6 +43,7 @@ import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -216,7 +218,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
         // Arrange: Mock event logging
-        mockLogCreateEvent();
+        mockLogEvent();
 
         // Act: Call the service method
         OrgUnit createdOrgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
@@ -240,8 +242,9 @@ public class OrgUnitServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Assert: Verify event logging
-        verify(eventService).logCreateEvent(eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
+                eq(EventActionType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -310,7 +313,7 @@ public class OrgUnitServiceTests {
         when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
 
         // Arrange: Mock event logging
-        mockLogUpdateEvent();
+        mockLogEvent();
 
         // Act: Call the service method
         orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
@@ -333,10 +336,9 @@ public class OrgUnitServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Verify the event was logged
-        verify(eventService).logUpdateEvent(
-                eq(ResourceType.ORGANIZATIONAL_UNIT),
-                eq(resourceId),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -380,7 +382,7 @@ public class OrgUnitServiceTests {
             mockAssignedOrgUnitInRepository(resourceId);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the service method
             orgUnitService.deleteOrgUnitById(resourceId);
@@ -390,9 +392,9 @@ public class OrgUnitServiceTests {
             verify(orgUnitRepository).delete(any(OrgUnit.class));
 
             // Verify the event was logged
-            verify(eventService).logDeleteEvent(
-                    eq(ResourceType.ORGANIZATIONAL_UNIT),
-                    eq(resourceId));
+            verify(eventService).logEvent(
+                    eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
+                    eq(EventActionType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding org unit
             mockNonexistentOrgUnitInRepository(resourceId);
@@ -472,10 +474,9 @@ public class OrgUnitServiceTests {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(eventService, times(2)).logUpdateEvent(
-                eq(ResourceType.ORGANIZATIONAL_UNIT),
-                anyLong(),
-                payloadCaptor.capture());
+        verify(eventService, times(2)).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), anyLong(),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payloads contain the expected changes
         List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
@@ -531,10 +532,9 @@ public class OrgUnitServiceTests {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(eventService, times(2)).logUpdateEvent(
-                eq(ResourceType.ORGANIZATIONAL_UNIT),
-                anyLong(),
-                payloadCaptor.capture());
+        verify(eventService, times(2)).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), anyLong(),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payloads contain the expected changes
         List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
@@ -608,15 +608,8 @@ public class OrgUnitServiceTests {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }

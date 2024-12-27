@@ -15,6 +15,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -62,7 +63,9 @@ public class RoomService {
     public Room createRoom(NewRoomDTO roomDTO) {
         Room room = self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
 
-        eventService.logCreateEvent(ResourceType.ROOM, room.getId(), buildCreatePayload(room));
+        eventService.logEvent(
+                ResourceType.ROOM, room.getId(),
+                EventActionType.CREATE, buildCreatePayload(room));
 
         return room;
     }
@@ -88,7 +91,9 @@ public class RoomService {
 
         Room updatedRoom = roomRepository.save(_room);
 
-        eventService.logUpdateEvent(ResourceType.ROOM, id, buildChangePayload(oldRoom, updatedRoom));
+        eventService.logEvent(
+                ResourceType.ROOM, id,
+                EventActionType.UPDATE, buildChangePayload(oldRoom, updatedRoom));
 
         return updatedRoom;
     }
@@ -99,7 +104,9 @@ public class RoomService {
         Room room = self.getRoomById(id);
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
 
-        eventService.logDeleteEvent(ResourceType.ROOM, id);
+        eventService.logEvent(
+                ResourceType.ROOM, id,
+                EventActionType.DELETE, null);
     }
 
     private Map<String, Object> buildCreatePayload(Room room) {

@@ -173,7 +173,7 @@ public class ItemServiceSecurityTests {
             when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
 
             // Arrange: Mock event logging
-            mockLogCreateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             Item item = itemService.createItem(itemDTO);
@@ -213,7 +213,7 @@ public class ItemServiceSecurityTests {
             when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
 
             // Arrange: Mock event logging
-            mockLogUpdateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             Item item = itemService.updateItem(resourceId, itemDTO);
@@ -327,7 +327,7 @@ public class ItemServiceSecurityTests {
             doNothing().when(itemRepository).deleteById(1L);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             itemService.deleteItemById(1L);
@@ -378,15 +378,8 @@ public class ItemServiceSecurityTests {
         when(itemRepository.findById(mockItem.getId())).thenReturn(Optional.of(mockItem));
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }

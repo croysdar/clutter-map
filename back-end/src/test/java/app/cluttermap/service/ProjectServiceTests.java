@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +38,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -153,7 +155,7 @@ public class ProjectServiceTests {
         when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
 
         // Arrange: Mock event logging
-        mockLogCreateEvent();
+        mockLogEvent();
 
         // Act: Call service method
         Project createdProject = projectService.createProject(projectDTO);
@@ -173,8 +175,9 @@ public class ProjectServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Assert: Verify event logging
-        verify(eventService).logCreateEvent(eq(ResourceType.PROJECT), eq(mockProject.getId()),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.PROJECT), eq(mockProject.getId()),
+                eq(EventActionType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -233,7 +236,7 @@ public class ProjectServiceTests {
         when(projectRepository.save(project)).thenReturn(project);
 
         // Arrange: Mock event logging
-        mockLogUpdateEvent();
+        mockLogEvent();
 
         // Act: Call the service to update the project's name
         projectService.updateProject(resourceId, projectDTO);
@@ -251,10 +254,9 @@ public class ProjectServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Verify the event was logged
-        verify(eventService).logUpdateEvent(
-                eq(ResourceType.PROJECT),
-                eq(resourceId),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.PROJECT), eq(resourceId),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -288,7 +290,7 @@ public class ProjectServiceTests {
             mockProjectInRepository(resourceId);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the service method
             projectService.deleteProjectById(resourceId);
@@ -298,9 +300,9 @@ public class ProjectServiceTests {
             verify(projectRepository).deleteById(resourceId);
 
             // Verify the event was logged
-            verify(eventService).logDeleteEvent(
-                    eq(ResourceType.PROJECT),
-                    eq(resourceId));
+            verify(eventService).logEvent(
+                    eq(ResourceType.PROJECT), eq(resourceId),
+                    eq(EventActionType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding project
             mockNonexistentProjectInRepository(resourceId);
@@ -324,15 +326,8 @@ public class ProjectServiceTests {
         return mockProject;
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }

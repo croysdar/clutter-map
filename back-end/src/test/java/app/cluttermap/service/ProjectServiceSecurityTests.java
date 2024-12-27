@@ -105,7 +105,7 @@ public class ProjectServiceSecurityTests {
             when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
 
             // Arrange: Mock event logging
-            mockLogUpdateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             Project project = projectService.updateProject(resourceId, projectDTO);
@@ -143,7 +143,7 @@ public class ProjectServiceSecurityTests {
             doNothing().when(projectRepository).deleteById(1L);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             projectService.deleteProjectById(resourceId);
@@ -173,11 +173,8 @@ public class ProjectServiceSecurityTests {
         return project;
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }

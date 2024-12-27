@@ -20,6 +20,7 @@ import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -88,7 +89,9 @@ public class ItemService {
             item = self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
         }
 
-        eventService.logCreateEvent(ResourceType.ITEM, item.getId(), buildCreatePayload(item));
+        eventService.logEvent(
+                ResourceType.ITEM, item.getId(),
+                EventActionType.CREATE, buildCreatePayload(item));
         return item;
     }
 
@@ -137,7 +140,9 @@ public class ItemService {
 
         Item updatedItem = itemRepository.save(_item);
 
-        eventService.logUpdateEvent(ResourceType.ITEM, id, buildChangePayload(oldItem, updatedItem));
+        eventService.logEvent(
+                ResourceType.ITEM, id, EventActionType.UPDATE,
+                buildChangePayload(oldItem, updatedItem));
 
         return updatedItem;
     }
@@ -149,7 +154,9 @@ public class ItemService {
         self.getItemById(id);
         itemRepository.deleteById(id);
 
-        eventService.logDeleteEvent(ResourceType.ITEM, id);
+        eventService.logEvent(
+                ResourceType.ITEM, id,
+                EventActionType.DELETE, null);
     }
 
     /* ------------- Complex Operations ------------- */
@@ -169,7 +176,9 @@ public class ItemService {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
             assignItemToOrgUnit(item, targetOrgUnit);
-            eventService.logUpdateEvent(ResourceType.ITEM, item.getId(), buildOrgUnitIdChangePayload(targetOrgUnitId));
+            eventService.logEvent(
+                    ResourceType.ITEM, item.getId(),
+                    EventActionType.UPDATE, buildOrgUnitIdChangePayload(targetOrgUnitId));
             updatedItems.add(item);
         }
         return updatedItems;
@@ -182,7 +191,9 @@ public class ItemService {
             Item item = self.getItemById(itemId);
             if (item.getOrgUnit() != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
-                eventService.logUpdateEvent(ResourceType.ITEM, item.getId(), buildOrgUnitIdChangePayload(null));
+                eventService.logEvent(
+                        ResourceType.ITEM, item.getId(),
+                        EventActionType.UPDATE, buildOrgUnitIdChangePayload(null));
             }
             updatedItems.add(item);
         }

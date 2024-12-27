@@ -119,7 +119,7 @@ public class RoomServiceSecurityTests {
             when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
 
             // Arrange: Mock event logging
-            mockLogCreateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             Room room = roomService.createRoom(roomDTO);
@@ -159,7 +159,7 @@ public class RoomServiceSecurityTests {
             when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
 
             // Arrange: Mock event logging
-            mockLogUpdateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             Room room = roomService.updateRoom(resourceId, roomDTO);
@@ -197,7 +197,7 @@ public class RoomServiceSecurityTests {
             doNothing().when(roomRepository).deleteById(1L);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             roomService.deleteRoomById(resourceId);
@@ -234,15 +234,8 @@ public class RoomServiceSecurityTests {
         return room;
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }

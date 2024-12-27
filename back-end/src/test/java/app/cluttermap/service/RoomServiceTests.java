@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -159,7 +161,7 @@ public class RoomServiceTests {
         when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
 
         // Arrange: Mock event logging
-        mockLogCreateEvent();
+        mockLogEvent();
 
         // Act: Call the service method
         Room createdRoom = roomService.createRoom(roomDTO);
@@ -179,8 +181,9 @@ public class RoomServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Assert: Verify event logging
-        verify(eventService).logCreateEvent(eq(ResourceType.ROOM), eq(mockRoom.getId()),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.ROOM), eq(mockRoom.getId()),
+                eq(EventActionType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -241,7 +244,7 @@ public class RoomServiceTests {
         when(roomRepository.save(room)).thenReturn(room);
 
         // Arrange: Mock event logging
-        mockLogUpdateEvent();
+        mockLogEvent();
 
         // Act: Call the service method
         roomService.updateRoom(resourceId, roomDTO);
@@ -264,10 +267,9 @@ public class RoomServiceTests {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
 
         // Verify the event was logged
-        verify(eventService).logUpdateEvent(
-                eq(ResourceType.ROOM),
-                eq(resourceId),
-                payloadCaptor.capture());
+        verify(eventService).logEvent(
+                eq(ResourceType.ROOM), eq(resourceId),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -310,7 +312,7 @@ public class RoomServiceTests {
             mockRoomInRepository(resourceId);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the service method
             roomService.deleteRoomById(resourceId);
@@ -319,9 +321,9 @@ public class RoomServiceTests {
             // correct ID
             verify(roomRepository).delete(any(Room.class));
 
-            verify(eventService).logDeleteEvent(
-                    eq(ResourceType.ROOM),
-                    eq(resourceId));
+            verify(eventService).logEvent(
+                    eq(ResourceType.ROOM), eq(resourceId),
+                    eq(EventActionType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding room
             mockNonexistentRoomInRepository(resourceId);
@@ -349,15 +351,7 @@ public class RoomServiceTests {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 }

@@ -178,7 +178,7 @@ public class OrgUnitServiceSecurityTests {
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
             // Arrange: Mock event logging
-            mockLogCreateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
@@ -218,7 +218,7 @@ public class OrgUnitServiceSecurityTests {
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
             // Arrange: Mock event logging
-            mockLogUpdateEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
@@ -333,7 +333,7 @@ public class OrgUnitServiceSecurityTests {
             doNothing().when(orgUnitRepository).deleteById(1L);
 
             // Arrange: Mock event logging
-            mockLogDeleteEvent();
+            mockLogEvent();
 
             // Act: Call the method under test
             orgUnitService.deleteOrgUnitById(1L);
@@ -382,15 +382,8 @@ public class OrgUnitServiceSecurityTests {
         when(orgUnitRepository.findById(mockOrgUnit.getId())).thenReturn(Optional.of(mockOrgUnit));
     }
 
-    private void mockLogCreateEvent() {
-        when(eventService.logCreateEvent(any(), anyLong(), any())).thenReturn(new Event());
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
-    private void mockLogUpdateEvent() {
-        when(eventService.logUpdateEvent(any(), anyLong(), any())).thenReturn(new Event());
-    }
-
-    private void mockLogDeleteEvent() {
-        when(eventService.logDeleteEvent(any(), anyLong())).thenReturn(new Event());
-    }
 }
