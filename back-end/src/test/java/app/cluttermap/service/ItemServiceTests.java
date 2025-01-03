@@ -499,7 +499,7 @@ public class ItemServiceTests {
         mockOrgUnitLookup();
 
         // Mock unassigned item
-        Item unassignedItem1 = mockUnassignedItemInRepository(1L);
+        Item unassignedItem = mockUnassignedItemInRepository(1L);
 
         // Mock a previously assigned item
         OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().id(10L).project(mockProject).build();
@@ -507,7 +507,7 @@ public class ItemServiceTests {
 
         // Act: Assign multiple items
         Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(
-                List.of(unassignedItem1.getId(), assignedItem.getId()),
+                List.of(unassignedItem.getId(), assignedItem.getId()),
                 mockOrgUnit.getId());
 
         // Assert: Verify all items are assigned to the target org unit
@@ -518,26 +518,15 @@ public class ItemServiceTests {
         verify(orgUnitRepository, times(2)).save(mockOrgUnit); // Assign all items
         verify(itemRepository, times(2)).findById(anyLong());
 
-        // Verify logUpdateEvent is called for all items
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ITEM), eq(assignedItem.getId()),
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(previousOrgUnit.getId()),
+                eq(mockOrgUnit.getId()));
 
-        verify(eventService, times(2)).logEvent(
-                eq(ResourceType.ITEM), anyLong(),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
-
-        // Assert: Verify the payloads contain the expected changes
-        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
-
-        assertThat(capturedPayloads).hasSize(2);
-
-        // Verify payload for the first item
-        assertThat(capturedPayloads.get(0))
-                .containsEntry("orgUnitId", mockOrgUnit.getId());
-
-        // Verify payload for the second item
-        assertThat(capturedPayloads.get(1))
-                .containsEntry("orgUnitId", mockOrgUnit.getId());
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ITEM), eq(unassignedItem.getId()),
+                eq(ResourceType.ORGANIZATIONAL_UNIT), isNull(),
+                eq(mockOrgUnit.getId()));
     }
 
     @Test
@@ -576,25 +565,11 @@ public class ItemServiceTests {
         verify(orgUnitRepository, times(2)).save(any(OrgUnit.class));
 
         // Verify logUpdateEvent is called for both items
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
-
-        verify(eventService, times(2)).logEvent(
+        verify(eventService, times(2)).logMoveEvent(
                 eq(ResourceType.ITEM), anyLong(),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
-
-        // Assert: Verify the payloads contain the expected changes
-        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
-
-        assertThat(capturedPayloads).hasSize(2);
-
-        // Verify payload for the first item
-        assertThat(capturedPayloads.get(0))
-                .containsEntry("orgUnitId", null);
-
-        // Verify payload for the second item
-        assertThat(capturedPayloads.get(1))
-                .containsEntry("orgUnitId", null);
+                eq(ResourceType.ORGANIZATIONAL_UNIT),
+                anyLong(),
+                isNull());
     }
 
     @Test

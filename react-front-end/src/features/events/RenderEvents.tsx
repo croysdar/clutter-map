@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 /* ------------- Material UI ------------- */
 import {
+    Button,
+    CircularProgress,
     Paper,
     Table,
     TableBody,
@@ -9,8 +11,6 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Button,
-    CircularProgress,
     Typography
 } from '@mui/material';
 
@@ -75,23 +75,19 @@ const RenderEvents: React.FC<RenderEventsProps> = ({ events }) => {
             <Table>
                 <TableHead>
                     <TableRow>
-                        {/* <TableCell>Entity Type</TableCell>
-                        <TableCell>Entity ID</TableCell> */}
-                        {/* <TableCell>Project</TableCell> */}
                         <TableCell>User</TableCell>
                         <TableCell>Action</TableCell>
+                        <TableCell>Timestamp</TableCell>
                         <TableCell>Payload</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {events.map(event => (
                         <TableRow key={event.id}>
-                            {/* <TableCell>{event.entityType}</TableCell>
-                            <TableCell>{event.entityId}</TableCell> */}
-                            {/* <TableCell>{`${event.projectName} (${event.projectId})`}</TableCell> */}
                             <TableCell>{event.userName}</TableCell>
                             <TableCell>{event.action}</TableCell>
-                            <TableCell><RenderPayload payload={event.payload} /></TableCell>
+                            <TableCell>{event.timestamp}</TableCell>
+                            <TableCell><RenderPayload payload={event.details} /></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

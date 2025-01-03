@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +36,11 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
+import app.cluttermap.model.dto.EntityHistoryDTO;
+import app.cluttermap.repository.EventEntityRepository;
 import app.cluttermap.repository.EventRepository;
 import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,6 +69,9 @@ public class EventServiceTests {
     private EventRepository eventRepository;
 
     @Mock
+    private EventEntityRepository eventEntityRepository;
+
+    @Mock
     private SecurityService securityService;
 
     @Mock
@@ -94,8 +97,8 @@ public class EventServiceTests {
         // Arrange
         Pageable pageable = PageRequest.of(0, 2);
         List<Event> mockEvents = List.of(
-                new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser),
-                new Event(ResourceType.ROOM, 2L, EventActionType.UPDATE, null, mockProject, mockUser));
+                new Event(EventActionType.CREATE, mockProject, mockUser),
+                new Event(EventActionType.UPDATE, mockProject, mockUser));
         Page<Event> mockPage = new PageImpl<>(mockEvents, pageable, 5);
 
         when(eventRepository.findAllEventsInProject(mockProject, pageable)).thenReturn(mockPage);
@@ -106,56 +109,49 @@ public class EventServiceTests {
         // Assert
         assertThat(events.getContent()).hasSize(2);
         assertThat(events.getTotalElements()).isEqualTo(5);
-        assertThat(events.getContent().get(0).getEntityType()).isEqualTo(ResourceType.ROOM);
         verify(eventRepository, times(1)).findAllEventsInProject(mockProject, pageable);
     }
 
     @Test
-    void getEventsForEntity_ShouldReturnPaginatedResults() {
+    void getEntityHistory_ShouldReturnPaginatedResults() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 2);
-        List<Event> mockEvents = List.of(
-                new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser),
-                new Event(ResourceType.ROOM, 1L, EventActionType.UPDATE, null, mockProject, mockUser));
-        Page<Event> mockPage = new PageImpl<>(mockEvents, pageable, 4);
 
-        when(eventRepository.findByEntityTypeAndEntityId(ResourceType.ROOM, 1L, pageable)).thenReturn(mockPage);
+        // Create mock data for EventHistoryDTO
+        EntityHistoryDTO dto1 = new EntityHistoryDTO(
+                ResourceType.ITEM,
+                1L,
+                EventChangeType.CREATE,
+                "{\"field\":\"value\"}", // Mock JSON for details
+                "testUser", // Username
+                1L, // User ID
+                LocalDateTime.of(2025, 1, 2, 14, 30, 50) // Mock timestamp
+        );
+
+        EntityHistoryDTO dto2 = new EntityHistoryDTO(
+                ResourceType.ITEM,
+                1L,
+                EventChangeType.UPDATE,
+                "{\"field\":\"newValue\"}", // Mock JSON for details
+                "testUser", // Username
+                1L, // User ID
+                LocalDateTime.of(2025, 1, 3, 10, 15, 30) // Mock timestamp
+        );
+
+        List<EntityHistoryDTO> mockDTOs = List.of(dto1, dto2);
+        Page<EntityHistoryDTO> mockPage = new PageImpl<>(mockDTOs, pageable, 4);
+
+        when(eventEntityRepository.findHistoryByEntity(ResourceType.ROOM, 1L, pageable)).thenReturn(mockPage);
 
         // Act
-        Page<Event> events = eventService.getEventsForEntity(ResourceType.ROOM, 1L, 0, 2);
+        Page<EntityHistoryDTO> events = eventService.getEntityHistory(ResourceType.ROOM, 1L, 0, 2);
 
         // Assert
         assertThat(events.getContent()).hasSize(2);
         assertThat(events.getTotalElements()).isEqualTo(4);
-        assertThat(events.getContent().get(0).getEntityId()).isEqualTo(1L);
-        verify(eventRepository, times(1)).findByEntityTypeAndEntityId(ResourceType.ROOM, 1L, pageable);
-    }
+        assertThat(events.getContent()).containsExactly(dto1, dto2);
 
-    @Test
-    void getChangedEntitiesSince_ShouldReturnMappedResults() {
-        // Arrange
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
-        List<Long> accessibleProjectIds = List.of(1L, 2L);
-        List<Object[]> mockResults = List.of(
-                new Object[] { ResourceType.ROOM, 1L },
-                new Object[] { ResourceType.ROOM, 2L },
-                new Object[] { ResourceType.PROJECT, 1L });
-
-        when(projectAccessService.getAccessibleProjectIds()).thenReturn(accessibleProjectIds);
-
-        when(eventRepository.findChangesSince(eq(since), anyList())).thenReturn(mockResults);
-
-        // Act
-        Map<ResourceType, Set<Long>> changes = eventService.getChangedEntitiesSince(since);
-
-        // Assert
-        assertThat(changes).hasSize(2);
-        assertThat(changes.get(ResourceType.ROOM)).containsExactlyInAnyOrder(1L, 2L);
-        assertThat(changes.get(ResourceType.PROJECT)).containsExactly(1L);
-
-        // Verify interactions
-        verify(projectAccessService, times(1)).getAccessibleProjectIds();
-        verify(eventRepository, times(1)).findChangesSince(since, accessibleProjectIds);
+        verify(eventEntityRepository, times(1)).findHistoryByEntity(ResourceType.ROOM, 1L, pageable);
     }
 
     @Test
@@ -185,9 +181,7 @@ public class EventServiceTests {
                 EventActionType.CREATE, expectedPayload);
 
         // Assert
-        assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.CREATE, user);
-        assertEquals("{\"name\":\"Room 1\",\"description\":\"Test room\"}",
-                event.getPayload());
+        assertEventFields(event, EventActionType.CREATE, user);
         assertEquals(project, event.getProject());
         verify(eventRepository, times(1)).save(event);
         verify(entityResolutionService, times(1)).resolveProject(any(ResourceType.class), anyLong());
@@ -222,8 +216,7 @@ public class EventServiceTests {
                 EventActionType.UPDATE, expectedPayload);
 
         // Assert
-        assertEventFields(event, ResourceType.ROOM, 2L, EventActionType.UPDATE, user);
-        assertEquals("{\"name\":\"New Room\",\"description\":\"New Description\"}", event.getPayload());
+        assertEventFields(event, EventActionType.UPDATE, user);
         assertEquals(project, event.getProject());
         verify(eventRepository, times(1)).save(event);
         verify(entityResolutionService, times(1)).resolveProject(ResourceType.ROOM, oldRoom.getId());
@@ -347,10 +340,7 @@ public class EventServiceTests {
         return mockUser;
     }
 
-    private void assertEventFields(Event event, ResourceType entityType, Long entityId, EventActionType action,
-            User user) {
-        assertEquals(entityType, event.getEntityType());
-        assertEquals(entityId, event.getEntityId());
+    private void assertEventFields(Event event, EventActionType action, User user) {
         assertEquals(action, event.getAction());
         assertEquals(user, event.getUser());
         assertNotNull(event.getTimestamp());

@@ -9,5 +9,6 @@ export interface TimelineEvent {
     projectName: string,
     userId: number,
     userName: string,
-    payload: string
+    details: string,
+    timestamp: string
 }

@@ -168,6 +168,7 @@ public class ItemService {
 
         for (Long itemId : itemIds) {
             Item item = self.getItemById(itemId);
+            Long previousOrgUnitId = item.getOrgUnitId();
 
             validateSameProject(item, targetOrgUnit);
 
@@ -176,9 +177,9 @@ public class ItemService {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
             }
             assignItemToOrgUnit(item, targetOrgUnit);
-            eventService.logEvent(
+            eventService.logMoveEvent(
                     ResourceType.ITEM, item.getId(),
-                    EventActionType.UPDATE, buildOrgUnitIdChangePayload(targetOrgUnitId));
+                    ResourceType.ORGANIZATIONAL_UNIT, previousOrgUnitId, targetOrgUnitId);
             updatedItems.add(item);
         }
         return updatedItems;
@@ -189,11 +190,12 @@ public class ItemService {
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
             Item item = self.getItemById(itemId);
-            if (item.getOrgUnit() != null) {
+            Long previousOrgUnitId = item.getOrgUnitId();
+            if (previousOrgUnitId != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
-                eventService.logEvent(
+                eventService.logMoveEvent(
                         ResourceType.ITEM, item.getId(),
-                        EventActionType.UPDATE, buildOrgUnitIdChangePayload(null));
+                        ResourceType.ORGANIZATIONAL_UNIT, previousOrgUnitId, null);
             }
             updatedItems.add(item);
         }
@@ -261,11 +263,5 @@ public class ItemService {
         }
 
         return changes;
-    }
-
-    private Map<String, Object> buildOrgUnitIdChangePayload(Long newOrgUnitId) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("orgUnitId", newOrgUnitId);
-        return payload;
     }
 }

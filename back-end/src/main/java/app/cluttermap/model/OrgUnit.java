@@ -213,7 +213,7 @@ public class OrgUnit {
             return false;
         }
         OrgUnit orgUnit = (OrgUnit) o;
-        return Objects.equals(id, orgUnit.id);
+        return Objects.equals(id, orgUnit.getId());
     }
 
     @Override

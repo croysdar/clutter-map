@@ -209,7 +209,7 @@ public class Project {
             return false;
         }
         Project project = (Project) o;
-        return Objects.equals(id, project.id);
+        return Objects.equals(id, project.getId());
     }
 
     @Override

@@ -158,6 +158,7 @@ public class OrgUnitService {
 
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
+            Long previousRoomId = orgUnit.getRoomId();
 
             validateSameProject(orgUnit, targetRoom);
 
@@ -166,9 +167,9 @@ public class OrgUnitService {
                 unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
             }
             assignOrgUnitToRoom(orgUnit, targetRoom);
-            eventService.logEvent(
+            eventService.logMoveEvent(
                     ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(),
-                    EventActionType.UPDATE, buildRoomIdChangePayload(targetRoom.getId()));
+                    ResourceType.ROOM, previousRoomId, targetRoomId);
             updatedOrgUnits.add(orgUnit);
         }
         return updatedOrgUnits;
@@ -179,11 +180,12 @@ public class OrgUnitService {
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
+            Long previousRoomId = orgUnit.getRoomId();
             if (orgUnit.getRoom() != null) {
                 unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
-                eventService.logEvent(
+                eventService.logMoveEvent(
                         ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(),
-                        EventActionType.UPDATE, buildRoomIdChangePayload(null));
+                        ResourceType.ROOM, previousRoomId, null);
             }
             updatedOrgUnits.add(orgUnit);
         }
@@ -243,11 +245,5 @@ public class OrgUnitService {
         }
 
         return changes;
-    }
-
-    private Map<String, Object> buildRoomIdChangePayload(Long newRoomId) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("roomId", newRoomId);
-        return payload;
     }
 }

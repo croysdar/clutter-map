@@ -203,7 +203,7 @@ public class Item {
             return false;
         }
         Item item = (Item) o;
-        return Objects.equals(id, item.id);
+        return Objects.equals(id, item.getId());
     }
 
     @Override

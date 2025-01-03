@@ -1,14 +1,16 @@
 package app.cluttermap.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.cluttermap.util.EventActionType;
-import app.cluttermap.util.ResourceType;
-import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,6 +20,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
@@ -30,19 +33,13 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private ResourceType entityType;
-
-    @NotNull
-    private Long entityId;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<EventEntity> eventEntities = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @NotNull
     private EventActionType action;
-
-    @Column(columnDefinition = "TEXT", nullable = true)
-    private String payload;
 
     @NotNull
     private LocalDateTime timestamp = LocalDateTime.now();
@@ -63,12 +60,18 @@ public class Event {
     public Event() {
     }
 
-    public Event(ResourceType entityType, Long entityId, EventActionType action,
-            String payload, Project project, User user) {
-        this.entityType = entityType;
-        this.entityId = entityId;
+    public Event(
+            EventActionType action,
+            Project project,
+            User user) {
+
+        if (action == null) {
+            throw new IllegalArgumentException("EventActionType cannot be null");
+        }
+        if (project == null) {
+            throw new IllegalArgumentException("Project cannot be null");
+        }
         this.action = action;
-        this.payload = payload;
         this.project = project;
         this.user = user;
     }
@@ -85,20 +88,12 @@ public class Event {
         this.id = id;
     }
 
-    public ResourceType getEntityType() {
-        return this.entityType;
+    public List<EventEntity> getEventEntities() {
+        return this.eventEntities;
     }
 
-    public void setEntityType(ResourceType entityType) {
-        this.entityType = entityType;
-    }
-
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
+    public void setEventEntities(List<EventEntity> eventEntities) {
+        this.eventEntities = eventEntities;
     }
 
     public EventActionType getAction() {
@@ -107,14 +102,6 @@ public class Event {
 
     public void setAction(EventActionType action) {
         this.action = action;
-    }
-
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
     }
 
     public LocalDateTime getTimestamp() {
@@ -168,23 +155,13 @@ public class Event {
         return this;
     }
 
-    public Event entityType(ResourceType entityType) {
-        setEntityType(entityType);
-        return this;
-    }
-
-    public Event entityId(Long entityId) {
-        setEntityId(entityId);
+    public Event eventEntities(List<EventEntity> eventEntities) {
+        setEventEntities(eventEntities);
         return this;
     }
 
     public Event action(EventActionType action) {
         setAction(action);
-        return this;
-    }
-
-    public Event payload(String payload) {
-        setPayload(payload);
         return this;
     }
 
@@ -203,6 +180,13 @@ public class Event {
         return this;
     }
 
+    /* ------------- Utility Methods ------------- */
+
+    public void addEventEntity(EventEntity entity) {
+        eventEntities.add(entity);
+        entity.setEvent(this);
+    }
+
     /* ------------- Equals, HashCode, and ToString ------------- */
 
     @Override
@@ -215,7 +199,7 @@ public class Event {
 
         Event event = (Event) o;
 
-        return Objects.equals(id, event.id);
+        return Objects.equals(id, event.getId());
     }
 
     @Override
@@ -227,12 +211,11 @@ public class Event {
     public String toString() {
         return "Event{" +
                 "id=" + id +
-                ", entityType=" + entityType +
-                ", entityId=" + entityId +
                 ", action=" + action +
                 ", timestamp=" + timestamp +
                 ", user=" + (user != null ? user.getUsername() : "null") +
                 ", project=" + (project != null ? project.getId() : "null") +
                 '}';
     }
+
 }

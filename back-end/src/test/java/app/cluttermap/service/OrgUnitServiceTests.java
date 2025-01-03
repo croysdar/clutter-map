@@ -470,26 +470,13 @@ public class OrgUnitServiceTests {
         verify(roomRepository, times(2)).save(mockRoom); // Assign all org units
         verify(orgUnitRepository, times(2)).findById(anyLong());
 
-        // Verify logUpdateEvent is called for all org units
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(assignedOrgUnit.getId()),
+                eq(ResourceType.ROOM), eq(previousRoom.getId()), eq(mockRoom.getId()));
 
-        verify(eventService, times(2)).logEvent(
-                eq(ResourceType.ORGANIZATIONAL_UNIT), anyLong(),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
-
-        // Assert: Verify the payloads contain the expected changes
-        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
-
-        assertThat(capturedPayloads).hasSize(2);
-
-        // Verify payload for the first item
-        assertThat(capturedPayloads.get(0))
-                .containsEntry("roomId", mockRoom.getId());
-
-        // Verify payload for the second item
-        assertThat(capturedPayloads.get(1))
-                .containsEntry("roomId", mockRoom.getId());
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(unassignedOrgUnit1.getId()),
+                eq(ResourceType.ROOM), isNull(), eq(mockRoom.getId()));
     }
 
     @Test
@@ -528,26 +515,9 @@ public class OrgUnitServiceTests {
         verify(orgUnitRepository, times(2)).findById(anyLong());
         verify(roomRepository, times(2)).save(any(Room.class));
 
-        // Verify logUpdateEvent is called for both items
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
-
-        verify(eventService, times(2)).logEvent(
+        verify(eventService, times(2)).logMoveEvent(
                 eq(ResourceType.ORGANIZATIONAL_UNIT), anyLong(),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
-
-        // Assert: Verify the payloads contain the expected changes
-        List<Map<String, Object>> capturedPayloads = payloadCaptor.getAllValues();
-
-        assertThat(capturedPayloads).hasSize(2);
-
-        // Verify payload for the first item
-        assertThat(capturedPayloads.get(0))
-                .containsEntry("roomId", null);
-
-        // Verify payload for the second item
-        assertThat(capturedPayloads.get(1))
-                .containsEntry("roomId", null);
+                eq(ResourceType.ROOM), eq(mockRoom.getId()), isNull());
     }
 
     @Test

@@ -57,65 +57,17 @@ public class EventRepositoryIntegrationTests {
     }
 
     @Test
-    void findByEntityTypeAndEntityId_ShouldReturnPaginatedResults() {
-        // Arrange: Create multiple events
-        List<Event> eventsToSave = new ArrayList<>();
-        eventsToSave.add(new Event(
-                ResourceType.ROOM, 1L,
-                EventActionType.CREATE, null,
-                mockProject, mockUser));
-        for (int i = 0; i < 5; i++) {
-            eventsToSave.add(new Event(
-                    ResourceType.ROOM, 1L,
-                    EventActionType.UPDATE, null,
-                    mockProject, mockUser));
-        }
-        eventRepository.saveAll(eventsToSave);
-
-        // Act: Retrieve paginated events
-        Page<Event> events = eventRepository.findByEntityTypeAndEntityId(
-                ResourceType.ROOM, 1L,
-                createPageable(0, 2));
-
-        // Assert
-        assertPageSizeAndTotal(events, 2, 6, 3);
-        events.forEach(e -> assertUserDetails(e, mockUser.getUsername()));
-    }
-
-    @Test
-    void findByEntityTypeAndEntityId_ShouldOnlyReturnEventsForSpecifiedEntity() {
-        // Arrange: Create events for different entities
-        Event event1 = new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser);
-        Event event2 = new Event(ResourceType.ITEM, 2L, EventActionType.CREATE, null, mockProject, mockUser);
-        Event event3 = new Event(ResourceType.ITEM, 2L, EventActionType.UPDATE, null, mockProject, mockUser);
-        eventRepository.saveAll(List.of(event1, event2, event3));
-
-        // Act: Retrieve events for a specific entity type and ID
-        Page<Event> project1Events = eventRepository.findByEntityTypeAndEntityId(
-                ResourceType.ROOM, 1L, createPageable(0, 10));
-
-        // Assert: Verify only events for the specified entity type and ID are returned
-        assertThat(project1Events.getContent()).hasSize(1);
-        assertThat(project1Events.getContent().get(0)).isEqualTo(event1);
-
-        // Assert: Ensure no unrelated events are included
-        assertThat(project1Events.getContent()).doesNotContain(event2, event3);
-    }
-
-    @Test
     void findAllEventsInProject_ShouldReturnPaginatedResults() {
         // Arrange: Create multiple events within the same project
         List<Event> eventsToSave = new ArrayList<>();
         eventsToSave.add(
                 new Event(
-                        ResourceType.ROOM, 1L,
-                        EventActionType.CREATE, null,
+                        EventActionType.CREATE,
                         mockProject, mockUser));
         for (int i = 0; i < 5; i++) {
             eventsToSave.add(
                     new Event(
-                            ResourceType.ROOM, 1L,
-                            EventActionType.UPDATE, null,
+                            EventActionType.UPDATE,
                             mockProject, mockUser));
         }
         eventRepository.saveAll(eventsToSave);
@@ -136,8 +88,8 @@ public class EventRepositoryIntegrationTests {
         Project otherProject = projectRepository
                 .save(new TestDataFactory.ProjectBuilder().name("Other Project").user(mockUser).build());
 
-        Event event1 = new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser);
-        Event event2 = new Event(ResourceType.ROOM, 2L, EventActionType.CREATE, null, otherProject, mockUser);
+        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventActionType.CREATE, otherProject, mockUser);
         eventRepository.saveAll(List.of(event1, event2));
 
         // Act: Retrieve events for mockProject
@@ -155,7 +107,7 @@ public class EventRepositoryIntegrationTests {
     @Test
     void findAllEventsInProject_ShouldOnlyIncludeUserIdAndUsername() {
         // Arrange
-        Event event = new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser);
+        Event event = new Event(EventActionType.CREATE, mockProject, mockUser);
         eventRepository.save(event);
 
         // Act
@@ -176,9 +128,9 @@ public class EventRepositoryIntegrationTests {
     @Test
     void findAllEventsInProject_ShouldSortByTimestampDescending() {
         // Arrange: Create multiple events with different timestamps
-        Event event1 = new Event(ResourceType.PROJECT, 1L, EventActionType.CREATE, null, mockProject, mockUser);
+        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
         event1.setTimestamp(LocalDateTime.now().minusDays(1));
-        Event event2 = new Event(ResourceType.PROJECT, 1L, EventActionType.UPDATE, null, mockProject, mockUser);
+        Event event2 = new Event(EventActionType.UPDATE, mockProject, mockUser);
         event2.setTimestamp(LocalDateTime.now());
         eventRepository.saveAll(List.of(event1, event2)); // Act: Retrieve events
         Pageable pageable = PageRequest.of(0, 10);
@@ -198,65 +150,6 @@ public class EventRepositoryIntegrationTests {
         assertThat(events.getContent()).isEmpty();
     }
 
-    @Test
-    void findChangesSince_ShouldReturnDistinctEntities() {
-        // Arrange: Create multiple events for different entities
-        eventRepository.save(new Event(ResourceType.PROJECT, 1L, EventActionType.CREATE, null, mockProject, mockUser));
-        eventRepository.save(new Event(ResourceType.ROOM, 1L, EventActionType.CREATE, null, mockProject, mockUser));
-        eventRepository.save(new Event(ResourceType.ROOM, 2L, EventActionType.CREATE, null, mockProject, mockUser));
-
-        // Act: Retrieve changes since a specific timestamp
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
-        List<Object[]> changes = eventRepository.findChangesSince(since, List.of(mockProject.getId()));
-
-        // Assert: Verify distinct entity types and IDs are returned
-        assertThat(changes).hasSize(3);
-        assertThat(changes).contains(
-                new Object[] { ResourceType.PROJECT, 1L },
-                new Object[] { ResourceType.ROOM, 1L },
-                new Object[] { ResourceType.ROOM, 2L });
-    }
-
-    @Test
-    void findChangesSince_ShouldOnlyReturnEventsSinceSpecifiedTimestamp() {
-        // Arrange: Create events with different timestamps
-        LocalDateTime timestamp1 = LocalDateTime.now().minusDays(2);
-        LocalDateTime timestamp2 = LocalDateTime.now().minusHours(1);
-
-        Event event1 = new Event(ResourceType.PROJECT, 1L, EventActionType.CREATE, null, mockProject, mockUser);
-        event1.setTimestamp(timestamp1);
-        Event event2 = new Event(ResourceType.ROOM, 2L, EventActionType.CREATE, null, mockProject, mockUser);
-        event2.setTimestamp(timestamp2);
-        eventRepository.saveAll(List.of(event1, event2));
-
-        // Act: Retrieve changes since a specific timestamp
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
-        List<Object[]> changes = eventRepository.findChangesSince(since, List.of(mockProject.getId()));
-
-        // Assert: Verify only recent events are returned
-        assertThat(changes).hasSize(1);
-        assertThat(changes).containsExactly(new Object[] { ResourceType.ROOM, 2L });
-
-        // Assert: Ensure older events are excluded
-        assertThat(changes).doesNotContain(new Object[] { ResourceType.PROJECT, 1L });
-    }
-
-    @Test
-    void findChangesSince_ShouldReturnCorrectFormat() {
-        // Arrange
-        eventRepository.save(new Event(ResourceType.PROJECT, 1L, EventActionType.CREATE, null, mockProject, mockUser));
-
-        // Act
-        List<Object[]> changes = eventRepository.findChangesSince(
-                LocalDateTime.now().minusDays(1),
-                List.of(mockProject.getId()));
-
-        // Assert
-        assertThat(changes).allMatch(change -> change.length == 2);
-        assertThat(changes).allMatch(change -> change[0] instanceof ResourceType);
-        assertThat(changes).allMatch(change -> change[1] instanceof Long);
-    }
-
     protected Pageable createPageable(int page, int size) {
         return PageRequest.of(page, size);
     }
@@ -274,7 +167,7 @@ public class EventRepositoryIntegrationTests {
 
     protected Event createAndSaveEvent(ResourceType resourceType, Long entityId, EventActionType actionType,
             Project project, User user, LocalDateTime timestamp) {
-        Event event = new Event(resourceType, entityId, actionType, null, project, user);
+        Event event = new Event(actionType, project, user);
         if (timestamp != null) {
             event.setTimestamp(timestamp);
         }

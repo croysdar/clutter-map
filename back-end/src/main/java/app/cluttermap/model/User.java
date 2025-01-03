@@ -242,7 +242,7 @@ public class User {
         }
         User user = (User) o;
 
-        return Objects.equals(id, user.id);
+        return Objects.equals(id, user.getId());
     }
 
     @Override
