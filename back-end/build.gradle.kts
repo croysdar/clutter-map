@@ -20,6 +20,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter") // Spring Boot core dependencies and auto-configuration.
 	implementation("org.springframework.boot:spring-boot-starter-web") // Spring MVC for building RESTful web services.
+    implementation("org.springframework.boot:spring-boot-starter-hateoas") // Spring HATEOAS for hypermedia-driven REST APIs.
 
 	implementation("com.google.oauth-client:google-oauth-client:1.32.1") // OAuth 2.0 client support for Google services.
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.32.1") // For HTTP transport
@@ -38,12 +39,12 @@ dependencies {
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test") // Spring Boot test utilities, including JUnit and Mockito.
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher") // JUnit platform launcher for running tests.
-	testImplementation("org.testcontainers:postgresql:1.20.3")
-    testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.testcontainers:postgresql:1.20.3") // Testcontainers support for PostgreSQL integration tests.
+    testImplementation("org.springframework.security:spring-security-test") // Utilities for testing Spring Security configurations.
 
-	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
+	implementation("io.github.cdimascio:dotenv-kotlin:6.3.1") // Kotlin library for loading environment variables from `.env` files.
 
-	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-validation") // Bean validation support for Spring Boot applications.
 
 	// IN CASE YOU GET AN ERROR AT THE TOP ABOUT THE GRADLE PLUGIN
 	// https://stackoverflow.com/questions/68321708/could-not-run-phased-build-action-using-connection-to-gradle-distribution

@@ -2,9 +2,11 @@ package app.cluttermap.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,14 +31,17 @@ public class EventController {
 
     /* ------------- GET Operations ------------- */
     @GetMapping("/{entityType}/{id}")
-    public ResponseEntity<Page<EntityHistoryDTO>> getEntityHistory(
+    public ResponseEntity<PagedModel<EntityModel<EntityHistoryDTO>>> getEntityHistory(
             @PathVariable("entityType") ResourceType entityType,
             @PathVariable("id") Long id,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            PagedResourcesAssembler<EntityHistoryDTO> assembler) {
+        Page<EntityHistoryDTO> historyPage = eventService.getEntityHistory(entityType, id, page, size);
 
-        Page<EntityHistoryDTO> events = eventService.getEntityHistory(entityType, id, page, size);
-        return ResponseEntity.ok(events);
+        System.out.println(historyPage);
+
+        return ResponseEntity.ok(assembler.toModel(historyPage));
     }
 
     @GetMapping("/fetch-updates")

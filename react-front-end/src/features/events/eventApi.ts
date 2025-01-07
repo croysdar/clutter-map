@@ -7,7 +7,8 @@ export const eventApi = baseApiSlice.injectEndpoints({
         /* ------------- GET Operations ------------- */
         getEntityEvents: builder.query<TimelineEvent[], { entityType: ResourceType, entityId: number }>({
             query: ({ entityType, entityId }) => `/events/${entityType}/${entityId}`,
-            transformResponse: (response: { content: TimelineEvent[] }) => response.content,
+            transformResponse: (response: { _embedded?: Record<string, TimelineEvent[]> }) =>
+                response._embedded ? Object.values(response._embedded)[0] : [],
             providesTags: (result, error, { entityType, entityId }) => [
                 { type: 'Event', id: `${entityType}-${entityId}` },
             ],
