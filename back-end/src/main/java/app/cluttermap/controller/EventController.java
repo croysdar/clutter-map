@@ -39,8 +39,6 @@ public class EventController {
             PagedResourcesAssembler<EntityHistoryDTO> assembler) {
         Page<EntityHistoryDTO> historyPage = eventService.getEntityHistory(entityType, id, page, size);
 
-        System.out.println(historyPage);
-
         return ResponseEntity.ok(assembler.toModel(historyPage));
     }
 

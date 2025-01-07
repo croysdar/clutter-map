@@ -101,15 +101,15 @@ public class EventServiceTests {
                 new Event(EventActionType.UPDATE, mockProject, mockUser));
         Page<Event> mockPage = new PageImpl<>(mockEvents, pageable, 5);
 
-        when(eventRepository.findAllEventsInProject(mockProject, pageable)).thenReturn(mockPage);
+        when(eventRepository.findAllEventsInProject(mockProject.getId(), pageable)).thenReturn(mockPage);
 
         // Act
-        Page<Event> events = eventService.getAllEventsInProject(mockProject, 0, 2);
+        Page<Event> events = eventService.getAllEventsInProject(mockProject.getId(), 0, 2);
 
         // Assert
         assertThat(events.getContent()).hasSize(2);
         assertThat(events.getTotalElements()).isEqualTo(5);
-        verify(eventRepository, times(1)).findAllEventsInProject(mockProject, pageable);
+        verify(eventRepository, times(1)).findAllEventsInProject(mockProject.getId(), pageable);
     }
 
     @Test

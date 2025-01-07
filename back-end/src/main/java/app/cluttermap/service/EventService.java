@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -63,11 +64,13 @@ public class EventService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Page<Event> getAllEventsInProject(Project project, int page, int size) {
+    @PreAuthorize("@securityService.isResourceOwner(#entityId, #entityType)")
+    public Page<Event> getAllEventsInProject(Long projectId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return eventRepository.findAllEventsInProject(project, pageable);
+        return eventRepository.findAllEventsInProject(projectId, pageable);
     }
 
+    @PreAuthorize("@securityService.isResourceOwner(#entityId, #entityType)")
     public Page<EntityHistoryDTO> getEntityHistory(ResourceType entityType, Long entityId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return eventEntityRepository.findHistoryByEntity(entityType, entityId, pageable);
@@ -84,6 +87,7 @@ public class EventService {
     }
 
     /* --- Create Operation (POST) --- */
+    @Transactional
     public Event logEvent(
             ResourceType entityType,
             Long entityId,

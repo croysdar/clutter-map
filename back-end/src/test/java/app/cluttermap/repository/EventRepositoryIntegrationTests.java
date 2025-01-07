@@ -73,7 +73,7 @@ public class EventRepositoryIntegrationTests {
         eventRepository.saveAll(eventsToSave);
 
         // Act: Retrieve paginated events within the project
-        Page<Event> events = eventRepository.findAllEventsInProject(mockProject, createPageable(0, 2));
+        Page<Event> events = eventRepository.findAllEventsInProject(mockProject.getId(), createPageable(0, 2));
 
         // Assert: Check pagination results
         assertPageSizeAndTotal(events, 2, 6, 3);
@@ -94,7 +94,7 @@ public class EventRepositoryIntegrationTests {
 
         // Act: Retrieve events for mockProject
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Event> projectEvents = eventRepository.findAllEventsInProject(mockProject, pageable);
+        Page<Event> projectEvents = eventRepository.findAllEventsInProject(mockProject.getId(), pageable);
 
         // Assert: Verify only events for mockProject are returned
         assertThat(projectEvents.getContent()).hasSize(1);
@@ -112,7 +112,7 @@ public class EventRepositoryIntegrationTests {
 
         // Act
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Event> events = eventRepository.findAllEventsInProject(mockProject, pageable);
+        Page<Event> events = eventRepository.findAllEventsInProject(mockProject.getId(), pageable);
 
         // Assert
         events.forEach(e -> {
@@ -134,7 +134,7 @@ public class EventRepositoryIntegrationTests {
         event2.setTimestamp(LocalDateTime.now());
         eventRepository.saveAll(List.of(event1, event2)); // Act: Retrieve events
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Event> events = eventRepository.findAllEventsInProject(mockProject, pageable);
+        Page<Event> events = eventRepository.findAllEventsInProject(mockProject.getId(), pageable);
 
         // Assert: Verify events are sorted by timestamp descending
         assertThat(events.getContent()).containsExactly(event2, event1);
@@ -144,7 +144,7 @@ public class EventRepositoryIntegrationTests {
     void findAllEventsInProject_ShouldReturnEmptyPage_WhenNoEventsExist() {
         // Act: Retrieve events for a project with no associated events
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Event> events = eventRepository.findAllEventsInProject(mockProject, pageable);
+        Page<Event> events = eventRepository.findAllEventsInProject(mockProject.getId(), pageable);
 
         // Assert: Verify empty result
         assertThat(events.getContent()).isEmpty();
