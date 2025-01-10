@@ -237,8 +237,8 @@ public class OrgUnit {
         copy.setId(this.getId());
         copy.setName(this.getName());
         copy.setDescription(this.getDescription());
-        copy.setProject(this.getProject());
         copy.setRoom(this.getRoom());
+        copy.setProject(this.getProject());
         return copy;
     }
 }

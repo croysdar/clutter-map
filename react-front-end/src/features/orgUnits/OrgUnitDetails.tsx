@@ -70,7 +70,7 @@ const OrgUnitDetails: React.FC = () => {
             >
                 <TileListWrapper count={items.length} >
                     {items.map((item) => (
-                        <ItemTile item={item} onClick={handleClick} />
+                        <ItemTile key={`item-tile-${item.id}`} item={item} onClick={handleClick} />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>

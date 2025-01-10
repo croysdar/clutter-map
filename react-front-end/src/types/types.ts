@@ -8,5 +8,8 @@ export enum ResourceType {
 export enum TimelineActionType {
     CREATE = "CREATE",
     UPDATE = "UPDATE",
-    DELETE = "DELETE"
+    DELETE = "DELETE",
+    MOVE = "MOVE",
+    ADD_CHILD = "ADD_CHILD",
+    REMOVE_CHILD = "REMOVE_CHILD"
 }

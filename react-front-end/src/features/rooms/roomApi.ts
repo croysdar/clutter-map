@@ -47,7 +47,7 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             }),
             invalidatesTags: (result, error, arg) => [
                 { type: 'Room', id: arg.id },
-                { type: 'Event', id: `${ResourceType.PROJECT}-${arg.id}` }
+                { type: 'Event', id: `${ResourceType.ROOM}-${arg.id}` }
             ]
         }),
 

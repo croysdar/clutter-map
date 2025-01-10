@@ -58,6 +58,5 @@ public class EntityResolutionService {
             default:
                 throw new IllegalArgumentException("Unknown entity type: " + resourceType);
         }
-
     }
 }

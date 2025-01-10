@@ -230,8 +230,8 @@ public class Item {
         copy.setDescription(this.getDescription());
         copy.setQuantity(this.getQuantity());
         copy.setTags(new ArrayList<>(this.getTags()));
-        copy.setProject(this.getProject());
         copy.setOrgUnit(this.getOrgUnit());
+        copy.setProject(this.getProject());
         return copy;
     }
 }

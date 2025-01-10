@@ -218,7 +218,7 @@ public class User {
         event.setUser(this);
     }
 
-    public void removeProject(Event event) {
+    public void removeEvent(Event event) {
         events.remove(event);
     }
 

@@ -64,9 +64,10 @@ public class EventService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    @PreAuthorize("@securityService.isResourceOwner(#entityId, #entityType)")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, PROJECT)")
     public Page<Event> getAllEventsInProject(Long projectId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        // TODO should this be project.getEvents instead?
         return eventRepository.findAllEventsInProject(projectId, pageable);
     }
 

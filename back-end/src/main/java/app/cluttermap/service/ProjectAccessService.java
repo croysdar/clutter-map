@@ -19,6 +19,7 @@ public class ProjectAccessService {
 
     public List<Long> getAccessibleProjectIds() {
         User user = securityService.getCurrentUser();
+        // TODO make sure to add collaborator/guest access when implemented
         return projectRepository.findProjectIdsByOwnerId(user.getId());
     }
 }

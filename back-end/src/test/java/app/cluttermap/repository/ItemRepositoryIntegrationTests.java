@@ -149,16 +149,25 @@ public class ItemRepositoryIntegrationTests {
     private OrgUnit createOrgUnitInProjectAndSave(Project project) {
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
         return orgUnit;
     }
 
     private Item createItemInProjectAndSave(Project project) {
         Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).project(project).build());
+
+        project.addItem(item);
+        projectRepository.save(project);
         return item;
     }
 
     private Item createItemInOrgUnitAndSave(OrgUnit orgUnit) {
         Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).orgUnit(orgUnit).build());
+
+        orgUnit.addItem(item);
+        orgUnitRepository.save(orgUnit);
         return item;
     }
 }

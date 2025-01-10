@@ -117,6 +117,8 @@ public class EventEntity {
         this.details = details;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
     public EventEntity id(Long id) {
         setId(id);
         return this;
@@ -146,6 +148,8 @@ public class EventEntity {
         setDetails(details);
         return this;
     }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
 
     @Override
     public boolean equals(Object o) {

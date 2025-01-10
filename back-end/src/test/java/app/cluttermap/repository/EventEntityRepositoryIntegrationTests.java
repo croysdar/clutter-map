@@ -86,16 +86,16 @@ public class EventEntityRepositoryIntegrationTests {
         }
 
         // Act: Retrieve paginated events
-        Page<EntityHistoryDTO> events = eventEntityRepository.findHistoryByEntity(
+        Page<EntityHistoryDTO> eventEntities = eventEntityRepository.findHistoryByEntity(
                 ResourceType.ROOM, 1L,
                 createPageable(0, 2));
 
         // Assert
-        assertPageSizeAndTotal(events, 2, 6, 3);
-        events.forEach(e -> {
+        assertPageSizeAndTotal(eventEntities, 2, 6, 3);
+        eventEntities.forEach(e -> {
             assertUserDetails(e, mockUser.getUsername());
-            // assertThat(e.getEntityType()).isEqualTo(ResourceType.ROOM);
-            // assertThat(e.getEntityId()).isEqualTo(1L);
+            assertThat(e.getEntityType()).isEqualTo(ResourceType.ROOM);
+            assertThat(e.getEntityId()).isEqualTo(1L);
         });
 
     }

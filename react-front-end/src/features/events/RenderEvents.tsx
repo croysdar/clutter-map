@@ -23,10 +23,6 @@ import { useGetEntityEventsQuery } from './eventApi';
 /* ------------- Constants ------------- */
 import { TimelineEvent } from "./eventTypes";
 
-type RenderEventsProps = {
-    events: TimelineEvent[];
-};
-
 type EntityEventsContainerProps = {
     entityId: number;
     entityType: ResourceType;
@@ -60,13 +56,13 @@ export const EntityEventsContainer: React.FC<EntityEventsContainerProps> = ({ en
             <Button variant="outlined" onClick={() => setShowHistory((prev) => !prev)}>
                 {showHistory ? 'Hide History' : 'Show History'}
             </Button>
-            {showHistory && (
-                <div>
-                    <Content />
-                </div>
-            )}
+            {showHistory && <Content />}
         </div>
     );
+};
+
+type RenderEventsProps = {
+    events: TimelineEvent[];
 };
 
 const RenderEvents: React.FC<RenderEventsProps> = ({ events }) => {
@@ -82,8 +78,8 @@ const RenderEvents: React.FC<RenderEventsProps> = ({ events }) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {events.map(event => (
-                        <TableRow key={event.id}>
+                    {events.map((event, index) => (
+                        <TableRow key={event.id || index}>
                             <TableCell>{event.userName}</TableCell>
                             <TableCell>{event.action}</TableCell>
                             <TableCell>{event.timestamp}</TableCell>

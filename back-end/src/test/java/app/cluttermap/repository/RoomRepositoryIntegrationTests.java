@@ -102,8 +102,6 @@ public class RoomRepositoryIntegrationTests {
         // Arrange: Set up a user and create a room with an associated orgUnit
         Room room = createRoomInProjectAndSave();
         OrgUnit orgUnit = createOrgUnitInRoomAndSave(room);
-        room.getOrgUnits().add(orgUnit);
-        room = roomRepository.save(room);
 
         assertThat(orgUnitRepository.findAll()).hasSize(1);
 
@@ -123,8 +121,6 @@ public class RoomRepositoryIntegrationTests {
         // Arrange: Set up a user and create a room with an associated orgUnit
         Room room = createRoomInProjectAndSave();
         OrgUnit orgUnit = createOrgUnitInRoomAndSave(room);
-        room.getOrgUnits().add(orgUnit);
-        room = roomRepository.save(room);
 
         assertThat(orgUnitRepository.findAll()).hasSize(1);
 
@@ -161,16 +157,25 @@ public class RoomRepositoryIntegrationTests {
     private Room createRoomInProjectAndSave() {
         Project project = createProjectWithUserAndSave();
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+
+        project.addRoom(room);
+        projectRepository.save(project);
         return room;
     }
 
     private Room createRoomInProjectAndSave(Project project) {
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+
+        project.addRoom(room);
+        projectRepository.save(project);
         return room;
     }
 
     private OrgUnit createOrgUnitInRoomAndSave(Room room) {
         OrgUnit orgUnit = orgUnitRepository.save(new TestDataFactory.OrgUnitBuilder().id(null).room(room).build());
+
+        room.addOrgUnit(orgUnit);
+        roomRepository.save(room);
         return orgUnit;
     }
 }

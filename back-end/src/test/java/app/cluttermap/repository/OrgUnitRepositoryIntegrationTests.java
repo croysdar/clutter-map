@@ -128,8 +128,6 @@ public class OrgUnitRepositoryIntegrationTests {
         // Arrange: Set up an org unit with an item
         OrgUnit orgUnit = createOrgUnitInProjectAndSave();
         Item item = createItemInOrgUnitAndSave(orgUnit);
-        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
-        orgUnit = orgUnitRepository.save(orgUnit);
 
         assertThat(itemRepository.findAll()).hasSize(1);
 
@@ -198,12 +196,18 @@ public class OrgUnitRepositoryIntegrationTests {
 
     private Room createRoomInProjectAndSave(Project project) {
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+
+        project.addRoom(room);
+        projectRepository.save(project);
         return room;
     }
 
     private OrgUnit createOrgUnitInProjectAndSave(Project project) {
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
         return orgUnit;
     }
 
@@ -211,12 +215,16 @@ public class OrgUnitRepositoryIntegrationTests {
         Project project = createProjectWithUserAndSave();
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
         return orgUnit;
     }
 
     private OrgUnit createOrgUnitInRoomAndSave(Room room) {
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).room(room).build());
+
         room.addOrgUnit(orgUnit);
         room = roomRepository.save(room);
         return orgUnit;
@@ -225,7 +233,7 @@ public class OrgUnitRepositoryIntegrationTests {
     private Item createItemInOrgUnitAndSave(OrgUnit orgUnit) {
         Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).orgUnit(orgUnit).build());
 
-        orgUnit.addItem(item); // Use addItem to set bidirectional relationship
+        orgUnit.addItem(item);
         orgUnit = orgUnitRepository.save(orgUnit);
         return item;
     }

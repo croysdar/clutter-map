@@ -106,9 +106,7 @@ public class ProjectRepositoryIntegrationTests {
     void deletingProject_ShouldAlsoDeleteRooms() {
         // Arrange: Set up a project and add a room to it
         Project project = createProjectWithUserAndSave();
-        Room room = createRoomInProjectAndSave(project);
-        project.addRoom(room);
-        project = projectRepository.save(project);
+        createRoomInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated room
         projectRepository.delete(project);
@@ -124,8 +122,6 @@ public class ProjectRepositoryIntegrationTests {
         // Arrange: Set up a project and add a room to it
         Project project = createProjectWithUserAndSave();
         Room room = createRoomInProjectAndSave(project);
-        project.addRoom(room);
-        project = projectRepository.save(project);
 
         // Clear the persistence context to ensure the latest state is fetched
         entityManager.clear();
@@ -146,9 +142,7 @@ public class ProjectRepositoryIntegrationTests {
     void deletingProject_ShouldAlsoDeleteOrgUnits() {
         // Arrange: Set up a project and add an org unit to it
         Project project = createProjectWithUserAndSave();
-        OrgUnit orgUnit = createOrgUnitInProjectAndSave(project);
-        project.addOrgUnit(orgUnit);
-        project = projectRepository.save(project);
+        createOrgUnitInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated
         // orgUnit
@@ -165,8 +159,6 @@ public class ProjectRepositoryIntegrationTests {
         // Arrange: Set up a project and add an org unit to it
         Project project = createProjectWithUserAndSave();
         OrgUnit orgUnit = createOrgUnitInProjectAndSave(project);
-        project.addOrgUnit(orgUnit);
-        project = projectRepository.save(project);
 
         // Clear the persistence context to ensure the latest state is fetched
         entityManager.clear();
@@ -187,9 +179,7 @@ public class ProjectRepositoryIntegrationTests {
     void deletingProject_ShouldAlsoDeleteItems() {
         // Arrange: Set up a project and add an item to it
         Project project = createProjectWithUserAndSave();
-        Item item = createItemInProjectAndSave(project);
-        project.addItem(item);
-        project = projectRepository.save(project);
+        createItemInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated item
         projectRepository.delete(project);
@@ -205,8 +195,6 @@ public class ProjectRepositoryIntegrationTests {
         // Arrange: Set up a project and add an item to it
         Project project = createProjectWithUserAndSave();
         Item item = createItemInProjectAndSave(project);
-        project.addItem(item);
-        project = projectRepository.save(project);
 
         // Clear the persistence context to ensure the latest state is fetched
         entityManager.clear();
@@ -243,17 +231,26 @@ public class ProjectRepositoryIntegrationTests {
 
     private Room createRoomInProjectAndSave(Project project) {
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+
+        project.addRoom(room);
+        projectRepository.save(project);
         return room;
     }
 
     private OrgUnit createOrgUnitInProjectAndSave(Project project) {
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
         return orgUnit;
     }
 
     private Item createItemInProjectAndSave(Project project) {
         Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).project(project).build());
+
+        project.addItem(item);
+        projectRepository.save(project);
         return item;
     }
 

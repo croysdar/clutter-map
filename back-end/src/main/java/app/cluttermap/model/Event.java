@@ -37,12 +37,12 @@ public class Event {
     @JsonManagedReference
     private List<EventEntity> eventEntities = new ArrayList<>();
 
+    @NotNull
+    private LocalDateTime timestamp = LocalDateTime.now();
+
     @Enumerated(EnumType.STRING)
     @NotNull
     private EventActionType action;
-
-    @NotNull
-    private LocalDateTime timestamp = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = true)
@@ -64,7 +64,6 @@ public class Event {
             EventActionType action,
             Project project,
             User user) {
-
         if (action == null) {
             throw new IllegalArgumentException("EventActionType cannot be null");
         }
@@ -96,20 +95,20 @@ public class Event {
         this.eventEntities = eventEntities;
     }
 
-    public EventActionType getAction() {
-        return this.action;
-    }
-
-    public void setAction(EventActionType action) {
-        this.action = action;
-    }
-
     public LocalDateTime getTimestamp() {
         return this.timestamp;
     }
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public EventActionType getAction() {
+        return this.action;
+    }
+
+    public void setAction(EventActionType action) {
+        this.action = action;
     }
 
     public Project getProject() {
@@ -160,13 +159,13 @@ public class Event {
         return this;
     }
 
-    public Event action(EventActionType action) {
-        setAction(action);
+    public Event timestamp(LocalDateTime timestamp) {
+        setTimestamp(timestamp);
         return this;
     }
 
-    public Event timestamp(LocalDateTime timestamp) {
-        setTimestamp(timestamp);
+    public Event action(EventActionType action) {
+        setAction(action);
         return this;
     }
 
@@ -211,10 +210,10 @@ public class Event {
     public String toString() {
         return "Event{" +
                 "id=" + id +
-                ", action=" + action +
                 ", timestamp=" + timestamp +
-                ", user=" + (user != null ? user.getUsername() : "null") +
+                ", action=" + action +
                 ", project=" + (project != null ? project.getId() : "null") +
+                ", user=" + (user != null ? user.getUsername() : "null") +
                 '}';
     }
 

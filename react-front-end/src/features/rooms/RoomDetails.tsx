@@ -71,7 +71,7 @@ const RoomDetails: React.FC = () => {
             >
                 <TileListWrapper count={orgUnits.length} >
                     {orgUnits.map((orgUnit) => (
-                        <OrgUnitTile orgUnit={orgUnit} onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)} />
+                        <OrgUnitTile key={`org-unit-tile-${orgUnit.id}`} orgUnit={orgUnit} onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)} />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>
