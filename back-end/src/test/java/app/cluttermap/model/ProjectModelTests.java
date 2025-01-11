@@ -1,6 +1,9 @@
 package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotSame;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -44,4 +47,63 @@ public class ProjectModelTests {
         assertThat(project.getRooms()).isEmpty();
     }
 
+    @Test
+    void toString_ShouldHandleNullFields() {
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("Empty Project");
+
+        String result = project.toString();
+
+        assertThat(result).contains("owner=null");
+        assertThat(result).contains("rooms=0");
+        assertThat(result).contains("orgUnits=0");
+        assertThat(result).contains("items=0");
+        assertThat(result).contains("events=0");
+    }
+
+    @Test
+    void toString_ShouldDisplaySummaryForFullProject() {
+        User owner = new User("mockProviderId");
+        owner.setUsername("mockUser");
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("Home Organization");
+        project.setOwner(owner);
+
+        // Add mock data for collections
+        project.setRooms(List.of(new Room(), new Room(), new Room()));
+        project.setOrgUnits(List.of(new OrgUnit(), new OrgUnit()));
+        project.setItems(List.of(new Item(), new Item(), new Item(), new Item(), new Item()));
+        project.setEvents(List.of(new Event(), new Event(), new Event()));
+
+        String result = project.toString();
+
+        assertThat(result).contains("owner=mockUser");
+        assertThat(result).contains("rooms=3");
+        assertThat(result).contains("orgUnits=2");
+        assertThat(result).contains("items=5");
+        assertThat(result).contains("events=3");
+    }
+
+    @Test
+    void copyProject_ShouldProduceIdenticalCopy() {
+        User user = new User("userProviderId");
+        Project original = new TestDataFactory.ProjectBuilder()
+                .id(1L)
+                .name("Original Name")
+                .user(user).build();
+
+        Project copy = original.copy();
+        // We don't copy the owner, but to use recursive to check equality,
+        // it must be set
+        copy.setOwner(user);
+
+        // Assert that all fields are identical
+        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
+
+        // Verify the copy is a new instance, not the same reference
+        assertNotSame(copy, original);
+    }
 }

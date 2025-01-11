@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.item.ItemLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
@@ -42,6 +46,8 @@ import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -70,6 +76,9 @@ public class ItemServiceTests {
     @Mock
     private OrgUnitService orgUnitService;
 
+    @Mock
+    private EventService eventService;
+
     @InjectMocks
     private ItemService itemService;
 
@@ -87,13 +96,10 @@ public class ItemServiceTests {
         mockUser = new User("mockProviderId");
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
 
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        mockRoom.setId(1L);
 
         mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        mockOrgUnit.setId(1L);
     }
 
     @Test
@@ -226,6 +232,9 @@ public class ItemServiceTests {
 
         when(itemRepository.save(any(Item.class))).thenReturn(mockItem);
 
+        // Arrange: Mock event logging
+        mockLogEvent();
+
         // Act: Call the service method
         Item createdItem = itemService.createItem(itemDTO);
 
@@ -242,6 +251,33 @@ public class ItemServiceTests {
             verify(projectService).getProjectById(projectId);
         }
         verify(itemRepository).save(any(Item.class));
+
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        // Assert: Verify event logging
+        verify(eventService).logEvent(
+                eq(ResourceType.ITEM), eq(mockItem.getId()),
+                eq(EventActionType.CREATE), payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdItem.getName());
+        assertThat(capturedPayload)
+                .containsEntry("description", createdItem.getDescription());
+        assertThat(capturedPayload)
+                .containsEntry("tags", createdItem.getTags());
+        assertThat(capturedPayload)
+                .containsEntry("quantity", createdItem.getQuantity());
+        if (isOrgUnitProvided) {
+            assertThat(capturedPayload)
+                    .containsEntry("orgUnitId", createdItem.getOrgUnitId());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("orgUnitId", createdItem.getOrgUnitId());
+        }
     }
 
     @Disabled("Feature under development")
@@ -267,14 +303,13 @@ public class ItemServiceTests {
     @ParameterizedTest
     @CsvSource({
             "true, true, true, All fields should update when all fields are provided",
-            "true, false, true, Description should not update when it is null",
-            "false, true, true, Tags should not update when they are null",
+            "false, true, true, Description should not update when it is null",
+            "true, false, true, Tags should not update when they are null",
             "true, true, false, Quantity should not update when it is null"
     })
     void updateItem_ShouldUpdateFieldsConditionally(
             boolean updateDescription, boolean updateTags, boolean updateQuantity, String description) {
         // Arrange: Set up mock item with initial values
-        Long resourceId = 1L;
         List<String> oldTags = List.of("Old tag 1", "Old tag 2");
         String oldDescription = "Old Description";
         Integer oldQuantity = 10;
@@ -285,6 +320,7 @@ public class ItemServiceTests {
                 .tags(oldTags)
                 .quantity(oldQuantity)
                 .orgUnit(mockOrgUnit).build();
+        Long resourceId = item.getId();
 
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(item));
 
@@ -296,6 +332,7 @@ public class ItemServiceTests {
 
         // Build the UpdateItemDTO with these values
         UpdateItemDTO itemDTO = new TestDataFactory.UpdateItemDTOBuilder()
+                .name("New Name")
                 .description(newDescription)
                 .tags(newTags)
                 .quantity(newQuantity)
@@ -304,25 +341,65 @@ public class ItemServiceTests {
         // Stub the repository to return the item after saving
         when(itemRepository.save(item)).thenReturn(item);
 
-        // Act: Call the service method
-        Item updatedItem = itemService.updateItem(resourceId, itemDTO);
+        // Arrange: Mock event logging
+        mockLogEvent();
 
-        // Assert: Verify the fields were updated as expected
-        assertThat(updatedItem.getName())
-                .as(description + ": Name should match the DTO name")
+        // Act: Call the service method
+        itemService.updateItem(resourceId, itemDTO);
+
+        // Capture the saved item to verify fields
+        ArgumentCaptor<Item> savedItemCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(savedItemCaptor.capture());
+        Item savedItem = savedItemCaptor.getValue();
+
+        // Assert: Add descriptions for field checks
+        assertThat(savedItem.getName())
+                .as(description + ": Name should match the expected value")
                 .isEqualTo(itemDTO.getName());
-        assertThat(updatedItem.getDescription())
+        assertThat(savedItem.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
-        assertThat(updatedItem.getTags())
+        assertThat(savedItem.getTags())
                 .as(description + ": Tags should match the expected value")
                 .isEqualTo(updateTags ? newTags : oldTags);
-        assertThat(updatedItem.getQuantity())
+        assertThat(savedItem.getQuantity())
                 .as(description + ": Quantity should match the expected value")
                 .isEqualTo(updateQuantity ? newQuantity : oldQuantity);
 
-        // Verify: Ensure the repository save method was called
-        verify(itemRepository).save(item);
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        // Verify the event was logged
+        verify(eventService).logEvent(
+                eq(ResourceType.ITEM), eq(resourceId),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedItem.getName());
+        if (updateDescription) {
+            assertThat(capturedPayload)
+                    .containsEntry("description", savedItem.getDescription());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("description", savedItem.getDescription());
+        }
+        if (updateTags) {
+            assertThat(capturedPayload)
+                    .containsEntry("tags", savedItem.getTags());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("tags", savedItem.getTags());
+        }
+        if (updateQuantity) {
+            assertThat(capturedPayload)
+                    .containsEntry("quantity", savedItem.getQuantity());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("quantity", savedItem.getQuantity());
+        }
     }
 
     @Test
@@ -352,12 +429,20 @@ public class ItemServiceTests {
             // Arrange: Stub the repository to simulate finding item
             mockAssignedItemInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogEvent();
+
             // Act: Call the service method
             itemService.deleteItemById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(itemRepository).deleteById(resourceId);
+
+            // Assert: Verify event logging
+            verify(eventService).logEvent(
+                    eq(ResourceType.ITEM), eq(resourceId),
+                    eq(EventActionType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding item
             mockNonexistentItemInRepository(resourceId);
@@ -413,17 +498,16 @@ public class ItemServiceTests {
         // Arrange: Use the existing mockOrgUnit as the target
         mockOrgUnitLookup();
 
-        // Mock unassigned items
-        Item unassignedItem1 = mockUnassignedItemInRepository(1L);
-        Item unassignedItem2 = mockUnassignedItemInRepository(2L);
+        // Mock unassigned item
+        Item unassignedItem = mockUnassignedItemInRepository(1L);
 
         // Mock a previously assigned item
-        OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
+        OrgUnit previousOrgUnit = new TestDataFactory.OrgUnitBuilder().id(10L).project(mockProject).build();
         Item assignedItem = mockAssignedItemInRepository(3L, previousOrgUnit);
 
         // Act: Assign multiple items
         Iterable<Item> movedItems = itemService.assignItemsToOrgUnit(
-                List.of(unassignedItem1.getId(), unassignedItem2.getId(), assignedItem.getId()),
+                List.of(unassignedItem.getId(), assignedItem.getId()),
                 mockOrgUnit.getId());
 
         // Assert: Verify all items are assigned to the target org unit
@@ -431,8 +515,18 @@ public class ItemServiceTests {
 
         // Verify unassignment and reassignment for the previously assigned item
         verify(orgUnitRepository).save(previousOrgUnit); // Unassign
-        verify(orgUnitRepository, times(3)).save(mockOrgUnit); // Assign all items
-        verify(itemRepository, times(3)).findById(anyLong());
+        verify(orgUnitRepository, times(2)).save(mockOrgUnit); // Assign all items
+        verify(itemRepository, times(2)).findById(anyLong());
+
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ITEM), eq(assignedItem.getId()),
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(previousOrgUnit.getId()),
+                eq(mockOrgUnit.getId()));
+
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ITEM), eq(unassignedItem.getId()),
+                eq(ResourceType.ORGANIZATIONAL_UNIT), isNull(),
+                eq(mockOrgUnit.getId()));
     }
 
     @Test
@@ -441,7 +535,7 @@ public class ItemServiceTests {
         mockOrgUnitLookup();
 
         // Mock an item from a different project
-        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project differentProject = new TestDataFactory.ProjectBuilder().id(2L).user(mockUser).build();
         Item itemWithDifferentProject = new TestDataFactory.ItemBuilder().project(differentProject).build();
         when(itemRepository.findById(2L)).thenReturn(Optional.of(itemWithDifferentProject));
 
@@ -469,6 +563,13 @@ public class ItemServiceTests {
         // Verify repository interactions
         verify(itemRepository, times(2)).findById(anyLong());
         verify(orgUnitRepository, times(2)).save(any(OrgUnit.class));
+
+        // Verify logUpdateEvent is called for both items
+        verify(eventService, times(2)).logMoveEvent(
+                eq(ResourceType.ITEM), anyLong(),
+                eq(ResourceType.ORGANIZATIONAL_UNIT),
+                anyLong(),
+                isNull());
     }
 
     @Test
@@ -488,7 +589,7 @@ public class ItemServiceTests {
     void shouldThrowAccessDeniedExceptionWhenUserDoesNotOwnItem() {
         // Overwrite the default stub for `isResourceOwner` to deny access to the item
         List<Long> itemIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("item"))).thenReturn(false);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ITEM))).thenReturn(false);
 
         // Act & Assert:
         assertThrows(AccessDeniedException.class, () -> {
@@ -501,22 +602,19 @@ public class ItemServiceTests {
     }
 
     private Item mockAssignedItemInRepository(Long resourceId) {
-        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(mockOrgUnit).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).orgUnit(mockOrgUnit).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }
 
     private Item mockAssignedItemInRepository(Long resourceId, OrgUnit orgUnit) {
-        Item mockItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).orgUnit(orgUnit).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }
 
     private Item mockUnassignedItemInRepository(Long resourceId) {
-        Item mockItem = new TestDataFactory.ItemBuilder().project(mockProject).build();
-        mockItem.setId(resourceId);
+        Item mockItem = new TestDataFactory.ItemBuilder().id(resourceId).project(mockProject).build();
         when(itemRepository.findById(resourceId)).thenReturn(Optional.of(mockItem));
         return mockItem;
     }
@@ -528,4 +626,9 @@ public class ItemServiceTests {
     private void mockProjectLookup() {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
+
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
 }

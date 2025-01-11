@@ -2,6 +2,7 @@ package app.cluttermap.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -40,7 +41,7 @@ public class OrgUnit {
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     @JsonBackReference
     private Project project;
 
@@ -145,6 +146,38 @@ public class OrgUnit {
         this.items = items;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public OrgUnit id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public OrgUnit name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public OrgUnit description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public OrgUnit room(Room room) {
+        setRoom(room);
+        return this;
+    }
+
+    public OrgUnit project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    public OrgUnit items(List<Item> items) {
+        setItems(items);
+        return this;
+    }
+
     /* ------------- Utility Methods ------------- */
 
     public void addItem(Item item) {
@@ -168,5 +201,44 @@ public class OrgUnit {
         for (Item item : items) {
             item.setOrgUnit(null); // Unassign each item before OrgUnit deletion
         }
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof OrgUnit)) {
+            return false;
+        }
+        OrgUnit orgUnit = (OrgUnit) o;
+        return Objects.equals(id, orgUnit.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "OrgUnit{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", roomId=" + (room != null ? room.getId() : "null") +
+                ", projectId=" + (project != null ? project.getId() : "null") +
+                '}';
+    }
+
+    public OrgUnit copy() {
+        OrgUnit copy = new OrgUnit();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setRoom(this.getRoom());
+        copy.setProject(this.getProject());
+        return copy;
     }
 }

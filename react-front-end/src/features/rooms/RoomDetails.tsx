@@ -8,6 +8,7 @@ import { CircularProgress, Typography } from '@mui/material';
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileListWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { EntityEventsContainer } from '@/features/events/RenderEvents';
 import RoomMenu from '@/features/rooms/RoomMenu';
 import { OrgUnitTile } from '../orgUnits/RenderOrgUnit';
 
@@ -16,6 +17,7 @@ import { useGetOrgUnitsByRoomQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 
 /* ------------- Constants ------------- */
+import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
 
 const RoomDetails: React.FC = () => {
@@ -69,7 +71,7 @@ const RoomDetails: React.FC = () => {
             >
                 <TileListWrapper count={orgUnits.length} >
                     {orgUnits.map((orgUnit) => (
-                        <OrgUnitTile orgUnit={orgUnit} onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)} />
+                        <OrgUnitTile key={`org-unit-tile-${orgUnit.id}`} orgUnit={orgUnit} onClick={(e: React.MouseEvent<HTMLDivElement>) => handleClick(e, orgUnit.id)} />
                     ))}
                 </TileListWrapper>
             </DetailsPagePaper>
@@ -77,6 +79,7 @@ const RoomDetails: React.FC = () => {
                 objectLabel='Organizer'
                 to={ROUTES.orgUnitAdd(projectId!, roomId!)}
             />
+            <EntityEventsContainer entityId={room.id} entityType={ResourceType.ROOM} />
         </>
     );
 };

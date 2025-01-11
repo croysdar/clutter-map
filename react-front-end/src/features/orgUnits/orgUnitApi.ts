@@ -1,6 +1,7 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewOrgUnit, NewUnassignedOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
 import { Item, ItemsAssign } from "../items/itemTypes";
+import { ResourceType } from "@/types/types";
 
 export const orgUnitApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -60,7 +61,10 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
                 method: 'PUT',
                 body: orgUnit
             }),
-            invalidatesTags: (result, error, arg) => [{ type: 'OrgUnit', id: arg.id }]
+            invalidatesTags: (result, error, arg) => [
+                { type: 'OrgUnit', id: arg.id },
+                { type: 'Event', id: `${ResourceType.ORGANIZATIONAL_UNIT}-${arg.id}` }
+            ]
         }),
 
         assignItemsToOrgUnit: builder.mutation<Item[], ItemsAssign>({
@@ -71,7 +75,8 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
             }),
             invalidatesTags: (result, error, { itemIds, orgUnitId }) => [
                 { type: 'OrgUnit', id: orgUnitId },
-                ...itemIds.map((id) => ({ type: 'Item', id } as const))
+                ...itemIds.map((id) => ({ type: 'Item', id } as const)),
+                ...itemIds.map((id) => ({ type: 'Event', id: `${ResourceType.ITEM}-${id}` } as const))
             ]
         }),
 

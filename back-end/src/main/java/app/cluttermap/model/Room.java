@@ -2,6 +2,7 @@ package app.cluttermap.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -34,7 +35,7 @@ public class Room {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", nullable = true)
     @JsonBackReference
     private Project project;
 
@@ -102,6 +103,33 @@ public class Room {
         this.orgUnits = orgUnits;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Room id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Room name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Room description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public Room project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    public Room orgUnits(List<OrgUnit> orgUnits) {
+        setOrgUnits(orgUnits);
+        return this;
+    }
+
     /* ------------- Utility Methods ------------- */
 
     public void addOrgUnit(OrgUnit orgUnit) {
@@ -125,5 +153,42 @@ public class Room {
         for (OrgUnit orgUnit : orgUnits) {
             orgUnit.setRoom(null); // Unassign each orgUnit before Room deletion
         }
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Room)) {
+            return false;
+        }
+        Room room = (Room) o;
+        return Objects.equals(id, room.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Room{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", projectId=" + (project != null ? project.getId() : "null") +
+                '}';
+    }
+
+    public Room copy() {
+        Room copy = new Room();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setProject(this.getProject());
+        return copy;
     }
 }

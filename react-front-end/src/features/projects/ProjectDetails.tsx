@@ -8,6 +8,7 @@ import { CircularProgress, Typography } from '@mui/material';
 import CreateNewEntityButton from '@/components/buttons/CreateNewEntityButton';
 import { TileListWrapper, TileWrapper } from '@/components/common/TileWrapper';
 import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { EntityEventsContainer } from '@/features/events/RenderEvents';
 import ProjectMenu from '@/features/projects/ProjectMenu';
 
 /* ------------- Redux ------------- */
@@ -15,6 +16,7 @@ import { useGetProjectQuery } from '@/features/projects/projectApi';
 import { useGetRoomsByProjectQuery } from '@/features/rooms/roomApi';
 
 /* ------------- Constants ------------- */
+import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
 
 const ProjectDetails: React.FC = () => {
@@ -82,6 +84,7 @@ const ProjectDetails: React.FC = () => {
                 objectLabel='room'
                 to={ROUTES.roomAdd(projectId!)}
             />
+            <EntityEventsContainer entityId={project.id} entityType={ResourceType.PROJECT} />
         </>
     );
 };

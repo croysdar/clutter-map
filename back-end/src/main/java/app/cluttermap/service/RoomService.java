@@ -1,5 +1,9 @@
 package app.cluttermap.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -11,6 +15,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -22,6 +27,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final SecurityService securityService;
     private final ProjectService projectService;
+    private final EventService eventService;
     private final RoomService self;
 
     /* ------------- Constructor ------------- */
@@ -29,10 +35,12 @@ public class RoomService {
             RoomRepository roomRepository,
             SecurityService securityService,
             ProjectService projectService,
+            EventService eventService,
             @Lazy RoomService self) {
         this.roomRepository = roomRepository;
         this.securityService = securityService;
         this.projectService = projectService;
+        this.eventService = eventService;
         this.self = self;
     }
 
@@ -44,7 +52,7 @@ public class RoomService {
         return roomRepository.findByOwnerId(user.getId());
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#id, 'room')")
+    @PreAuthorize("@securityService.isResourceOwner(#id, 'ROOM')")
     public Room getRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, id));
@@ -53,10 +61,16 @@ public class RoomService {
     /* --- Create Operation (POST) --- */
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
-        return self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+        Room room = self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+
+        eventService.logEvent(
+                ResourceType.ROOM, room.getId(),
+                EventActionType.CREATE, buildCreatePayload(room));
+
+        return room;
     }
 
-    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'project')")
+    @PreAuthorize("@securityService.isResourceOwner(#projectId, 'PROJECT')")
     public Room createRoomInProject(NewRoomDTO roomDTO, Long projectId) {
         Project project = projectService.getProjectById(roomDTO.getProjectIdAsLong());
 
@@ -68,18 +82,50 @@ public class RoomService {
     @Transactional
     public Room updateRoom(Long id, UpdateRoomDTO roomDTO) {
         Room _room = self.getRoomById(id);
+        Room oldRoom = _room.copy();
+
         _room.setName(roomDTO.getName());
         if (roomDTO.getDescription() != null) {
             _room.setDescription(roomDTO.getDescription());
         }
 
-        return roomRepository.save(_room);
+        Room updatedRoom = roomRepository.save(_room);
+
+        eventService.logEvent(
+                ResourceType.ROOM, id,
+                EventActionType.UPDATE, buildChangePayload(oldRoom, updatedRoom));
+
+        return updatedRoom;
     }
 
     /* --- Delete Operation (DELETE) --- */
     @Transactional
-    public void deleteRoomById(Long roomId) {
-        Room room = self.getRoomById(roomId);
+    public void deleteRoomById(Long id) {
+        Room room = self.getRoomById(id);
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
+
+        eventService.logEvent(
+                ResourceType.ROOM, id,
+                EventActionType.DELETE, null);
+    }
+
+    private Map<String, Object> buildCreatePayload(Room room) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", room.getName());
+        payload.put("description", room.getDescription());
+        return payload;
+    }
+
+    private Map<String, Object> buildChangePayload(Room oldRoom, Room newRoom) {
+        Map<String, Object> changes = new HashMap<>();
+
+        if (!Objects.equals(oldRoom.getName(), newRoom.getName())) {
+            changes.put("name", newRoom.getName());
+        }
+        if (!Objects.equals(oldRoom.getDescription(), newRoom.getDescription())) {
+            changes.put("description", newRoom.getDescription());
+        }
+
+        return changes;
     }
 }

@@ -1,6 +1,8 @@
 package app.cluttermap.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,7 +41,7 @@ public class Item {
     private OrgUnit orgUnit;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     @JsonBackReference
     private Project project;
 
@@ -154,4 +156,82 @@ public class Item {
         this.project = project;
     }
 
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Item id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Item name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Item description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public Item tags(List<String> tags) {
+        setTags(tags);
+        return this;
+    }
+
+    public Item quantity(Integer quantity) {
+        setQuantity(quantity);
+        return this;
+    }
+
+    public Item orgUnit(OrgUnit orgUnit) {
+        setOrgUnit(orgUnit);
+        return this;
+    }
+
+    public Item project(Project project) {
+        setProject(project);
+        return this;
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Item)) {
+            return false;
+        }
+        Item item = (Item) o;
+        return Objects.equals(id, item.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", tags=" + tags +
+                ", quantity=" + quantity +
+                ", orgUnitId=" + (orgUnit != null ? orgUnit.getId() : "null") +
+                ", projectId=" + (project != null ? project.getId() : "null") +
+                '}';
+    }
+
+    public Item copy() {
+        Item copy = new Item();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        copy.setDescription(this.getDescription());
+        copy.setQuantity(this.getQuantity());
+        copy.setTags(new ArrayList<>(this.getTags()));
+        copy.setOrgUnit(this.getOrgUnit());
+        copy.setProject(this.getProject());
+        return copy;
+    }
 }

@@ -1,6 +1,7 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
-import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
+import { ResourceType } from "@/types/types";
 import { OrgUnit, OrgUnitsAssign } from "../orgUnits/orgUnitsTypes";
+import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
 
 export const roomsApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -44,7 +45,10 @@ export const roomsApi = baseApiSlice.injectEndpoints({
                 method: 'PUT',
                 body: room
             }),
-            invalidatesTags: (result, error, arg) => [{ type: 'Room', id: arg.id }]
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Room', id: arg.id },
+                { type: 'Event', id: `${ResourceType.ROOM}-${arg.id}` }
+            ]
         }),
 
         assignOrgUnitsToRoom: builder.mutation<OrgUnit[], OrgUnitsAssign>({
@@ -55,7 +59,8 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             }),
             invalidatesTags: (result, error, { orgUnitIds, roomId }) => [
                 { type: "Room", id: roomId },
-                ...orgUnitIds.map((id) => ({ type: 'OrgUnit', id } as const))
+                ...orgUnitIds.map((id) => ({ type: 'OrgUnit', id } as const)),
+                ...orgUnitIds.map((id) => ({ type: 'Event', id: `${ResourceType.ORGANIZATIONAL_UNIT}-${id}` } as const))
             ]
         }),
 

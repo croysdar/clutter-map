@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,12 +25,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -50,6 +51,9 @@ public class RoomServiceSecurityTests {
     @MockBean
     private SecurityService securityService;
 
+    @MockBean
+    private EventService eventService;
+
     private Project mockProject;
     private Room mockRoom;
 
@@ -58,7 +62,7 @@ public class RoomServiceSecurityTests {
         mockProject = createMockProject();
         mockRoom = createMockRoom(mockProject);
 
-        when(securityService.isResourceOwner(anyLong(), anyString())).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), any(ResourceType.class))).thenReturn(true);
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 
@@ -71,7 +75,7 @@ public class RoomServiceSecurityTests {
     void getRoomById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "room";
+        ResourceType resourceType = ResourceType.ROOM;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -100,7 +104,7 @@ public class RoomServiceSecurityTests {
         // Arrange: Prepare mock data based on the resource type
         Long resourceId = mockProject.getId();
 
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         NewRoomDTO roomDTO;
 
         roomDTO = new TestDataFactory.NewRoomDTOBuilder()
@@ -113,6 +117,9 @@ public class RoomServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             Room room = roomService.createRoom(roomDTO);
@@ -142,7 +149,7 @@ public class RoomServiceSecurityTests {
     void updateRoom_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "room";
+        ResourceType resourceType = ResourceType.ROOM;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         UpdateRoomDTO roomDTO = new TestDataFactory.UpdateRoomDTOBuilder().build();
@@ -150,6 +157,9 @@ public class RoomServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(roomRepository.save(any(Room.class))).thenReturn(mockRoom);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             Room room = roomService.updateRoom(resourceId, roomDTO);
@@ -179,12 +189,15 @@ public class RoomServiceSecurityTests {
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "room";
+        ResourceType resourceType = ResourceType.ROOM;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
             // Mock repository behavior for authorized access
             doNothing().when(roomRepository).deleteById(1L);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             roomService.deleteRoomById(resourceId);
@@ -210,17 +223,19 @@ public class RoomServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
         return project;
     }
 
     private Room createMockRoom(Project project) {
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        room.setId(1L);
         when(roomRepository.findById(room.getId())).thenReturn(Optional.of(room));
 
         return room;
+    }
+
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
 }

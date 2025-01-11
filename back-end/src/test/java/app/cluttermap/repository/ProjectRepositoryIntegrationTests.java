@@ -18,6 +18,8 @@ import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
@@ -40,32 +42,32 @@ public class ProjectRepositoryIntegrationTests {
     @Autowired
     private ItemRepository itemRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
         projectRepository.deleteAll();
         roomRepository.deleteAll();
+        orgUnitRepository.deleteAll();
+        itemRepository.deleteAll();
     }
 
     @Test
     void findByOwner_ShouldReturnOnlyProjectsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project
-        User user1 = new User("owner1ProviderId");
-        Project project1 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 1").user(user1).build();
+        User user1 = createUserAndSave();
+        Project project1 = createProjectWithUserAndSave(user1);
 
-        User user2 = new User("owner2ProviderId");
-        Project project2 = new TestDataFactory.ProjectBuilder().name("Project Owned by User 2").user(user2).build();
-
-        // Arrange: Save the users and their projects to the repositories
-        userRepository.saveAll(List.of(user1, user2));
-        projectRepository.saveAll(List.of(project1, project2));
+        User user2 = createUserAndSave();
+        Project project2 = createProjectWithUserAndSave(user2);
 
         // Act: Retrieve projects associated with user1
         List<Project> user1Projects = projectRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the project owned by user1 is returned
-        assertThat(user1Projects).hasSize(1);
-        assertThat(user1Projects.get(0).getName()).isEqualTo("Project Owned by User 1");
+        assertThat(user1Projects).containsExactly(project1);
 
         // Assert: Confirm that the project list does not contain a project owned by
         // user2
@@ -75,29 +77,22 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnAllProjectsOwnedByUser() {
         // Arrange: Set up a user with multiple projects
-        User owner = new User("ownerProviderId");
-        Project project1 = new Project("Project 1", owner);
-        Project project2 = new Project("Project 2", owner);
-        Project project3 = new Project("Project 3", owner);
-
-        // Arrange: Save the user and their projects to the repositories
-        userRepository.save(owner);
-        projectRepository.saveAll(List.of(project1, project2, project3));
+        User owner = createUserAndSave();
+        Project project1 = createProjectWithUserAndSave(owner);
+        Project project2 = createProjectWithUserAndSave(owner);
+        Project project3 = createProjectWithUserAndSave(owner);
 
         // Act: Retrieve all projects associated with the user
         List<Project> ownerProjects = projectRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all projects owned by the user are returned
-        assertThat(ownerProjects).hasSize(3);
-        assertThat(ownerProjects).extracting(Project::getName).containsExactlyInAnyOrder("Project 1", "Project 2",
-                "Project 3");
+        assertThat(ownerProjects).containsExactlyInAnyOrder(project1, project2, project3);
     }
 
     @Test
     void findByOwner_ShouldReturnEmptyList_WhenUserHasNoProjects() {
         // Arrange: Set up a user with no projects
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner); // Save the user without any projects
+        User owner = createUserAndSave();
 
         // Act: Retrieve projects associated with the user
         List<Project> ownerProjects = projectRepository.findByOwnerId(owner.getId());
@@ -109,17 +104,9 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     @Transactional
     void deletingProject_ShouldAlsoDeleteRooms() {
-        // Arrange: Set up a user and create a project with an associated room
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        project.getRooms().add(room);
-
-        // Arrange: Save the project (and implicitly the room) to the repository
-        projectRepository.save(project);
-        assertThat(roomRepository.findAll()).hasSize(1); // Verify that the room saved
+        // Arrange: Set up a project and add a room to it
+        Project project = createProjectWithUserAndSave();
+        createRoomInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated room
         projectRepository.delete(project);
@@ -132,42 +119,30 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     @Transactional
     void removingRoomFromProject_ShouldTriggerOrphanRemoval() {
-        // Arrange: Set up a user and create a project with an associated room
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
+        // Arrange: Set up a project and add a room to it
+        Project project = createProjectWithUserAndSave();
+        Room room = createRoomInProjectAndSave(project);
 
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        project.getRooms().add(room);
-
-        // Arrange: Save the project (and implicitly the room) to the repository
-        projectRepository.save(project);
-        assertThat(roomRepository.findAll()).hasSize(1); // Room should exist in DB
+        // Clear the persistence context to ensure the latest state is fetched
+        entityManager.clear();
 
         // Act: Remove the room from the project's room list and save the project to
         // trigger orphan removal
-        project.getRooms().remove(room);
+        project.removeRoom(room);
         projectRepository.save(project);
 
         // Assert: Verify that the room was deleted as an orphan when removed from the
         // project
+        assertThat(project.getRooms()).isEmpty();
         assertThat(roomRepository.findAll()).isEmpty();
     }
 
     @Test
     @Transactional
     void deletingProject_ShouldAlsoDeleteOrgUnits() {
-        // Arrange: Set up a user and create a project with an associated orgUnit
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        project.getOrgUnits().add(orgUnit);
-
-        // Arrange: Save the project (and implicitly the orgUnit) to the repository
-        projectRepository.save(project);
-        assertThat(orgUnitRepository.findAll()).hasSize(1); // Verify that the orgUnit was saved
+        // Arrange: Set up a project and add an org unit to it
+        Project project = createProjectWithUserAndSave();
+        createOrgUnitInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated
         // orgUnit
@@ -181,42 +156,30 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     @Transactional
     void removingOrgUnitFromProject_ShouldTriggerOrphanRemoval() {
-        // Arrange: Set up a user and create a project with an associated orgUnit
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
+        // Arrange: Set up a project and add an org unit to it
+        Project project = createProjectWithUserAndSave();
+        OrgUnit orgUnit = createOrgUnitInProjectAndSave(project);
 
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        project.getOrgUnits().add(orgUnit);
-
-        // Arrange: Save the project (and implicitly the orgUnit) to the repository
-        projectRepository.save(project);
-        assertThat(orgUnitRepository.findAll()).hasSize(1); // Verify that the orgUnit exists in DB
+        // Clear the persistence context to ensure the latest state is fetched
+        entityManager.clear();
 
         // Act: Remove the orgUnit from the project's orgUnit list and save the project
         // to trigger orphan removal
-        project.getOrgUnits().remove(orgUnit);
-        projectRepository.save(project);
+        project.removeOrgUnit(orgUnit);
+        project = projectRepository.save(project);
 
         // Assert: Verify that the orgUnit was deleted as an orphan when removed from
         // the project
+        assertThat(project.getOrgUnits()).isEmpty();
         assertThat(orgUnitRepository.findAll()).isEmpty();
     }
 
     @Test
     @Transactional
     void deletingProject_ShouldAlsoDeleteItems() {
-        // Arrange: Set up a user and create a project with an associated item
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        Item item = new TestDataFactory.ItemBuilder().project(project).build();
-        project.getItems().add(item);
-
-        // Arrange: Save the project (and implicitly the item) to the repository
-        projectRepository.save(project);
-        assertThat(itemRepository.findAll()).hasSize(1); // Verify that the item was saved
+        // Arrange: Set up a project and add an item to it
+        Project project = createProjectWithUserAndSave();
+        createItemInProjectAndSave(project);
 
         // Act: Delete the project, triggering cascade deletion for the associated item
         projectRepository.delete(project);
@@ -229,25 +192,66 @@ public class ProjectRepositoryIntegrationTests {
     @Test
     @Transactional
     void removingItemFromProject_ShouldTriggerOrphanRemoval() {
-        // Arrange: Set up a user and create a project with an associated item
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
+        // Arrange: Set up a project and add an item to it
+        Project project = createProjectWithUserAndSave();
+        Item item = createItemInProjectAndSave(project);
 
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        Item item = new TestDataFactory.ItemBuilder().project(project).build();
-        project.getItems().add(item);
-
-        // Arrange: Save the project (and implicitly the item) to the repository
-        projectRepository.save(project);
-        assertThat(itemRepository.findAll()).hasSize(1); // Verify that the item exists in DB
+        // Clear the persistence context to ensure the latest state is fetched
+        entityManager.clear();
 
         // Act: Remove the item from the project's item list and save the project to
         // trigger orphan removal
-        project.getItems().remove(item);
-        projectRepository.save(project);
+        project.removeItem(item);
+        project = projectRepository.save(project);
 
         // Assert: Verify that the item was deleted as an orphan when removed from the
         // project
+        assertThat(project.getItems()).isEmpty();
         assertThat(itemRepository.findAll()).isEmpty();
     }
+
+    private User createUserAndSave() {
+        User owner = userRepository.save(new User("ownerProviderId"));
+        return owner;
+    }
+
+    private Project createProjectWithUserAndSave() {
+        User owner = createUserAndSave();
+
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private Project createProjectWithUserAndSave(User owner) {
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private Room createRoomInProjectAndSave(Project project) {
+        Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+
+        project.addRoom(room);
+        projectRepository.save(project);
+        return room;
+    }
+
+    private OrgUnit createOrgUnitInProjectAndSave(Project project) {
+        OrgUnit orgUnit = orgUnitRepository
+                .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
+        return orgUnit;
+    }
+
+    private Item createItemInProjectAndSave(Project project) {
+        Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).project(project).build());
+
+        project.addItem(item);
+        projectRepository.save(project);
+        return item;
+    }
+
 }

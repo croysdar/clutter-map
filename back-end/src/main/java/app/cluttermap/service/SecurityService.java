@@ -6,18 +6,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.auth.InvalidAuthenticationException;
 import app.cluttermap.exception.auth.UserNotFoundException;
-import app.cluttermap.model.Item;
-import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
-import app.cluttermap.repository.ItemRepository;
-import app.cluttermap.repository.OrgUnitRepository;
-import app.cluttermap.repository.ProjectRepository;
-import app.cluttermap.repository.RoomRepository;
 import app.cluttermap.repository.UserRepository;
 import app.cluttermap.util.ResourceType;
 
@@ -25,23 +17,14 @@ import app.cluttermap.util.ResourceType;
 public class SecurityService {
     /* ------------- Injected Dependencies ------------- */
     private final UserRepository userRepository;
-    private final ProjectRepository projectRepository;
-    private final RoomRepository roomRepository;
-    private final OrgUnitRepository orgUnitRepository;
-    private final ItemRepository itemRepository;
+    private final EntityResolutionService entityResolutionService;
 
     /* ------------- Constructor ------------- */
     public SecurityService(
             UserRepository userRepository,
-            ProjectRepository projectRepository,
-            RoomRepository roomRepository,
-            OrgUnitRepository orgUnitRepository,
-            ItemRepository itemRepository) {
+            EntityResolutionService entityResolutionService) {
         this.userRepository = userRepository;
-        this.projectRepository = projectRepository;
-        this.roomRepository = roomRepository;
-        this.orgUnitRepository = orgUnitRepository;
-        this.itemRepository = itemRepository;
+        this.entityResolutionService = entityResolutionService;
     }
 
     /* ------------- Current User Operations ------------- */
@@ -59,35 +42,11 @@ public class SecurityService {
     }
 
     /* ------------- Resource Ownership Checks ------------- */
-    public boolean isResourceOwner(Long resourceId, String resourceType) {
+    public boolean isResourceOwner(Long resourceId, ResourceType resourceType) {
         Long currentUserId = getCurrentUser().getId();
 
-        switch (resourceType) {
-            case "project":
-                Project project = projectRepository.findById(resourceId)
-                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PROJECT, resourceId));
+        Project project = entityResolutionService.resolveProject(resourceType, resourceId);
 
-                return project.getOwner().getId().equals(currentUserId);
-
-            case "room":
-                Room room = roomRepository.findById(resourceId)
-                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ROOM, resourceId));
-
-                return room.getProject().getOwner().getId().equals(currentUserId);
-
-            case "org-unit":
-                OrgUnit orgUnit = orgUnitRepository.findById(resourceId)
-                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ORGANIZATIONAL_UNIT, resourceId));
-
-                return orgUnit.getProject().getOwner().getId().equals(currentUserId);
-
-            case "item":
-                Item item = itemRepository.findById(resourceId)
-                        .orElseThrow(() -> new ResourceNotFoundException(ResourceType.ITEM, resourceId));
-
-                return item.getProject().getOwner().getId().equals(currentUserId);
-        }
-
-        return false;
+        return project.getOwner().getId().equals(currentUserId);
     }
 }

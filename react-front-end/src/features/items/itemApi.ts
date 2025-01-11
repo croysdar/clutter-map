@@ -1,5 +1,6 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { NewItem, Item, ItemUpdate, NewUnassignedItem } from "./itemTypes";
+import { ResourceType } from "@/types/types";
 
 export const itemApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -59,7 +60,10 @@ export const itemApi = baseApiSlice.injectEndpoints({
                 method: 'PUT',
                 body: item
             }),
-            invalidatesTags: (result, error, arg) => [{ type: 'Item', id: arg.id }]
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Item', id: arg.id },
+                { type: 'Event', id: `${ResourceType.ITEM}-${arg.id}` }
+            ]
         }),
 
         unassignItemsFromOrgUnit: builder.mutation<Item[], number[]>({

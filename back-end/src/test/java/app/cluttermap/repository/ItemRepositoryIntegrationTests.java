@@ -16,7 +16,6 @@ import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
-import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
 
 @SpringBootTest
@@ -32,9 +31,6 @@ public class ItemRepositoryIntegrationTests {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
     private OrgUnitRepository orgUnitRepository;
 
     @Autowired
@@ -44,41 +40,26 @@ public class ItemRepositoryIntegrationTests {
     void setUp() {
         userRepository.deleteAll();
         projectRepository.deleteAll();
-        roomRepository.deleteAll();
         orgUnitRepository.deleteAll();
         itemRepository.deleteAll();
     }
 
     @Test
     void findByOwner_ShouldReturnOnlyItemsOwnedBySpecifiedUser() {
-        // Arrange: Set up two users, each with their own project, room and item
-        User user1 = new User("owner1ProviderId");
-        User user2 = new User("owner2ProviderId");
-        userRepository.saveAll(List.of(user1, user2));
+        // Arrange: Set up two users, each with their own project and item
+        User user1 = createUserAndSave();
+        Project project1 = createProjectWithUserAndSave(user1);
+        Item item1 = createItemInProjectAndSave(project1);
 
-        Project project1 = new TestDataFactory.ProjectBuilder().user(user1).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(user2).build();
-        projectRepository.saveAll(List.of(project1, project2));
-
-        Room room1 = new TestDataFactory.RoomBuilder().project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().project(project2).build();
-        roomRepository.saveAll(List.of(room1, room2));
-
-        OrgUnit orgUnit1 = new TestDataFactory.OrgUnitBuilder().room(room1).build();
-        OrgUnit orgUnit2 = new TestDataFactory.OrgUnitBuilder().room(room2).build();
-        orgUnitRepository.saveAll(List.of(orgUnit1, orgUnit2));
-
-        Item item1 = new TestDataFactory.ItemBuilder().name("Item Owned by User 1").orgUnit(orgUnit1).build();
-        Item item2 = new TestDataFactory.ItemBuilder().name("Item Owned by User 2").orgUnit(orgUnit2).build();
-
-        itemRepository.saveAll(List.of(item1, item2));
+        User user2 = createUserAndSave();
+        Project project2 = createProjectWithUserAndSave(user2);
+        Item item2 = createItemInProjectAndSave(project2);
 
         // Act: Retrieve items associated with user1
         List<Item> user1Items = itemRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the item owned by user1 is returned
-        assertThat(user1Items).hasSize(1);
-        assertThat(user1Items.get(0).getName()).isEqualTo("Item Owned by User 1");
+        assertThat(user1Items).containsExactly(item1);
 
         // Assert: Confirm that the item list does not contain a item owned by
         // user2
@@ -87,39 +68,27 @@ public class ItemRepositoryIntegrationTests {
 
     @Test
     void findByOwner_ShouldReturnAllItemsOwnedByUser() {
-        // Arrange: Set up a user with multiple items
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
+        // Arrange: Set up a user with multiple items, both assigned and unassigned
+        User owner = createUserAndSave();
 
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        projectRepository.save(project);
+        Project project = createProjectWithUserAndSave(owner);
+        Item item1 = createItemInProjectAndSave(project);
+        Item item2 = createItemInProjectAndSave(project);
 
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        roomRepository.save(room);
-
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        orgUnitRepository.save(orgUnit);
-
-        List<String> itemNames = List.of("Item 1", "Item 2", "Item 3");
-        Item item1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).orgUnit(orgUnit).build();
-        Item item2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).orgUnit(orgUnit).build();
-        Item item3 = new TestDataFactory.ItemBuilder().name(itemNames.get(2)).orgUnit(orgUnit).build();
-
-        itemRepository.saveAll(List.of(item1, item2, item3));
+        OrgUnit orgUnit = createOrgUnitInProjectAndSave(project);
+        Item item3 = createItemInOrgUnitAndSave(orgUnit);
 
         // Act: Retrieve all items associated with the user
         List<Item> ownerItems = itemRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all items owned by the user are returned
-        assertThat(ownerItems).hasSize(3);
-        assertThat(ownerItems).extracting(Item::getName).containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
+        assertThat(ownerItems).containsExactlyInAnyOrder(item1, item2, item3);
     }
 
     @Test
     void findByOwner_ShouldReturnEmptyList_WhenUserHasNoItems() {
         // Arrange: Set up a user with no items
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner); // Save the user without any items
+        User owner = createUserAndSave();
 
         // Act: Retrieve items associated with the user
         List<Item> ownerItems = itemRepository.findByOwnerId(owner.getId());
@@ -131,29 +100,19 @@ public class ItemRepositoryIntegrationTests {
     @Test
     void findUnassignedItemsByProjectId_ShouldReturnOnlyUnassignedItems() {
         // Arrange: Create a project and items with and without an assigned orgUnit
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        projectRepository.save(project);
+        Project project = createProjectWithUserAndSave();
+        Item unassignedItem1 = createItemInProjectAndSave(project);
+        Item unassignedItem2 = createItemInProjectAndSave(project);
 
-        List<String> itemNames = List.of("Item 1", "Item 2");
-        Item unassignedItem1 = new TestDataFactory.ItemBuilder().name(itemNames.get(0)).project(project).build();
-        Item unassignedItem2 = new TestDataFactory.ItemBuilder().name(itemNames.get(1)).project(project).build();
-
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        orgUnitRepository.save(orgUnit);
-
-        Item assignedItem = new TestDataFactory.ItemBuilder().orgUnit(orgUnit).build();
-        assignedItem.setOrgUnit(orgUnit);
-
-        itemRepository.saveAll(List.of(unassignedItem1, unassignedItem2, assignedItem));
+        // Save an assigned item as well
+        OrgUnit orgUnit = createOrgUnitInProjectAndSave(project);
+        createItemInOrgUnitAndSave(orgUnit);
 
         // Act: Retrieve unassigned items
         List<Item> unassignedItems = itemRepository.findUnassignedItemsByProjectId(project.getId());
 
         // Assert: Verify only unassigned items are returned
-        assertThat(unassignedItems).extracting(Item::getName)
-                .containsExactlyInAnyOrder(itemNames.toArray(new String[0]));
+        assertThat(unassignedItems).containsExactlyInAnyOrder(unassignedItem1, unassignedItem2);
     }
 
     @Test
@@ -166,5 +125,49 @@ public class ItemRepositoryIntegrationTests {
 
         // Assert: Verify that the result is an empty list
         assertThat(unassignedItems).isEmpty();
+    }
+
+    private User createUserAndSave() {
+        User owner = userRepository.save(new User("ownerProviderId"));
+        return owner;
+    }
+
+    private Project createProjectWithUserAndSave() {
+        User owner = createUserAndSave();
+
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private Project createProjectWithUserAndSave(User owner) {
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private OrgUnit createOrgUnitInProjectAndSave(Project project) {
+        OrgUnit orgUnit = orgUnitRepository
+                .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
+
+        project.addOrgUnit(orgUnit);
+        projectRepository.save(project);
+        return orgUnit;
+    }
+
+    private Item createItemInProjectAndSave(Project project) {
+        Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).project(project).build());
+
+        project.addItem(item);
+        projectRepository.save(project);
+        return item;
+    }
+
+    private Item createItemInOrgUnitAndSave(OrgUnit orgUnit) {
+        Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).orgUnit(orgUnit).build());
+
+        orgUnit.addItem(item);
+        orgUnitRepository.save(orgUnit);
+        return item;
     }
 }
