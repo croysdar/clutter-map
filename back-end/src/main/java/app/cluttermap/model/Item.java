@@ -30,7 +30,7 @@ public class Item {
 
     private String description;
 
-    private List<String> tags;
+    private List<String> tags = new ArrayList<>();
 
     private Integer quantity;
 
