@@ -29,10 +29,12 @@ import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
 import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+import { initIDB, syncIDB } from '@/features/offline/syncSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
+
 import '../assets/styles/App.css';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -53,17 +55,30 @@ function App() {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt')
+        const initializeDB = async () => {
+            await dispatch(initIDB());
+        };
+        initializeDB();
 
-        // Check if user has previously logged in
-        if (token) {
-            // send token to backend to fetch user data
-            dispatch(fetchUserInfo(token));
+        const initializeAuth = async () => {
+            const token = localStorage.getItem('jwt')
+
+            // Check if user has previously logged in
+            if (token) {
+                // send token to backend to fetch user data
+                const result = await dispatch(fetchUserInfo(token));
+
+                // Make sure the user is properly logged in before trying to sync
+                if (fetchUserInfo.fulfilled.match(result)) {
+                    dispatch(syncIDB(token));
+                }
+            }
+            else {
+                // Set auth status to 'none' because there is no jwt
+                dispatch(rejectAuthStatus());
+            }
         }
-        else {
-            // Set auth status to 'none' because there is no jwt
-            dispatch(rejectAuthStatus());
-        }
+        initializeAuth();
     }, [dispatch]);
 
 

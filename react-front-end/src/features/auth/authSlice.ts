@@ -1,6 +1,6 @@
-import { client } from "@/services/client";
 import { RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
+import { client } from "@/services/client";
 import { API_BASE_URL } from "@/utils/constants";
 
 interface UserInfo {

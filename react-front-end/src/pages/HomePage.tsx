@@ -1,23 +1,36 @@
 import React from 'react';
 
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+
+/* ------------- Material UI ------------- */
+import { CircularProgress, Typography } from '@mui/material';
+
+/* ------------- Components ------------- */
 import ButtonLink from '@/components/common/ButtonLink';
 import { StaticPageWrapper } from '@/components/pageWrappers/StaticPageWrapper';
+
+/* ------------- Redux ------------- */
 import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
+import { syncIDB } from '@/features/offline/syncSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
-import { CircularProgress, Typography } from '@mui/material';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 const HomePage: React.FC = () => {
     const authStatus = useAppSelector(selectAuthStatus);
     const dispatch = useAppDispatch();
 
-    const handleSuccess = async (cred: CredentialResponse) => {
+    const handleLoginSuccess = async (cred: CredentialResponse) => {
         const idToken = cred.credential
         if (idToken) {
             await dispatch(verifyToken({ idToken, provider: 'google' }));
             const jwt = localStorage.getItem('jwt');
-            if (jwt)
-                await (dispatch(fetchUserInfo(jwt)));
+            if (jwt) {
+                const result = await (dispatch(fetchUserInfo(jwt)));
+
+                // Make sure the user is properly logged in before trying to sync
+                if (fetchUserInfo.fulfilled.match(result)) {
+                    dispatch(syncIDB(jwt));
+                }
+            }
         }
     }
 
@@ -46,7 +59,7 @@ const HomePage: React.FC = () => {
             {
                 (authStatus === 'none' || authStatus === 'idle') &&
                 <GoogleLogin
-                    onSuccess={handleSuccess}
+                    onSuccess={handleLoginSuccess}
                 />
             }
             {

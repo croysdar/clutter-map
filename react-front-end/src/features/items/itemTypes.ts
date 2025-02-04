@@ -6,6 +6,7 @@ export interface Item {
     quantity: number;
     orgUnitId?: number,
     orgUnitName?: string,
+    projectId: number
 }
 
 export type NewItem = Pick<Item, 'name' | 'description' | 'tags' | 'quantity'> | { orgUnitId: string }
