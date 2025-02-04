@@ -1,6 +1,8 @@
 package app.cluttermap.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.dto.ItemDTO;
 import app.cluttermap.model.dto.NewOrgUnitDTO;
+import app.cluttermap.model.dto.OrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
@@ -37,46 +41,61 @@ public class OrgUnitController {
 
     /* ------------- GET Operations ------------- */
     @GetMapping()
-    public ResponseEntity<Iterable<OrgUnit>> getOrgUnits() {
-        return ResponseEntity.ok(orgUnitService.getUserOrgUnits());
+    public ResponseEntity<List<OrgUnitDTO>> getOrgUnits() {
+        List<OrgUnitDTO> orgUnitDTOS = new ArrayList<>();
+        for (OrgUnit orgUnit : orgUnitService.getUserOrgUnits()) {
+            orgUnitDTOS.add(new OrgUnitDTO(orgUnit));
+        }
+        return ResponseEntity.ok(orgUnitDTOS);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrgUnit> getOneOrgUnit(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(orgUnitService.getOrgUnitById(id));
+    public ResponseEntity<OrgUnitDTO> getOneOrgUnit(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(new OrgUnitDTO(orgUnitService.getOrgUnitById(id)));
     }
 
+    // TODO should this be a query like /items?org-unit={id}
     @GetMapping("/{id}/items")
-    public ResponseEntity<Iterable<Item>> getOrgUnitItems(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(orgUnitService.getOrgUnitById(id).getItems());
+    public ResponseEntity<List<ItemDTO>> getOrgUnitItems(@PathVariable("id") Long id) {
+        List<ItemDTO> itemDTOs = new ArrayList<>();
+        for (Item item : orgUnitService.getOrgUnitById(id).getItems()) {
+            itemDTOs.add(new ItemDTO(item));
+        }
+        return ResponseEntity.ok(itemDTOs);
     }
 
     /* ------------- POST Operations ------------- */
     @PostMapping()
-    public ResponseEntity<OrgUnit> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
-        return ResponseEntity.ok(orgUnitService.createOrgUnit(orgUnitDTO));
+    public ResponseEntity<OrgUnitDTO> addOneOrgUnit(@Valid @RequestBody NewOrgUnitDTO orgUnitDTO) {
+        return ResponseEntity.ok(new OrgUnitDTO(orgUnitService.createOrgUnit(orgUnitDTO)));
     }
 
     /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
-    public ResponseEntity<OrgUnit> updateOneOrgUnit(@PathVariable("id") Long id,
+    public ResponseEntity<OrgUnitDTO> updateOneOrgUnit(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateOrgUnitDTO orgUnitDTO) {
-        return ResponseEntity.ok(orgUnitService.updateOrgUnit(id, orgUnitDTO));
+        return ResponseEntity.ok(new OrgUnitDTO(orgUnitService.updateOrgUnit(id, orgUnitDTO)));
     }
 
     @PutMapping("/{orgUnitId}/items")
-    public ResponseEntity<Iterable<Item>> assignItemsToOrgUnit(
+    public ResponseEntity<List<ItemDTO>> assignItemsToOrgUnit(
             @PathVariable Long orgUnitId,
             @RequestBody List<Long> itemIds) {
 
-        Iterable<Item> updatedItems = itemService.assignItemsToOrgUnit(itemIds, orgUnitId);
-        return ResponseEntity.ok(updatedItems);
+        List<ItemDTO> itemDTOs = new ArrayList<>();
+        for (Item item : itemService.assignItemsToOrgUnit(itemIds, orgUnitId)) {
+            itemDTOs.add(new ItemDTO(item));
+        }
+        return ResponseEntity.ok(itemDTOs);
     }
 
     @PutMapping("/unassign")
-    public ResponseEntity<Iterable<OrgUnit>> unassignOrgUnits(@RequestBody List<Long> orgUnitIds) {
+    public ResponseEntity<Iterable<OrgUnitDTO>> unassignOrgUnits(@RequestBody List<Long> orgUnitIds) {
         orgUnitService.checkOwnershipForOrgUnits(orgUnitIds);
-        return ResponseEntity.ok(orgUnitService.unassignOrgUnits(orgUnitIds));
+        List<OrgUnitDTO> unassignedOrgUnitDTOs = orgUnitService.unassignOrgUnits(orgUnitIds).stream()
+                .map(OrgUnitDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(unassignedOrgUnitDTOs);
     }
 
     /* ------------- DELETE Operations ------------- */

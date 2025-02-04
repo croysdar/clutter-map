@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
@@ -59,7 +60,7 @@ public class ItemService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Iterable<Item> getUserItems() {
+    public List<Item> getUserItems() {
         User user = securityService.getCurrentUser();
 
         return itemRepository.findByOwnerId(user.getId());
@@ -161,14 +162,14 @@ public class ItemService {
 
     /* ------------- Complex Operations ------------- */
     @Transactional
-    public Iterable<Item> assignItemsToOrgUnit(List<Long> itemIds, Long targetOrgUnitId) {
+    public List<Item> assignItemsToOrgUnit(List<Long> itemIds, Long targetOrgUnitId) {
         OrgUnit targetOrgUnit = orgUnitService.getOrgUnitById(targetOrgUnitId);
 
         List<Item> updatedItems = new ArrayList<>();
 
         for (Long itemId : itemIds) {
             Item item = self.getItemById(itemId);
-            Long previousOrgUnitId = item.getOrgUnitId();
+            Long previousOrgUnitId = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getId).orElse(null);
 
             validateSameProject(item, targetOrgUnit);
 
@@ -186,11 +187,11 @@ public class ItemService {
     }
 
     @Transactional
-    public Iterable<Item> unassignItems(List<Long> itemIds) {
+    public List<Item> unassignItems(List<Long> itemIds) {
         List<Item> updatedItems = new ArrayList<>();
         for (Long itemId : itemIds) {
             Item item = self.getItemById(itemId);
-            Long previousOrgUnitId = item.getOrgUnitId();
+            Long previousOrgUnitId = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getId).orElse(null);
             if (previousOrgUnitId != null) {
                 unassignItemFromOrgUnit(item, item.getOrgUnit());
                 eventService.logMoveEvent(

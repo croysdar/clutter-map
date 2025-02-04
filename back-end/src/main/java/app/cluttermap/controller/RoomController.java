@@ -1,5 +1,6 @@
 package app.cluttermap.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.dto.NewRoomDTO;
+import app.cluttermap.model.dto.OrgUnitDTO;
+import app.cluttermap.model.dto.RoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.service.OrgUnitService;
 import app.cluttermap.service.RoomService;
@@ -39,40 +42,52 @@ public class RoomController {
 
     /* ------------- GET Operations ------------- */
     @GetMapping()
-    public ResponseEntity<Iterable<Room>> getRooms() {
-        return ResponseEntity.ok(roomService.getUserRooms());
+    public ResponseEntity<List<RoomDTO>> getRooms() {
+        List<RoomDTO> roomDTOs = new ArrayList<>();
+        for (Room room : roomService.getUserRooms()) {
+            roomDTOs.add(new RoomDTO(room));
+        }
+        return ResponseEntity.ok(roomDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> getOneRoom(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(roomService.getRoomById(id));
+    public ResponseEntity<RoomDTO> getOneRoom(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(new RoomDTO(roomService.getRoomById(id)));
     }
 
+    // TODO should this be a query like /org-units?room={id}
     @GetMapping("/{id}/org-units")
-    public ResponseEntity<Iterable<OrgUnit>> getRoomOrgUnits(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(roomService.getRoomById(id).getOrgUnits());
+    public ResponseEntity<List<OrgUnitDTO>> getRoomOrgUnits(@PathVariable("id") Long id) {
+        List<OrgUnitDTO> orgUnitDTOs = new ArrayList<>();
+        for (OrgUnit orgUnit : roomService.getRoomById(id).getOrgUnits()) {
+            orgUnitDTOs.add(new OrgUnitDTO(orgUnit));
+        }
+        return ResponseEntity.ok(orgUnitDTOs);
     }
 
     /* ------------- POST Operations ------------- */
     @PostMapping()
-    public ResponseEntity<Room> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
-        return ResponseEntity.ok(roomService.createRoom(roomDTO));
+    public ResponseEntity<RoomDTO> addOneRoom(@Valid @RequestBody NewRoomDTO roomDTO) {
+        return ResponseEntity.ok(new RoomDTO(roomService.createRoom(roomDTO)));
     }
 
     /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateOneRoom(@PathVariable("id") Long id,
+    public ResponseEntity<RoomDTO> updateOneRoom(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateRoomDTO roomDTO) {
-        return ResponseEntity.ok(roomService.updateRoom(id, roomDTO));
+        return ResponseEntity.ok(new RoomDTO(roomService.updateRoom(id, roomDTO)));
     }
 
     @PutMapping("/{roomId}/org-units")
-    public ResponseEntity<Iterable<OrgUnit>> assignOrgUnitsToRoom(
+    public ResponseEntity<List<OrgUnitDTO>> assignOrgUnitsToRoom(
             @PathVariable Long roomId,
             @RequestBody List<Long> orgUnitIds) {
 
-        Iterable<OrgUnit> updatedOrgUnits = orgUnitService.assignOrgUnitsToRoom(orgUnitIds, roomId);
-        return ResponseEntity.ok(updatedOrgUnits);
+        List<OrgUnitDTO> orgUnitDTOs = new ArrayList<>();
+        for (OrgUnit orgUnit : orgUnitService.assignOrgUnitsToRoom(orgUnitIds, roomId)) {
+            orgUnitDTOs.add(new OrgUnitDTO(orgUnit));
+        }
+        return ResponseEntity.ok(orgUnitDTOs);
     }
 
     /* ------------- DELETE Operations ------------- */
