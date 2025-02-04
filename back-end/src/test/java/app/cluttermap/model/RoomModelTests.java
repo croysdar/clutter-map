@@ -37,7 +37,6 @@ public class RoomModelTests {
 
         // Act: Add a orgUnit to the room
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        room.getOrgUnits().add(orgUnit);
 
         // Assert: Verify that the orgUnit was added to the room's orgUnits
         // collection

@@ -3,6 +3,7 @@ package app.cluttermap;
 import static app.cluttermap.TestDataConstants.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
@@ -86,10 +87,13 @@ public class TestDataFactory {
             if (orgUnit != null) {
                 Item item = new Item(name, description, tags, quantity, orgUnit);
                 item.setId(id);
+                orgUnit.addItem(item);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addItem(item));
                 return item;
             } else if (project != null) {
                 Item item = new Item(name, description, tags, quantity, project);
                 item.setId(id);
+                project.addItem(item);
                 return item;
             } else {
                 throw new IllegalStateException("Either OrgUnit or Project must be set to build an Item.");
@@ -233,10 +237,13 @@ public class TestDataFactory {
             if (room != null) {
                 OrgUnit orgUnit = new OrgUnit(name, description, room);
                 orgUnit.setId(id);
+                room.addOrgUnit(orgUnit);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addOrgUnit(orgUnit));
                 return orgUnit;
             } else if (project != null) {
                 OrgUnit orgUnit = new OrgUnit(name, description, project);
                 orgUnit.setId(id);
+                project.addOrgUnit(orgUnit);
                 return orgUnit;
             } else {
                 throw new IllegalStateException("Either Room or Project must be set to build an OrgUnit.");
@@ -348,6 +355,7 @@ public class TestDataFactory {
             if (project != null) {
                 Room room = new Room(name, description, project);
                 room.setId(id);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addRoom(room));
                 return room;
             } else {
                 throw new IllegalStateException("Project must be set to build a Room.");

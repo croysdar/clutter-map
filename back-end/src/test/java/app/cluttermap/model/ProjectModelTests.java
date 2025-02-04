@@ -34,7 +34,6 @@ public class ProjectModelTests {
 
         // Act: Add a room to the project
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        project.getRooms().add(room);
 
         // Assert: Verify that the room was added to the project's rooms collection
         assertThat(project.getRooms()).hasSize(1);
