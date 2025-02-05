@@ -22,7 +22,11 @@ const syncSlice = createAppSlice({
         create => {
             return {
                 syncIDB: create.asyncThunk(
-                    async (token: string, { rejectWithValue }) => {
+                    async (_, { rejectWithValue }) => {
+                        const token = localStorage.getItem('jwt');
+                        if (!token)
+                            return;
+
                         if (syncAbortController) {
                             console.warn("Sync already in progress. Cancelling duplicate sync.");
                             return;

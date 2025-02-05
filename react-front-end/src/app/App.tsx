@@ -70,7 +70,7 @@ function App() {
 
                 // Make sure the user is properly logged in before trying to sync
                 if (fetchUserInfo.fulfilled.match(result)) {
-                    dispatch(syncIDB(token));
+                    dispatch(syncIDB());
                 }
             }
             else {
