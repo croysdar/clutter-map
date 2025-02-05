@@ -1,12 +1,14 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
+import { Stores } from "../offline/idb";
+import { getAllFromIndexedDB, getByIdFromIndexedDB } from "../offline/useIndexedDBQuery";
 import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
 
 export const projectApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
         /* ------------- GET Operations ------------- */
         getProjects: builder.query<Project[], void>({
-            query: () => '/projects',
+            queryFn: async () => await getAllFromIndexedDB(Stores.Projects),
             providesTags: (result = []) => [
                 'Project',
                 ...result.map(({ id }) => ({ type: 'Project', id } as const))
@@ -14,7 +16,7 @@ export const projectApi = baseApiSlice.injectEndpoints({
         }),
 
         getProject: builder.query<Project, number>({
-            query: (projectId) => `/projects/${projectId}`,
+            queryFn: async (projectId) => await getByIdFromIndexedDB(Stores.Projects, projectId),
             providesTags: (result, error, arg) => [{ type: 'Project', id: arg }]
         }),
 
