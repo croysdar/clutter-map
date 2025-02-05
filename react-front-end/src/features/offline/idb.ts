@@ -76,27 +76,27 @@ export const setLastSynced = async (timestamp: number): Promise<void> => {
 export const performSync = async (token: string) => {
     const lastSynced = await getLastSynced();
     const now = Date.now();
-    const oneMinute = 60 * 1000;
+    const recent = 3 * 1000;
 
     if (lastSynced) {
         // Fetch updates since last sync
-        if (now - lastSynced > oneMinute) {
+        if (now - lastSynced > recent) {
             console.log('Last-synced timestamp found. Fetching updates since last sync...');
-            partialSync(token, lastSynced);
+            await partialSync(token, lastSynced);
         }
         else {
-            console.log("Last-synced was less than a minute ago.")
+            console.log("Last-synced was too recent.")
         }
     }
     else {
         // Perform full sync for new devices
         console.log('No last-synced timestamp found. Performing full sync...');
-        fullSync(token);
+        await fullSync(token);
     }
 };
 
 const partialSync = async (token: string, lastSynced: number) => {
-
+    await fullSync(token);
 
 }
 
@@ -108,95 +108,40 @@ const fullSync = async (token: string) => {
         'items': {} as Record<number, Item>
     };
 
-    // GET all projects
-    const projectsResponse = await client.get<Project[]>(`${API_BASE_URL}/projects`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    const [projectsResponse, roomsResponse, orgUnitsResponse, itemsResponse] = await Promise.all([
+        client.get<Project[]>(`${API_BASE_URL}/projects`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Room[]>(`${API_BASE_URL}/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<OrgUnit[]>(`${API_BASE_URL}/org-units`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Item[]>(`${API_BASE_URL}/items`, { headers: { Authorization: `Bearer ${token}` } })
+    ]);
 
-    // Go through all projects
-    for (let project of projectsResponse.data) {
-        // Save project in data
-        let projectID = project.id;
-        data.projects[projectID] = project;
-    }
+    projectsResponse.data.forEach(project => (data.projects[project.id] = project));
+    roomsResponse.data.forEach(room => (data.rooms[room.id] = room));
+    orgUnitsResponse.data.forEach(orgUnit => (data.orgUnits[orgUnit.id] = orgUnit));
+    itemsResponse.data.forEach(item => (data.items[item.id] = item));
 
-    // GET all rooms
-    const roomsResponse = await client.get<Room[]>(`${API_BASE_URL}/rooms`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    console.log('Data fetched:', data);
 
-    // Go through all rooms
-    for (let room of roomsResponse.data) {
-        // Save room in data
-        let roomID = room.id;
-        data.rooms[roomID] = room;
-    }
+    const db = await openDB('ClutterMapDB', IDB_VERSION);
 
-    // GET all orgUnits
-    const orgUnitsResponse = await client.get<OrgUnit[]>(`${API_BASE_URL}/org-units`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    const tx = db.transaction([Stores.Projects, Stores.Rooms, Stores.OrgUnits, Stores.Items, Stores.Meta], 'readwrite');
 
-    // Go through all orgUnits
-    for (let orgUnit of orgUnitsResponse.data) {
-        // Save orgUnits in data
-        let orgUnitID = orgUnit.id;
-        data.orgUnits[orgUnitID] = orgUnit;
-    }
-
-    // GET all items
-    const itemsResponse = await client.get<Item[]>(`${API_BASE_URL}/items`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-
-    // Go through all items
-    for (let item of itemsResponse.data) {
-        // Save items in data
-        let itemID = item.id;
-        data.items[itemID] = item;
-    }
-
-    console.log(data);
-
-    const dbRequest = indexedDB.open('ClutterMapDB', version);
-
-    dbRequest.onsuccess = async () => {
-        const db = dbRequest.result;
-
-        // Start a readwrite transaction
-        const transaction = db.transaction(
-            ['projects', 'rooms', 'org_units', 'items', 'meta'],
-            'readwrite'
-        );
-
-        // Get object stores
-        const projectsStore = transaction.objectStore('projects');
-        const roomsStore = transaction.objectStore('rooms');
-        const orgUnitsStore = transaction.objectStore('org_units');
-        const itemsStore = transaction.objectStore('items');
-        const metaStore = transaction.objectStore('meta');
-
-        // Helper function to store data safely
-        const storeData = (store: IDBObjectStore, records: Record<number, any>) => {
-            Object.values(records).forEach(record => store.put(record));
+    const storeData = async (storeName: Stores, records: Record<number, any>) => {
+        const store = tx.objectStore(storeName);
+        await Promise.all(Object.values(records).map(record => store.put(record)));
         };
 
-        // Store the fetched data
-        storeData(projectsStore, data.projects);
-        storeData(roomsStore, data.rooms);
-        storeData(orgUnitsStore, data.orgUnits);
-        storeData(itemsStore, data.items);
+    await Promise.all([
+        storeData(Stores.Projects, data.projects),
+        storeData(Stores.Rooms, data.rooms),
+        storeData(Stores.OrgUnits, data.orgUnits),
+        storeData(Stores.Items, data.items),
+        tx.objectStore(Stores.Meta).put({ key: 'last-synced', value: Date.now() })
+    ]);
 
-        // Store last-synced timestamp
-        metaStore.put({ key: 'last-synced', value: Date.now() });
 
-        // Wait for transaction to complete
-        transaction.oncomplete = () => {
+    await tx.done;
+
             console.log('Full sync completed.');
-        };
 
-        transaction.onerror = (event) => {
-            console.error('Transaction failed:', event);
-        };
-    };
 }
