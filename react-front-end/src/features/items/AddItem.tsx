@@ -28,7 +28,7 @@ export const AddItem = () => {
     const { projectId, roomId, orgUnitId } = useParams();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
 
-    const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit } = useGetOrgUnitQuery(Number(orgUnitId!));
 
     // States to manage special input
     const [tags, setTags] = useState<string[]>([]);

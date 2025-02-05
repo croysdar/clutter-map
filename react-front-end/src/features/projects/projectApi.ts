@@ -13,7 +13,7 @@ export const projectApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getProject: builder.query<Project, string>({
+        getProject: builder.query<Project, number>({
             query: (projectId) => `/projects/${projectId}`,
             providesTags: (result, error, arg) => [{ type: 'Project', id: arg }]
         }),

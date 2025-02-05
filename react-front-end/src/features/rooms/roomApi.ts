@@ -14,7 +14,7 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getRoomsByProject: builder.query<Room[], string>({
+        getRoomsByProject: builder.query<Room[], number>({
             query: (projectID) => `/projects/${projectID}/rooms`,
             providesTags: (result = [], error, projectID) => [
                 'Room',
@@ -23,7 +23,7 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getRoom: builder.query<Room, string>({
+        getRoom: builder.query<Room, number>({
             query: (roomId) => `/rooms/${roomId}`,
             providesTags: (result, error, arg) => [{ type: 'Room', id: arg }]
         }),

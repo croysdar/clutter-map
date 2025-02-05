@@ -33,7 +33,7 @@ const EditProject = () => {
     const { projectId } = useParams();
     const redirectUrl = ROUTES.projectDetails(projectId!);
 
-    const { data: project, isLoading: projectLoading, isError, error } = useGetProjectQuery(projectId!);
+    const { data: project, isLoading: projectLoading, isError, error } = useGetProjectQuery(Number(projectId!));
 
     const [
         updateProject,

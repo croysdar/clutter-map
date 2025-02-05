@@ -13,7 +13,7 @@ export const itemApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getItemsByOrgUnit: builder.query<Item[], string>({
+        getItemsByOrgUnit: builder.query<Item[], number>({
             query: (orgUnitID) => `/org-units/${orgUnitID}/items`,
             providesTags: (result = [], error, orgUnitID) => [
                 { type: 'OrgUnit', id: orgUnitID },
@@ -21,7 +21,7 @@ export const itemApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getItemsByProject: builder.query<Item[], string>({
+        getItemsByProject: builder.query<Item[], number>({
             query: (projectId) => `/projects/${projectId}/items`,
             providesTags: (result = [], error, projectID) => [
                 { type: 'Project', id: projectID },
@@ -29,7 +29,7 @@ export const itemApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getItem: builder.query<Item, string>({
+        getItem: builder.query<Item, number>({
             query: (itemId) => `/items/${itemId}`,
             providesTags: (result, error, arg) => [{ type: 'Item', id: arg }]
         }),

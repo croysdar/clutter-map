@@ -25,7 +25,7 @@ export const AddOrgUnit = () => {
     const { roomId, projectId } = useParams();
     const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
 
-    const { data: room } = useGetRoomQuery(roomId!);
+    const { data: room } = useGetRoomQuery(Number(roomId!));
 
 
     const handleSubmit = async (e: React.FormEvent<AddOrgUnitFormElements>) => {

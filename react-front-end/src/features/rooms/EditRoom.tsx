@@ -34,7 +34,7 @@ const EditRoom = () => {
     const { roomId, projectId } = useParams();
     const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
 
-    const { data: room, isLoading: roomLoading, isError, error } = useGetRoomQuery(roomId!);
+    const { data: room, isLoading: roomLoading, isError, error } = useGetRoomQuery(Number(roomId!));
 
     const [
         updateRoom,

@@ -23,14 +23,14 @@ import { ROUTES } from '@/utils/constants';
 const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
 
-    const { data: room } = useGetRoomQuery(roomId!);
+    const { data: room } = useGetRoomQuery(Number(roomId!));
 
     const {
         data: orgUnits = [],
         isLoading,
         isError,
         error
-    } = useGetOrgUnitsByRoomQuery(roomId!);
+    } = useGetOrgUnitsByRoomQuery(Number(roomId!));
 
     const navigate = useNavigate();
     const handleClick = (e: React.MouseEvent<HTMLDivElement>, orgUnitId: number) => {

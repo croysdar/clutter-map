@@ -22,14 +22,14 @@ import { ROUTES } from '@/utils/constants';
 const ProjectDetails: React.FC = () => {
     const { projectId } = useParams();
 
-    const { data: project } = useGetProjectQuery(projectId!);
+    const { data: project } = useGetProjectQuery(Number(projectId!));
 
     const {
         data: rooms = [],
         isLoading,
         isError,
         error
-    } = useGetRoomsByProjectQuery(projectId!);
+    } = useGetRoomsByProjectQuery(Number(projectId!));
 
     const navigate = useNavigate();
 

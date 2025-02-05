@@ -24,7 +24,7 @@ export const AddRoom = () => {
     const { projectId } = useParams();
     const redirectUrl = ROUTES.projectDetails(projectId!)
 
-    const { data: project } = useGetProjectQuery(projectId!);
+    const { data: project } = useGetProjectQuery(Number(projectId!));
 
     const handleSubmit = async (e: React.FormEvent<AddRoomFormElements>) => {
         e.preventDefault()

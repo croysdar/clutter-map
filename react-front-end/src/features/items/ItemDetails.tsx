@@ -24,7 +24,7 @@ const ItemDetails: React.FC = () => {
         isLoading,
         isError,
         error
-    } = useGetItemQuery(itemId!);
+    } = useGetItemQuery(Number(itemId)!);
 
     if (isLoading) {
         return (
