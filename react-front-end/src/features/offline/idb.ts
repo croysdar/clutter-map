@@ -7,11 +7,9 @@ import { Project } from "@/features/projects/projectsTypes";
 import { Room } from "@/features/rooms/roomsTypes";
 
 /* ------------- Constants ------------- */
-import { API_BASE_URL } from "@/utils/constants";
+import { API_BASE_URL, IDB_VERSION } from "@/utils/constants";
 
 import { client } from "@/services/client";
-
-let version = 1;
 
 export enum Stores {
     Projects = 'projects',
@@ -23,7 +21,7 @@ export enum Stores {
 
 export const initDB = (): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('ClutterMapDB', version);
+        const request = indexedDB.open('ClutterMapDB', IDB_VERSION);
 
         request.onupgradeneeded = () => {
             const db = request.result;
@@ -59,7 +57,7 @@ export const initDB = (): Promise<boolean> => {
 };
 
 export const getLastSynced = async (): Promise<number | null> => {
-    const db = await openDB('ClutterMapDB', version);
+    const db = await openDB('ClutterMapDB', IDB_VERSION);
     const transaction = db.transaction('meta', 'readonly');
     const store = transaction.objectStore('meta');
 
@@ -68,7 +66,7 @@ export const getLastSynced = async (): Promise<number | null> => {
 };
 
 export const setLastSynced = async (timestamp: number): Promise<void> => {
-    const db = await openDB('ClutterMapDB', version);
+    const db = await openDB('ClutterMapDB', IDB_VERSION);
     const transaction = db.transaction('meta', 'readwrite');
     const store = transaction.objectStore('meta');
 
