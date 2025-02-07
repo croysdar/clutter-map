@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 /* ------------- Material UI ------------- */
@@ -53,9 +53,12 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
 
 function App() {
     const dispatch = useAppDispatch();
+    const isInit = useRef(false);
 
     useEffect(() => {
         const initializeApp = async () => {
+            if (isInit.current) return;
+            isInit.current = true;
             await dispatch(initIDB());
 
             const token = localStorage.getItem('jwt')

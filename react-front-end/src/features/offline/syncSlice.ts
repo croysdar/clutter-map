@@ -12,9 +12,6 @@ const initialState: SyncState = {
     status: 'idle'
 }
 
-let syncAbortController: AbortController | null = null;
-let initAbortController: AbortController | null = null;
-
 const syncSlice = createAppSlice({
     name: 'sync',
     initialState,
@@ -26,22 +23,12 @@ const syncSlice = createAppSlice({
                         const token = localStorage.getItem('jwt');
                         if (!token)
                             return;
-
-                        if (syncAbortController) {
-                            console.warn("Sync already in progress. Cancelling duplicate sync.");
-                            return;
-                        }
-
-                        syncAbortController = new AbortController();
-
                         try {
                             await syncFunction(token);
                             return { success: true }
                         }
                         catch (error: any) {
                             return rejectWithValue(error.message || 'Sync failed');
-                        } finally {
-                            syncAbortController = null;
                         }
                     },
                     {
@@ -58,21 +45,12 @@ const syncSlice = createAppSlice({
                 ),
                 initIDB: create.asyncThunk(
                     async (_, { rejectWithValue }) => {
-                        if (initAbortController) {
-                            console.warn("Initialization already in progress. Cancelling duplicate init.");
-                            return;
-                        }
-
-                        initAbortController = new AbortController();
-
                         try {
                             await initFunction();
                             return { success: true }
                         }
                         catch (error: any) {
                             return rejectWithValue(error.message || 'Initialization failed');
-                        } finally {
-                            initAbortController = null;
                         }
                     },
                     {
