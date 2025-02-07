@@ -49,7 +49,6 @@ const authSlice = createAppSlice({
                         state.status = 'pending'
                     },
                     fulfilled: (state, action) => {
-
                         state.status = 'verified'
                     },
                     rejected: (state) => {
@@ -58,7 +57,7 @@ const authSlice = createAppSlice({
                 }
             ),
             fetchUserInfo: create.asyncThunk(
-                async (token: string, { rejectWithValue }) => {
+                async (token: string, { rejectWithValue, dispatch }) => {
                     try {
                         const response = await client.get<UserInfo>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }

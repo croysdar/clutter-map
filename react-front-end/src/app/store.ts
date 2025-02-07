@@ -4,6 +4,7 @@ import { baseApiSlice } from "@/services/baseApiSlice";
 
 import authReducer from "@/features/auth/authSlice";
 import syncReducer from "@/features/offline/syncSlice";
+import authListenerMiddleware from "../features/auth/authListenerMiddleware";
 
 export const store = configureStore({
     reducer: {
@@ -12,7 +13,7 @@ export const store = configureStore({
         sync: syncReducer
     },
     middleware: getDefaultMiddleware =>
-        getDefaultMiddleware().concat(baseApiSlice.middleware)
+        getDefaultMiddleware().concat(baseApiSlice.middleware, authListenerMiddleware.middleware)
 })
 
 

@@ -10,8 +10,7 @@ import ButtonLink from '@/components/common/ButtonLink';
 import { StaticPageWrapper } from '@/components/pageWrappers/StaticPageWrapper';
 
 /* ------------- Redux ------------- */
-import { fetchUserInfo, selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
-import { syncIDB } from '@/features/offline/syncSlice';
+import { selectAuthStatus, verifyToken } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 const HomePage: React.FC = () => {
@@ -22,15 +21,6 @@ const HomePage: React.FC = () => {
         const idToken = cred.credential
         if (idToken) {
             await dispatch(verifyToken({ idToken, provider: 'google' }));
-            const jwt = localStorage.getItem('jwt');
-            if (jwt) {
-                const result = await (dispatch(fetchUserInfo(jwt)));
-
-                // Make sure the user is properly logged in before trying to sync
-                if (fetchUserInfo.fulfilled.match(result)) {
-                    dispatch(syncIDB());
-                }
-            }
         }
     }
 
