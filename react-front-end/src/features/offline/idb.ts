@@ -21,10 +21,15 @@ export enum Stores {
 
 export const initDB = (): Promise<boolean> => {
     return new Promise((resolve, reject) => {
+
         const request = indexedDB.open('ClutterMapDB', IDB_VERSION);
+
+        let needsFullSync = false;
 
         request.onupgradeneeded = () => {
             const db = request.result;
+
+            needsFullSync = true;
 
             // Create object stores if they don't exist
             if (!db.objectStoreNames.contains(Stores.Projects)) {
@@ -46,6 +51,18 @@ export const initDB = (): Promise<boolean> => {
 
         request.onsuccess = () => {
             console.log('IndexedDB initialized');
+
+            if (needsFullSync) {
+                console.log("Triggering full sync due to IDB upgrade...");
+                const syncUpgradedIDB = async () => {
+                    const token = localStorage.getItem('jwt');
+                    if (token) {
+                        await fullSync(token);
+                    }
+                }
+                syncUpgradedIDB();
+            }
+
             resolve(true);
         };
 
