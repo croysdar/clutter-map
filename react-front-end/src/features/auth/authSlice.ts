@@ -57,7 +57,7 @@ const authSlice = createAppSlice({
                 }
             ),
             fetchUserInfo: create.asyncThunk(
-                async (token: string, { rejectWithValue, dispatch }) => {
+                async (token: string, { rejectWithValue }) => {
                     try {
                         const response = await client.get<UserInfo>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }

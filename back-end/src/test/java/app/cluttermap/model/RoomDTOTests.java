@@ -15,7 +15,6 @@ public class RoomDTOTests {
     @Test
     void testRoomDTO_CorrectMapping() {
         Project project = new TestDataFactory.ProjectBuilder()
-                .name("Project for Room")
                 .user(new User())
                 .build();
 

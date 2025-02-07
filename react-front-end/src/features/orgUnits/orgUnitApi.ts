@@ -37,8 +37,8 @@ export const orgUnitApi = baseApiSlice.injectEndpoints({
                 getRelatedEntities<Project, OrgUnit>(
                     Stores.Projects,
                     projectID,
-                    Stores.Rooms,
-                    'roomIds'
+                    Stores.OrgUnits,
+                    'orgUnitIds'
                 ),
             providesTags: (result = [], error, projectId) => [
                 { type: 'Project', id: projectId },
