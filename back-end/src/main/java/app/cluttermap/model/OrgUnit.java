@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -111,16 +110,6 @@ public class OrgUnit {
 
     public Room getRoom() {
         return room;
-    }
-
-    @JsonProperty("roomId")
-    public Long getRoomId() {
-        return room != null ? room.getId() : null;
-    }
-
-    @JsonProperty("roomName")
-    public String getRoomName() {
-        return room != null ? room.getName() : null;
     }
 
     public void setRoom(Room room) {

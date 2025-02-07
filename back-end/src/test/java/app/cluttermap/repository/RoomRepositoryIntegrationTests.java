@@ -157,25 +157,16 @@ public class RoomRepositoryIntegrationTests {
     private Room createRoomInProjectAndSave() {
         Project project = createProjectWithUserAndSave();
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
-
-        project.addRoom(room);
-        projectRepository.save(project);
         return room;
     }
 
     private Room createRoomInProjectAndSave(Project project) {
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
-
-        project.addRoom(room);
-        projectRepository.save(project);
         return room;
     }
 
     private OrgUnit createOrgUnitInRoomAndSave(Room room) {
         OrgUnit orgUnit = orgUnitRepository.save(new TestDataFactory.OrgUnitBuilder().id(null).room(room).build());
-
-        room.addOrgUnit(orgUnit);
-        roomRepository.save(room);
         return orgUnit;
     }
 }

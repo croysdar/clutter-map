@@ -1,9 +1,14 @@
+import { Item } from "../items/itemTypes"
+
 export interface OrgUnit {
     id: number
     name: string
     description: string
     roomId?: number
     roomName?: string
+    items: Item[]
+    itemIds: number[]
+    projectId: number
 }
 
 export type NewOrgUnit = Pick<OrgUnit, 'name' | 'description'> | { roomId: string }

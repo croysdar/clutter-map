@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +30,7 @@ public class Item {
 
     private String description;
 
-    private List<String> tags;
+    private List<String> tags = new ArrayList<>();
 
     private Integer quantity;
 
@@ -129,16 +128,6 @@ public class Item {
 
     public OrgUnit getOrgUnit() {
         return orgUnit;
-    }
-
-    @JsonProperty("orgUnitId")
-    public Long getOrgUnitId() {
-        return orgUnit != null ? orgUnit.getId() : null;
-    }
-
-    @JsonProperty("orgUnitName")
-    public String getOrgUnitName() {
-        return orgUnit != null ? orgUnit.getName() : null;
     }
 
     public void setOrgUnit(OrgUnit orgUnit) {

@@ -39,7 +39,6 @@ public class OrgUnitModelTests {
 
         // Act: Add a item to the orgUnit
         Item item = new TestDataFactory.ItemBuilder().id(1L).orgUnit(orgUnit).build();
-        orgUnit.getItems().add(item);
 
         // Assert: Verify that the item was added to the orgUnit's items
         // collection

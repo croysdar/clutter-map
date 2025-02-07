@@ -22,7 +22,7 @@ import { ROUTES } from '@/utils/constants';
 
 const OrgUnitDetails: React.FC = () => {
     const { projectId, roomId, orgUnitId } = useParams();
-    const { data: orgUnit } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit } = useGetOrgUnitQuery(Number(orgUnitId!));
     const navigate = useNavigate();
 
     const {
@@ -30,7 +30,7 @@ const OrgUnitDetails: React.FC = () => {
         isLoading,
         isError,
         error
-    } = useGetItemsByOrgUnitQuery(orgUnitId!);
+    } = useGetItemsByOrgUnitQuery(Number(orgUnitId)!);
 
     if (isLoading) {
         return (

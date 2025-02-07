@@ -1,21 +1,30 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
+import { Stores } from "../offline/idb";
+import { getAllFromIndexedDB, getByIdFromIndexedDB, getRelatedEntities } from "../offline/useIndexedDBQuery";
 import { OrgUnit, OrgUnitsAssign } from "../orgUnits/orgUnitsTypes";
+import { Project } from "../projects/projectsTypes";
 import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
 
 export const roomsApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({
         /* ------------- GET Operations ------------- */
         getRooms: builder.query<Room[], void>({
-            query: () => '/rooms',
+            queryFn: async () => await getAllFromIndexedDB(Stores.Rooms),
             providesTags: (result = []) => [
                 'Room',
                 ...result.map(({ id }) => ({ type: 'Room', id } as const))
             ]
         }),
 
-        getRoomsByProject: builder.query<Room[], string>({
-            query: (projectID) => `/projects/${projectID}/rooms`,
+        getRoomsByProject: builder.query<Room[], number>({
+            queryFn: async (projectID) =>
+                getRelatedEntities<Project, Room>(
+                    Stores.Projects,
+                    projectID,
+                    Stores.Rooms,
+                    'roomIds'
+                ),
             providesTags: (result = [], error, projectID) => [
                 'Room',
                 { type: 'Project', id: projectID },
@@ -23,8 +32,8 @@ export const roomsApi = baseApiSlice.injectEndpoints({
             ]
         }),
 
-        getRoom: builder.query<Room, string>({
-            query: (roomId) => `/rooms/${roomId}`,
+        getRoom: builder.query<Room, number>({
+            queryFn: async (roomId) => await getByIdFromIndexedDB(Stores.Rooms, roomId),
             providesTags: (result, error, arg) => [{ type: 'Room', id: arg }]
         }),
 

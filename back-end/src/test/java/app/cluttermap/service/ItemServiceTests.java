@@ -273,10 +273,10 @@ public class ItemServiceTests {
                 .containsEntry("quantity", createdItem.getQuantity());
         if (isOrgUnitProvided) {
             assertThat(capturedPayload)
-                    .containsEntry("orgUnitId", createdItem.getOrgUnitId());
+                    .containsEntry("orgUnitId", createdItem.getOrgUnit().getId());
         } else {
             assertThat(capturedPayload)
-                    .doesNotContainEntry("orgUnitId", createdItem.getOrgUnitId());
+                    .doesNotContainEntry("orgUnitId", mockOrgUnit.getId());
         }
     }
 

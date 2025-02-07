@@ -231,26 +231,17 @@ public class ProjectRepositoryIntegrationTests {
 
     private Room createRoomInProjectAndSave(Project project) {
         Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
-
-        project.addRoom(room);
-        projectRepository.save(project);
         return room;
     }
 
     private OrgUnit createOrgUnitInProjectAndSave(Project project) {
         OrgUnit orgUnit = orgUnitRepository
                 .save(new TestDataFactory.OrgUnitBuilder().id(null).project(project).build());
-
-        project.addOrgUnit(orgUnit);
-        projectRepository.save(project);
         return orgUnit;
     }
 
     private Item createItemInProjectAndSave(Project project) {
         Item item = itemRepository.save(new TestDataFactory.ItemBuilder().id(null).project(project).build());
-
-        project.addItem(item);
-        projectRepository.save(project);
         return item;
     }
 

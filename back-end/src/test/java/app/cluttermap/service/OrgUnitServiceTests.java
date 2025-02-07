@@ -254,10 +254,10 @@ public class OrgUnitServiceTests {
                 .containsEntry("description", createdOrgUnit.getDescription());
         if (isRoomProvided) {
             assertThat(capturedPayload)
-                    .containsEntry("roomId", createdOrgUnit.getRoomId());
+                    .containsEntry("roomId", createdOrgUnit.getRoom().getId());
         } else {
             assertThat(capturedPayload)
-                    .doesNotContainEntry("roomId", createdOrgUnit.getRoomId());
+                    .doesNotContainEntry("roomId", mockRoom.getId());
         }
     }
 

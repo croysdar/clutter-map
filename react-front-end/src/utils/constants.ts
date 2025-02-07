@@ -45,3 +45,5 @@ export const ROUTES = {
     itemEdit: (projectId: string | number, roomId: string | number, orgUnitId: string | number, itemId: string | number) =>
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/${itemId}/edit`,
 }
+
+export const IDB_VERSION = 1;

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
@@ -61,7 +62,7 @@ public class OrgUnitService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Iterable<OrgUnit> getUserOrgUnits() {
+    public List<OrgUnit> getUserOrgUnits() {
         User user = securityService.getCurrentUser();
 
         return orgUnitRepository.findByOwnerId(user.getId());
@@ -151,14 +152,14 @@ public class OrgUnitService {
 
     /* ------------- Complex Operations ------------- */
     @Transactional
-    public Iterable<OrgUnit> assignOrgUnitsToRoom(List<Long> orgUnitIds, Long targetRoomId) {
+    public List<OrgUnit> assignOrgUnitsToRoom(List<Long> orgUnitIds, Long targetRoomId) {
         Room targetRoom = roomService.getRoomById(targetRoomId);
 
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
 
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
-            Long previousRoomId = orgUnit.getRoomId();
+            Long previousRoomId = Optional.ofNullable(orgUnit.getRoom()).map(Room::getId).orElse(null);
 
             validateSameProject(orgUnit, targetRoom);
 
@@ -176,11 +177,11 @@ public class OrgUnitService {
     }
 
     @Transactional
-    public Iterable<OrgUnit> unassignOrgUnits(List<Long> orgUnitIds) {
+    public List<OrgUnit> unassignOrgUnits(List<Long> orgUnitIds) {
         List<OrgUnit> updatedOrgUnits = new ArrayList<>();
         for (Long orgUnitId : orgUnitIds) {
             OrgUnit orgUnit = self.getOrgUnitById(orgUnitId);
-            Long previousRoomId = orgUnit.getRoomId();
+            Long previousRoomId = Optional.ofNullable(orgUnit.getRoom()).map(Room::getId).orElse(null);
             if (orgUnit.getRoom() != null) {
                 unassignOrgUnitFromRoom(orgUnit, orgUnit.getRoom());
                 eventService.logMoveEvent(

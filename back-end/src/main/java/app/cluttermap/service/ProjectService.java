@@ -1,6 +1,7 @@
 package app.cluttermap.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,7 +45,7 @@ public class ProjectService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Iterable<Project> getUserProjects() {
+    public List<Project> getUserProjects() {
         User user = securityService.getCurrentUser();
 
         return projectRepository.findByOwnerId(user.getId());

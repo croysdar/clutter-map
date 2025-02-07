@@ -1,6 +1,7 @@
 package app.cluttermap.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -46,7 +47,7 @@ public class RoomService {
 
     /* ------------- CRUD Operations ------------- */
     /* --- Read Operations (GET) --- */
-    public Iterable<Room> getUserRooms() {
+    public List<Room> getUserRooms() {
         User user = securityService.getCurrentUser();
 
         return roomRepository.findByOwnerId(user.getId());

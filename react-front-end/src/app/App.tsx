@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 /* ------------- Material UI ------------- */
@@ -29,10 +29,12 @@ import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
 import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+import { initIDB } from '@/features/offline/idbSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
+
 import '../assets/styles/App.css';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -51,19 +53,28 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
 
 function App() {
     const dispatch = useAppDispatch();
+    const isInit = useRef(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt')
+        const initializeApp = async () => {
+            if (isInit.current) return;
+            isInit.current = true;
+            await dispatch(initIDB());
 
-        // Check if user has previously logged in
-        if (token) {
-            // send token to backend to fetch user data
-            dispatch(fetchUserInfo(token));
+            const token = localStorage.getItem('jwt')
+
+            // Check if user has previously logged in
+            if (token) {
+                // send token to backend to fetch user data
+                await dispatch(fetchUserInfo(token));
+            }
+            else {
+                // Set auth status to 'none' because there is no jwt
+                dispatch(rejectAuthStatus());
+            }
         }
-        else {
-            // Set auth status to 'none' because there is no jwt
-            dispatch(rejectAuthStatus());
-        }
+
+        initializeApp();
     }, [dispatch]);
 
 
