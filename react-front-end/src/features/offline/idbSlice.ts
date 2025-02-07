@@ -12,8 +12,8 @@ const initialState: SyncState = {
     status: 'idle'
 }
 
-const syncSlice = createAppSlice({
-    name: 'sync',
+const idbSlice = createAppSlice({
+    name: 'idb',
     initialState,
     reducers:
         create => {
@@ -69,5 +69,5 @@ const syncSlice = createAppSlice({
         }
 });
 
-export const { syncIDB, initIDB } = syncSlice.actions;
-export default syncSlice.reducer;
+export const { syncIDB, initIDB } = idbSlice.actions;
+export default idbSlice.reducer;

@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_BASE_URL } from '@/utils/constants';
 import { getCsrfTokenFromCookies } from '@/utils/utils';
 
-import { syncIDB } from '@/features/offline/syncSlice';
+import { syncIDB } from '@/features/offline/idbSlice';
 
 export const baseApiSlice = createApi({
     reducerPath: 'api',
@@ -31,7 +31,7 @@ export const baseApiSlice = createApi({
 
             console.log("Sync complete. Now invalidating redux cache...");
             api.dispatch(
-                baseApiSlice.util.invalidateTags(['Item'])
+                baseApiSlice.util.invalidateTags(['Project', 'Room', 'OrgUnit', 'Item'])
             )
         }
 

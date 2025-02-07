@@ -1,6 +1,6 @@
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { fetchUserInfo, verifyToken } from "@/features/auth/authSlice";
-import { syncIDB } from "@/features/offline/syncSlice";
+import { syncIDB } from "@/features/offline/idbSlice";
 
 const authListenerMiddleware = createListenerMiddleware();
 

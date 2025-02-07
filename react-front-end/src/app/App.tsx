@@ -29,7 +29,7 @@ import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
 import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
-import { initIDB } from '@/features/offline/syncSlice';
+import { initIDB } from '@/features/offline/idbSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 /* ------------- Constants ------------- */
