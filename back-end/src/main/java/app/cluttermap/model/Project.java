@@ -1,5 +1,6 @@
 package app.cluttermap.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,9 @@ public class Project {
     @JoinColumn(name = "owner_id")
     @JsonBackReference
     private User owner;
+
+    @Column(updatable = true, name = "last_updated")
+    private Instant lastUpdated;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -197,6 +201,10 @@ public class Project {
 
     public void removeItem(Item item) {
         items.remove(item);
+    }
+
+    public void touch() {
+        this.lastUpdated = Instant.now();
     }
 
     /* ------------- Equals, HashCode, and ToString ------------- */

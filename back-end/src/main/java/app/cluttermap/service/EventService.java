@@ -228,6 +228,9 @@ public class EventService {
         event.setProject(project);
         User user = securityService.getCurrentUser();
         event.setUser(user);
+
+        // Set last updated value in the project
+        project.touch();
         return event;
     }
 
