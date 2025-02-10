@@ -78,7 +78,7 @@ public class EventService {
     }
 
     public List<EntityHistoryDTO> fetchUpdatesSince(Instant since) {
-        List<Long> projectIds = projectAccessService.getAccessibleProjectIds();
+        List<Long> projectIds = projectAccessService.getUpdatedProjectIds(since);
 
         if (projectIds.isEmpty()) {
             return Collections.emptyList();
