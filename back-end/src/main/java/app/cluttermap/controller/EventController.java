@@ -1,6 +1,6 @@
 package app.cluttermap.controller;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -44,7 +44,7 @@ public class EventController {
 
     @GetMapping("/fetch-updates")
     public ResponseEntity<List<EntityHistoryDTO>> getChangedEntitiesSince(@RequestParam("since") String since) {
-        LocalDateTime sinceTime = LocalDateTime.parse(since);
+        Instant sinceTime = Instant.parse(since);
 
         List<EntityHistoryDTO> updates = eventService.fetchUpdatesSince(sinceTime);
 

@@ -1,7 +1,7 @@
 package app.cluttermap.service;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +77,7 @@ public class EventService {
         return eventEntityRepository.findHistoryByEntity(entityType, entityId, pageable);
     }
 
-    public List<EntityHistoryDTO> fetchUpdatesSince(LocalDateTime since) {
+    public List<EntityHistoryDTO> fetchUpdatesSince(Instant since) {
         List<Long> projectIds = projectAccessService.getAccessibleProjectIds();
 
         if (projectIds.isEmpty()) {

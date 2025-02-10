@@ -1,6 +1,6 @@
 package app.cluttermap.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -61,7 +61,7 @@ public interface EventEntityRepository extends CrudRepository<EventEntity, Long>
                 ORDER BY e.timestamp ASC
             """)
     List<EntityHistoryDTO> findChangesSince(
-            @Param("since") LocalDateTime since,
+            @Param("since") Instant since,
             @Param("projectIds") List<Long> projectIds);
 
 }

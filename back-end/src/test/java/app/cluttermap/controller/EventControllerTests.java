@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,9 +53,9 @@ public class EventControllerTests {
 
         List<EntityHistoryDTO> mockHistory = List.of(
                 new EntityHistoryDTO(entityType, entityId, EventChangeType.UPDATE, "{\"description\":\"Wire brush.\"}",
-                        "Rebecca Gilbert-Croysdale", 1L, LocalDateTime.now()),
+                        "Jane Smith", 1L, Instant.now()),
                 new EntityHistoryDTO(entityType, entityId, EventChangeType.UPDATE, "{\"quantity\":1}",
-                        "Rebecca Gilbert-Croysdale", 1L, LocalDateTime.now()));
+                        "Jane Smith", 1L, Instant.now()));
 
         Page<EntityHistoryDTO> page = new PageImpl<>(mockHistory, PageRequest.of(0, 10), mockHistory.size());
         when(eventService.getEntityHistory(entityType, entityId, 0, 10)).thenReturn(page);
@@ -68,7 +68,7 @@ public class EventControllerTests {
                 .andExpect(jsonPath("$._embedded.entityHistoryDTOList").isArray())
                 .andExpect(jsonPath("$._embedded.entityHistoryDTOList.length()").value(mockHistory.size()))
                 .andExpect(jsonPath("$._embedded.entityHistoryDTOList[0].entityId").value(entityId))
-                .andExpect(jsonPath("$._embedded.entityHistoryDTOList[0].userName").value("Rebecca Gilbert-Croysdale"));
+                .andExpect(jsonPath("$._embedded.entityHistoryDTOList[0].userName").value("Jane Smith"));
 
         verify(eventService).getEntityHistory(entityType, entityId, 0, 10);
     }
@@ -95,13 +95,13 @@ public class EventControllerTests {
     @Test
     void getChangedEntitiesSince_ShouldReturnUpdates() throws Exception {
         // Arrange
-        String since = "2025-01-01T12:00:00";
-        LocalDateTime sinceTime = LocalDateTime.parse(since);
+        String since = "2025-01-01T12:00:00Z";
+        Instant sinceTime = Instant.parse(since);
 
         List<EntityHistoryDTO> updates = List.of(
                 new EntityHistoryDTO(ResourceType.ITEM, 5L, EventChangeType.UPDATE,
                         "{\"description\":\"New description\"}",
-                        "Rebecca Gilbert-Croysdale", 1L, LocalDateTime.now()));
+                        "Jane Smith", 1L, Instant.now()));
 
         when(eventService.fetchUpdatesSince(sinceTime)).thenReturn(updates);
 
@@ -113,7 +113,7 @@ public class EventControllerTests {
                 .andExpect(jsonPath("$[0].entityType").value("ITEM"))
                 .andExpect(jsonPath("$[0].entityId").value(5L))
                 .andExpect(jsonPath("$[0].action").value("UPDATE"))
-                .andExpect(jsonPath("$[0].userName").value("Rebecca Gilbert-Croysdale"));
+                .andExpect(jsonPath("$[0].userName").value("Jane Smith"));
 
         verify(eventService).fetchUpdatesSince(sinceTime);
     }
@@ -121,8 +121,8 @@ public class EventControllerTests {
     @Test
     void getChangedEntitiesSince_ShouldReturnEmptyList_WhenNoUpdatesExist() throws Exception {
         // Arrange
-        String since = "2025-01-01T12:00:00";
-        LocalDateTime sinceTime = LocalDateTime.parse(since);
+        String since = "2025-01-01T12:00:00Z";
+        Instant sinceTime = Instant.parse(since);
 
         when(eventService.fetchUpdatesSince(sinceTime)).thenReturn(Collections.emptyList());
 

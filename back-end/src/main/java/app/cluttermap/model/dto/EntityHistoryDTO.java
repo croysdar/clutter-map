@@ -1,6 +1,6 @@
 package app.cluttermap.model.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
@@ -12,7 +12,7 @@ public class EntityHistoryDTO {
     String details;
     String userName;
     Long userId;
-    LocalDateTime timestamp;
+    Instant timestamp;
 
     public EntityHistoryDTO() {
     }
@@ -24,7 +24,7 @@ public class EntityHistoryDTO {
             String details,
             String userName,
             Long userId,
-            LocalDateTime timestamp) {
+            Instant timestamp) {
         this.entityType = entityType;
         this.entityId = entityId;
         this.action = action;
@@ -58,7 +58,7 @@ public class EntityHistoryDTO {
         return this.userId;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return this.timestamp;
     }
 }
