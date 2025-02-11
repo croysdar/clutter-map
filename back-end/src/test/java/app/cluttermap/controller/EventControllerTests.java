@@ -106,7 +106,7 @@ public class EventControllerTests {
         when(eventService.fetchUpdatesSince(sinceTime)).thenReturn(updates);
 
         // Act & Assert
-        mockMvc.perform(get("/events/fetch-updates")
+        mockMvc.perform(get("/fetch-updates")
                 .param("since", since))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(updates.size()))
@@ -127,7 +127,7 @@ public class EventControllerTests {
         when(eventService.fetchUpdatesSince(sinceTime)).thenReturn(Collections.emptyList());
 
         // Act & Assert
-        mockMvc.perform(get("/events/fetch-updates")
+        mockMvc.perform(get("/fetch-updates")
                 .param("since", since))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());

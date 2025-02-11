@@ -10,7 +10,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +18,6 @@ import app.cluttermap.service.EventService;
 import app.cluttermap.util.ResourceType;
 
 @RestController
-@RequestMapping("/events")
 public class EventController {
     /* ------------- Injected Dependencies ------------- */
     private final EventService eventService;
@@ -30,7 +28,7 @@ public class EventController {
     }
 
     /* ------------- GET Operations ------------- */
-    @GetMapping("/{entityType}/{id}")
+    @GetMapping("/events/{entityType}/{id}")
     public ResponseEntity<PagedModel<EntityModel<EntityHistoryDTO>>> getEntityHistory(
             @PathVariable("entityType") ResourceType entityType,
             @PathVariable("id") Long id,
