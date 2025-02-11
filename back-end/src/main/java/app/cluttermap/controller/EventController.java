@@ -1,6 +1,7 @@
 package app.cluttermap.controller;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -42,7 +43,15 @@ public class EventController {
 
     @GetMapping("/fetch-updates")
     public ResponseEntity<List<EntityHistoryDTO>> getChangedEntitiesSince(@RequestParam("since") String since) {
-        Instant sinceTime = Instant.parse(since);
+        Instant sinceTime;
+        try {
+            // Try parsing as an ISO-8601 string (e.g., "2025-01-02T14:30:50Z")
+            sinceTime = Instant.parse(since);
+        } catch (DateTimeParseException e) {
+            // If parsing fails, assume it's a Unix timestamp in milliseconds
+            long epochMillis = Long.parseLong(since);
+            sinceTime = Instant.ofEpochMilli(epochMillis);
+        }
 
         List<EntityHistoryDTO> updates = eventService.fetchUpdatesSince(sinceTime);
 
