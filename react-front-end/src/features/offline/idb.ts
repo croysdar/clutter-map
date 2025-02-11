@@ -1,4 +1,4 @@
-import { openDB } from "idb";
+import { IDBPObjectStore, IDBPTransaction, openDB } from "idb";
 
 /* ------------- Types ------------- */
 import { Item } from "@/features/items/itemTypes";
@@ -10,6 +10,10 @@ import { Room } from "@/features/rooms/roomsTypes";
 import { API_BASE_URL, IDB_VERSION } from "@/utils/constants";
 
 import { client } from "@/services/client";
+import { ResourceType, TimelineActionType } from "@/types/types";
+import { Event } from "./eventTypes";
+
+/* ------------- Enums & Interfaces ------------- */
 
 export enum Stores {
     Projects = 'projects',
@@ -19,16 +23,19 @@ export enum Stores {
     Meta = 'meta',
 }
 
-export const initDB = (): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
+interface MoveEventGroup {
+    move?: Event
+    remove?: Event
+    add?: Event
+}
 
-        const request = indexedDB.open('ClutterMapDB', IDB_VERSION);
+/* ------------- IndexedDB Initialization & Syncing ------------- */
 
-        let needsFullSync = false;
+export const initDB = async () => {
+    let needsFullSync = false;
 
-        request.onupgradeneeded = () => {
-            const db = request.result;
-
+    await openDB('ClutterMapDB', IDB_VERSION, {
+        upgrade(db) {
             needsFullSync = true;
 
             // Create object stores if they don't exist
@@ -47,75 +54,40 @@ export const initDB = (): Promise<boolean> => {
             if (!db.objectStoreNames.contains(Stores.Meta)) {
                 db.createObjectStore(Stores.Meta, { keyPath: 'key' });
             }
-        };
-
-        request.onsuccess = () => {
-            console.log('IndexedDB initialized');
-
-            if (needsFullSync) {
-                console.log("Triggering full sync due to IDB upgrade...");
-                const syncUpgradedIDB = async () => {
-                    const token = localStorage.getItem('jwt');
-                    if (token) {
-                        await fullSync(token);
-                    }
-                }
-                syncUpgradedIDB();
-            }
-
-            resolve(true);
-        };
-
-        request.onerror = (event) => {
-            console.error('IndexedDB initialization failed:', event);
-            reject(false);
-        };
+        }
     });
-};
 
-export const getLastSynced = async (): Promise<number | null> => {
-    const db = await openDB('ClutterMapDB', IDB_VERSION);
-    const transaction = db.transaction('meta', 'readonly');
-    const store = transaction.objectStore('meta');
-
-    const result = await store.get('last-synced');
-    return result ? result.value : null;
-};
-
-export const setLastSynced = async (timestamp: number): Promise<void> => {
-    const db = await openDB('ClutterMapDB', IDB_VERSION);
-    const transaction = db.transaction('meta', 'readwrite');
-    const store = transaction.objectStore('meta');
-
-    await store.put({ key: 'last-synced', value: timestamp });
+    console.log('IndexedDB initialized');
+    if (needsFullSync) {
+        console.log("Triggering full sync due to IDB upgrade...");
+        const syncUpgradedIDB = async () => {
+            const token = localStorage.getItem('jwt');
+            if (token) {
+                await fullSync(token);
+            }
+        }
+        syncUpgradedIDB();
+    }
+    return true;
 };
 
 export const performSync = async (token: string) => {
     const lastSynced = await getLastSynced();
     const now = Date.now();
-    const recent = 3 * 1000;
+    const recent = 3 * 1000; // Date is measured in milliseconds
 
-    if (lastSynced) {
-        // Fetch updates since last sync
-        if (now - lastSynced > recent) {
-            console.log('Last-synced timestamp found. Fetching updates since last sync...');
-            await partialSync(token, lastSynced);
-        }
-        else {
-            console.log("Last-synced was too recent.")
-        }
+    if (lastSynced && now - lastSynced > recent) {
+        console.log('Last-synced timestamp found. Fetching updates since last sync...');
+        await partialSync(token, lastSynced);
     }
-    else {
-        // Perform full sync for new devices
+    else if (!lastSynced) {
         console.log('No last-synced timestamp found. Performing full sync...');
         await fullSync(token);
     }
+    else {
+        console.log("Last-synced was too recent.")
+    }
 };
-
-const partialSync = async (token: string, lastSynced: number) => {
-    await fullSync(token);
-
-}
 
 const fullSync = async (token: string) => {
     let data = {
@@ -141,24 +113,301 @@ const fullSync = async (token: string) => {
 
     const db = await openDB('ClutterMapDB', IDB_VERSION);
 
-    const tx = db.transaction([Stores.Projects, Stores.Rooms, Stores.OrgUnits, Stores.Items, Stores.Meta], 'readwrite');
+    const tx = db.transaction(Object.values(Stores), 'readwrite');
 
     const storeData = async (storeName: Stores, records: Record<number, any>) => {
         const store = tx.objectStore(storeName);
         await Promise.all(Object.values(records).map(record => store.put(record)));
-        };
+    };
 
     await Promise.all([
         storeData(Stores.Projects, data.projects),
         storeData(Stores.Rooms, data.rooms),
         storeData(Stores.OrgUnits, data.orgUnits),
         storeData(Stores.Items, data.items),
-        tx.objectStore(Stores.Meta).put({ key: 'last-synced', value: Date.now() })
+        setLastSynced(Date.now(), tx)
     ]);
-
 
     await tx.done;
 
-            console.log('Full sync completed.');
+    console.log('Full sync completed.');
+}
 
+const partialSync = async (token: string, lastSynced: number) => {
+    const response = await client.get<Event[]>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
+    const events = response.data;
+
+    if (events.length === 0) {
+        console.log("No updates found.");
+        return;
+    }
+
+    const db = await openDB('ClutterMapDB', IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readwrite");
+
+    try {
+        await processEvents(events, transaction);
+
+        const now = Date.now();
+        setLastSynced(now, transaction);
+
+        await transaction.done;
+        console.log(`Sync completed. Last synced at: ${new Date(now).toISOString()}`);
+    }
+    catch (error) {
+        // TODO add retry logic
+        console.error("Error during sync. Rolling back transaction.", error);
+        transaction.abort();
+    }
+}
+
+/* ------------- Event Processing ------------- */
+
+async function processEvents(events: Event[], transaction: IDBPTransaction<any, Stores[], "readwrite">) {
+    const eventBuffer: Map<string, MoveEventGroup> = new Map();
+
+    for (let event of events) {
+        const eventKey = getEventKey(event.entityType, event.entityId);
+
+        if (event.action === TimelineActionType.MOVE) {
+            if (!eventBuffer.has(eventKey)) {
+                eventBuffer.set(eventKey, {});
+            }
+            eventBuffer.get(eventKey)!.move = event;
+        }
+
+        else if (event.action === TimelineActionType.REMOVE_CHILD || event.action === TimelineActionType.ADD_CHILD) {
+            const { childId, childType } = JSON.parse(event.details);
+            if (childId && childType) {
+                const childEventKey = getEventKey(childType, childId);
+
+                if (!eventBuffer.has(childEventKey)) {
+                    eventBuffer.set(childEventKey, {});
+                }
+
+                if (event.action === TimelineActionType.REMOVE_CHILD) {
+                    eventBuffer.get(childEventKey)!.remove = event;
+                } else {
+                    eventBuffer.get(childEventKey)!.add = event;
+                }
+            }
+        } else {
+            // Process other events immediately
+            await processStandardEvent(event, transaction);
+        }
+    }
+
+    // Process MOVE-related events
+    for (const [_, groupedEvents] of Array.from(eventBuffer.entries())) {
+        await processMoveRelatedEvents(groupedEvents, transaction);
+    }
+}
+
+async function processMoveRelatedEvents(
+    { move, remove, add }: MoveEventGroup,
+    transaction: IDBPTransaction<any, Stores[], "readwrite">
+) {
+    if (!move) {
+        console.warn("Skipping move-related processing because MOVE event is missing.");
+        return;
+    }
+
+    try {
+        const moveDetails = JSON.parse(move.details);
+        const childStore = transaction.objectStore(getStoreName(move.entityType));
+        const childEntity = await childStore.get(move.entityId);
+
+        if (!childEntity) {
+            console.warn(`Skipping MOVE: Child entity ${move.entityType}-${move.entityId} not found.`);
+            return;
+        }
+
+        const parentKey = getParentKeyForType(moveDetails.parentType);
+        if (!parentKey) {
+            console.warn(`Skipping MOVE: Could not determine parent key for ${moveDetails.parentType}`);
+            return;
+        }
+
+        childEntity[parentKey] = moveDetails.newParentId || null;
+        await childStore.put(childEntity);
+
+        // Handle orphaning
+        if (remove) {
+            const oldParentStore = transaction.objectStore(getStoreName(remove.entityType));
+            const oldParent = await oldParentStore.get(remove.entityId);
+
+            if (oldParent) {
+                const childListKey = getChildListKeyForType(move.entityType);
+                if (childListKey && Array.isArray(oldParent[childListKey])) {
+                    oldParent[childListKey] = oldParent[childListKey].filter((id: number) => id !== move.entityId);
+                    await oldParentStore.put(oldParent);
+                }
+            }
+        }
+
+        // Handle adoption
+        if (add) {
+            const newParentStore = transaction.objectStore(getStoreName(add.entityType));
+            const newParent = await newParentStore.get(add.entityId);
+
+            if (newParent) {
+                const childListKey = getChildListKeyForType(move.entityType);
+                if (childListKey) {
+                    if (!Array.isArray(newParent[childListKey])) {
+                        newParent[childListKey] = [];
+                    }
+
+                    // Prevent duplicate childId
+                    if (!newParent[childListKey].includes(move.entityId)) {
+                        newParent[childListKey].push(move.entityId);
+                        await newParentStore.put(newParent);
+                    } else {
+                        console.warn(`Skipping ADD_CHILD: ${move.entityId} already exists in ${childListKey} of parent ${add.entityId}`);
+                    }
+                }
+            }
+        }
+        console.log(`Processed MOVE event for ${move.entityType}-${move.entityId}, new ${parentKey}: ${moveDetails.newParentId}`);
+    } catch (error) {
+        console.error(`Error processing MOVE-related events for ${move.entityType}-${move.entityId}:`, error);
+    }
+}
+
+async function processStandardEvent(event: Event, transaction: IDBPTransaction<any, Stores[], "readwrite">) {
+    try {
+        const storeName = getStoreName(event.entityType);
+
+        const store = transaction.objectStore(storeName);
+        if (!store) {
+            console.warn(`Store not found: ${storeName}`);
+            return;
+        }
+
+        switch (event.action) {
+            case TimelineActionType.CREATE:
+                await processCreateEvent(store, event);
+                break;
+            case TimelineActionType.UPDATE:
+                await processUpdateEvent(store, event);
+                break;
+            case TimelineActionType.DELETE:
+                await processDeleteEvent(store, event.entityId);
+                break;
+            default:
+                console.warn(`Unhandled event action: ${event.action}`);
+        }
+    } catch (error) {
+        console.error(`Error processing event for ${event.entityType}:`, error);
+    }
+}
+
+async function processCreateEvent(store: IDBPObjectStore<any, any, any, "readwrite">, event: Event) {
+    try {
+        const entity = await store.get(event.entityId);
+        if (entity) {
+            console.warn(`Entity with ID ${entity.id} already exists in store '${store.name}'. Skipping creation.`);
+            return;
+        }
+
+        const newEntity = JSON.parse(event.details);
+        newEntity.id = event.entityId;
+
+        await store.put(newEntity);
+        console.log(`Created new ${event.entityType}:`, newEntity);
+    } catch (error) {
+        console.error("Error processing CREATE event:", error);
+    }
+}
+
+async function processUpdateEvent(store: IDBPObjectStore<any, any, any, "readwrite">, event: Event) {
+    try {
+        const entity = await store.get(event.entityId);
+        if (!entity) {
+            console.warn(`Entity not found for UPDATE: ${event.entityId}`);
+            return;
+        }
+
+        const updates = JSON.parse(event.details);
+        Object.assign(entity, updates);
+        await store.put(entity);
+
+        console.log(`Updated ${event.entityType} (ID: ${event.entityId}):`, updates);
+    } catch (error) {
+        console.error("Error processing UPDATE event:", error);
+    }
+}
+
+async function processDeleteEvent(store: IDBPObjectStore<any, any, any, "readwrite">, entityId: number) {
+    try {
+        const entity = await store.get(entityId);
+        if (!entity) {
+            console.warn(`Entity not found for DELETE: ${entityId}`);
+            return;
+        }
+        await store.delete(entityId);
+        console.log(`Deleted entity ID ${entityId}`);
+    } catch (error) {
+        console.error("Error processing DELETE event:", error);
+    }
+}
+
+/* ------------- Sync Metadata Handling ------------- */
+
+export const getLastSynced = async (): Promise<number | null> => {
+    const db = await openDB('ClutterMapDB', IDB_VERSION);
+    return (await db.get(Stores.Meta, 'last-synced'))?.value || null;
+}
+
+export const setLastSynced = async (timestamp: number, transaction: IDBPTransaction<any, Stores[], "readwrite">): Promise<void> => {
+    const store = transaction.objectStore(Stores.Meta);
+    await store.put({ key: 'last-synced', value: timestamp });
+}
+
+/* ------------- Helper Functions ------------- */
+
+function getStoreName(resourceType: ResourceType): Stores {
+    switch (resourceType) {
+        case ResourceType.PROJECT:
+            return Stores.Projects;
+        case ResourceType.ROOM:
+            return Stores.Rooms;
+        case ResourceType.ORGANIZATIONAL_UNIT:
+            return Stores.OrgUnits;
+        case ResourceType.ITEM:
+            return Stores.Items;
+        default:
+            throw new Error(`Unsupported ResourceType: ${resourceType}`);
+    }
+}
+
+function getParentKeyForType(parentType: ResourceType): string | null {
+    switch (parentType) {
+        case ResourceType.ROOM:
+            return "roomId";
+        case ResourceType.ORGANIZATIONAL_UNIT:
+            return "orgUnitId";
+        case ResourceType.PROJECT:
+            return "projectId";
+        default:
+            console.warn(`Unknown parentType: ${parentType}`);
+            return null;
+    }
+}
+
+function getChildListKeyForType(childType: ResourceType): string | null {
+    switch (childType) {
+        case ResourceType.ROOM:
+            return "roomIds";
+        case ResourceType.ORGANIZATIONAL_UNIT:
+            return "orgUnitIds";
+        case ResourceType.ITEM:
+            return "itemIds";
+        default:
+            console.warn(`Unknown childType: ${childType}`);
+            return null;
+    }
+}
+
+function getEventKey(entityType: ResourceType, entityId: number): string {
+    return `${entityType}-${entityId}`;
 }
