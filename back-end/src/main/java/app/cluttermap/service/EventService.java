@@ -122,6 +122,7 @@ public class EventService {
         Map<String, Object> moveDetails = new HashMap<>();
         moveDetails.put("previousParentId", previousParentId);
         moveDetails.put("newParentId", newParentId);
+        moveDetails.put("parentType", parentEntityType);
 
         EventEntity moveEntity = new EventEntity(
                 event, entityType, entityId,
@@ -131,6 +132,7 @@ public class EventService {
         if (previousParentId != null) {
             Map<String, Object> removeChildDetails = new HashMap<>();
             removeChildDetails.put("childId", entityId);
+            removeChildDetails.put("childType", entityType);
             EventEntity previousParentEntity = new EventEntity(
                     event, parentEntityType, previousParentId,
                     EventChangeType.REMOVE_CHILD, convertToJson(removeChildDetails));
@@ -140,6 +142,7 @@ public class EventService {
         if (newParentId != null) {
             Map<String, Object> addChildDetails = new HashMap<>();
             addChildDetails.put("childId", entityId);
+            addChildDetails.put("childType", entityType);
             EventEntity newParentEntity = new EventEntity(
                     event, parentEntityType, newParentId,
                     EventChangeType.ADD_CHILD, convertToJson(addChildDetails));
