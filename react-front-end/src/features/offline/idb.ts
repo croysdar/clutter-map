@@ -5,13 +5,13 @@ import { Item } from "@/features/items/itemTypes";
 import { OrgUnit } from "@/features/orgUnits/orgUnitsTypes";
 import { Project } from "@/features/projects/projectsTypes";
 import { Room } from "@/features/rooms/roomsTypes";
-
-/* ------------- Constants ------------- */
-import { API_BASE_URL, IDB_VERSION } from "@/utils/constants";
-
-import { client } from "@/services/client";
 import { ResourceType, TimelineActionType } from "@/types/types";
 import { Event } from "./eventTypes";
+
+/* ------------- Constants ------------- */
+import { API_BASE_URL, IDB_NAME, IDB_VERSION } from "@/utils/constants";
+
+import { client } from "@/services/client";
 
 /* ------------- Enums & Interfaces ------------- */
 
@@ -23,7 +23,7 @@ export enum Stores {
     Meta = 'meta',
 }
 
-interface MoveEventGroup {
+export interface MoveEventGroup {
     move?: Event
     remove?: Event
     add?: Event
@@ -31,10 +31,11 @@ interface MoveEventGroup {
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
 
-export const initDB = async () => {
+export const initDB = async (testMode = false) => {
     let needsFullSync = false;
+    const dbName = testMode ? 'ClutterMapDB_Test' : IDB_NAME;
 
-    await openDB('ClutterMapDB', IDB_VERSION, {
+    await openDB(dbName, IDB_VERSION, {
         upgrade(db) {
             needsFullSync = true;
 
@@ -57,8 +58,7 @@ export const initDB = async () => {
         }
     });
 
-    console.log('IndexedDB initialized');
-    if (needsFullSync) {
+    if (needsFullSync && !testMode) {
         console.log("Triggering full sync due to IDB upgrade...");
         const syncUpgradedIDB = async () => {
             const token = localStorage.getItem('jwt');
@@ -72,7 +72,7 @@ export const initDB = async () => {
 };
 
 export const performSync = async (token: string) => {
-    const lastSynced = await getLastSynced();
+    const lastSynced = await getLastSynced(IDB_NAME);
     const now = Date.now();
     const recent = 3 * 1000; // Date is measured in milliseconds
 
@@ -111,7 +111,7 @@ const fullSync = async (token: string) => {
 
     console.log('Data fetched:', data);
 
-    const db = await openDB('ClutterMapDB', IDB_VERSION);
+    const db = await openDB(IDB_NAME, IDB_VERSION);
 
     const tx = db.transaction(Object.values(Stores), 'readwrite');
 
@@ -142,7 +142,7 @@ const partialSync = async (token: string, lastSynced: number) => {
         return;
     }
 
-    const db = await openDB('ClutterMapDB', IDB_VERSION);
+    const db = await openDB(IDB_NAME, IDB_VERSION);
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     try {
@@ -163,7 +163,7 @@ const partialSync = async (token: string, lastSynced: number) => {
 
 /* ------------- Event Processing ------------- */
 
-async function processEvents(events: Event[], transaction: IDBPTransaction<any, Stores[], "readwrite">) {
+export async function processEvents(events: Event[], transaction: IDBPTransaction<any, Stores[], "readwrite">) {
     const eventBuffer: Map<string, MoveEventGroup> = new Map();
 
     for (let event of events) {
@@ -203,7 +203,7 @@ async function processEvents(events: Event[], transaction: IDBPTransaction<any, 
     }
 }
 
-async function processMoveRelatedEvents(
+export async function processMoveRelatedEvents(
     { move, remove, add }: MoveEventGroup,
     transaction: IDBPTransaction<any, Stores[], "readwrite">
 ) {
@@ -324,6 +324,7 @@ async function processUpdateEvent(store: IDBPObjectStore<any, any, any, "readwri
         const entity = await store.get(event.entityId);
         if (!entity) {
             console.warn(`Entity not found for UPDATE: ${event.entityId}`);
+            // TODO log this in Meta as it likely means a full sync is necessary
             return;
         }
 
@@ -353,8 +354,8 @@ async function processDeleteEvent(store: IDBPObjectStore<any, any, any, "readwri
 
 /* ------------- Sync Metadata Handling ------------- */
 
-export const getLastSynced = async (): Promise<number | null> => {
-    const db = await openDB('ClutterMapDB', IDB_VERSION);
+export const getLastSynced = async (IDB_NAME: string): Promise<number | null> => {
+    const db = await openDB(IDB_NAME, IDB_VERSION);
     return (await db.get(Stores.Meta, 'last-synced'))?.value || null;
 }
 
