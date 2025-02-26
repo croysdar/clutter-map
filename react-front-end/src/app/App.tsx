@@ -28,7 +28,7 @@ import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
-import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+import { fetchUserInfo, logoutUser, selectAuthStatus } from '@/features/auth/authSlice';
 import { initIDB } from '@/features/offline/idbSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
@@ -56,25 +56,37 @@ function App() {
     const isInit = useRef(false);
 
     useEffect(() => {
-        const initializeApp = async () => {
-            if (isInit.current) return;
-            isInit.current = true;
-            await dispatch(initIDB());
+        // isInit prevents duplicate running of useEffect
+        if (isInit.current) return;
+        isInit.current = true;
 
+        const fetchUserInfoIfToken = async () => {
             const token = localStorage.getItem('jwt')
-
-            // Check if user has previously logged in
             if (token) {
-                // send token to backend to fetch user data
                 await dispatch(fetchUserInfo(token));
             }
             else {
-                // Set auth status to 'none' because there is no jwt
-                dispatch(rejectAuthStatus());
+                logoutUser();
             }
+        };
+
+        const initializeApp = async () => {
+            await dispatch(initIDB());
+
+            await fetchUserInfoIfToken();
         }
 
+        const handleOnline = () => {
+            fetchUserInfoIfToken();
+        }
+
+        window.addEventListener('online', handleOnline);
+
         initializeApp();
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+        }
     }, [dispatch]);
 
 
