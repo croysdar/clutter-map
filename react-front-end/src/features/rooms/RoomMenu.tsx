@@ -21,15 +21,18 @@ const RoomMenu: React.FC<RoomMenuProps> = ({ room }) => {
     const menuItems: LinkMenuItem[] = [
         {
             label: "Edit Room",
-            url: ROUTES.roomEdit(projectId!, room.id)
+            url: ROUTES.roomEdit(projectId!, room.id),
+            requiresOnline: true
         },
         {
             label: "Remove Organizers From Room",
-            url: ROUTES.roomRemoveOrgUnits(projectId!, room.id)
+            url: ROUTES.roomRemoveOrgUnits(projectId!, room.id),
+            requiresOnline: true
         },
         {
             label: "Move Organizers to Room",
-            url: ROUTES.roomAssignOrgUnits(projectId!, room.id)
+            url: ROUTES.roomAssignOrgUnits(projectId!, room.id),
+            requiresOnline: true
         },
     ]
 
