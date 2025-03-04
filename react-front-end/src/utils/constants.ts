@@ -47,3 +47,7 @@ export const ROUTES = {
 }
 
 export const IDB_VERSION = 1;
+
+export const IDB_NAME = 'ClutterMapDB';
+
+export const TEST_IDB_NAME = 'ClutterMapDB_Test';

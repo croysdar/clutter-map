@@ -16,9 +16,26 @@ public class DatabaseMigrationService {
     public void migrateDatabase() {
         addColumnIfNotExists("org_units", "project_id", "BIGINT");
         addColumnIfNotExists("items", "project_id", "BIGINT");
+        addTimestampColumnIfNotExists("projects", "last_updated");
 
         populateProjectIdForOrgUnits();
         populateProjectIdForItems();
+    }
+
+    private void addTimestampColumnIfNotExists(String tableName, String columnName) {
+        String sql = String.format("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name='%s' AND column_name='%s'
+                    ) THEN
+                        ALTER TABLE %s ADD COLUMN %s TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+                    END IF;
+                END $$;
+                """, tableName, columnName, tableName, columnName);
+
+        jdbcTemplate.execute(sql);
     }
 
     private void addColumnIfNotExists(String tableName, String columnName, String dataType) {

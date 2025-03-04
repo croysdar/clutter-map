@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,7 +39,7 @@ public class EventModelTests {
         Event event = new Event();
         event.setId(1L);
         event.setAction(EventActionType.CREATE);
-        event.setTimestamp(LocalDateTime.now());
+        event.setTimestamp(Instant.now());
 
         // Act
         String result = event.toString();

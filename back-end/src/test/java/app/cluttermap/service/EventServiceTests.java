@@ -9,7 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +125,7 @@ public class EventServiceTests {
                 "{\"field\":\"value\"}", // Mock JSON for details
                 "testUser", // Username
                 1L, // User ID
-                LocalDateTime.of(2025, 1, 2, 14, 30, 50) // Mock timestamp
+                Instant.parse("2025-01-02T14:30:50Z") // Mock timestamp
         );
 
         EntityHistoryDTO dto2 = new EntityHistoryDTO(
@@ -135,7 +135,7 @@ public class EventServiceTests {
                 "{\"field\":\"newValue\"}", // Mock JSON for details
                 "testUser", // Username
                 1L, // User ID
-                LocalDateTime.of(2025, 1, 3, 10, 15, 30) // Mock timestamp
+                Instant.parse("2025-01-03T10:15:30Z") // Mock timestamp
         );
 
         List<EntityHistoryDTO> mockDTOs = List.of(dto1, dto2);

@@ -2,7 +2,8 @@ package app.cluttermap.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,9 +130,9 @@ public class EventRepositoryIntegrationTests {
     void findAllEventsInProject_ShouldSortByTimestampDescending() {
         // Arrange: Create multiple events with different timestamps
         Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
-        event1.setTimestamp(LocalDateTime.now().minusDays(1));
+        event1.setTimestamp(Instant.now().minus(Duration.ofDays(1)));
         Event event2 = new Event(EventActionType.UPDATE, mockProject, mockUser);
-        event2.setTimestamp(LocalDateTime.now());
+        event2.setTimestamp(Instant.now());
         eventRepository.saveAll(List.of(event1, event2)); // Act: Retrieve events
         Pageable pageable = PageRequest.of(0, 10);
         Page<Event> events = eventRepository.findAllEventsInProject(mockProject.getId(), pageable);
@@ -166,7 +167,7 @@ public class EventRepositoryIntegrationTests {
     }
 
     protected Event createAndSaveEvent(ResourceType resourceType, Long entityId, EventActionType actionType,
-            Project project, User user, LocalDateTime timestamp) {
+            Project project, User user, Instant timestamp) {
         Event event = new Event(actionType, project, user);
         if (timestamp != null) {
             event.setTimestamp(timestamp);

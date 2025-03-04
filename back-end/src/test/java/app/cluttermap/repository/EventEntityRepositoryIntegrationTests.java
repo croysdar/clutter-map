@@ -2,7 +2,8 @@ package app.cluttermap.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -204,7 +205,7 @@ public class EventEntityRepositoryIntegrationTests {
         eventRepository.save(event3);
 
         // Act: Retrieve changes since a specific timestamp
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
+        Instant since = Instant.now().minus(Duration.ofDays(1));
         List<EntityHistoryDTO> changes = eventEntityRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify all changes are returned
@@ -214,8 +215,8 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findChangesSince_ShouldOnlyReturnEventsSinceSpecifiedTimestamp() {
         // Arrange: Create events with different timestamps
-        LocalDateTime timestamp1 = LocalDateTime.now().minusDays(2);
-        LocalDateTime timestamp2 = LocalDateTime.now().minusHours(1);
+        Instant timestamp1 = Instant.now().minus(Duration.ofDays(2));
+        Instant timestamp2 = Instant.now().minus(Duration.ofHours(1));
 
         // Event 1 (older than "since" timestamp)
         Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
@@ -232,7 +233,7 @@ public class EventEntityRepositoryIntegrationTests {
         eventRepository.save(event2);
 
         // Act: Retrieve changes since the specified timestamp
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
+        Instant since = Instant.now().minus(Duration.ofDays(1));
         List<EntityHistoryDTO> changes = eventEntityRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify only recent events are returned
@@ -246,8 +247,8 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findChangesSince_ShouldReturnEmptyWhenNoEventsSinceTimestamp() {
         // Arrange: Create events all before the specified timestamp
-        LocalDateTime timestamp1 = LocalDateTime.now().minusDays(3);
-        LocalDateTime timestamp2 = LocalDateTime.now().minusDays(2);
+        Instant timestamp1 = Instant.now().minus(Duration.ofDays(3));
+        Instant timestamp2 = Instant.now().minus(Duration.ofDays(2));
 
         Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event1, ResourceType.PROJECT, 1L, EventChangeType.CREATE, "");
@@ -262,7 +263,7 @@ public class EventEntityRepositoryIntegrationTests {
         eventRepository.save(event2);
 
         // Act: Retrieve changes since a timestamp after all events
-        LocalDateTime since = LocalDateTime.now().minusDays(1);
+        Instant since = Instant.now().minus(Duration.ofDays(1));
         List<EntityHistoryDTO> changes = eventEntityRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify no changes are returned
@@ -272,19 +273,19 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findChangesSince_ShouldReturnMultipleChangesForSameEntity() {
         // Arrange: Create multiple changes for the same entity
-        LocalDateTime timestamp = LocalDateTime.now().minusHours(1);
+        Instant timestamp = Instant.now().minus(Duration.ofHours(1));
 
         for (int i = 0; i < 3; i++) {
             Event event = new Event(EventActionType.UPDATE, mockProject, mockUser);
             EventEntity entity = new EventEntity(event, ResourceType.ROOM, 1L, EventChangeType.UPDATE,
                     "{\"change\":\"change" + i + "\"}");
             event.addEventEntity(entity);
-            event.setTimestamp(timestamp.plusMinutes(i * 10)); // Stagger timestamps
+            event.setTimestamp(timestamp.plus(Duration.ofMinutes(i * 10))); // Stagger timestamps
             eventRepository.save(event);
         }
 
         // Act: Retrieve changes since a specific timestamp
-        LocalDateTime since = LocalDateTime.now().minusHours(2);
+        Instant since = Instant.now().minus(Duration.ofHours(2));
         List<EntityHistoryDTO> changes = eventEntityRepository.findChangesSince(since, List.of(mockProject.getId()));
 
         // Assert: Verify all changes for the same entity are returned
@@ -311,7 +312,7 @@ public class EventEntityRepositoryIntegrationTests {
 
         // Act: Retrieve changes since a specific timestamp
         List<EntityHistoryDTO> changes = eventEntityRepository.findChangesSince(
-                LocalDateTime.now().minusDays(1),
+                Instant.now().minus(Duration.ofDays(1)),
                 List.of(mockProject.getId()));
 
         // Assert: Verify that the returned changes are correctly formatted
