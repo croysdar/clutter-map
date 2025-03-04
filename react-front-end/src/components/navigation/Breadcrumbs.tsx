@@ -19,10 +19,10 @@ const AppBreadcrumbs: React.FC = () => {
     const orgUnitId = params["orgUnitId"]
     const itemId = params["itemId"]
 
-    const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(projectId ?? '', { skip: !projectId });
-    const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(roomId ?? '', { skip: !roomId });
-    const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId ?? '', { skip: !orgUnitId });
-    const { data: itemData, isLoading: itemLoading } = useGetItemQuery(itemId ?? '', { skip: !itemId });
+    const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(Number(projectId) ?? '', { skip: !projectId });
+    const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(Number(roomId) ?? '', { skip: !roomId });
+    const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(Number(orgUnitId) ?? '', { skip: !orgUnitId });
+    const { data: itemData, isLoading: itemLoading } = useGetItemQuery(Number(itemId) ?? '', { skip: !itemId });
 
     const { pathname } = useLocation();
     const breadcrumbs = [

@@ -1,9 +1,9 @@
 package app.cluttermap.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +17,11 @@ import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
+import app.cluttermap.model.dto.ItemDTO;
 import app.cluttermap.model.dto.NewProjectDTO;
+import app.cluttermap.model.dto.OrgUnitDTO;
+import app.cluttermap.model.dto.ProjectDTO;
+import app.cluttermap.model.dto.RoomDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.service.ItemService;
 import app.cluttermap.service.OrgUnitService;
@@ -44,53 +48,75 @@ public class ProjectController {
 
     /* ------------- GET Operations ------------- */
     @GetMapping()
-    public ResponseEntity<Iterable<Project>> getProjects() {
-        return ResponseEntity.ok(projectService.getUserProjects());
+    public ResponseEntity<List<ProjectDTO>> getProjects() {
+        List<ProjectDTO> projectDTOs = new ArrayList<>();
+        for (Project project : projectService.getUserProjects()) {
+            projectDTOs.add(new ProjectDTO(project));
+        }
+        return ResponseEntity.ok(projectDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getOneProject(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(projectService.getProjectById(id));
+    public ResponseEntity<ProjectDTO> getOneProject(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(new ProjectDTO(projectService.getProjectById(id)));
     }
 
     @GetMapping("/{id}/rooms")
-    public ResponseEntity<Iterable<Room>> getProjectRooms(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(projectService.getProjectById(id).getRooms());
+    public ResponseEntity<List<RoomDTO>> getProjectRooms(@PathVariable("id") Long id) {
+        List<RoomDTO> roomDTOs = new ArrayList<>();
+        for (Room room : projectService.getProjectById(id).getRooms()) {
+            roomDTOs.add(new RoomDTO(room));
+        }
+        return ResponseEntity.ok(roomDTOs);
     }
 
     @GetMapping("/{id}/org-units")
-    public ResponseEntity<Iterable<OrgUnit>> getProjectOrgUnits(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(projectService.getProjectById(id).getOrgUnits());
+    public ResponseEntity<List<OrgUnitDTO>> getProjectOrgUnits(@PathVariable("id") Long id) {
+        List<OrgUnitDTO> orgUnitDTOs = new ArrayList<>();
+        for (OrgUnit orgUnit : projectService.getProjectById(id).getOrgUnits()) {
+            orgUnitDTOs.add(new OrgUnitDTO(orgUnit));
+        }
+        return ResponseEntity.ok(orgUnitDTOs);
     }
 
     @GetMapping("/{id}/items")
-    public ResponseEntity<Iterable<Item>> getProjectItems(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(projectService.getProjectById(id).getItems());
+    public ResponseEntity<List<ItemDTO>> getProjectItems(@PathVariable("id") Long id) {
+        List<ItemDTO> itemDTOs = new ArrayList<>();
+        for (Item item : projectService.getProjectById(id).getItems()) {
+            itemDTOs.add(new ItemDTO(item));
+        }
+        return ResponseEntity.ok(itemDTOs);
     }
 
     @GetMapping("/{projectId}/org-units/unassigned")
-    public ResponseEntity<Iterable<OrgUnit>> getUnassignedOrgUnitsByProjectId(@PathVariable Long projectId) {
-        Iterable<OrgUnit> unassignedOrgUnits = orgUnitService.getUnassignedOrgUnitsByProjectId(projectId);
-        return ResponseEntity.ok(unassignedOrgUnits);
+    public ResponseEntity<List<OrgUnitDTO>> getUnassignedOrgUnitsByProjectId(@PathVariable Long projectId) {
+        List<OrgUnitDTO> unassignedOrgUnitDTOs = new ArrayList<>();
+        for (OrgUnit orgUnit : orgUnitService.getUnassignedOrgUnitsByProjectId(projectId)) {
+            unassignedOrgUnitDTOs.add(new OrgUnitDTO(orgUnit));
+        }
+        return ResponseEntity.ok(unassignedOrgUnitDTOs);
     }
 
     @GetMapping("/{projectId}/items/unassigned")
-    public ResponseEntity<List<Item>> getUnassignedItemsByProjectId(@PathVariable Long projectId) {
-        List<Item> unassignedItems = itemService.getUnassignedItemsByProjectId(projectId);
-        return ResponseEntity.ok(unassignedItems);
+    public ResponseEntity<List<ItemDTO>> getUnassignedItemsByProjectId(@PathVariable Long projectId) {
+        List<ItemDTO> unassignedItemDTOs = new ArrayList<>();
+        for (Item item : itemService.getUnassignedItemsByProjectId(projectId)) {
+            unassignedItemDTOs.add(new ItemDTO(item));
+        }
+        return ResponseEntity.ok(unassignedItemDTOs);
     }
 
     /* ------------- POST Operations ------------- */
     @PostMapping()
-    public ResponseEntity<Project> addOneProject(@Valid @RequestBody NewProjectDTO projectDTO) {
-        return ResponseEntity.ok(projectService.createProject(projectDTO));
+    public ResponseEntity<ProjectDTO> addOneProject(@Valid @RequestBody NewProjectDTO projectDTO) {
+        return ResponseEntity.ok(new ProjectDTO(projectService.createProject(projectDTO)));
     }
 
     /* ------------- PUT Operations ------------- */
     @PutMapping("/{id}")
-    public ResponseEntity<Project> updateOneProject(@PathVariable("id") Long id,
+    public ResponseEntity<ProjectDTO> updateOneProject(@PathVariable("id") Long id,
             @Valid @RequestBody UpdateProjectDTO projectDTO) {
-        return ResponseEntity.ok(projectService.updateProject(id, projectDTO));
+        return ResponseEntity.ok(new ProjectDTO(projectService.updateProject(id, projectDTO)));
     }
 
     /* ------------- DELETE Operations ------------- */

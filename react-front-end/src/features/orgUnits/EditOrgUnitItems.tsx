@@ -23,8 +23,8 @@ export const RemoveOrgUnitItems = () => {
     const navigate = useNavigate();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
-    const { data: items, isLoading: itemsLoading, isError, error } = useGetItemsByOrgUnitQuery(orgUnitId!);
-    const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: items, isLoading: itemsLoading, isError, error } = useGetItemsByOrgUnitQuery(Number(orgUnitId)!);
+    const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(Number(orgUnitId!));
 
     const [itemsToRemove, setItemsToRemove] = useState<number[]>([]);
 
@@ -87,8 +87,8 @@ export const AssignItemsToOrgUnit = () => {
     const navigate = useNavigate();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
-    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(orgUnitId!);
-    const { data: projectItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(projectId!);
+    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(Number(orgUnitId!));
+    const { data: projectItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(Number(projectId)!);
 
     const itemBank = projectItems?.filter((item) => String(item.orgUnitId) !== orgUnitId) || [];
 

@@ -14,7 +14,8 @@ const ProjectMenu: React.FC<ProjectMenuProps> = ({ project }) => {
     const menuItems: LinkMenuItem[] = [
         {
             label: "Edit Project",
-            url: ROUTES.projectEdit(project.id)
+            url: ROUTES.projectEdit(project.id),
+            requiresOnline: true
         }
     ]
 

@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 /* ------------- Material UI ------------- */
@@ -28,11 +28,14 @@ import AboutPage from '@/pages/AboutPage';
 import HomePage from '@/pages/HomePage';
 
 /* ------------- Redux ------------- */
-import { fetchUserInfo, rejectAuthStatus, selectAuthStatus } from '@/features/auth/authSlice';
+import { fetchUserInfo, logoutUser, selectAuthStatus } from '@/features/auth/authSlice';
+import { initIDB } from '@/features/offline/idbSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
+
+import RequiresOnline from '@/features/offline/RequiresOnline';
 import '../assets/styles/App.css';
 
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
@@ -51,18 +54,39 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
 
 function App() {
     const dispatch = useAppDispatch();
+    const isInit = useRef(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt')
 
-        // Check if user has previously logged in
-        if (token) {
-            // send token to backend to fetch user data
-            dispatch(fetchUserInfo(token));
+        const fetchUserInfoIfToken = async () => {
+            const token = localStorage.getItem('jwt')
+            if (token) {
+                await dispatch(fetchUserInfo(token));
+            }
+            else {
+                await dispatch(logoutUser());
+            }
+        };
+
+        const initializeApp = async () => {
+            if (isInit.current) return;
+            isInit.current = true;
+
+            await dispatch(initIDB());
+
+            await fetchUserInfoIfToken();
         }
-        else {
-            // Set auth status to 'none' because there is no jwt
-            dispatch(rejectAuthStatus());
+
+        const handleOnline = () => {
+            fetchUserInfoIfToken();
+        }
+
+        window.addEventListener('online', handleOnline);
+
+        initializeApp();
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
         }
     }, [dispatch]);
 
@@ -92,25 +116,78 @@ function App() {
                                     <Routes>
                                         <Route path={ROUTES.projects} Component={ProjectsList} />
 
-                                        <Route path={ROUTES.projectAdd} Component={AddProject} />
+                                        {/* Project Routes */}
+                                        <Route path={ROUTES.projectAdd} element={
+                                            <RequiresOnline redirectUrl={ROUTES.projects}>
+                                                <AddProject />
+                                            </RequiresOnline>
+                                        } />
                                         <Route path={ROUTES.projectDetails(":projectId")} Component={ProjectDetails} />
-                                        <Route path={ROUTES.projectEdit(":projectId")} Component={EditProject} />
+                                        <Route path={ROUTES.projectEdit(":projectId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.projectDetails}>
+                                                <EditProject />
+                                            </RequiresOnline>
+                                        } />
 
-                                        <Route path={ROUTES.roomAdd(":projectId")} Component={AddRoom} />
+                                        {/* Room Routes */}
+                                        <Route path={ROUTES.roomAdd(":projectId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.projectDetails}>
+                                                <AddRoom />
+                                            </RequiresOnline>
+                                        } />
                                         <Route path={ROUTES.roomDetails(":projectId", ":roomId")} Component={RoomDetails} />
-                                        <Route path={ROUTES.roomEdit(":projectId", ":roomId")} Component={EditRoom} />
-                                        <Route path={ROUTES.roomRemoveOrgUnits(":projectId", ":roomId")} Component={RemoveRoomOrgUnits} />
-                                        <Route path={ROUTES.roomAssignOrgUnits(":projectId", ":roomId")} Component={AssignOrgUnitsToRoom} />
+                                        <Route path={ROUTES.roomEdit(":projectId", ":roomId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.roomDetails}>
+                                                <EditRoom />
+                                            </RequiresOnline>
+                                        } />
+                                        <Route path={ROUTES.roomRemoveOrgUnits(":projectId", ":roomId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.roomDetails}>
+                                                <RemoveRoomOrgUnits />
+                                            </RequiresOnline>
+                                        } />
 
-                                        <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} Component={AddOrgUnit} />
+                                        <Route path={ROUTES.roomAssignOrgUnits(":projectId", ":roomId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.roomDetails}>
+                                                <AssignOrgUnitsToRoom />
+                                            </RequiresOnline>
+                                        } />
+
+                                        {/* Org Unit Routes */}
+                                        <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.roomDetails}>
+                                                <AddOrgUnit />
+                                            </RequiresOnline>
+                                        } />
                                         <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
-                                        <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} Component={EditOrgUnit} />
-                                        <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":roomId", ":orgUnitId")} Component={RemoveOrgUnitItems} />
-                                        <Route path={ROUTES.orgUnitAssignItems(":projectId", ":roomId", ":orgUnitId")} Component={AssignItemsToOrgUnit} />
+                                        <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
+                                                <EditOrgUnit />
+                                            </RequiresOnline>
+                                        } />
+                                        <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":roomId", ":orgUnitId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
+                                                <RemoveOrgUnitItems />
+                                            </RequiresOnline>
+                                        } />
+                                        <Route path={ROUTES.orgUnitAssignItems(":projectId", ":roomId", ":orgUnitId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
+                                                <AssignItemsToOrgUnit />
+                                            </RequiresOnline>
+                                        } />
 
-                                        <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} Component={AddItem} />
+                                        {/* Item Routes */}
+                                        <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
+                                                <AddItem />
+                                            </RequiresOnline>
+                                        } />
                                         <Route path={ROUTES.itemDetails(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={ItemDetails} />
-                                        <Route path={ROUTES.itemEdit(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={EditItem} />
+                                        <Route path={ROUTES.itemEdit(":projectId", ":roomId", ":orgUnitId", ":itemId")} element={
+                                            <RequiresOnline redirectUrl={ROUTES.itemDetails}>
+                                                <EditItem />
+                                            </RequiresOnline>
+                                        } />
                                     </Routes>
                                 </ProtectedRoute>
                             }

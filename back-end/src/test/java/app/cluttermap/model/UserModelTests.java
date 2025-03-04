@@ -3,6 +3,7 @@ package app.cluttermap.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -66,4 +67,39 @@ class UserModelTests {
         assertThat(user.getProjects()).hasSize(1);
         assertThat(user.getProjects().get(0).getName()).isEqualTo("Project 1");
     }
+
+    @Test
+    void toString_ShouldHandleNullFields() {
+        User user = new User();
+        user.setId(1L);
+
+        String result = user.toString();
+
+        assertThat(result).contains("providerId=null");
+        assertThat(result).contains("projects=0");
+        assertThat(result).contains("events=0");
+    }
+
+    @Test
+    void toString_ShouldDisplaySummaryForPopulatedUser() {
+        User user = new User();
+        user.setId(1L);
+        user.setProviderId("google-oauth2|12345");
+        user.setProvider("google");
+        user.setUsername("mockUser");
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
+        user.setCreatedAt(new Date());
+
+        user.setProjects(List.of(new Project(), new Project(), new Project()));
+        user.setEvents(List.of(new Event(), new Event(), new Event(), new Event(), new Event()));
+
+        String result = user.toString();
+
+        assertThat(result).contains("providerId=google-oauth2|12345");
+        assertThat(result).contains("projects=3");
+        assertThat(result).contains("events=5");
+    }
+
 }

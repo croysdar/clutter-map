@@ -80,9 +80,9 @@ class OrgUnitControllerTests {
 
         when(securityService.getCurrentUser()).thenReturn(mockUser);
         // Stub isResourceOwner to allow access to protected resources
-        when(securityService.isResourceOwner(anyLong(), eq("room"))).thenReturn(true);
-        when(securityService.isResourceOwner(anyLong(), eq("org-unit"))).thenReturn(true);
-        when(securityService.isResourceOwner(anyLong(), eq("project"))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ROOM))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ORGANIZATIONAL_UNIT))).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.PROJECT))).thenReturn(true);
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper();

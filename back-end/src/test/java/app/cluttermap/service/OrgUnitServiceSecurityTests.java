@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -37,6 +37,7 @@ import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.ResourceType;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -59,6 +60,9 @@ public class OrgUnitServiceSecurityTests {
     private RoomRepository roomRepository;
 
     @MockBean
+    private EventService eventService;
+
+    @MockBean
     private SecurityService securityService;
 
     private Project mockProject;
@@ -69,7 +73,7 @@ public class OrgUnitServiceSecurityTests {
         mockProject = createMockProject();
         mockOrgUnit = createMockOrgUnit(mockProject);
 
-        when(securityService.isResourceOwner(anyLong(), anyString())).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), any(ResourceType.class))).thenReturn(true);
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
 
@@ -82,7 +86,7 @@ public class OrgUnitServiceSecurityTests {
     void getOrgUnitById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "org-unit";
+        ResourceType resourceType = ResourceType.ORGANIZATIONAL_UNIT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -110,7 +114,7 @@ public class OrgUnitServiceSecurityTests {
     void getUnassignedOrgUnitsByProjectId_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -140,18 +144,18 @@ public class OrgUnitServiceSecurityTests {
 
     @ParameterizedTest
     @CsvSource({
-            "true, project, Item should be created successfully when user has ownership of the project",
-            "false, project, AccessDeniedException should be thrown when user lacks ownership of the project",
-            "true, room, Org Unit should be created successfully when user has ownership of the room",
-            "false, room, AccessDeniedException should be thrown when user lacks ownership of the org unit",
+            "true, PROJECT, Item should be created successfully when user has ownership of the project",
+            "false, PROJECT, AccessDeniedException should be thrown when user lacks ownership of the project",
+            "true, ROOM, Org Unit should be created successfully when user has ownership of the room",
+            "false, ROOM, AccessDeniedException should be thrown when user lacks ownership of the org unit",
     })
     @WithMockUser(username = "testUser")
-    void createOrgUnit_ShouldRespectOwnership(boolean isOwner, String resourceType, String description) {
+    void createOrgUnit_ShouldRespectOwnership(boolean isOwner, ResourceType resourceType, String description) {
         // Arrange: Prepare mock data based on the resource type
         Long resourceId;
         NewOrgUnitDTO orgUnitDTO;
 
-        if (resourceType.equals("project")) {
+        if (resourceType.equals(ResourceType.PROJECT)) {
             resourceId = mockProject.getId();
             orgUnitDTO = new TestDataFactory.NewOrgUnitDTOBuilder()
                     .projectId(mockProject.getId())
@@ -172,6 +176,9 @@ public class OrgUnitServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
@@ -201,7 +208,7 @@ public class OrgUnitServiceSecurityTests {
     void updateOrgUnit_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "org-unit";
+        ResourceType resourceType = ResourceType.ORGANIZATIONAL_UNIT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder().build();
@@ -209,6 +216,9 @@ public class OrgUnitServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             OrgUnit orgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
@@ -238,7 +248,7 @@ public class OrgUnitServiceSecurityTests {
     void assignOrgUnitsToRoom_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "org-unit";
+        ResourceType resourceType = ResourceType.ORGANIZATIONAL_UNIT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         Room mockRoom = createMockRoom(mockProject);
@@ -278,7 +288,7 @@ public class OrgUnitServiceSecurityTests {
     void unassignOrgUnits_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "org-unit";
+        ResourceType resourceType = ResourceType.ORGANIZATIONAL_UNIT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -315,12 +325,15 @@ public class OrgUnitServiceSecurityTests {
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "org-unit";
+        ResourceType resourceType = ResourceType.ORGANIZATIONAL_UNIT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
             // Mock repository behavior for authorized access
             doNothing().when(orgUnitRepository).deleteById(1L);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             orgUnitService.deleteOrgUnitById(1L);
@@ -345,14 +358,12 @@ public class OrgUnitServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
 
         return project;
     }
 
     private Room createMockRoom(Project project) {
         Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        room.setId(1L);
         when(roomService.getRoomById(room.getId())).thenReturn(room);
 
         return room;
@@ -360,8 +371,7 @@ public class OrgUnitServiceSecurityTests {
 
     private OrgUnit createMockOrgUnit(Project project) {
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().project(project).build();
-        orgUnit.setId(1L);
-        when(orgUnitRepository.findById(1L)).thenReturn(Optional.of(orgUnit));
+        when(orgUnitRepository.findById(orgUnit.getId())).thenReturn(Optional.of(orgUnit));
 
         return orgUnit;
     }
@@ -371,4 +381,9 @@ public class OrgUnitServiceSecurityTests {
         mockOrgUnit.setRoom(mockRoom);
         when(orgUnitRepository.findById(mockOrgUnit.getId())).thenReturn(Optional.of(mockOrgUnit));
     }
+
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
 }

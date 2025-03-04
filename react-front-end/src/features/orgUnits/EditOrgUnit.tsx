@@ -34,7 +34,7 @@ const EditOrgUnit = () => {
     const { orgUnitId, roomId, projectId } = useParams();
     const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
 
-    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(orgUnitId!);
+    const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(Number(orgUnitId!));
 
     const [
         updateOrgUnit,

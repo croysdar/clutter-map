@@ -3,6 +3,7 @@ package app.cluttermap;
 import static app.cluttermap.TestDataConstants.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
@@ -21,12 +22,18 @@ import app.cluttermap.model.dto.UpdateRoomDTO;
 public class TestDataFactory {
 
     public static class ItemBuilder {
+        private Long id = 1L;
         private String name = DEFAULT_ITEM_NAME;
         private String description = DEFAULT_ITEM_DESCRIPTION;
         private List<String> tags = DEFAULT_ITEM_TAGS;
         private Integer quantity = DEFAULT_ITEM_QUANTITY;
         private OrgUnit orgUnit;
         private Project project;
+
+        public ItemBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public ItemBuilder name(String name) {
             this.name = name;
@@ -78,9 +85,16 @@ public class TestDataFactory {
 
         public Item build() {
             if (orgUnit != null) {
-                return new Item(name, description, tags, quantity, orgUnit);
+                Item item = new Item(name, description, tags, quantity, orgUnit);
+                item.setId(id);
+                orgUnit.addItem(item);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addItem(item));
+                return item;
             } else if (project != null) {
-                return new Item(name, description, tags, quantity, project);
+                Item item = new Item(name, description, tags, quantity, project);
+                item.setId(id);
+                project.addItem(item);
+                return item;
             } else {
                 throw new IllegalStateException("Either OrgUnit or Project must be set to build an Item.");
             }
@@ -174,10 +188,16 @@ public class TestDataFactory {
     }
 
     public static class OrgUnitBuilder {
+        private Long id = 1L;
         private String name = DEFAULT_ORG_UNIT_NAME;
         private String description = DEFAULT_ORG_UNIT_DESCRIPTION;
         private Room room;
         private Project project;
+
+        public OrgUnitBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public OrgUnitBuilder name(String name) {
             this.name = name;
@@ -215,9 +235,16 @@ public class TestDataFactory {
 
         public OrgUnit build() {
             if (room != null) {
-                return new OrgUnit(name, description, room);
+                OrgUnit orgUnit = new OrgUnit(name, description, room);
+                orgUnit.setId(id);
+                room.addOrgUnit(orgUnit);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addOrgUnit(orgUnit));
+                return orgUnit;
             } else if (project != null) {
-                return new OrgUnit(name, description, project);
+                OrgUnit orgUnit = new OrgUnit(name, description, project);
+                orgUnit.setId(id);
+                project.addOrgUnit(orgUnit);
+                return orgUnit;
             } else {
                 throw new IllegalStateException("Either Room or Project must be set to build an OrgUnit.");
             }
@@ -287,9 +314,15 @@ public class TestDataFactory {
     }
 
     public static class RoomBuilder {
+        private Long id = 1L;
         private String name = DEFAULT_ROOM_NAME;
         private String description = DEFAULT_ROOM_DESCRIPTION;
         private Project project;
+
+        public RoomBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public RoomBuilder name(String name) {
             this.name = name;
@@ -320,7 +353,10 @@ public class TestDataFactory {
 
         public Room build() {
             if (project != null) {
-                return new Room(name, description, project);
+                Room room = new Room(name, description, project);
+                room.setId(id);
+                Optional.ofNullable(this.project).ifPresent(p -> p.addRoom(room));
+                return room;
             } else {
                 throw new IllegalStateException("Project must be set to build a Room.");
             }
@@ -378,8 +414,14 @@ public class TestDataFactory {
     }
 
     public static class ProjectBuilder {
+        private Long id = 1L;
         private String name = DEFAULT_PROJECT_NAME;
         private User user;
+
+        public ProjectBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public ProjectBuilder name(String name) {
             this.name = name;
@@ -403,7 +445,9 @@ public class TestDataFactory {
 
         public Project build() {
             if (user != null) {
-                return new Project(name, user);
+                Project project = new Project(name, user);
+                project.setId(id);
+                return project;
             } else {
                 throw new IllegalStateException("User must be set to build a Project.");
             }

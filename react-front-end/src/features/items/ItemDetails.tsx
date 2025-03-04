@@ -7,10 +7,14 @@ import { CircularProgress, Typography } from '@mui/material';
 /* ------------- Components ------------- */
 import { RenderTags } from '@/components/forms/TagField';
 import { DetailsPagePaper } from '@/components/pageWrappers/ListViewPageWrapper';
+import { EntityEventsContainer } from '@/features/events/RenderEvents';
 import ItemMenu from '@/features/items/ItemMenu';
 
 /* ------------- Redux ------------- */
 import { useGetItemQuery } from '@/features/items/itemApi';
+
+/* ------------- Constants ------------- */
+import { ResourceType } from '@/types/types';
 
 const ItemDetails: React.FC = () => {
     const { itemId } = useParams();
@@ -20,7 +24,7 @@ const ItemDetails: React.FC = () => {
         isLoading,
         isError,
         error
-    } = useGetItemQuery(itemId!);
+    } = useGetItemQuery(Number(itemId)!);
 
     if (isLoading) {
         return (
@@ -56,6 +60,7 @@ const ItemDetails: React.FC = () => {
                 <Typography>Quantity: {item.quantity || 1}</Typography>
                 <RenderTags tags={item.tags} />
             </DetailsPagePaper>
+            <EntityEventsContainer entityId={item.id} entityType={ResourceType.ITEM} />
         </>
     );
 };

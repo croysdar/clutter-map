@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import app.cluttermap.TestDataFactory;
 import app.cluttermap.exception.ResourceNotFoundException;
 import app.cluttermap.exception.org_unit.OrgUnitLimitReachedException;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
@@ -39,6 +43,8 @@ import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
+import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -58,6 +64,9 @@ public class OrgUnitServiceTests {
     @Mock
     private RoomService roomService;
 
+    @Mock
+    private EventService eventService;
+
     @InjectMocks
     private OrgUnitService orgUnitService;
 
@@ -74,10 +83,8 @@ public class OrgUnitServiceTests {
         mockUser = new User("mockProviderId");
 
         mockProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
-        mockProject.setId(1L);
 
         mockRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
-        mockRoom.setId(1L);
     }
 
     @Test
@@ -210,6 +217,9 @@ public class OrgUnitServiceTests {
 
         when(orgUnitRepository.save(any(OrgUnit.class))).thenReturn(mockOrgUnit);
 
+        // Arrange: Mock event logging
+        mockLogEvent();
+
         // Act: Call the service method
         OrgUnit createdOrgUnit = orgUnitService.createOrgUnit(orgUnitDTO);
 
@@ -226,6 +236,29 @@ public class OrgUnitServiceTests {
             verify(projectService).getProjectById(projectId);
         }
         verify(orgUnitRepository).save(any(OrgUnit.class));
+
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        // Assert: Verify event logging
+        verify(eventService).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
+                eq(EventActionType.CREATE), payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected values
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", createdOrgUnit.getName());
+        assertThat(capturedPayload)
+                .containsEntry("description", createdOrgUnit.getDescription());
+        if (isRoomProvided) {
+            assertThat(capturedPayload)
+                    .containsEntry("roomId", createdOrgUnit.getRoom().getId());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("roomId", mockRoom.getId());
+        }
     }
 
     @Disabled("Feature under development")
@@ -272,25 +305,52 @@ public class OrgUnitServiceTests {
 
         // Build the UpdateOrgUnitDTO with these values
         UpdateOrgUnitDTO orgUnitDTO = new TestDataFactory.UpdateOrgUnitDTOBuilder()
+                .name("New Name")
                 .description(newDescription)
                 .build();
 
         // Stub the repository to return the org unit after saving
         when(orgUnitRepository.save(orgUnit)).thenReturn(orgUnit);
 
+        // Arrange: Mock event logging
+        mockLogEvent();
+
         // Act: Call the service method
-        OrgUnit updatedOrgUnit = orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
+        orgUnitService.updateOrgUnit(resourceId, orgUnitDTO);
+
+        // Capture the saved org unit to verify fields
+        ArgumentCaptor<OrgUnit> savedOrgUnitCaptor = ArgumentCaptor.forClass(OrgUnit.class);
+        verify(orgUnitRepository).save(savedOrgUnitCaptor.capture());
+        OrgUnit savedOrgUnit = savedOrgUnitCaptor.getValue();
 
         // Assert: Verify the fields were updated as expected
-        assertThat(updatedOrgUnit.getName())
+        assertThat(savedOrgUnit.getName())
                 .as(description + ": Name should match the DTO name")
                 .isEqualTo(orgUnitDTO.getName());
-        assertThat(updatedOrgUnit.getDescription())
+        assertThat(savedOrgUnit.getDescription())
                 .as(description + ": Description should match the expected value")
                 .isEqualTo(updateDescription ? newDescription : oldDescription);
 
-        // Verify: Ensure the repository save method was called
-        verify(orgUnitRepository).save(orgUnit);
+        // Capture and verify the arguments passed to logUpdateEvent
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+
+        // Verify the event was logged
+        verify(eventService).logEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
+                eq(EventActionType.UPDATE), payloadCaptor.capture());
+
+        // Assert: Verify the payload contains the expected changes
+        Map<String, Object> capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload)
+                .containsEntry("name", savedOrgUnit.getName());
+        if (updateDescription) {
+            assertThat(capturedPayload)
+                    .containsEntry("description", savedOrgUnit.getDescription());
+        } else {
+            assertThat(capturedPayload)
+                    .doesNotContainEntry("description", savedOrgUnit.getDescription());
+        }
     }
 
     @Test
@@ -321,12 +381,20 @@ public class OrgUnitServiceTests {
             // Arrange: Stub the repository to simulate finding org unit
             mockAssignedOrgUnitInRepository(resourceId);
 
+            // Arrange: Mock event logging
+            mockLogEvent();
+
             // Act: Call the service method
             orgUnitService.deleteOrgUnitById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(orgUnitRepository).delete(any(OrgUnit.class));
+
+            // Verify the event was logged
+            verify(eventService).logEvent(
+                    eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
+                    eq(EventActionType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding org unit
             mockNonexistentOrgUnitInRepository(resourceId);
@@ -378,21 +446,20 @@ public class OrgUnitServiceTests {
     }
 
     @Test
-    void assignOrgUnitsToROom_ShouldHandleAssignedAndUnassignedOrgUnits() {
+    void assignOrgUnitsToRoom_ShouldHandleAssignedAndUnassignedOrgUnits() {
         // Arrange: Use the existing mockRoom as the target
         mockRoomLookup();
 
-        // Mock unassigned org units
+        // Mock unassigned org unit
         OrgUnit unassignedOrgUnit1 = mockUnassignedOrgUnitInRepository(1L);
-        OrgUnit unassignedOrgUnit2 = mockUnassignedOrgUnitInRepository(2L);
 
         // Mock a previously assigned org unit
-        Room previousRoom = new TestDataFactory.RoomBuilder().project(mockProject).build();
+        Room previousRoom = new TestDataFactory.RoomBuilder().id(10L).project(mockProject).build();
         OrgUnit assignedOrgUnit = mockAssignedOrgUnitInRepository(3L, previousRoom);
 
         // Act: Assign multiple org units
         Iterable<OrgUnit> movedOrgUnits = orgUnitService.assignOrgUnitsToRoom(
-                List.of(unassignedOrgUnit1.getId(), unassignedOrgUnit2.getId(), assignedOrgUnit.getId()),
+                List.of(unassignedOrgUnit1.getId(), assignedOrgUnit.getId()),
                 mockRoom.getId());
 
         // Assert: Verify all org units are assigned to the target room
@@ -400,8 +467,16 @@ public class OrgUnitServiceTests {
 
         // Verify unassignment and reassignment for the previously assigned org unit
         verify(roomRepository).save(previousRoom); // Unassign
-        verify(roomRepository, times(3)).save(mockRoom); // Assign all org units
-        verify(orgUnitRepository, times(3)).findById(anyLong());
+        verify(roomRepository, times(2)).save(mockRoom); // Assign all org units
+        verify(orgUnitRepository, times(2)).findById(anyLong());
+
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(assignedOrgUnit.getId()),
+                eq(ResourceType.ROOM), eq(previousRoom.getId()), eq(mockRoom.getId()));
+
+        verify(eventService, times(1)).logMoveEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), eq(unassignedOrgUnit1.getId()),
+                eq(ResourceType.ROOM), isNull(), eq(mockRoom.getId()));
     }
 
     @Test
@@ -410,7 +485,7 @@ public class OrgUnitServiceTests {
         mockRoomLookup();
 
         // Mock an org unit from a different project
-        Project differentProject = new TestDataFactory.ProjectBuilder().user(mockUser).build();
+        Project differentProject = new TestDataFactory.ProjectBuilder().id(2L).user(mockUser).build();
         OrgUnit orgUnitWithDifferentProject = new TestDataFactory.OrgUnitBuilder().project(differentProject).build();
         when(orgUnitRepository.findById(2L)).thenReturn(Optional.of(orgUnitWithDifferentProject));
 
@@ -439,6 +514,10 @@ public class OrgUnitServiceTests {
         // Verify repository interactions
         verify(orgUnitRepository, times(2)).findById(anyLong());
         verify(roomRepository, times(2)).save(any(Room.class));
+
+        verify(eventService, times(2)).logMoveEvent(
+                eq(ResourceType.ORGANIZATIONAL_UNIT), anyLong(),
+                eq(ResourceType.ROOM), eq(mockRoom.getId()), isNull());
     }
 
     @Test
@@ -461,7 +540,7 @@ public class OrgUnitServiceTests {
         // Overwrite the default stub for `isResourceOwner` to deny access to the org
         // unit
         List<Long> orgUnitIds = List.of(1L, 2L, 3L);
-        when(securityService.isResourceOwner(anyLong(), eq("org-unit"))).thenReturn(false);
+        when(securityService.isResourceOwner(anyLong(), eq(ResourceType.ORGANIZATIONAL_UNIT))).thenReturn(false);
 
         // Act & Assert:
         assertThrows(AccessDeniedException.class, () -> {
@@ -474,22 +553,19 @@ public class OrgUnitServiceTests {
     }
 
     private OrgUnit mockAssignedOrgUnitInRepository(Long resourceId) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(mockRoom).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).room(mockRoom).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }
 
     private OrgUnit mockAssignedOrgUnitInRepository(Long resourceId, Room room) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).room(room).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }
 
     private OrgUnit mockUnassignedOrgUnitInRepository(Long resourceId) {
-        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().project(mockProject).build();
-        mockOrgUnit.setId(resourceId);
+        OrgUnit mockOrgUnit = new TestDataFactory.OrgUnitBuilder().id(resourceId).project(mockProject).build();
         when(orgUnitRepository.findById(resourceId)).thenReturn(Optional.of(mockOrgUnit));
         return mockOrgUnit;
     }
@@ -501,4 +577,9 @@ public class OrgUnitServiceTests {
     private void mockProjectLookup() {
         when(projectService.getProjectById(mockProject.getId())).thenReturn(mockProject);
     }
+
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
+    }
+
 }

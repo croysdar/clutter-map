@@ -1,7 +1,9 @@
 package app.cluttermap.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -35,6 +37,9 @@ public class Project {
     @JsonBackReference
     private User owner;
 
+    @Column(updatable = true, name = "last_updated")
+    private Instant lastUpdated;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
@@ -46,6 +51,10 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Item> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Event> events = new ArrayList<>();
 
     /* ------------- Constructors ------------- */
     // NOTE: Constructors should list parameters in the same order as the fields for
@@ -112,5 +121,127 @@ public class Project {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+
+    /* ------------- Custom Builders (Fluent Methods) ------------- */
+
+    public Project id(Long id) {
+        setId(id);
+        return this;
+    }
+
+    public Project name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public Project owner(User owner) {
+        setOwner(owner);
+        return this;
+    }
+
+    public Project rooms(List<Room> rooms) {
+        setRooms(rooms);
+        return this;
+    }
+
+    public Project orgUnits(List<OrgUnit> orgUnits) {
+        setOrgUnits(orgUnits);
+        return this;
+    }
+
+    public Project items(List<Item> items) {
+        setItems(items);
+        return this;
+    }
+
+    public Project events(List<Event> events) {
+        setEvents(events);
+        return this;
+    }
+
+    /* ------------- Utility Methods ------------- */
+
+    public void addRoom(Room room) {
+        if (!rooms.contains(room)) {
+            rooms.add(room);
+        }
+        room.setProject(this);
+    }
+
+    public void removeRoom(Room room) {
+        rooms.remove(room);
+    }
+
+    public void addOrgUnit(OrgUnit orgUnit) {
+        if (!orgUnits.contains(orgUnit)) {
+            orgUnits.add(orgUnit);
+        }
+        orgUnit.setProject(this);
+    }
+
+    public void removeOrgUnit(OrgUnit orgUnit) {
+        orgUnits.remove(orgUnit);
+    }
+
+    public void addItem(Item item) {
+        if (!items.contains(item)) {
+            items.add(item);
+        }
+        item.setProject(this);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
+    public void touch() {
+        this.lastUpdated = Instant.now();
+    }
+
+    /* ------------- Equals, HashCode, and ToString ------------- */
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Project)) {
+            return false;
+        }
+        Project project = (Project) o;
+        return Objects.equals(id, project.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", owner=" + (owner != null ? owner.getUsername() : "null") +
+                ", rooms=" + (rooms != null ? rooms.size() : "null") +
+                ", orgUnits=" + (orgUnits != null ? orgUnits.size() : "null") +
+                ", items=" + (items != null ? items.size() : "null") +
+                ", events=" + (events != null ? events.size() : "null") +
+                '}';
+    }
+
+    public Project copy() {
+        Project copy = new Project();
+        copy.setId(this.getId());
+        copy.setName(this.getName());
+        return copy;
     }
 }

@@ -23,8 +23,8 @@ export const RemoveRoomOrgUnits = () => {
     const navigate = useNavigate();
     const redirectUrl = ROUTES.roomDetails(projectId!, roomId!);
 
-    const { data: orgUnits, isLoading: orgUnitsLoading, isError, error } = useGetOrgUnitsByRoomQuery(roomId!);
-    const { data: room, isLoading: roomLoading } = useGetRoomQuery(roomId!);
+    const { data: orgUnits, isLoading: orgUnitsLoading, isError, error } = useGetOrgUnitsByRoomQuery(Number(roomId!));
+    const { data: room, isLoading: roomLoading } = useGetRoomQuery(Number(roomId!));
 
     const [orgUnitsToRemove, setOrgUnitsToRemove] = useState<number[]>([]);
 
@@ -87,9 +87,9 @@ export const AssignOrgUnitsToRoom = () => {
     const navigate = useNavigate();
     const redirectUrl = ROUTES.roomDetails(projectId!, roomId!);
 
-    const { data: room, isLoading: roomLoading, isError: isRoomError, error: roomError } = useGetRoomQuery(roomId!);
+    const { data: room, isLoading: roomLoading, isError: isRoomError, error: roomError } = useGetRoomQuery(Number(roomId!));
 
-    const { data: projectOrgUnits, isLoading: orgUnitsLoading, isError: isProjectError, error: projectError } = useGetOrgUnitsByProjectQuery(projectId!);
+    const { data: projectOrgUnits, isLoading: orgUnitsLoading, isError: isProjectError, error: projectError } = useGetOrgUnitsByProjectQuery(Number(projectId!));
     const orgUnitBank = projectOrgUnits?.filter((orgUnit) => String(orgUnit.roomId) !== roomId) || [];
 
     const [orgUnitsToAdd, setOrgUnitsToAdd] = useState<number[]>([]);

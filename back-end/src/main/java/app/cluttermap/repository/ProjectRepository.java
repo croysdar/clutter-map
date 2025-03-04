@@ -1,5 +1,6 @@
 package app.cluttermap.repository;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,12 @@ public interface ProjectRepository extends CrudRepository<Project, Long> {
 
     @Query(value = "SELECT p.* FROM projects p WHERE p.owner_id =:ownerId", nativeQuery = true)
     List<Project> findByOwnerId(@Param("ownerId") Long ownerId);
+
+    @Query("SELECT p.id FROM Project p WHERE p.owner.id = :userId")
+    List<Long> findProjectIdsByOwnerId(@Param("userId") Long userId);
+
+    @Query("SELECT p.id FROM Project p WHERE p.owner.id = :userId AND p.lastUpdated > :since")
+    List<Long> findUpdatedProjectIds(
+            @Param("since") Instant since,
+            @Param("userId") Long userId);
 }

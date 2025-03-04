@@ -37,7 +37,7 @@ const EditItem = () => {
     const { projectId, roomId, orgUnitId, itemId } = useParams();
     const redirectUrl = ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId!)
 
-    const { data: item, isLoading: itemLoading, isError, error } = useGetItemQuery(itemId!);
+    const { data: item, isLoading: itemLoading, isError, error } = useGetItemQuery(Number(itemId)!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
 
     // States to manage special input

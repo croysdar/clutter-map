@@ -48,24 +48,19 @@ public class RoomRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnOnlyRoomsOwnedBySpecifiedUser() {
         // Arrange: Set up two users, each with their own project and room
-        User user1 = new User("owner1ProviderId");
-        User user2 = new User("owner2ProviderId");
-        userRepository.saveAll(List.of(user1, user2));
+        User user1 = createUserAndSave();
+        Project project1 = createProjectWithUserAndSave(user1);
+        Room room1 = createRoomInProjectAndSave(project1);
 
-        Project project1 = new TestDataFactory.ProjectBuilder().user(user1).build();
-        Project project2 = new TestDataFactory.ProjectBuilder().user(user2).build();
-        projectRepository.saveAll(List.of(project1, project2));
-
-        Room room1 = new TestDataFactory.RoomBuilder().name("Room Owned by User 1").project(project1).build();
-        Room room2 = new TestDataFactory.RoomBuilder().name("Room Owned by User 2").project(project2).build();
-        roomRepository.saveAll(List.of(room1, room2));
+        User user2 = createUserAndSave();
+        Project project2 = createProjectWithUserAndSave(user2);
+        Room room2 = createRoomInProjectAndSave(project2);
 
         // Act: Retrieve rooms associated with user1
         List<Room> user1Rooms = roomRepository.findByOwnerId(user1.getId());
 
         // Assert: Verify that only the room owned by user1 is returned
-        assertThat(user1Rooms).hasSize(1);
-        assertThat(user1Rooms.get(0).getName()).isEqualTo("Room Owned by User 1");
+        assertThat(user1Rooms).containsExactly(room1);
 
         // Assert: Confirm that the room list does not contain a room owned by user2
         assertThat(user1Rooms).doesNotContain(room2);
@@ -74,34 +69,25 @@ public class RoomRepositoryIntegrationTests {
     @Test
     void findByOwner_ShouldReturnAllRoomsOwnedByUser() {
         // Arrange: Set up a user with multiple rooms
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
+        User owner = createUserAndSave();
+        Project project = createProjectWithUserAndSave(owner);
 
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        projectRepository.save(project);
-
-        List<String> roomNames = List.of("OrgUnit 1", "OrgUnit 2", "OrgUnit 3");
-        Room room1 = new TestDataFactory.RoomBuilder().name(roomNames.get(0)).project(project).build();
-        Room room2 = new TestDataFactory.RoomBuilder().name(roomNames.get(1)).project(project).build();
-        Room room3 = new TestDataFactory.RoomBuilder().name(roomNames.get(2)).project(project).build();
-
-        roomRepository.saveAll(List.of(room1, room2, room3));
+        Room room1 = createRoomInProjectAndSave(project);
+        Room room2 = createRoomInProjectAndSave(project);
+        Room room3 = createRoomInProjectAndSave(project);
 
         // Act: Retrieve all rooms associated with the user
         List<Room> ownerRooms = roomRepository.findByOwnerId(owner.getId());
 
         // Assert: Verify that all rooms owned by the user are returned
-        assertThat(ownerRooms).hasSize(3);
-        assertThat(ownerRooms).extracting(Room::getName)
-                .containsExactlyInAnyOrder(roomNames.toArray(new String[0]));
+        assertThat(ownerRooms).containsExactlyInAnyOrder(room1, room2, room3);
 
     }
 
     @Test
     void findByOwner_ShouldReturnEmptyList_WhenUserHasNoRooms() {
         // Arrange: Set up a user with no rooms
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner); // Save the user without any rooms
+        User owner = createUserAndSave();
 
         // Act: Retrieve rooms associated with the user
         List<Room> ownerRooms = roomRepository.findByOwnerId(owner.getId());
@@ -114,16 +100,8 @@ public class RoomRepositoryIntegrationTests {
     @Transactional
     void deletingRoom_ShouldNotDeleteOrgUnitsButUnassignThem() {
         // Arrange: Set up a user and create a room with an associated orgUnit
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        projectRepository.save(project);
-
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        room.getOrgUnits().add(orgUnit);
-        roomRepository.save(room);
+        Room room = createRoomInProjectAndSave();
+        OrgUnit orgUnit = createOrgUnitInRoomAndSave(room);
 
         assertThat(orgUnitRepository.findAll()).hasSize(1);
 
@@ -141,16 +119,8 @@ public class RoomRepositoryIntegrationTests {
     @Transactional
     void removingOrgUnitFromRoom_ShouldNotTriggerOrphanRemoval() {
         // Arrange: Set up a user and create a room with an associated orgUnit
-        User owner = new User("ownerProviderId");
-        userRepository.save(owner);
-
-        Project project = new TestDataFactory.ProjectBuilder().user(owner).build();
-        projectRepository.save(project);
-
-        Room room = new TestDataFactory.RoomBuilder().project(project).build();
-        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        room.getOrgUnits().add(orgUnit);
-        roomRepository.save(room);
+        Room room = createRoomInProjectAndSave();
+        OrgUnit orgUnit = createOrgUnitInRoomAndSave(room);
 
         assertThat(orgUnitRepository.findAll()).hasSize(1);
 
@@ -163,5 +133,40 @@ public class RoomRepositoryIntegrationTests {
         OrgUnit fetchedOrgUnit = orgUnitRepository.findById(orgUnit.getId()).orElse(null);
         assertThat(fetchedOrgUnit).isNotNull();
         assertThat(fetchedOrgUnit.getRoom()).isNull();
+    }
+
+    private User createUserAndSave() {
+        User owner = userRepository.save(new User("ownerProviderId"));
+        return owner;
+    }
+
+    private Project createProjectWithUserAndSave() {
+        User owner = createUserAndSave();
+
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private Project createProjectWithUserAndSave(User owner) {
+        Project project = projectRepository
+                .save(new TestDataFactory.ProjectBuilder().id(null).user(owner).build());
+        return project;
+    }
+
+    private Room createRoomInProjectAndSave() {
+        Project project = createProjectWithUserAndSave();
+        Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+        return room;
+    }
+
+    private Room createRoomInProjectAndSave(Project project) {
+        Room room = roomRepository.save(new TestDataFactory.RoomBuilder().id(null).project(project).build());
+        return room;
+    }
+
+    private OrgUnit createOrgUnitInRoomAndSave(Room room) {
+        OrgUnit orgUnit = orgUnitRepository.save(new TestDataFactory.OrgUnitBuilder().id(null).room(room).build());
+        return orgUnit;
     }
 }

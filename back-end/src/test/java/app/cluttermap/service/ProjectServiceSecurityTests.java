@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,10 +25,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
+import app.cluttermap.util.ResourceType;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -45,13 +46,16 @@ public class ProjectServiceSecurityTests {
     @MockBean
     private SecurityService securityService;
 
+    @MockBean
+    private EventService eventService;
+
     private Project mockProject;
 
     @BeforeEach
     void setUp() {
         mockProject = createMockProject();
 
-        when(securityService.isResourceOwner(anyLong(), anyString())).thenReturn(true);
+        when(securityService.isResourceOwner(anyLong(), any(ResourceType.class))).thenReturn(true);
     }
 
     @ParameterizedTest
@@ -63,7 +67,7 @@ public class ProjectServiceSecurityTests {
     void getProjectById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
@@ -91,7 +95,7 @@ public class ProjectServiceSecurityTests {
     void updateProject_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         UpdateProjectDTO projectDTO = new TestDataFactory.UpdateProjectDTOBuilder().build();
@@ -99,6 +103,9 @@ public class ProjectServiceSecurityTests {
         if (isOwner) {
             // Mock repository behavior for authorized access
             when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             Project project = projectService.updateProject(resourceId, projectDTO);
@@ -128,12 +135,15 @@ public class ProjectServiceSecurityTests {
     void deleteById_ShouldRespectOwnership(boolean isOwner, String description) {
         // Arrange: Prepare mock data and configure security service
         Long resourceId = 1L;
-        String resourceType = "project";
+        ResourceType resourceType = ResourceType.PROJECT;
         when(securityService.isResourceOwner(resourceId, resourceType)).thenReturn(isOwner);
 
         if (isOwner) {
             // Mock repository behavior for authorized access
             doNothing().when(projectRepository).deleteById(1L);
+
+            // Arrange: Mock event logging
+            mockLogEvent();
 
             // Act: Call the method under test
             projectService.deleteProjectById(resourceId);
@@ -158,10 +168,13 @@ public class ProjectServiceSecurityTests {
     private Project createMockProject() {
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
-        project.setId(1L);
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
 
         return project;
+    }
+
+    private void mockLogEvent() {
+        when(eventService.logEvent(any(), anyLong(), any(), any())).thenReturn(new Event());
     }
 
 }

@@ -1,6 +1,9 @@
 package app.cluttermap.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotSame;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,7 +37,6 @@ public class RoomModelTests {
 
         // Act: Add a orgUnit to the room
         OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder().room(room).build();
-        room.getOrgUnits().add(orgUnit);
 
         // Assert: Verify that the orgUnit was added to the room's orgUnits
         // collection
@@ -46,5 +48,57 @@ public class RoomModelTests {
 
         // Assert: Verify that the orgUnits collection is empty after removal
         assertThat(room.getOrgUnits()).isEmpty();
+    }
+
+    @Test
+    void toString_ShouldHandleNullFields() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setName("Living Room");
+
+        String result = room.toString();
+
+        assertThat(result).contains("projectId=null");
+    }
+
+    @Test
+    void toString_ShouldDisplaySummaryForPopulatedRoom() {
+        Project project = new TestDataFactory.ProjectBuilder().id(10L).user(new User("")).build();
+
+        Room room = new TestDataFactory.RoomBuilder()
+                .id(20L)
+                .name("Living Room")
+                .description("Main living area")
+                .project(project)
+                .build();
+
+        room.setOrgUnits(List.of(new OrgUnit(), new OrgUnit(), new OrgUnit()));
+
+        String result = room.toString();
+
+        assertThat(result).contains("id=20");
+        assertThat(result).contains("name='Living Room'");
+        assertThat(result).contains("description='Main living area'");
+        assertThat(result).contains("projectId=10");
+    }
+
+    @Test
+    void copyRoom_ShouldProduceIdenticalCopy() {
+        User user = new User("userProviderId");
+        Project project = new TestDataFactory.ProjectBuilder().user(user).build();
+        Room original = new TestDataFactory.RoomBuilder()
+                .id(1L)
+                .name("Original Name")
+                .description("Original Description")
+                .project(project)
+                .build();
+
+        Room copy = original.copy();
+
+        // Assert that all fields are identical
+        assertThat(copy).usingRecursiveComparison().isEqualTo(original);
+
+        // Verify the copy is a new instance, not the same reference
+        assertNotSame(copy, original);
     }
 }
