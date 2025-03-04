@@ -3,24 +3,26 @@ import React from 'react';
 import { AppBar, Box, Button, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { rejectAuthStatus, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
+import { logoutUser, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import NavMenuDrawer from './NavMenuDrawer';
 
 import Logo from '@/assets/images/logo.svg';
 import { ROUTES } from '@/utils/constants';
+import OnlineIndicator from '../common/OnlineIndicator';
 
 const Navbar: React.FC = () => {
     const isMobile = useMediaQuery('(max-width: 600px)');
 
     const userName = useAppSelector(selectCurrentUserName);
     const userFirstName = useAppSelector(selectCurrentUserFirstName);
-    const dispatch = useAppDispatch();
 
     const loggedIn = useAppSelector(selectAuthStatus) === 'verified';
 
-    const handleLogout = () => {
-        dispatch(rejectAuthStatus());
+    const dispatch = useAppDispatch();
+
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
     }
 
     return (
@@ -48,6 +50,7 @@ const Navbar: React.FC = () => {
 
                 {/* Greeting and Logout Button */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <OnlineIndicator />
                     {
                         loggedIn &&
                         <>

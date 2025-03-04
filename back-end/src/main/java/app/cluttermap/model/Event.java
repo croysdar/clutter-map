@@ -1,6 +1,6 @@
 package app.cluttermap.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +38,7 @@ public class Event {
     private List<EventEntity> eventEntities = new ArrayList<>();
 
     @NotNull
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private Instant timestamp = Instant.now();
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -95,11 +95,11 @@ public class Event {
         this.eventEntities = eventEntities;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return this.timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -159,7 +159,7 @@ public class Event {
         return this;
     }
 
-    public Event timestamp(LocalDateTime timestamp) {
+    public Event timestamp(Instant timestamp) {
         setTimestamp(timestamp);
         return this;
     }

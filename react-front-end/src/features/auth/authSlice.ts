@@ -1,6 +1,6 @@
-import { RootState } from "@/app/store";
-import { createAppSlice } from "@/hooks/useAppHooks";
 import { client } from "@/services/client";
+import { AppDispatch, RootState } from "@/app/store";
+import { createAppSlice } from "@/hooks/useAppHooks";
 import { API_BASE_URL } from "@/utils/constants";
 
 interface UserInfo {
@@ -58,12 +58,48 @@ const authSlice = createAppSlice({
             ),
             fetchUserInfo: create.asyncThunk(
                 async (token: string, { rejectWithValue }) => {
+                    const isOffline = !navigator.onLine;
+
+                    let userInfo = null;
+                    try {
+                        const cachedUserInfo = localStorage.getItem('userInfo');
+                        if (cachedUserInfo) {
+                            userInfo = JSON.parse(cachedUserInfo);
+                        }
+                    } catch (error) {
+                        console.error("Corrupted userInfo in localStorage. Clearing it.", error);
+                        localStorage.removeItem('userInfo'); // Prevent further issues
+                    }
+
+                    const lastFetch = userInfo?.lastFetched;
+                    const fiveMinutes = 5 * 60 * 1000; // 5 min threshold
+                    const now = Date.now();
+
+                    // Use cached data if it's recent (skip API call)
+                    if (lastFetch && now - parseInt(lastFetch) < fiveMinutes) {
+                        console.warn("Skipping fetchUserInfo: Already fetched recently");
+                        return userInfo;
+                    }
+
+                    // If offline, use cached data
+                    if (isOffline && userInfo) {
+                        console.warn('Offline: Using cached user info');
+                        return userInfo;
+                    }
+
                     try {
                         const response = await client.get<UserInfo>(`${API_BASE_URL}/auth/user-info`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
 
-                        return response.data
+                        const userInfoWithLastFetched = {
+                            ...response.data,
+                            lastFetched: Date.now() // Add the current timestamp for lastFetched
+                        };
+
+                        localStorage.setItem('userInfo', JSON.stringify(userInfoWithLastFetched));
+
+                        return userInfoWithLastFetched;
                     }
                     catch (error: any) {
                         if (error.status) {
@@ -97,12 +133,19 @@ const authSlice = createAppSlice({
 
                         const statusCode = errorPayload?.status
 
+                        if (!navigator.onLine) {
+                            // If offline, keep the cached user info in state
+                            console.warn('Fetch user info failed due to offline status');
+                            return;
+                        }
+
                         if (statusCode === 500) {
                             console.error('Server error: ', action.error)
                         }
                         else if (statusCode === 401 || statusCode === 403) {
                             // Invalid token
-                            localStorage.removeItem('jwt')
+                            localStorage.removeItem('jwt');
+                            localStorage.removeItem('userInfo');
                             state.userEmail = null;
                             state.userName = null;
                             state.userFirstName = null;
@@ -117,7 +160,6 @@ const authSlice = createAppSlice({
             ),
             rejectAuthStatus: create.reducer(
                 (state) => {
-                    localStorage.removeItem('jwt')
                     state.userEmail = null;
                     state.userName = null;
                     state.userFirstName = null;
@@ -128,6 +170,17 @@ const authSlice = createAppSlice({
         }
     },
 })
+
+
+// Additional action to handle local storage cleanup when the user logs out
+export const logoutUser = () => (dispatch: AppDispatch) => {
+    // Clear local storage
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('userInfo');
+
+    // Update state
+    dispatch(rejectAuthStatus());
+};
 
 export const { verifyToken, fetchUserInfo, rejectAuthStatus } = authSlice.actions
 

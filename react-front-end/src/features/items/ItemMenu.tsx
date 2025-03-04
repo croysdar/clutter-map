@@ -16,7 +16,8 @@ const ItemMenu: React.FC<ItemMenuProps> = ({ item }) => {
     const menuItems: LinkMenuItem[] = [
         {
             label: "Edit Item",
-            url: ROUTES.itemEdit(projectId!, roomId!, orgUnitId!, item.id)
+            url: ROUTES.itemEdit(projectId!, roomId!, orgUnitId!, item.id),
+            requiresOnline: true
         }
     ]
 

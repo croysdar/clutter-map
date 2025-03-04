@@ -1,6 +1,7 @@
 package app.cluttermap.controller;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -10,7 +11,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +19,6 @@ import app.cluttermap.service.EventService;
 import app.cluttermap.util.ResourceType;
 
 @RestController
-@RequestMapping("/events")
 public class EventController {
     /* ------------- Injected Dependencies ------------- */
     private final EventService eventService;
@@ -30,7 +29,7 @@ public class EventController {
     }
 
     /* ------------- GET Operations ------------- */
-    @GetMapping("/{entityType}/{id}")
+    @GetMapping("/events/{entityType}/{id}")
     public ResponseEntity<PagedModel<EntityModel<EntityHistoryDTO>>> getEntityHistory(
             @PathVariable("entityType") ResourceType entityType,
             @PathVariable("id") Long id,
@@ -44,7 +43,15 @@ public class EventController {
 
     @GetMapping("/fetch-updates")
     public ResponseEntity<List<EntityHistoryDTO>> getChangedEntitiesSince(@RequestParam("since") String since) {
-        LocalDateTime sinceTime = LocalDateTime.parse(since);
+        Instant sinceTime;
+        try {
+            // Try parsing as an ISO-8601 string (e.g., "2025-01-02T14:30:50Z")
+            sinceTime = Instant.parse(since);
+        } catch (DateTimeParseException e) {
+            // If parsing fails, assume it's a Unix timestamp in milliseconds
+            long epochMillis = Long.parseLong(since);
+            sinceTime = Instant.ofEpochMilli(epochMillis);
+        }
 
         List<EntityHistoryDTO> updates = eventService.fetchUpdatesSince(sinceTime);
 

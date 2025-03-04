@@ -1,7 +1,7 @@
 package app.cluttermap.service;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -77,8 +77,8 @@ public class EventService {
         return eventEntityRepository.findHistoryByEntity(entityType, entityId, pageable);
     }
 
-    public List<EntityHistoryDTO> fetchUpdatesSince(LocalDateTime since) {
-        List<Long> projectIds = projectAccessService.getAccessibleProjectIds();
+    public List<EntityHistoryDTO> fetchUpdatesSince(Instant since) {
+        List<Long> projectIds = projectAccessService.getUpdatedProjectIds(since);
 
         if (projectIds.isEmpty()) {
             return Collections.emptyList();
@@ -122,6 +122,7 @@ public class EventService {
         Map<String, Object> moveDetails = new HashMap<>();
         moveDetails.put("previousParentId", previousParentId);
         moveDetails.put("newParentId", newParentId);
+        moveDetails.put("parentType", parentEntityType);
 
         EventEntity moveEntity = new EventEntity(
                 event, entityType, entityId,
@@ -131,6 +132,7 @@ public class EventService {
         if (previousParentId != null) {
             Map<String, Object> removeChildDetails = new HashMap<>();
             removeChildDetails.put("childId", entityId);
+            removeChildDetails.put("childType", entityType);
             EventEntity previousParentEntity = new EventEntity(
                     event, parentEntityType, previousParentId,
                     EventChangeType.REMOVE_CHILD, convertToJson(removeChildDetails));
@@ -140,6 +142,7 @@ public class EventService {
         if (newParentId != null) {
             Map<String, Object> addChildDetails = new HashMap<>();
             addChildDetails.put("childId", entityId);
+            addChildDetails.put("childType", entityType);
             EventEntity newParentEntity = new EventEntity(
                     event, parentEntityType, newParentId,
                     EventChangeType.ADD_CHILD, convertToJson(addChildDetails));
@@ -228,6 +231,9 @@ public class EventService {
         event.setProject(project);
         User user = securityService.getCurrentUser();
         event.setUser(user);
+
+        // Set last updated value in the project
+        project.touch();
         return event;
     }
 
