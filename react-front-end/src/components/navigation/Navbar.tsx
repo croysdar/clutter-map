@@ -4,7 +4,7 @@ import { AppBar, Box, Button, Toolbar, Typography, useMediaQuery } from '@mui/ma
 import { Link } from 'react-router-dom';
 
 import { logoutUser, selectAuthStatus, selectCurrentUserFirstName, selectCurrentUserName } from '@/features/auth/authSlice';
-import { useAppSelector } from '@/hooks/useAppHooks';
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppHooks';
 import NavMenuDrawer from './NavMenuDrawer';
 
 import Logo from '@/assets/images/logo.svg';
@@ -19,8 +19,10 @@ const Navbar: React.FC = () => {
 
     const loggedIn = useAppSelector(selectAuthStatus) === 'verified';
 
-    const handleLogout = () => {
-        logoutUser();
+    const dispatch = useAppDispatch();
+
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
     }
 
     return (

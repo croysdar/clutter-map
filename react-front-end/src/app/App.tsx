@@ -56,9 +56,6 @@ function App() {
     const isInit = useRef(false);
 
     useEffect(() => {
-        // isInit prevents duplicate running of useEffect
-        if (isInit.current) return;
-        isInit.current = true;
 
         const fetchUserInfoIfToken = async () => {
             const token = localStorage.getItem('jwt')
@@ -66,11 +63,14 @@ function App() {
                 await dispatch(fetchUserInfo(token));
             }
             else {
-                logoutUser();
+                await dispatch(logoutUser());
             }
         };
 
         const initializeApp = async () => {
+            if (isInit.current) return;
+            isInit.current = true;
+
             await dispatch(initIDB());
 
             await fetchUserInfoIfToken();
