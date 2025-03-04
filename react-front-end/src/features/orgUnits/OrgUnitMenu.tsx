@@ -15,15 +15,18 @@ const OrgUnitMenu: React.FC<OrgUnitMenuProps> = ({ orgUnit }) => {
     const menuItems: LinkMenuItem[] = [
         {
             label: "Edit Organizer",
-            url: ROUTES.orgUnitEdit(projectId!, roomId!, orgUnit.id)
+            url: ROUTES.orgUnitEdit(projectId!, roomId!, orgUnit.id),
+            requiresOnline: true
         },
         {
             label: "Remove Items From Organizer",
-            url: ROUTES.orgUnitRemoveItems(projectId!, roomId!, orgUnit.id)
+            url: ROUTES.orgUnitRemoveItems(projectId!, roomId!, orgUnit.id),
+            requiresOnline: true
         },
         {
             label: "Move Items to Organizer",
-            url: ROUTES.orgUnitAssignItems(projectId!, roomId!, orgUnit.id)
+            url: ROUTES.orgUnitAssignItems(projectId!, roomId!, orgUnit.id),
+            requiresOnline: true
         },
     ]
 
