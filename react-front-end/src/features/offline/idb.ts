@@ -32,42 +32,26 @@ export interface MoveEventGroup {
 /* ------------- IndexedDB Initialization & Syncing ------------- */
 
 export const initDB = async (testMode = false) => {
-    let needsFullSync = false;
     const dbName = testMode ? 'ClutterMapDB_Test' : IDB_NAME;
 
     await openDB(dbName, IDB_VERSION, {
-        upgrade(db) {
-            needsFullSync = true;
+        upgrade(db, oldVersion, newVersion, transaction) {
+            console.log(`Upgrading IndexedDB from v${oldVersion} to v${newVersion}`);
 
-            // Create object stores if they don't exist
-            if (!db.objectStoreNames.contains(Stores.Projects)) {
-                db.createObjectStore(Stores.Projects, { keyPath: 'id' });
-            }
-            if (!db.objectStoreNames.contains(Stores.Rooms)) {
-                db.createObjectStore(Stores.Rooms, { keyPath: 'id' });
-            }
-            if (!db.objectStoreNames.contains(Stores.OrgUnits)) {
-                db.createObjectStore(Stores.OrgUnits, { keyPath: 'id' });
-            }
-            if (!db.objectStoreNames.contains(Stores.Items)) {
-                db.createObjectStore(Stores.Items, { keyPath: 'id' });
-            }
-            if (!db.objectStoreNames.contains(Stores.Meta)) {
-                db.createObjectStore(Stores.Meta, { keyPath: 'key' });
-            }
+            // Remove existing stores to force a fresh sync
+            Array.from(db.objectStoreNames).forEach((storeName) => {
+                db.deleteObjectStore(storeName);
+            });
+
+
+            db.createObjectStore(Stores.Projects, { keyPath: 'id' });
+            db.createObjectStore(Stores.Rooms, { keyPath: 'id' });
+            db.createObjectStore(Stores.OrgUnits, { keyPath: 'id' });
+            db.createObjectStore(Stores.Items, { keyPath: 'id' });
+            db.createObjectStore(Stores.Meta, { keyPath: 'key' });
         }
     });
 
-    if (needsFullSync && !testMode) {
-        console.log("Triggering full sync due to IDB upgrade...");
-        const syncUpgradedIDB = async () => {
-            const token = localStorage.getItem('jwt');
-            if (token) {
-                await fullSync(token);
-            }
-        }
-        syncUpgradedIDB();
-    }
     return true;
 };
 
