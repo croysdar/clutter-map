@@ -46,7 +46,7 @@ export const ROUTES = {
         `/projects/${projectId}/rooms/${roomId}/org-units/${orgUnitId}/items/${itemId}/edit`,
 }
 
-export const IDB_VERSION = 1;
+export const IDB_VERSION = 2;
 
 export const IDB_NAME = 'ClutterMapDB';
 
