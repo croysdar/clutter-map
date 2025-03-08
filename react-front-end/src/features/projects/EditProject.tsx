@@ -103,7 +103,6 @@ const EditProject = () => {
             <DeleteButton
                 project={project}
                 isDisabled={updateLoading}
-                redirectUrl={redirectUrl}
             />
         </EditCardWrapper>
     )
@@ -112,10 +111,11 @@ const EditProject = () => {
 type DeleteButtonProps = {
     project: Project,
     isDisabled: boolean
-    redirectUrl: string
 }
 
-const DeleteButton: React.FC<DeleteButtonProps> = ({ project, isDisabled, redirectUrl }) => {
+const DeleteButton: React.FC<DeleteButtonProps> = ({ project, isDisabled }) => {
+    const redirectUrl = ROUTES.projects
+
     return (
         <DeleteEntityButtonWithModal
             entity={project}

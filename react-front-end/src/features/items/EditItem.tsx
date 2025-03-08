@@ -132,7 +132,6 @@ const EditItem = () => {
             <DeleteItemButton
                 item={item}
                 isDisabled={updateLoading}
-                redirectUrl={redirectUrl}
             />
         </EditCardWrapper>
     )
@@ -141,10 +140,12 @@ const EditItem = () => {
 type DeleteButtonProps = {
     item: Item,
     isDisabled: boolean
-    redirectUrl: string
 }
 
-const DeleteItemButton: React.FC<DeleteButtonProps> = ({ item, isDisabled, redirectUrl }) => {
+const DeleteItemButton: React.FC<DeleteButtonProps> = ({ item, isDisabled }) => {
+    const { projectId, roomId, orgUnitId } = useParams();
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
+
     return (
         <DeleteEntityButtonWithModal
             entity={item}

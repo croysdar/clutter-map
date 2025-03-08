@@ -116,7 +116,6 @@ const EditOrgUnit = () => {
             <DeleteOrgUnitButton
                 orgUnit={orgUnit}
                 isDisabled={updateLoading}
-                redirectUrl={redirectUrl}
             />
         </EditCardWrapper>
     )
@@ -125,10 +124,12 @@ const EditOrgUnit = () => {
 type DeleteButtonProps = {
     orgUnit: OrgUnit,
     isDisabled: boolean
-    redirectUrl: string
 }
 
-const DeleteOrgUnitButton: React.FC<DeleteButtonProps> = ({ orgUnit, isDisabled, redirectUrl }) => {
+const DeleteOrgUnitButton: React.FC<DeleteButtonProps> = ({ orgUnit, isDisabled }) => {
+    const { projectId, roomId } = useParams();
+    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!);
+
     return (
         <DeleteEntityButtonWithModal
             entity={orgUnit}
