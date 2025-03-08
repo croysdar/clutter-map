@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,7 +42,7 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private EventActionType action;
+    private EventChangeType action;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = true)
@@ -61,11 +61,11 @@ public class Event {
     }
 
     public Event(
-            EventActionType action,
+            EventChangeType action,
             Project project,
             User user) {
         if (action == null) {
-            throw new IllegalArgumentException("EventActionType cannot be null");
+            throw new IllegalArgumentException("EventChangeType cannot be null");
         }
         if (project == null) {
             throw new IllegalArgumentException("Project cannot be null");
@@ -103,11 +103,11 @@ public class Event {
         this.timestamp = timestamp;
     }
 
-    public EventActionType getAction() {
+    public EventChangeType getAction() {
         return this.action;
     }
 
-    public void setAction(EventActionType action) {
+    public void setAction(EventChangeType action) {
         this.action = action;
     }
 
@@ -164,7 +164,7 @@ public class Event {
         return this;
     }
 
-    public Event action(EventActionType action) {
+    public Event action(EventChangeType action) {
         setAction(action);
         return this;
     }

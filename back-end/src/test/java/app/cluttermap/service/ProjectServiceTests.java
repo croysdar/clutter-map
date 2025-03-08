@@ -38,7 +38,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -177,7 +177,7 @@ public class ProjectServiceTests {
         // Assert: Verify event logging
         verify(eventService).logEvent(
                 eq(ResourceType.PROJECT), eq(mockProject.getId()),
-                eq(EventActionType.CREATE), payloadCaptor.capture());
+                eq(EventChangeType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -256,7 +256,7 @@ public class ProjectServiceTests {
         // Verify the event was logged
         verify(eventService).logEvent(
                 eq(ResourceType.PROJECT), eq(resourceId),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
+                eq(EventChangeType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -302,7 +302,7 @@ public class ProjectServiceTests {
             // Verify the event was logged
             verify(eventService).logEvent(
                     eq(ResourceType.PROJECT), eq(resourceId),
-                    eq(EventActionType.DELETE), isNull());
+                    eq(EventChangeType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding project
             mockNonexistentProjectInRepository(resourceId);

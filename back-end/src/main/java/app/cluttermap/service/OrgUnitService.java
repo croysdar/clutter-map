@@ -22,7 +22,7 @@ import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -86,10 +86,31 @@ public class OrgUnitService {
         } else {
             orgUnit = self.createOrgUnitInRoom(orgUnitDTO, orgUnitDTO.getRoomIdAsLong());
         }
+        long id = orgUnit.getId();
 
         eventService.logEvent(
-                ResourceType.ORGANIZATIONAL_UNIT, orgUnit.getId(),
-                EventActionType.CREATE, buildCreatePayload(orgUnit));
+                ResourceType.ORGANIZATIONAL_UNIT, id,
+                EventChangeType.CREATE, buildCreatePayload(orgUnit));
+        
+
+        Map<String, Object> addChildDetails = new HashMap<>();
+        addChildDetails.put("childId", id);
+        addChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
+        eventService.logEvent(
+            ResourceType.PROJECT, orgUnit.getProject().getId(),
+            EventChangeType.ADD_CHILD, addChildDetails
+        );
+
+        if (orgUnit.getRoom() != null) {
+            addChildDetails = new HashMap<>();
+            addChildDetails.put("childId", id);
+            addChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
+            eventService.logEvent(
+                ResourceType.ROOM, orgUnit.getRoom().getId(),
+                EventChangeType.ADD_CHILD, addChildDetails
+            );
+        }
+        
         return orgUnit;
     }
 
@@ -134,7 +155,7 @@ public class OrgUnitService {
 
         eventService.logEvent(
                 ResourceType.ORGANIZATIONAL_UNIT, id,
-                EventActionType.UPDATE, buildChangePayload(oldOrgUnit, updatedOrgUnit));
+                EventChangeType.UPDATE, buildChangePayload(oldOrgUnit, updatedOrgUnit));
 
         return updatedOrgUnit;
     }
@@ -146,7 +167,25 @@ public class OrgUnitService {
 
         eventService.logEvent(
                 ResourceType.ORGANIZATIONAL_UNIT, id,
-                EventActionType.DELETE, null);
+                EventChangeType.DELETE, null);
+        
+        Map<String, Object> removeChildDetails = new HashMap<>();
+        removeChildDetails.put("childId", id);
+        removeChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
+        eventService.logEvent(
+            ResourceType.PROJECT, orgUnit.getProject().getId(),
+            EventChangeType.REMOVE_CHILD, removeChildDetails
+        );
+
+        if (orgUnit.getRoom() != null) {
+            removeChildDetails = new HashMap<>();
+            removeChildDetails.put("childId", id);
+            removeChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
+            eventService.logEvent(
+                ResourceType.ROOM, orgUnit.getRoom().getId(),
+                EventChangeType.REMOVE_CHILD, removeChildDetails
+            );
+        }
 
         orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }
@@ -228,6 +267,8 @@ public class OrgUnitService {
 
     private Map<String, Object> buildCreatePayload(OrgUnit orgUnit) {
         Map<String, Object> payload = new HashMap<>();
+        payload.put("projectId", orgUnit.getProject().getId());
+
         payload.put("name", orgUnit.getName());
         payload.put("description", orgUnit.getDescription());
         if (orgUnit.getRoom() != null) {

@@ -43,7 +43,7 @@ import app.cluttermap.model.dto.NewOrgUnitDTO;
 import app.cluttermap.model.dto.UpdateOrgUnitDTO;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -244,7 +244,7 @@ public class OrgUnitServiceTests {
         // Assert: Verify event logging
         verify(eventService).logEvent(
                 eq(ResourceType.ORGANIZATIONAL_UNIT), eq(mockOrgUnit.getId()),
-                eq(EventActionType.CREATE), payloadCaptor.capture());
+                eq(EventChangeType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -338,7 +338,7 @@ public class OrgUnitServiceTests {
         // Verify the event was logged
         verify(eventService).logEvent(
                 eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
+                eq(EventChangeType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -394,7 +394,7 @@ public class OrgUnitServiceTests {
             // Verify the event was logged
             verify(eventService).logEvent(
                     eq(ResourceType.ORGANIZATIONAL_UNIT), eq(resourceId),
-                    eq(EventActionType.DELETE), isNull());
+                    eq(EventChangeType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding org unit
             mockNonexistentOrgUnitInRepository(resourceId);

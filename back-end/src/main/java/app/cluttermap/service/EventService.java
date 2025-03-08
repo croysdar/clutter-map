@@ -28,7 +28,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.EntityHistoryDTO;
 import app.cluttermap.repository.EventEntityRepository;
 import app.cluttermap.repository.EventRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
@@ -92,7 +92,7 @@ public class EventService {
     public Event logEvent(
             ResourceType entityType,
             Long entityId,
-            EventActionType actionType,
+            EventChangeType actionType,
             Map<String, Object> payload) {
 
         Project project = entityResolutionService.resolveProject(entityType, entityId);
@@ -100,7 +100,7 @@ public class EventService {
 
         EventEntity eventEntity = new EventEntity(
                 event, entityType, entityId,
-                resolveSimpleEventAction(actionType), convertToJson(payload));
+                actionType, convertToJson(payload));
 
         event.addEventEntity(eventEntity);
 
@@ -117,7 +117,7 @@ public class EventService {
 
         Project project = entityResolutionService.resolveProject(entityType, entityId);
 
-        Event event = initializeEvent(EventActionType.UPDATE, project);
+        Event event = initializeEvent(EventChangeType.UPDATE, project);
 
         Map<String, Object> moveDetails = new HashMap<>();
         moveDetails.put("previousParentId", previousParentId);
@@ -222,7 +222,7 @@ public class EventService {
     }
 
     /* --- Private Helper Methods --- */
-    private Event initializeEvent(EventActionType actionType, Project project) {
+    private Event initializeEvent(EventChangeType actionType, Project project) {
         if (actionType == null || project == null) {
             throw new IllegalArgumentException("Action type and project must not be null");
         }
@@ -235,19 +235,6 @@ public class EventService {
         // Set last updated value in the project
         project.touch();
         return event;
-    }
-
-    private EventChangeType resolveSimpleEventAction(EventActionType type) {
-        switch (type) {
-            case CREATE:
-                return EventChangeType.CREATE;
-            case UPDATE:
-                return EventChangeType.UPDATE;
-            case DELETE:
-                return EventChangeType.DELETE;
-            default:
-                return EventChangeType.UPDATE;
-        }
     }
 
     /**

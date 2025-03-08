@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
@@ -19,7 +19,7 @@ public class EntityEventModelTests {
         ResourceType entityType = ResourceType.ITEM;
         Long entityId = 10L;
         String details = "{\"key\":\"value\"}";
-        Event event = new Event(EventActionType.CREATE, new Project(), new User());
+        Event event = new Event(EventChangeType.CREATE, new Project(), new User());
 
         // Act
         EventEntity eventEntity = new EventEntity(event, entityType, entityId, changeType, details);
@@ -52,7 +52,7 @@ public class EntityEventModelTests {
     @Test
     void toString_ShouldHandleNonNullFields() {
         // Arrange
-        Event event = new Event(EventActionType.CREATE, new Project(), new User());
+        Event event = new Event(EventChangeType.CREATE, new Project(), new User());
         ResourceType entityType = ResourceType.ROOM;
         Long entityId = 101L;
         EventChangeType changeType = EventChangeType.UPDATE;

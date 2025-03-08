@@ -23,7 +23,7 @@ import app.cluttermap.model.EventEntity;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
 import app.cluttermap.model.dto.EntityHistoryDTO;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
@@ -66,7 +66,7 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findByEntityTypeAndEntityId_ShouldReturnPaginatedResults() {
         // Arrange: Create multiple events
-        Event createEvent = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event createEvent = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity createEventEntity = new EventEntity(
                 createEvent,
                 ResourceType.ROOM, 1L,
@@ -76,7 +76,7 @@ public class EventEntityRepositoryIntegrationTests {
         eventRepository.save(createEvent);
 
         for (int i = 0; i < 5; i++) {
-            Event updateEvent = new Event(EventActionType.CREATE, mockProject, mockUser);
+            Event updateEvent = new Event(EventChangeType.CREATE, mockProject, mockUser);
             EventEntity updateEventEntity = new EventEntity(
                     updateEvent,
                     ResourceType.ROOM, 1L,
@@ -104,17 +104,17 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findByEntityTypeAndEntityId_ShouldOnlyReturnEventsForSpecifiedEntity() {
         // Arrange: Create events and associated EventEntities for different entities
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event1, ResourceType.ROOM, 1L, EventChangeType.CREATE, "");
         event1.addEventEntity(entityEvent1);
         eventRepository.save(event1);
 
-        Event event2 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent2 = new EventEntity(event2, ResourceType.ITEM, 2L, EventChangeType.CREATE, "");
         event2.addEventEntity(entityEvent2);
         eventRepository.save(event2);
 
-        Event event3 = new Event(EventActionType.UPDATE, mockProject, mockUser);
+        Event event3 = new Event(EventChangeType.UPDATE, mockProject, mockUser);
         EventEntity entityEvent3 = new EventEntity(event3, ResourceType.ROOM, 3L, EventChangeType.UPDATE, "");
         event3.addEventEntity(entityEvent3);
         eventRepository.save(event3);
@@ -135,7 +135,7 @@ public class EventEntityRepositoryIntegrationTests {
     void findByEntityTypeAndEntityId_ShouldReturnAllMatchesForSameEntity() {
         // Arrange: Create multiple Events with the same ResourceType and entityId
         for (int i = 0; i < 3; i++) {
-            Event event = new Event(EventActionType.UPDATE, mockProject, mockUser);
+            Event event = new Event(EventChangeType.UPDATE, mockProject, mockUser);
             EventEntity entity = new EventEntity(event, ResourceType.ROOM, 1L, EventChangeType.UPDATE, "");
             event.addEventEntity(entity);
             eventRepository.save(event);
@@ -156,7 +156,7 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findByEntityTypeAndEntityId_ShouldReturnEmptyWhenNoMatches() {
         // Arrange: Create and save an Event with a non-matching EventEntity
-        Event event = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entity = new EventEntity(event, ResourceType.ITEM, 2L, EventChangeType.CREATE, "");
         event.addEventEntity(entity);
         eventRepository.save(event);
@@ -172,7 +172,7 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void orphanRemoval_ShouldDeleteEventEntitiesWhenParentEventIsDeleted() {
         // Arrange: Create and save an Event with EventEntities
-        Event event = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event, ResourceType.ROOM, 1L, EventChangeType.CREATE, "");
         EventEntity entityEvent2 = new EventEntity(event, ResourceType.ITEM, 2L, EventChangeType.CREATE, "");
         event.addEventEntity(entityEvent1);
@@ -189,17 +189,17 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findChangesSince_ShouldReturnAllChanges() {
         // Arrange: Create multiple events with associated EventEntities
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event1, ResourceType.PROJECT, 1L, EventChangeType.CREATE, "");
         event1.addEventEntity(entityEvent1);
         eventRepository.save(event1);
 
-        Event event2 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent2 = new EventEntity(event2, ResourceType.ROOM, 1L, EventChangeType.CREATE, "");
         event2.addEventEntity(entityEvent2);
         eventRepository.save(event2);
 
-        Event event3 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event3 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent3 = new EventEntity(event3, ResourceType.ROOM, 2L, EventChangeType.UPDATE, "");
         event3.addEventEntity(entityEvent3);
         eventRepository.save(event3);
@@ -219,14 +219,14 @@ public class EventEntityRepositoryIntegrationTests {
         Instant timestamp2 = Instant.now().minus(Duration.ofHours(1));
 
         // Event 1 (older than "since" timestamp)
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event1, ResourceType.PROJECT, 1L, EventChangeType.CREATE, "");
         event1.addEventEntity(entityEvent1);
         event1.setTimestamp(timestamp1);
         eventRepository.save(event1);
 
         // Event 2 (newer than "since" timestamp)
-        Event event2 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent2 = new EventEntity(event2, ResourceType.ROOM, 2L, EventChangeType.CREATE, "");
         event2.addEventEntity(entityEvent2);
         event2.setTimestamp(timestamp2);
@@ -250,13 +250,13 @@ public class EventEntityRepositoryIntegrationTests {
         Instant timestamp1 = Instant.now().minus(Duration.ofDays(3));
         Instant timestamp2 = Instant.now().minus(Duration.ofDays(2));
 
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent1 = new EventEntity(event1, ResourceType.PROJECT, 1L, EventChangeType.CREATE, "");
         event1.addEventEntity(entityEvent1);
         event1.setTimestamp(timestamp1);
         eventRepository.save(event1);
 
-        Event event2 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity entityEvent2 = new EventEntity(event2, ResourceType.ROOM, 2L, EventChangeType.CREATE, "");
         event2.addEventEntity(entityEvent2);
         event2.setTimestamp(timestamp2);
@@ -276,7 +276,7 @@ public class EventEntityRepositoryIntegrationTests {
         Instant timestamp = Instant.now().minus(Duration.ofHours(1));
 
         for (int i = 0; i < 3; i++) {
-            Event event = new Event(EventActionType.UPDATE, mockProject, mockUser);
+            Event event = new Event(EventChangeType.UPDATE, mockProject, mockUser);
             EventEntity entity = new EventEntity(event, ResourceType.ROOM, 1L, EventChangeType.UPDATE,
                     "{\"change\":\"change" + i + "\"}");
             event.addEventEntity(entity);
@@ -300,7 +300,7 @@ public class EventEntityRepositoryIntegrationTests {
     @Test
     void findChangesSince_ShouldReturnCorrectFormat() {
         // Arrange: Create and save an Event with an associated EventEntity
-        Event event = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event = new Event(EventChangeType.CREATE, mockProject, mockUser);
         EventEntity eventEntity = new EventEntity(
                 event,
                 ResourceType.PROJECT,

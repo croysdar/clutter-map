@@ -16,7 +16,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewRoomDTO;
 import app.cluttermap.model.dto.UpdateRoomDTO;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -63,10 +63,19 @@ public class RoomService {
     @Transactional
     public Room createRoom(NewRoomDTO roomDTO) {
         Room room = self.createRoomInProject(roomDTO, roomDTO.getProjectIdAsLong());
+        long id = room.getId();
 
         eventService.logEvent(
-                ResourceType.ROOM, room.getId(),
-                EventActionType.CREATE, buildCreatePayload(room));
+                ResourceType.ROOM, id,
+                EventChangeType.CREATE, buildCreatePayload(room));
+        
+        Map<String, Object> addChildDetails = new HashMap<>();
+        addChildDetails.put("childId", id);
+        addChildDetails.put("childType", ResourceType.ROOM);
+        eventService.logEvent(
+            ResourceType.PROJECT, room.getProject().getId(),
+            EventChangeType.ADD_CHILD, addChildDetails
+        );
 
         return room;
     }
@@ -94,7 +103,7 @@ public class RoomService {
 
         eventService.logEvent(
                 ResourceType.ROOM, id,
-                EventActionType.UPDATE, buildChangePayload(oldRoom, updatedRoom));
+                EventChangeType.UPDATE, buildChangePayload(oldRoom, updatedRoom));
 
         return updatedRoom;
     }
@@ -106,12 +115,23 @@ public class RoomService {
 
         eventService.logEvent(
                 ResourceType.ROOM, id,
-                EventActionType.DELETE, null);
+                EventChangeType.DELETE, null);
+        
+        Map<String, Object> removeChildDetails = new HashMap<>();
+        removeChildDetails.put("childId", id);
+        removeChildDetails.put("childType", ResourceType.ROOM);
+        eventService.logEvent(
+            ResourceType.PROJECT, room.getProject().getId(),
+            EventChangeType.REMOVE_CHILD, removeChildDetails
+        );
+
         roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 
     private Map<String, Object> buildCreatePayload(Room room) {
         Map<String, Object> payload = new HashMap<>();
+        payload.put("projectId", room.getProject().getId());
+
         payload.put("name", room.getName());
         payload.put("description", room.getDescription());
         return payload;

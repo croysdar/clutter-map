@@ -18,6 +18,8 @@ public class DatabaseMigrationService {
         addColumnIfNotExists("items", "project_id", "BIGINT");
         addTimestampColumnIfNotExists("projects", "last_updated");
 
+        updateEventsActionConstraint();
+
         populateProjectIdForOrgUnits();
         populateProjectIdForItems();
     }
@@ -64,5 +66,28 @@ public class DatabaseMigrationService {
                 "SET project_id = (SELECT project_id FROM org_units WHERE org_units.id = items.org_unit_id) " +
                 "WHERE project_id IS NULL";
         jdbcTemplate.update(updateItemsSql);
+    }
+
+    private void updateEventsActionConstraint() {
+        // Drop the old constraint if it exists
+        String dropConstraintSql = """
+                DO $$ 
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM information_schema.table_constraints 
+                            WHERE table_name='events' AND constraint_name='events_action_check') 
+                    THEN
+                        ALTER TABLE events DROP CONSTRAINT events_action_check;
+                    END IF;
+                END $$;
+                """;
+        jdbcTemplate.execute(dropConstraintSql);
+
+        // Add the new constraint with updated values
+        String addConstraintSql = """
+                ALTER TABLE events 
+                ADD CONSTRAINT events_action_check 
+                CHECK (action IN ('CREATE', 'UPDATE', 'DELETE', 'MOVE', 'ADD_CHILD', 'REMOVE_CHILD'));
+                """;
+        jdbcTemplate.execute(addConstraintSql);
     }
 }

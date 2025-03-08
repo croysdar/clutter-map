@@ -16,7 +16,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.NewProjectDTO;
 import app.cluttermap.model.dto.UpdateProjectDTO;
 import app.cluttermap.repository.ProjectRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -73,7 +73,7 @@ public class ProjectService {
 
         eventService.logEvent(
                 ResourceType.PROJECT, project.getId(),
-                EventActionType.CREATE, buildCreatePayload(project));
+                EventChangeType.CREATE, buildCreatePayload(project));
 
         return project;
     }
@@ -90,7 +90,7 @@ public class ProjectService {
 
         eventService.logEvent(
                 ResourceType.PROJECT, id,
-                EventActionType.UPDATE, buildChangePayload(oldProject, updatedProject));
+                EventChangeType.UPDATE, buildChangePayload(oldProject, updatedProject));
 
         return updatedProject;
     }
@@ -103,7 +103,7 @@ public class ProjectService {
 
         eventService.logEvent(
                 ResourceType.PROJECT, id,
-                EventActionType.DELETE, null);
+                EventChangeType.DELETE, null);
 
         projectRepository.deleteById(id);
     }

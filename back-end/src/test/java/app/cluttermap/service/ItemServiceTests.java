@@ -46,7 +46,7 @@ import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
 import app.cluttermap.repository.ProjectRepository;
 import app.cluttermap.repository.RoomRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -259,7 +259,7 @@ public class ItemServiceTests {
         // Assert: Verify event logging
         verify(eventService).logEvent(
                 eq(ResourceType.ITEM), eq(mockItem.getId()),
-                eq(EventActionType.CREATE), payloadCaptor.capture());
+                eq(EventChangeType.CREATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected values
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -373,7 +373,7 @@ public class ItemServiceTests {
         // Verify the event was logged
         verify(eventService).logEvent(
                 eq(ResourceType.ITEM), eq(resourceId),
-                eq(EventActionType.UPDATE), payloadCaptor.capture());
+                eq(EventChangeType.UPDATE), payloadCaptor.capture());
 
         // Assert: Verify the payload contains the expected changes
         Map<String, Object> capturedPayload = payloadCaptor.getValue();
@@ -442,7 +442,7 @@ public class ItemServiceTests {
             // Assert: Verify event logging
             verify(eventService).logEvent(
                     eq(ResourceType.ITEM), eq(resourceId),
-                    eq(EventActionType.DELETE), isNull());
+                    eq(EventChangeType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding item
             mockNonexistentItemInRepository(resourceId);

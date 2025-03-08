@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.TestDataFactory;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 
 @ActiveProfiles("test")
 public class EventModelTests {
     @Test
     void event_ShouldSetFieldsCorrectly_WhenConstructed() {
         // Arrange
-        EventActionType action = EventActionType.CREATE;
+        EventChangeType action = EventChangeType.CREATE;
         User user = new User("mockProviderId");
         Project project = new TestDataFactory.ProjectBuilder().user(user).build();
 
@@ -38,7 +38,7 @@ public class EventModelTests {
         // Arrange
         Event event = new Event();
         event.setId(1L);
-        event.setAction(EventActionType.CREATE);
+        event.setAction(EventChangeType.CREATE);
         event.setTimestamp(Instant.now());
 
         // Act
@@ -57,7 +57,7 @@ public class EventModelTests {
         Project project = new Project();
         project.setId(101L);
 
-        Event event = new Event(EventActionType.CREATE, project, user);
+        Event event = new Event(EventChangeType.CREATE, project, user);
 
         // Act
         String result = event.toString();

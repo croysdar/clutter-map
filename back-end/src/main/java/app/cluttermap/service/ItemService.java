@@ -21,7 +21,7 @@ import app.cluttermap.model.dto.NewItemDTO;
 import app.cluttermap.model.dto.UpdateItemDTO;
 import app.cluttermap.repository.ItemRepository;
 import app.cluttermap.repository.OrgUnitRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 import jakarta.transaction.Transactional;
 
@@ -90,9 +90,30 @@ public class ItemService {
             item = self.createItemInOrgUnit(itemDTO, itemDTO.getOrgUnitIdAsLong());
         }
 
+        long id = item.getId();
+
         eventService.logEvent(
-                ResourceType.ITEM, item.getId(),
-                EventActionType.CREATE, buildCreatePayload(item));
+                ResourceType.ITEM, id,
+                EventChangeType.CREATE, buildCreatePayload(item));
+
+        Map<String, Object> addChildDetails = new HashMap<>();
+        addChildDetails.put("childId", id);
+        addChildDetails.put("childType", ResourceType.ITEM);
+        eventService.logEvent(
+            ResourceType.PROJECT, item.getProject().getId(),
+            EventChangeType.ADD_CHILD, addChildDetails
+        );
+
+        if (item.getOrgUnit() != null) {
+            addChildDetails = new HashMap<>();
+            addChildDetails.put("childId", id);
+            addChildDetails.put("childType", ResourceType.ITEM);
+            eventService.logEvent(
+                ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
+                EventChangeType.ADD_CHILD, addChildDetails
+            );
+        }
+
         return item;
     }
 
@@ -142,7 +163,7 @@ public class ItemService {
         Item updatedItem = itemRepository.save(_item);
 
         eventService.logEvent(
-                ResourceType.ITEM, id, EventActionType.UPDATE,
+                ResourceType.ITEM, id, EventChangeType.UPDATE,
                 buildChangePayload(oldItem, updatedItem));
 
         return updatedItem;
@@ -152,11 +173,29 @@ public class ItemService {
     @Transactional
     public void deleteItemById(Long id) {
         // Make sure item exists first
-        self.getItemById(id);
+        Item item = self.getItemById(id);
 
         eventService.logEvent(
                 ResourceType.ITEM, id,
-                EventActionType.DELETE, null);
+                EventChangeType.DELETE, null);
+
+        Map<String, Object> removeChildDetails = new HashMap<>();
+        removeChildDetails.put("childId", id);
+        removeChildDetails.put("childType", ResourceType.ITEM);
+        eventService.logEvent(
+            ResourceType.PROJECT, item.getProject().getId(),
+            EventChangeType.REMOVE_CHILD, removeChildDetails
+        );
+
+        if (item.getOrgUnit() != null) {
+            removeChildDetails = new HashMap<>();
+            removeChildDetails.put("childId", id);
+            removeChildDetails.put("childType", ResourceType.ITEM);
+            eventService.logEvent(
+                ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
+                EventChangeType.REMOVE_CHILD, removeChildDetails
+            );
+        }
 
         itemRepository.deleteById(id);
     }
@@ -238,6 +277,8 @@ public class ItemService {
 
     private Map<String, Object> buildCreatePayload(Item item) {
         Map<String, Object> payload = new HashMap<>();
+        payload.put("projectId", item.getProject().getId());
+
         payload.put("name", item.getName());
         payload.put("description", item.getDescription());
         payload.put("quantity", item.getQuantity());

@@ -39,7 +39,7 @@ import app.cluttermap.model.User;
 import app.cluttermap.model.dto.EntityHistoryDTO;
 import app.cluttermap.repository.EventEntityRepository;
 import app.cluttermap.repository.EventRepository;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
@@ -97,8 +97,8 @@ public class EventServiceTests {
         // Arrange
         Pageable pageable = PageRequest.of(0, 2);
         List<Event> mockEvents = List.of(
-                new Event(EventActionType.CREATE, mockProject, mockUser),
-                new Event(EventActionType.UPDATE, mockProject, mockUser));
+                new Event(EventChangeType.CREATE, mockProject, mockUser),
+                new Event(EventChangeType.UPDATE, mockProject, mockUser));
         Page<Event> mockPage = new PageImpl<>(mockEvents, pageable, 5);
 
         when(eventRepository.findAllEventsInProject(mockProject.getId(), pageable)).thenReturn(mockPage);
@@ -178,10 +178,10 @@ public class EventServiceTests {
         // Act
         Event event = eventService.logEvent(
                 ResourceType.ROOM, room.getId(),
-                EventActionType.CREATE, expectedPayload);
+                EventChangeType.CREATE, expectedPayload);
 
         // Assert
-        assertEventFields(event, EventActionType.CREATE, user);
+        assertEventFields(event, EventChangeType.CREATE, user);
         assertEquals(project, event.getProject());
         verify(eventRepository, times(1)).save(event);
         verify(entityResolutionService, times(1)).resolveProject(any(ResourceType.class), anyLong());
@@ -213,10 +213,10 @@ public class EventServiceTests {
         // Act
         Event event = eventService.logEvent(
                 ResourceType.ROOM, oldRoom.getId(),
-                EventActionType.UPDATE, expectedPayload);
+                EventChangeType.UPDATE, expectedPayload);
 
         // Assert
-        assertEventFields(event, EventActionType.UPDATE, user);
+        assertEventFields(event, EventChangeType.UPDATE, user);
         assertEquals(project, event.getProject());
         verify(eventRepository, times(1)).save(event);
         verify(entityResolutionService, times(1)).resolveProject(ResourceType.ROOM, oldRoom.getId());
@@ -340,7 +340,7 @@ public class EventServiceTests {
         return mockUser;
     }
 
-    private void assertEventFields(Event event, EventActionType action, User user) {
+    private void assertEventFields(Event event, EventChangeType action, User user) {
         assertEquals(action, event.getAction());
         assertEquals(user, event.getUser());
         assertNotNull(event.getTimestamp());

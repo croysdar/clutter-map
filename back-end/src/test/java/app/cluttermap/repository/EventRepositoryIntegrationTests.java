@@ -22,7 +22,7 @@ import app.cluttermap.TestDataFactory;
 import app.cluttermap.model.Event;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.User;
-import app.cluttermap.util.EventActionType;
+import app.cluttermap.util.EventChangeType;
 import app.cluttermap.util.ResourceType;
 
 @SpringBootTest
@@ -63,12 +63,12 @@ public class EventRepositoryIntegrationTests {
         List<Event> eventsToSave = new ArrayList<>();
         eventsToSave.add(
                 new Event(
-                        EventActionType.CREATE,
+                        EventChangeType.CREATE,
                         mockProject, mockUser));
         for (int i = 0; i < 5; i++) {
             eventsToSave.add(
                     new Event(
-                            EventActionType.UPDATE,
+                            EventChangeType.UPDATE,
                             mockProject, mockUser));
         }
         eventRepository.saveAll(eventsToSave);
@@ -89,8 +89,8 @@ public class EventRepositoryIntegrationTests {
         Project otherProject = projectRepository
                 .save(new TestDataFactory.ProjectBuilder().name("Other Project").user(mockUser).build());
 
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
-        Event event2 = new Event(EventActionType.CREATE, otherProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.CREATE, otherProject, mockUser);
         eventRepository.saveAll(List.of(event1, event2));
 
         // Act: Retrieve events for mockProject
@@ -108,7 +108,7 @@ public class EventRepositoryIntegrationTests {
     @Test
     void findAllEventsInProject_ShouldOnlyIncludeUserIdAndUsername() {
         // Arrange
-        Event event = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event = new Event(EventChangeType.CREATE, mockProject, mockUser);
         eventRepository.save(event);
 
         // Act
@@ -129,9 +129,9 @@ public class EventRepositoryIntegrationTests {
     @Test
     void findAllEventsInProject_ShouldSortByTimestampDescending() {
         // Arrange: Create multiple events with different timestamps
-        Event event1 = new Event(EventActionType.CREATE, mockProject, mockUser);
+        Event event1 = new Event(EventChangeType.CREATE, mockProject, mockUser);
         event1.setTimestamp(Instant.now().minus(Duration.ofDays(1)));
-        Event event2 = new Event(EventActionType.UPDATE, mockProject, mockUser);
+        Event event2 = new Event(EventChangeType.UPDATE, mockProject, mockUser);
         event2.setTimestamp(Instant.now());
         eventRepository.saveAll(List.of(event1, event2)); // Act: Retrieve events
         Pageable pageable = PageRequest.of(0, 10);
@@ -166,7 +166,7 @@ public class EventRepositoryIntegrationTests {
         assertThat(event.getUser().getUsername()).isEqualTo(expectedUsername);
     }
 
-    protected Event createAndSaveEvent(ResourceType resourceType, Long entityId, EventActionType actionType,
+    protected Event createAndSaveEvent(ResourceType resourceType, Long entityId, EventChangeType actionType,
             Project project, User user, Instant timestamp) {
         Event event = new Event(actionType, project, user);
         if (timestamp != null) {

@@ -168,8 +168,10 @@ export async function processEvents(events: Event[], transaction: IDBPTransactio
 
     for (let event of events) {
         const eventKey = getEventKey(event.entityType, event.entityId);
+        console.log(event)
 
         if (event.action === TimelineActionType.MOVE) {
+            // init eventKey in eventBuffer
             if (!eventBuffer.has(eventKey)) {
                 eventBuffer.set(eventKey, {});
             }
@@ -207,42 +209,42 @@ export async function processMoveRelatedEvents(
     { move, remove, add }: MoveEventGroup,
     transaction: IDBPTransaction<any, Stores[], "readwrite">
 ) {
-    if (!move) {
-        console.warn("Skipping move-related processing because MOVE event is missing.");
-        return;
-    }
-
     try {
-        const moveDetails = JSON.parse(move.details);
-        const childStore = transaction.objectStore(getStoreName(move.entityType));
-        const childEntity = await childStore.get(move.entityId);
+        // if move, then we are changing the parent key of a child
+        if (move) {
+            const { parentType, newParentId } = JSON.parse(move.details);
+            const childStore = transaction.objectStore(getStoreName(move.entityType));
+            const childEntity = await childStore.get(move.entityId);
+            if (!childEntity) {
+                console.warn(`Skipping MOVE: Child entity ${move.entityType}-${move.entityId} not found.`);
+                return;
+            }
+            const parentKey = getParentKeyForType(parentType);
+            if (!parentKey) {
+                console.warn(`Skipping MOVE: Could not determine parent key for ${parentType}`);
+                return;
+            }
 
-        if (!childEntity) {
-            console.warn(`Skipping MOVE: Child entity ${move.entityType}-${move.entityId} not found.`);
-            return;
+            childEntity[parentKey] = newParentId || null;
+            await childStore.put(childEntity);
+            console.log(`Processed MOVE event for ${move.entityType}-${move.entityId}, new ${parentKey}: ${newParentId}`);
         }
-
-        const parentKey = getParentKeyForType(moveDetails.parentType);
-        if (!parentKey) {
-            console.warn(`Skipping MOVE: Could not determine parent key for ${moveDetails.parentType}`);
-            return;
-        }
-
-        childEntity[parentKey] = moveDetails.newParentId || null;
-        await childStore.put(childEntity);
 
         // Handle orphaning
         if (remove) {
             const oldParentStore = transaction.objectStore(getStoreName(remove.entityType));
             const oldParent = await oldParentStore.get(remove.entityId);
 
+            const { childType, childId } = JSON.parse(remove.details);
+
             if (oldParent) {
-                const childListKey = getChildListKeyForType(move.entityType);
-                if (childListKey && Array.isArray(oldParent[childListKey])) {
-                    oldParent[childListKey] = oldParent[childListKey].filter((id: number) => id !== move.entityId);
+                const childTypeListKey = getChildTypeListKeyForType(childType);
+                if (childTypeListKey && Array.isArray(oldParent[childTypeListKey])) {
+                    oldParent[childTypeListKey] = oldParent[childTypeListKey].filter((id: number) => id !== childId);
                     await oldParentStore.put(oldParent);
                 }
             }
+            console.log(`Processed REMOVE_CHILD event: removed ${childType}-${childId}, from ${remove.entityType}: ${remove.entityId}`);
         }
 
         // Handle adoption
@@ -250,26 +252,28 @@ export async function processMoveRelatedEvents(
             const newParentStore = transaction.objectStore(getStoreName(add.entityType));
             const newParent = await newParentStore.get(add.entityId);
 
+            const { childType, childId } = JSON.parse(add.details);
+
             if (newParent) {
-                const childListKey = getChildListKeyForType(move.entityType);
-                if (childListKey) {
-                    if (!Array.isArray(newParent[childListKey])) {
-                        newParent[childListKey] = [];
+                const childTypeListKey = getChildTypeListKeyForType(childType);
+                if (childTypeListKey) {
+                    if (!Array.isArray(newParent[childTypeListKey])) {
+                        newParent[childTypeListKey] = [];
                     }
 
                     // Prevent duplicate childId
-                    if (!newParent[childListKey].includes(move.entityId)) {
-                        newParent[childListKey].push(move.entityId);
+                    if (!newParent[childTypeListKey].includes(childId)) {
+                        newParent[childTypeListKey].push(childId);
                         await newParentStore.put(newParent);
                     } else {
-                        console.warn(`Skipping ADD_CHILD: ${move.entityId} already exists in ${childListKey} of parent ${add.entityId}`);
+                        console.warn(`Skipping ADD_CHILD: ${childId} already exists in ${childTypeListKey} of parent ${add.entityId}`);
                     }
                 }
             }
+            console.log(`Processed ADD_CHILD event: added ${childType}-${childId}, to ${add.entityType}: ${add.entityId}`);
         }
-        console.log(`Processed MOVE event for ${move.entityType}-${move.entityId}, new ${parentKey}: ${moveDetails.newParentId}`);
     } catch (error) {
-        console.error(`Error processing MOVE-related events for ${move.entityType}-${move.entityId}:`, error);
+        console.error(`Error processing MOVE-related events`, error);
     }
 }
 
@@ -318,6 +322,7 @@ async function processCreateEvent(store: IDBPObjectStore<any, any, any, "readwri
         console.error("Error processing CREATE event:", error);
     }
 }
+// this never adds it to the list of the parent's children!!
 
 async function processUpdateEvent(store: IDBPObjectStore<any, any, any, "readwrite">, event: Event) {
     try {
@@ -395,7 +400,7 @@ function getParentKeyForType(parentType: ResourceType): string | null {
     }
 }
 
-function getChildListKeyForType(childType: ResourceType): string | null {
+function getChildTypeListKeyForType(childType: ResourceType): string | null {
     switch (childType) {
         case ResourceType.ROOM:
             return "roomIds";
