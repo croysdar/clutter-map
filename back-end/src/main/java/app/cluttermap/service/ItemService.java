@@ -153,11 +153,12 @@ public class ItemService {
     public void deleteItemById(Long id) {
         // Make sure item exists first
         self.getItemById(id);
-        itemRepository.deleteById(id);
 
         eventService.logEvent(
                 ResourceType.ITEM, id,
                 EventActionType.DELETE, null);
+
+        itemRepository.deleteById(id);
     }
 
     /* ------------- Complex Operations ------------- */

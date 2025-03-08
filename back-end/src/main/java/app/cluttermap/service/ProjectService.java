@@ -100,11 +100,12 @@ public class ProjectService {
     public void deleteProjectById(Long id) {
         // Make sure project exists first
         self.getProjectById(id);
-        projectRepository.deleteById(id);
 
         eventService.logEvent(
                 ResourceType.PROJECT, id,
                 EventActionType.DELETE, null);
+
+        projectRepository.deleteById(id);
     }
 
     private Map<String, Object> buildCreatePayload(Project project) {

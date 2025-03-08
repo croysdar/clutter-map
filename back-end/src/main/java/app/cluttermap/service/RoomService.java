@@ -103,11 +103,11 @@ public class RoomService {
     @Transactional
     public void deleteRoomById(Long id) {
         Room room = self.getRoomById(id);
-        roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
 
         eventService.logEvent(
                 ResourceType.ROOM, id,
                 EventActionType.DELETE, null);
+        roomRepository.delete(room); // Ensures OrgUnits are unassigned, not deleted
     }
 
     private Map<String, Object> buildCreatePayload(Room room) {

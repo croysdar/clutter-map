@@ -143,11 +143,12 @@ public class OrgUnitService {
     @Transactional
     public void deleteOrgUnitById(Long id) {
         OrgUnit orgUnit = self.getOrgUnitById(id);
-        orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
 
         eventService.logEvent(
                 ResourceType.ORGANIZATIONAL_UNIT, id,
                 EventActionType.DELETE, null);
+
+        orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted
     }
 
     /* ------------- Complex Operations ------------- */
