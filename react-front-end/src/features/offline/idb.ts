@@ -43,7 +43,6 @@ export const initDB = async (testMode = false) => {
                 db.deleteObjectStore(storeName);
             });
 
-
             db.createObjectStore(Stores.Projects, { keyPath: 'id' });
             db.createObjectStore(Stores.Rooms, { keyPath: 'id' });
             db.createObjectStore(Stores.OrgUnits, { keyPath: 'id' });
@@ -117,9 +116,16 @@ const fullSync = async (token: string) => {
     console.log('Full sync completed.');
 }
 
+interface SyncResponse {
+    projects: number[]
+    events: Event[]
+}
+
 const partialSync = async (token: string, lastSynced: number) => {
-    const response = await client.get<Event[]>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
-    const events = response.data;
+    const response = await client.get<SyncResponse>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
+    const events: Event[] = response.data.events;
+
+    const projectIDs: number[] = response.data.projects;
 
     if (events.length === 0) {
         console.log("No updates found.");
