@@ -45,7 +45,7 @@ public class Event {
     private EventChangeType action;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = true)
+    @JoinColumn(name = "project_id", nullable = false)
     @JsonBackReference
     private Project project;
 
