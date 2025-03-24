@@ -152,7 +152,7 @@ const partialSync = async (token: string, lastSynced: number) => {
 
 const syncProjectList = async (token: string) => {
     const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
-    const projectList = response.data;
+    const serverProjectIDs = response.data;
 
     const db = await openDB(IDB_NAME, IDB_VERSION);
     const transaction = db.transaction(Object.values(Stores), "readonly");
@@ -162,19 +162,19 @@ const syncProjectList = async (token: string) => {
 
     await transaction.done;
 
-    const projectSet = new Set(projectList);
+    const serverSet = new Set(serverProjectIDs);
     const storedSet = new Set(storedProjectIDs);
 
-    // Check to see if any projects in the idb are not in the projectList
+    // Check to see if any projects in the idb are not in the serverProjectIDs
     for (const projectID of storedProjectIDs) {
-        if (!projectSet.has(projectID)) {
+        if (!serverSet.has(projectID)) {
             console.log(`Project ${projectID} is not in the server, deleting locally...`)
             await removeDeletedProject(projectID);
         }
     }
 
-    // Check to see if any projects in the projectList are not in the idb
-    for (const projectID of projectList) {
+    // Check to see if any projects in the serverProjectIDs are not in the idb
+    for (const projectID of serverProjectIDs) {
         if (!storedSet.has(projectID)) {
             console.log(`New project found on server : project ${projectID}. Downloading...`)
             await downloadNewProject(token, projectID);
