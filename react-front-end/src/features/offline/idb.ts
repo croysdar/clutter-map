@@ -174,7 +174,11 @@ const syncProjectList = async (token: string) => {
     }
 }
 
-export const removeDeletedProject = async (projectID: number) => {
+const removeDeletedProject = async (projectID: number) => {
+    await _removeDeletedProject(projectID, IDB_NAME);
+}
+
+export const _removeDeletedProject = async (projectID: number, IDB_NAME: string) => {
     const db = await openDB(IDB_NAME, IDB_VERSION);
     const transaction = db.transaction(Object.values(Stores), "readwrite");
     const projectStore = transaction.objectStore(Stores.Projects);

@@ -5,7 +5,7 @@ import {
     processEvents,
     MoveEventGroup,
     processMoveRelatedEvents,
-    removeDeletedProject
+    _removeDeletedProject
 } from '@/features/offline/idb'
 
 import { IDB_VERSION, TEST_IDB_NAME } from '@/utils/constants';
@@ -378,9 +378,7 @@ test('removeDeletedProject should remove a project and its associated data', asy
     expect(await db.get(Stores.Items, 30)).toBeDefined();
 
     // Perform deletion
-    const deleteTx = db.transaction(Object.values(Stores), 'readwrite');
-    await removeDeletedProject(1);
-    await deleteTx.done;
+    await _removeDeletedProject(1, TEST_IDB_NAME);
 
     // Verify everything is deleted
     expect(await db.get(Stores.Projects, 1)).toBeUndefined();
