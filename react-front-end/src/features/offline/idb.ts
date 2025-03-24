@@ -11,6 +11,7 @@ import { Event } from "./eventTypes";
 /* ------------- Constants ------------- */
 import { API_BASE_URL, IDB_NAME, IDB_VERSION } from "@/utils/constants";
 
+/* ------------- API ------------- */
 import { client } from "@/services/client";
 
 /* ------------- Enums & Interfaces ------------- */
@@ -116,23 +117,11 @@ const fullSync = async (token: string) => {
     console.log('Full sync completed.');
 }
 
-interface SyncResponse {
-    projects: number[]
-    events: Event[]
-}
-
 const partialSync = async (token: string, lastSynced: number) => {
-    const response = await client.get<SyncResponse>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
-    const events: Event[] = response.data.events;
+    await syncProjectList(token);
 
-    const projectIDs: number[] = response.data.projects;
-
-    await syncProjectList(token, projectIDs);
-
-    if (events.length === 0) {
-        console.log("No updates found.");
-        return;
-    }
+    const response = await client.get<Event[]>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
+    const events = response.data;
 
     const db = await openDB(IDB_NAME, IDB_VERSION);
     const transaction = db.transaction(Object.values(Stores), "readwrite");
@@ -153,12 +142,17 @@ const partialSync = async (token: string, lastSynced: number) => {
     }
 }
 
-const syncProjectList = async (token: string, projectList: number[]) => {
+const syncProjectList = async (token: string) => {
+    const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
+    const projectList = response.data;
+
     const db = await openDB(IDB_NAME, IDB_VERSION);
-    const transaction = db.transaction(Object.values(Stores), "readwrite");
+    const transaction = db.transaction(Object.values(Stores), "readonly");
     const store = transaction.objectStore(Stores.Projects);
 
     const storedProjectIDs = await store.getAllKeys() as number[];
+
+    await transaction.done;
 
     const projectSet = new Set(projectList);
     const storedSet = new Set(storedProjectIDs);
@@ -166,8 +160,8 @@ const syncProjectList = async (token: string, projectList: number[]) => {
     // Check to see if any projects in the idb are not in the projectList
     for (const projectID of storedProjectIDs) {
         if (!projectSet.has(projectID)) {
-            console.log(`Project ${projectID} is not in the server, deleting project`)
-            removeDeletedProject(projectID, transaction);
+            console.log(`Project ${projectID} is not in the server, deleting locally...`)
+            await removeDeletedProject(projectID);
         }
     }
 
@@ -175,13 +169,14 @@ const syncProjectList = async (token: string, projectList: number[]) => {
     for (const projectID of projectList) {
         if (!storedSet.has(projectID)) {
             console.log(`New project found on server : project ${projectID}. Downloading...`)
-            downloadNewProject(token, projectID, transaction);
+            await downloadNewProject(token, projectID);
         }
     }
 }
 
-export const removeDeletedProject = async (projectID: number, transaction: IDBPTransaction<any, Stores[], "readwrite">) => {
-    // Go through all the child id lists
+export const removeDeletedProject = async (projectID: number) => {
+    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readwrite");
     const projectStore = transaction.objectStore(Stores.Projects);
     const project: Project = await projectStore.get(projectID);
 
@@ -192,34 +187,40 @@ export const removeDeletedProject = async (projectID: number, transaction: IDBPT
 
     // remove all items
     const itemStore = transaction.objectStore(Stores.Items);
-    project.itemIds.forEach(async (itemID) => {
+    for (const itemID of project.itemIds) {
         await itemStore.delete(itemID);
-    })
+    }
 
     // remove all org units
     const orgUnitStore = transaction.objectStore(Stores.OrgUnits);
-    project.orgUnitIds.forEach(async (orgUnitID) => {
+    for (const orgUnitID of project.orgUnitIds) {
         await orgUnitStore.delete(orgUnitID);
-    })
+    }
 
     // remove all rooms
     const roomStore = transaction.objectStore(Stores.Rooms);
-    project.roomIds.forEach(async (roomID) => {
+    for (const roomID of project.roomIds) {
         await roomStore.delete(roomID);
-    })
+    }
 
     // remove the project
     await projectStore.delete(projectID);
+
+    await transaction.done;
 }
 
-const downloadNewProject = async (token: string, projectID: number, transaction: IDBPTransaction<any, Stores[], "readwrite">) => {
+const downloadNewProject = async (token: string, projectID: number) => {
     // Pull project and children from api
     const [projectResponse, roomsResponse, orgUnitsResponse, itemsResponse] = await Promise.all([
-        client.get<Project>(`${API_BASE_URL}/project/${projectID}`, { headers: { Authorization: `Bearer ${token}` } }),
-        client.get<Room[]>(`${API_BASE_URL}/project/${projectID}/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
-        client.get<OrgUnit[]>(`${API_BASE_URL}/project/${projectID}/org-units`, { headers: { Authorization: `Bearer ${token}` } }),
-        client.get<Item[]>(`${API_BASE_URL}/project/${projectID}/items`, { headers: { Authorization: `Bearer ${token}` } })
+        client.get<Project>(`${API_BASE_URL}/projects/${projectID}`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Room[]>(`${API_BASE_URL}/projects/${projectID}/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<OrgUnit[]>(`${API_BASE_URL}/projects/${projectID}/org-units`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Item[]>(`${API_BASE_URL}/projects/${projectID}/items`, { headers: { Authorization: `Bearer ${token}` } })
     ]);
+
+    // A new transaction must open after every new api call
+    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     let data = {
         'projects': {} as Record<number, Project>,
@@ -235,7 +236,13 @@ const downloadNewProject = async (token: string, projectID: number, transaction:
 
     const storeData = async (storeName: Stores, records: Record<number, any>) => {
         const store = transaction.objectStore(storeName);
-        await Promise.all(Object.values(records).map(record => store.put(record)));
+        await Promise.all(Object.values(records).map(async (record) => {
+            try {
+                await store.put(record);
+            } catch (error) {
+                console.error(`Failed to store record in ${storeName}:`, error);
+            }
+        }));
     };
 
     await Promise.all([
@@ -244,6 +251,9 @@ const downloadNewProject = async (token: string, projectID: number, transaction:
         storeData(Stores.OrgUnits, data.orgUnits),
         storeData(Stores.Items, data.items),
     ]);
+    console.log(`Finished storing all entities for newly downloaded project ${projectID}`)
+
+    await transaction.done;
 }
 
 /* ------------- Event Processing ------------- */

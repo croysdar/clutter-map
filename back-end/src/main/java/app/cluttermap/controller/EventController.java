@@ -2,9 +2,7 @@ package app.cluttermap.controller;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -18,21 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.cluttermap.model.dto.EntityHistoryDTO;
 import app.cluttermap.service.EventService;
-import app.cluttermap.service.ProjectAccessService;
 import app.cluttermap.util.ResourceType;
 
 @RestController
 public class EventController {
     /* ------------- Injected Dependencies ------------- */
     private final EventService eventService;
-    private final ProjectAccessService projectAccessService;
 
     /* ------------- Constructor ------------- */
     public EventController(
-            EventService eventService,
-            ProjectAccessService projectAccessService) {
+            EventService eventService) {
         this.eventService = eventService;
-        this.projectAccessService = projectAccessService;
     }
 
     /* ------------- GET Operations ------------- */
@@ -49,7 +43,7 @@ public class EventController {
     }
 
     @GetMapping("/fetch-updates")
-    public ResponseEntity<Map<String, Object>> getChangedEntitiesSince(@RequestParam("since") String since) {
+    public ResponseEntity<List<EntityHistoryDTO>> getChangedEntitiesSince(@RequestParam("since") String since) {
         Instant sinceTime;
         try {
             // Try parsing as an ISO-8601 string (e.g., "2025-01-02T14:30:50Z")
@@ -62,12 +56,6 @@ public class EventController {
 
         List<EntityHistoryDTO> updates = eventService.fetchUpdatesSince(sinceTime);
 
-        List<Long> accessibleProjects = projectAccessService.getAccessibleProjectIds();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("events", updates);
-        response.put("projects", accessibleProjects);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(updates);
     }
 }

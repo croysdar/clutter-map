@@ -151,6 +151,10 @@ test('processEvents should correctly process DELETE events', async () => {
     expect(deletedItem).toBeUndefined();
 });
 
+// TODO test on backend that deleting project works 
+// TODO make sure that creating a child adds to the parent
+// TODO make sure tht deleting a child adds to the parent
+// TODO make sure that deleting a parent deletes their children
 
 test('processEvents should correctly process events from adding a child to a parent', async () => {
     const db = await openDB(TEST_IDB_NAME, IDB_VERSION, {
@@ -375,7 +379,7 @@ test('removeDeletedProject should remove a project and its associated data', asy
 
     // Perform deletion
     const deleteTx = db.transaction(Object.values(Stores), 'readwrite');
-    await removeDeletedProject(1, deleteTx);
+    await removeDeletedProject(1);
     await deleteTx.done;
 
     // Verify everything is deleted
