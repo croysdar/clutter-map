@@ -289,9 +289,6 @@ public class ProjectServiceTests {
             // Arrange: Stub the repository to simulate finding project
             mockProjectInRepository(resourceId);
 
-            // Arrange: Mock event logging
-            mockLogEvent();
-
             // Act: Call the service method
             projectService.deleteProjectById(resourceId);
 
