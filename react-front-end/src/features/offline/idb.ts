@@ -31,8 +31,11 @@ export interface MoveEventGroup {
 }
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
+export const initDB = async () => {
+    await _initDB(false);
+}
 
-export const initDB = async (testMode = false) => {
+export const _initDB = async (testMode: boolean) => {
     const dbName = testMode ? 'ClutterMapDB_Test' : IDB_NAME;
 
     await openDB(dbName, IDB_VERSION, {

@@ -1,7 +1,7 @@
 import { openDB, deleteDB } from 'idb';
 
 import {
-    initDB, getLastSynced, setLastSynced, Stores,
+    _initDB, getLastSynced, setLastSynced, Stores,
     processEvents,
     MoveEventGroup,
     processMoveRelatedEvents,
@@ -27,7 +27,7 @@ afterEach(async () => {
 });
 
 test('initDB should initialize IndexedDB with correct stores', async () => {
-    await initDB(true);
+    await _initDB(true);
     const db = await openDB(TEST_IDB_NAME, IDB_VERSION);
 
     expect(db.objectStoreNames).toContain(Stores.Projects);
