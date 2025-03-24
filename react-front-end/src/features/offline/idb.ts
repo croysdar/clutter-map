@@ -126,6 +126,11 @@ const partialSync = async (token: string, lastSynced: number) => {
     const response = await client.get<Event[]>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
     const events = response.data;
 
+    if (events.length === 0) {
+        console.log("No updates found.");
+        return;
+    }
+
     const db = await openDB(IDB_NAME, IDB_VERSION);
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
