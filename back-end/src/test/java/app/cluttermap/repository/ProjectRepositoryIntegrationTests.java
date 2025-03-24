@@ -13,11 +13,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import app.cluttermap.EnableTestcontainers;
 import app.cluttermap.TestDataFactory;
+import app.cluttermap.model.Event;
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
 import app.cluttermap.model.Project;
 import app.cluttermap.model.Room;
 import app.cluttermap.model.User;
+import app.cluttermap.util.EventChangeType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -41,6 +43,9 @@ public class ProjectRepositoryIntegrationTests {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -208,6 +213,22 @@ public class ProjectRepositoryIntegrationTests {
         // project
         assertThat(project.getItems()).isEmpty();
         assertThat(itemRepository.findAll()).isEmpty();
+    }
+
+    // TODO add a soft delete
+    @Test
+    @Transactional
+    void deletingProject_ShouldAlsoDeleteEvents() {
+        // Arrange: Set up a project and add an event to it
+        Project project = createProjectWithUserAndSave();
+        new Event(EventChangeType.CREATE, project, createUserAndSave());
+
+        // Act: Delete the project, triggering cascade deletion for the associated event
+        projectRepository.delete(project);
+
+        // Assert: Verify that the event was deleted as an orphan when the project was
+        // removed
+        assertThat(eventRepository.findAll()).isEmpty();
     }
 
     private User createUserAndSave() {
