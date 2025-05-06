@@ -24,7 +24,8 @@ public class EventController {
     private final EventService eventService;
 
     /* ------------- Constructor ------------- */
-    public EventController(EventService eventService) {
+    public EventController(
+            EventService eventService) {
         this.eventService = eventService;
     }
 

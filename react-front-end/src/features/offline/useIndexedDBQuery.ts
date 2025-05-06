@@ -69,8 +69,8 @@ export const getByIdFromIndexedDB = async <T>(storeName: string, id: number): Pr
         return { data }
     }
     catch (error) {
-        console.error(`Failed to fetch from IndexedDB store: ${storeName}`, error);
-        return { error: { status: 500, data: { message: `Failed to fetch from ${storeName}` } } };
+        console.error(`Failed to fetch from IndexedDB store: ${storeName} id ${id}`, error);
+        return { error: { status: 500, data: { message: `Failed to fetch from ${storeName} id ${id}` } } };
     }
 };
 

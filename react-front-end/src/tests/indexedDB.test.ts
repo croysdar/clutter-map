@@ -1,16 +1,21 @@
 import { openDB, deleteDB } from 'idb';
 
 import {
-    initDB, getLastSynced, setLastSynced, Stores,
+    _initDB, getLastSynced, setLastSynced, Stores,
     processEvents,
     MoveEventGroup,
-    processMoveRelatedEvents
+    processMoveRelatedEvents,
+    _removeDeletedProject
 } from '@/features/offline/idb'
 
 import { IDB_VERSION, TEST_IDB_NAME } from '@/utils/constants';
 
 import { ResourceType, TimelineActionType } from '@/types/types';
 import { Event } from '@/features/offline/eventTypes';
+import { Project } from '@/features/projects/projectsTypes';
+import { Item } from '@/features/items/itemTypes';
+import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import { Room } from '@/features/rooms/roomsTypes';
 
 beforeEach(async () => {
 });
@@ -22,7 +27,7 @@ afterEach(async () => {
 });
 
 test('initDB should initialize IndexedDB with correct stores', async () => {
-    await initDB(true);
+    await _initDB(true);
     const db = await openDB(TEST_IDB_NAME, IDB_VERSION);
 
     expect(db.objectStoreNames).toContain(Stores.Projects);
@@ -146,6 +151,10 @@ test('processEvents should correctly process DELETE events', async () => {
     expect(deletedItem).toBeUndefined();
 });
 
+// TODO test on backend that deleting project works 
+// TODO make sure that creating a child adds to the parent
+// TODO make sure tht deleting a child adds to the parent
+// TODO make sure that deleting a parent deletes their children
 
 test('processEvents should correctly process events from adding a child to a parent', async () => {
     const db = await openDB(TEST_IDB_NAME, IDB_VERSION, {
@@ -328,4 +337,54 @@ test('processEvents should correctly process events from moving a child from one
     // Verify that Org Unit B now has the item
     const updatedOrgUnitB = await db.get(Stores.OrgUnits, 203);
     expect(updatedOrgUnitB.itemIds).toContain(103);
+});
+
+test('removeDeletedProject should remove a project and its associated data', async () => {
+    const db = await openDB(TEST_IDB_NAME, IDB_VERSION, {
+        upgrade(db) {
+            db.createObjectStore(Stores.Projects, { keyPath: 'id' });
+            db.createObjectStore(Stores.Rooms, { keyPath: 'id' });
+            db.createObjectStore(Stores.OrgUnits, { keyPath: 'id' });
+            db.createObjectStore(Stores.Items, { keyPath: 'id' });
+        }
+    });
+
+    const testItem: Item = { id: 30, name: 'Test Item', projectId: 1, description: '', quantity: 1, tags: [] };
+    const testOrgUnit: OrgUnit = { id: 20, name: 'Test Org Unit', projectId: 1, items: [testItem], itemIds: [30], description: '' };
+    const testRoom: Room = { id: 10, name: 'Test Room', description: 'test', projectId: 1, orgUnitIds: [20], orgUnits: [testOrgUnit] };
+
+    // Create test project with related entities
+    const testProject: Project = {
+        id: 1,
+        name: 'Test Project',
+        roomIds: [10],
+        rooms: [testRoom],
+        orgUnitIds: [20],
+        itemIds: [30],
+    };
+
+    // Store entities in IndexedDB
+    const transaction = db.transaction(Object.values(Stores), 'readwrite');
+    await transaction.objectStore(Stores.Projects).put(testProject);
+    await transaction.objectStore(Stores.Rooms).put(testRoom);
+    await transaction.objectStore(Stores.OrgUnits).put(testOrgUnit);
+    await transaction.objectStore(Stores.Items).put(testItem);
+    await transaction.done;
+
+    // Verify they exist before deletion
+    expect(await db.get(Stores.Projects, 1)).toBeDefined();
+    expect(await db.get(Stores.Rooms, 10)).toBeDefined();
+    expect(await db.get(Stores.OrgUnits, 20)).toBeDefined();
+    expect(await db.get(Stores.Items, 30)).toBeDefined();
+
+    // Perform deletion
+    await _removeDeletedProject(1, TEST_IDB_NAME);
+
+    // Verify everything is deleted
+    expect(await db.get(Stores.Projects, 1)).toBeUndefined();
+    expect(await db.get(Stores.Rooms, 10)).toBeUndefined();
+    expect(await db.get(Stores.OrgUnits, 20)).toBeUndefined();
+    expect(await db.get(Stores.Items, 30)).toBeUndefined();
+
+    db.close();
 });

@@ -11,6 +11,7 @@ import { Event } from "./eventTypes";
 /* ------------- Constants ------------- */
 import { API_BASE_URL, IDB_NAME, IDB_VERSION } from "@/utils/constants";
 
+/* ------------- API ------------- */
 import { client } from "@/services/client";
 
 /* ------------- Enums & Interfaces ------------- */
@@ -30,8 +31,11 @@ export interface MoveEventGroup {
 }
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
+export const initDB = async () => {
+    await _initDB(false);
+}
 
-export const initDB = async (testMode = false) => {
+export const _initDB = async (testMode: boolean) => {
     const dbName = testMode ? 'ClutterMapDB_Test' : IDB_NAME;
 
     await openDB(dbName, IDB_VERSION, {
@@ -42,7 +46,6 @@ export const initDB = async (testMode = false) => {
             Array.from(db.objectStoreNames).forEach((storeName) => {
                 db.deleteObjectStore(storeName);
             });
-
 
             db.createObjectStore(Stores.Projects, { keyPath: 'id' });
             db.createObjectStore(Stores.Rooms, { keyPath: 'id' });
@@ -118,6 +121,8 @@ const fullSync = async (token: string) => {
 }
 
 const partialSync = async (token: string, lastSynced: number) => {
+    await syncProjectList(token);
+
     const response = await client.get<Event[]>(`${API_BASE_URL}/fetch-updates?since=${lastSynced}`, { headers: { Authorization: `Bearer ${token}` } });
     const events = response.data;
 
@@ -145,6 +150,124 @@ const partialSync = async (token: string, lastSynced: number) => {
     }
 }
 
+const syncProjectList = async (token: string) => {
+    const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
+    const serverProjectIDs = response.data;
+
+    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readonly");
+    const store = transaction.objectStore(Stores.Projects);
+
+    const storedProjectIDs = await store.getAllKeys() as number[];
+
+    await transaction.done;
+
+    const serverSet = new Set(serverProjectIDs);
+    const storedSet = new Set(storedProjectIDs);
+
+    // Check to see if any projects in the idb are not in the serverProjectIDs
+    for (const projectID of storedProjectIDs) {
+        if (!serverSet.has(projectID)) {
+            console.log(`Project ${projectID} is not in the server, deleting locally...`)
+            await removeDeletedProject(projectID);
+        }
+    }
+
+    // Check to see if any projects in the serverProjectIDs are not in the idb
+    for (const projectID of serverProjectIDs) {
+        if (!storedSet.has(projectID)) {
+            console.log(`New project found on server : project ${projectID}. Downloading...`)
+            await downloadNewProject(token, projectID);
+        }
+    }
+}
+
+const removeDeletedProject = async (projectID: number) => {
+    await _removeDeletedProject(projectID, IDB_NAME);
+}
+
+export const _removeDeletedProject = async (projectID: number, IDB_NAME: string) => {
+    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readwrite");
+    const projectStore = transaction.objectStore(Stores.Projects);
+    const project: Project = await projectStore.get(projectID);
+
+    if (!project) {
+        console.warn(`Attempted delete of project ${projectID} failed. Project does not exist in IndexedDB.`)
+        return;
+    }
+
+    // remove all items
+    const itemStore = transaction.objectStore(Stores.Items);
+    for (const itemID of project.itemIds) {
+        await itemStore.delete(itemID);
+    }
+
+    // remove all org units
+    const orgUnitStore = transaction.objectStore(Stores.OrgUnits);
+    for (const orgUnitID of project.orgUnitIds) {
+        await orgUnitStore.delete(orgUnitID);
+    }
+
+    // remove all rooms
+    const roomStore = transaction.objectStore(Stores.Rooms);
+    for (const roomID of project.roomIds) {
+        await roomStore.delete(roomID);
+    }
+
+    // remove the project
+    await projectStore.delete(projectID);
+
+    await transaction.done;
+}
+
+const downloadNewProject = async (token: string, projectID: number) => {
+    // Pull project and children from api
+    const [projectResponse, roomsResponse, orgUnitsResponse, itemsResponse] = await Promise.all([
+        client.get<Project>(`${API_BASE_URL}/projects/${projectID}`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Room[]>(`${API_BASE_URL}/projects/${projectID}/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<OrgUnit[]>(`${API_BASE_URL}/projects/${projectID}/org-units`, { headers: { Authorization: `Bearer ${token}` } }),
+        client.get<Item[]>(`${API_BASE_URL}/projects/${projectID}/items`, { headers: { Authorization: `Bearer ${token}` } })
+    ]);
+
+    // A new transaction must open after every new api call
+    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const transaction = db.transaction(Object.values(Stores), "readwrite");
+
+    let data = {
+        'projects': {} as Record<number, Project>,
+        'rooms': {} as Record<number, Room>,
+        'orgUnits': {} as Record<number, OrgUnit>,
+        'items': {} as Record<number, Item>
+    };
+
+    data.projects[projectID] = projectResponse.data;
+    roomsResponse.data.forEach(room => (data.rooms[room.id] = room));
+    orgUnitsResponse.data.forEach(orgUnit => (data.orgUnits[orgUnit.id] = orgUnit));
+    itemsResponse.data.forEach(item => (data.items[item.id] = item));
+
+    const storeData = async (storeName: Stores, records: Record<number, any>) => {
+        const store = transaction.objectStore(storeName);
+        await Promise.all(Object.values(records).map(async (record) => {
+            try {
+                await store.put(record);
+            } catch (error) {
+                console.error(`Failed to store record in ${storeName}:`, error);
+            }
+        }));
+    };
+
+    await Promise.all([
+        storeData(Stores.Projects, data.projects),
+        storeData(Stores.Rooms, data.rooms),
+        storeData(Stores.OrgUnits, data.orgUnits),
+        storeData(Stores.Items, data.items),
+    ]);
+    console.log(`Finished storing all entities for newly downloaded project ${projectID}`)
+
+    await transaction.done;
+}
+
 /* ------------- Event Processing ------------- */
 
 export async function processEvents(events: Event[], transaction: IDBPTransaction<any, Stores[], "readwrite">) {
@@ -152,7 +275,6 @@ export async function processEvents(events: Event[], transaction: IDBPTransactio
 
     for (let event of events) {
         const eventKey = getEventKey(event.entityType, event.entityId);
-        console.log(event)
 
         if (event.action === TimelineActionType.MOVE) {
             // init eventKey in eventBuffer
@@ -306,7 +428,6 @@ async function processCreateEvent(store: IDBPObjectStore<any, any, any, "readwri
         console.error("Error processing CREATE event:", error);
     }
 }
-// this never adds it to the list of the parent's children!!
 
 async function processUpdateEvent(store: IDBPObjectStore<any, any, any, "readwrite">, event: Event) {
     try {

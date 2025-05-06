@@ -289,20 +289,12 @@ public class ProjectServiceTests {
             // Arrange: Stub the repository to simulate finding project
             mockProjectInRepository(resourceId);
 
-            // Arrange: Mock event logging
-            mockLogEvent();
-
             // Act: Call the service method
             projectService.deleteProjectById(resourceId);
 
             // Assert: Verify that the repository's delete method was called with the
             // correct ID
             verify(projectRepository).deleteById(resourceId);
-
-            // Verify the event was logged
-            verify(eventService).logEvent(
-                    eq(ResourceType.PROJECT), eq(resourceId),
-                    eq(EventChangeType.DELETE), isNull());
         } else {
             // Arrange: Stub the repository to simulate not finding project
             mockNonexistentProjectInRepository(resourceId);

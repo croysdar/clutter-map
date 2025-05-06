@@ -2,6 +2,7 @@ package app.cluttermap.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,6 +55,15 @@ public class ProjectController {
             projectDTOs.add(new ProjectDTO(project));
         }
         return ResponseEntity.ok(projectDTOs);
+    }
+
+    @GetMapping("/ids")
+    public ResponseEntity<List<Long>> getProjectIDs() {
+        List<Long> projectIds = projectService.getUserProjects()
+                .stream()
+                .map(Project::getId)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(projectIds);
     }
 
     @GetMapping("/{id}")

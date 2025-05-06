@@ -101,10 +101,6 @@ public class ProjectService {
         // Make sure project exists first
         self.getProjectById(id);
 
-        eventService.logEvent(
-                ResourceType.PROJECT, id,
-                EventChangeType.DELETE, null);
-
         projectRepository.deleteById(id);
     }
 
