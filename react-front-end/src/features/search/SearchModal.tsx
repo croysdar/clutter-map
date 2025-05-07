@@ -1,0 +1,94 @@
+import React, { useState } from "react";
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    IconButton,
+    Button,
+    List,
+    ListItem,
+    ListItemText,
+    DialogActions,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { useGetItemsByProjectQuery } from "../items/itemApi";
+import { useParams } from "react-router-dom";
+import { searchItems } from "./search";
+import { Item } from "../items/itemTypes";
+
+interface SearchModalProps {
+    open: boolean;
+    onClose: () => void;
+}
+
+export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
+    const [query, setQuery] = useState("");
+    const [results, setResults] = useState<Item[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    const { projectId } = useParams();
+    const { data: allItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(Number(projectId)!);
+
+    const handleSearch = async () => {
+        if (itemsLoading || !allItems) return
+
+        setLoading(true);
+        const filtered = searchItems(allItems, query);
+        setResults(filtered);
+        setLoading(false);
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>
+                Search Items
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{ position: "absolute", right: 8, top: 8 }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+
+            <DialogContent dividers>
+                <TextField
+                    fullWidth
+                    label="Search by name, description, or tag"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            handleSearch();
+                        }
+                    }}
+                />
+
+                <Button
+                    onClick={handleSearch}
+                    variant="contained"
+                    sx={{ mt: 2 }}
+                    disabled={loading}
+                >
+                    {loading ? "Searching..." : "Search"}
+                </Button>
+
+                <List sx={{ maxHeight: 300, overflow: "auto", mt: 2 }}>
+                    {results.map((item) => (
+                        <ListItem key={item.id} button>
+                            <ListItemText
+                                primary={item.name}
+                                secondary={`${item.description} • Tags: ${item.tags.join(", ")}`}
+                            />
+                        </ListItem>
+                    ))}
+                </List>
+            </DialogContent>
+
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
