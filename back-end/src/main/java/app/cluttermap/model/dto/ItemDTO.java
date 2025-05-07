@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import app.cluttermap.model.Item;
 import app.cluttermap.model.OrgUnit;
+import app.cluttermap.model.Room;
 
 public class ItemDTO {
     /* ------------- Fields ------------- */
@@ -16,6 +17,8 @@ public class ItemDTO {
     private Integer quantity;
     private Optional<Long> orgUnitId;
     private Optional<String> orgUnitName;
+    private Optional<Long> roomId;
+    private Optional<String> roomName;
     private Long projectId;
 
     /* ------------- Constructors ------------- */
@@ -28,6 +31,8 @@ public class ItemDTO {
         this.quantity = item.getQuantity();
         this.orgUnitId = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getId);
         this.orgUnitName = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getName);
+        this.roomId = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getRoom).map(Room::getId);
+        this.roomName = Optional.ofNullable(item.getOrgUnit()).map(OrgUnit::getRoom).map(Room::getName);
         this.projectId = item.getProject().getId();
     }
 
@@ -61,6 +66,14 @@ public class ItemDTO {
 
     public Optional<String> getOrgUnitName() {
         return orgUnitName;
+    }
+
+    public Optional<Long> getRoomId() {
+        return roomId;
+    }
+
+    public Optional<String> getRoomName() {
+        return roomName;
     }
 
     public Long getProjectId() {

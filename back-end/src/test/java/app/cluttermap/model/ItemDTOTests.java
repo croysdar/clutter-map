@@ -98,4 +98,64 @@ public class ItemDTOTests {
         assertTrue(itemDTO.getOrgUnitName().isEmpty());
         assertEquals(project.getId(), itemDTO.getProjectId());
     }
+
+    @Test
+    void testItemDTO_WithRoomInformation() {
+        // Create test data using TestDataFactory
+        Project project = new TestDataFactory.ProjectBuilder()
+                .user(new User())
+                .build();
+
+        Room room = new TestDataFactory.RoomBuilder()
+                .project(project)
+                .name("Living Room")
+                .build();
+
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder()
+                .room(room)
+                .name("Storage Bin")
+                .build();
+
+        Item item = new TestDataFactory.ItemBuilder()
+                .orgUnit(orgUnit)
+                .name("Flashlight")
+                .description("A bright LED flashlight")
+                .tags(List.of("camping", "light"))
+                .quantity(2)
+                .build();
+
+        // Convert to DTO
+        ItemDTO itemDTO = new ItemDTO(item);
+
+        // Assertions
+        assertTrue(itemDTO.getRoomId().isPresent());
+        assertEquals(room.getId(), itemDTO.getRoomId().get());
+        assertTrue(itemDTO.getRoomName().isPresent());
+        assertEquals(room.getName(), itemDTO.getRoomName().get());
+    }
+
+    @Test
+    void testItemDTO_WithoutRoom() {
+        // Create test data using TestDataFactory
+        Project project = new TestDataFactory.ProjectBuilder()
+                .user(new User())
+                .build();
+
+        OrgUnit orgUnit = new TestDataFactory.OrgUnitBuilder()
+                .project(project) // Note: no room assigned
+                .name("Storage Bin")
+                .build();
+
+        Item item = new TestDataFactory.ItemBuilder()
+                .orgUnit(orgUnit)
+                .name("Flashlight")
+                .build();
+
+        // Convert to DTO
+        ItemDTO itemDTO = new ItemDTO(item);
+
+        // Assertions
+        assertTrue(itemDTO.getRoomId().isEmpty());
+        assertTrue(itemDTO.getRoomName().isEmpty());
+    }
 }
