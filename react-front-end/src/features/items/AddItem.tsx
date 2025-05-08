@@ -51,7 +51,7 @@ export const AddItem = () => {
 
 
         try {
-            if (orgUnit) {
+            if (orgUnitId) {
                 if (!orgUnit) {
                     console.log("Organizer not found")
                     return
