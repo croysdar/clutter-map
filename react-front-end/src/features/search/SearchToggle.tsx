@@ -105,7 +105,7 @@ interface SwipeToDismissFabProps {
 
 export const SwipeToDismissFab = forwardRef(
     (
-        { onDismiss, onClick, onRightClick }: SwipeToDismissFabProps,
+        { onDismiss, onClick, onRightClick, ...rest }: SwipeToDismissFabProps,
         ref: Ref<HTMLButtonElement>
     ) => {
 
@@ -189,6 +189,7 @@ export const SwipeToDismissFab = forwardRef(
         return (
             <Fab
                 ref={ref}
+                {...rest}
 
                 color="primary"
                 onClick={handleClick}
