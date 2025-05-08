@@ -86,7 +86,21 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
                         return (
                             <ListItem key={item.id} onClick={() => {
                                 navigate(route);
-                            }}>
+                                onClose();
+                            }}
+                                sx={{
+                                    cursor: "pointer",
+                                    borderRadius: 1,
+                                    transition: 'background-color 0.2s ease-in-out',
+                                    "&:hover": {
+                                        backgroundColor: "primary.main",
+                                        color: "primary.contrastText",
+                                        "& .MuiTypography-root": {
+                                            color: "primary.contrastText",
+                                        }
+                                    }
+                                }}
+                            >
                                 <ListItemText
                                     primary={item.name}
                                     secondary={`${item.description} • Tags: ${item.tags.join(", ")}`}
