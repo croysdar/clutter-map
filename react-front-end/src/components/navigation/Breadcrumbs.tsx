@@ -23,6 +23,12 @@ const AppBreadcrumbs: React.FC = () => {
     const isAddRoomPage = pathname.includes("/rooms/add");
     const isAddPage = isAddItemPage || isAddOrgUnitPage || isAddRoomPage;
 
+    const isEditItemPage = /\/items\/[^/]+\/edit/.test(pathname);
+    const isEditOrgUnitPage = /\/org-units\/[^/]+\/edit/.test(pathname);
+    const isEditRoomPage = /\/rooms\/[^/]+\/edit/.test(pathname);
+    const isEditPage = isEditItemPage || isEditOrgUnitPage || isEditRoomPage;
+
+
     // Get hierarchy for items or org units
     const shouldFetchHierarchy = !isAddPage && (itemId || orgUnitId);
     const { hierarchy, loading: hierarchyLoading } = useEntityHierarchy(
@@ -63,18 +69,26 @@ const AppBreadcrumbs: React.FC = () => {
             label: projectLoading ? "Loading..." : projectData?.name || `Project ${projectId}`,
             to: ROUTES.projectDetails(projectId),
         },
-        resolvedRoomId && {
+        resolvedRoomIdNum && !isNaN(resolvedRoomIdNum) && {
             label: (roomLoading || hierarchyLoading) ? "Loading..." : roomData?.name || `Room ${roomId}`,
-            to: ROUTES.roomDetails(projectId!, resolvedRoomId),
+            to: ROUTES.roomDetails(projectId!, resolvedRoomIdNum),
         },
-        resolvedOrgUnitId && {
+        resolvedOrgUnitIdNum && !isNaN(resolvedOrgUnitIdNum) && {
             label: (orgUnitLoading || hierarchyLoading) ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
-            to: ROUTES.orgUnitDetails(projectId!, resolvedOrgUnitId),
+            to: ROUTES.orgUnitDetails(projectId!, resolvedOrgUnitIdNum),
         },
-        itemId && {
+        itemIdNum && !isNaN(itemIdNum) && {
             label: (itemLoading || hierarchyLoading) ? "Loading..." : itemData?.name || `Item ${itemId}`,
-            to: ROUTES.itemDetails(projectId!, itemId),
+            to: ROUTES.itemDetails(projectId!, itemIdNum),
         },
+        isAddPage && {
+            label: "Add",
+            to: pathname,
+        },
+        isEditPage && {
+            label: "Edit",
+            to: pathname,
+        }
     ].filter(Boolean);
 
     return (
