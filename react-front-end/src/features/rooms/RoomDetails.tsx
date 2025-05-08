@@ -78,7 +78,7 @@ const RoomDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Organizer'
-                to={ROUTES.orgUnitAdd(projectId!)}
+                to={`${ROUTES.orgUnitAdd(projectId!)}?roomId=${roomId}`}
             />
             <EntityEventsContainer entityId={room.id} entityType={ResourceType.ROOM} />
             <SearchManager />

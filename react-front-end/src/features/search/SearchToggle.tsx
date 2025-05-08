@@ -131,13 +131,11 @@ export const SwipeToDismissFab = forwardRef(
         }
 
         const handlePointerDown = (e: React.PointerEvent) => {
-            console.log('pointer down')
             startX.current = e.clientX;
             e.currentTarget.setPointerCapture(e.pointerId);
         };
 
         const handlePointerMove = (e: React.PointerEvent) => {
-            console.log('pointer move')
             if (startX.current === null) return
 
             const deltaX = e.clientX - startX.current;
@@ -164,8 +162,6 @@ export const SwipeToDismissFab = forwardRef(
         };
 
         const handlePointerUp = (e: React.PointerEvent) => {
-            console.log('pointer up')
-
             if (dragX > dragThreshold.current) {
                 onDismiss();
             } else {

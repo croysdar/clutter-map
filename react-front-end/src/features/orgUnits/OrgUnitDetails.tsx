@@ -77,7 +77,7 @@ const OrgUnitDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Item'
-                to={ROUTES.itemAdd(projectId!)}
+                to={`${ROUTES.itemAdd(projectId!)}?orgUnitId=${orgUnitId}`}
             />
             <EntityEventsContainer entityId={orgUnit.id} entityType={ResourceType.ORGANIZATIONAL_UNIT} />
             <SearchManager />

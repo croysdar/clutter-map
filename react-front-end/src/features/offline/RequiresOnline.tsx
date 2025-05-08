@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useState } from 'react';
-import { Navigate, redirect, useLocation, useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
+import { useResolvedParams } from '@/hooks/useResolvedParams';
 
 type RequiresOnlineProps = {
     children: ReactElement;
@@ -9,7 +10,7 @@ type RequiresOnlineProps = {
 
 const RequiresOnline = ({ children, redirectUrl }: RequiresOnlineProps) => {
     const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-    const { projectId, roomId, orgUnitId, itemId } = useParams();
+    const { projectId, roomId, orgUnitId, itemId } = useResolvedParams();
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);

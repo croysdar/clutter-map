@@ -20,6 +20,10 @@ export const useEntityHierarchy = (entityType: 'item' | 'orgUnit', entityId: num
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        if (entityId === -1) {
+            setLoading(false);
+            return;
+        }
         const fetchHierarchy = async () => {
             try {
                 const db = await getOrInitDB();
