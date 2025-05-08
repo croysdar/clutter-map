@@ -60,7 +60,7 @@ const ItemDetails: React.FC = () => {
             >
                 <Typography>Quantity: {item.quantity || 1}</Typography>
                 {item.tags &&
-                <RenderTags tags={item.tags} />
+                    <RenderTags tags={item.tags} />
                 }
                 {item.orgUnitName && (
                     <Typography>Location: {item.orgUnitName}</Typography>

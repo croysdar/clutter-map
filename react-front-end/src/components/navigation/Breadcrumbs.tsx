@@ -28,7 +28,6 @@ const AppBreadcrumbs: React.FC = () => {
     const isEditRoomPage = /\/rooms\/[^/]+\/edit/.test(pathname);
     const isEditPage = isEditItemPage || isEditOrgUnitPage || isEditRoomPage;
 
-
     // Get hierarchy for items or org units
     const shouldFetchHierarchy = !isAddPage && (itemId || orgUnitId);
     const { hierarchy, loading: hierarchyLoading } = useEntityHierarchy(
