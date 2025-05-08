@@ -26,8 +26,8 @@ export enum Stores {
 
 export interface MoveEventGroup {
     move?: Event
-    remove?: Event
-    add?: Event
+    remove?: Event[]
+    add?: Event[]
 }
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
@@ -308,11 +308,16 @@ export async function processEvents(events: Event[], transaction: IDBPTransactio
                     eventBuffer.set(childEventKey, {});
                 }
 
+                const buffer = eventBuffer.get(childEventKey)!;
+
                 if (event.action === TimelineActionType.REMOVE_CHILD) {
-                    eventBuffer.get(childEventKey)!.remove = event;
+                    if (!buffer.remove) buffer.remove = [];
+                    buffer.remove.push(event);
                 } else {
-                    eventBuffer.get(childEventKey)!.add = event;
+                    if (!buffer.add) buffer.add = [];
+                    buffer.add.push(event);
                 }
+
             }
         } else {
             // Process other events immediately
@@ -352,46 +357,51 @@ export async function processMoveRelatedEvents(
         }
 
         // Handle orphaning
-        if (remove) {
-            const oldParentStore = transaction.objectStore(getStoreName(remove.entityType));
-            const oldParent = await oldParentStore.get(remove.entityId);
+        if (remove && Array.isArray(remove)) {
+            for (const removeEvent of remove) {
 
-            const { childType, childId } = JSON.parse(remove.details);
+                const oldParentStore = transaction.objectStore(getStoreName(removeEvent.entityType));
+                const oldParent = await oldParentStore.get(removeEvent.entityId);
 
-            if (oldParent) {
-                const childTypeListKey = getChildTypeListKeyForType(childType);
-                if (childTypeListKey && Array.isArray(oldParent[childTypeListKey])) {
-                    oldParent[childTypeListKey] = oldParent[childTypeListKey].filter((id: number) => id !== childId);
-                    await oldParentStore.put(oldParent);
+                const { childType, childId } = JSON.parse(removeEvent.details);
+
+                if (oldParent) {
+                    const childTypeListKey = getChildTypeListKeyForType(childType);
+                    if (childTypeListKey && Array.isArray(oldParent[childTypeListKey])) {
+                        oldParent[childTypeListKey] = oldParent[childTypeListKey].filter((id: number) => id !== childId);
+                        await oldParentStore.put(oldParent);
+                    }
                 }
+                console.log(`Processed REMOVE_CHILD event: removed ${childType}-${childId}, from ${removeEvent.entityType}: ${removeEvent.entityId}`);
             }
-            console.log(`Processed REMOVE_CHILD event: removed ${childType}-${childId}, from ${remove.entityType}: ${remove.entityId}`);
         }
 
         // Handle adoption
-        if (add) {
-            const newParentStore = transaction.objectStore(getStoreName(add.entityType));
-            const newParent = await newParentStore.get(add.entityId);
+        if (add && Array.isArray(add)) {
+            for (const addEvent of add) {
+                const newParentStore = transaction.objectStore(getStoreName(addEvent.entityType));
+                const newParent = await newParentStore.get(addEvent.entityId);
 
-            const { childType, childId } = JSON.parse(add.details);
+                const { childType, childId } = JSON.parse(addEvent.details);
 
-            if (newParent) {
-                const childTypeListKey = getChildTypeListKeyForType(childType);
-                if (childTypeListKey) {
-                    if (!Array.isArray(newParent[childTypeListKey])) {
-                        newParent[childTypeListKey] = [];
-                    }
+                if (newParent) {
+                    const childTypeListKey = getChildTypeListKeyForType(childType);
+                    if (childTypeListKey) {
+                        if (!Array.isArray(newParent[childTypeListKey])) {
+                            newParent[childTypeListKey] = [];
+                        }
 
-                    // Prevent duplicate childId
-                    if (!newParent[childTypeListKey].includes(childId)) {
-                        newParent[childTypeListKey].push(childId);
-                        await newParentStore.put(newParent);
-                    } else {
-                        console.warn(`Skipping ADD_CHILD: ${childId} already exists in ${childTypeListKey} of parent ${add.entityId}`);
+                        // Prevent duplicate childId
+                        if (!newParent[childTypeListKey].includes(childId)) {
+                            newParent[childTypeListKey].push(childId);
+                            await newParentStore.put(newParent);
+                        } else {
+                            console.warn(`Skipping ADD_CHILD: ${childId} already exists in ${childTypeListKey} of parent ${addEvent.entityId}`);
+                        }
                     }
                 }
+                console.log(`Processed ADD_CHILD event: added ${childType}-${childId}, to ${addEvent.entityType}: ${addEvent.entityId}`);
             }
-            console.log(`Processed ADD_CHILD event: added ${childType}-${childId}, to ${add.entityType}: ${add.entityId}`);
         }
     } catch (error) {
         console.error(`Error processing MOVE-related events`, error);

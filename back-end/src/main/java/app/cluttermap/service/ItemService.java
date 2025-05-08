@@ -100,18 +100,13 @@ public class ItemService {
         addChildDetails.put("childId", id);
         addChildDetails.put("childType", ResourceType.ITEM);
         eventService.logEvent(
-            ResourceType.PROJECT, item.getProject().getId(),
-            EventChangeType.ADD_CHILD, addChildDetails
-        );
+                ResourceType.PROJECT, item.getProject().getId(),
+                EventChangeType.ADD_CHILD, addChildDetails);
 
         if (item.getOrgUnit() != null) {
-            addChildDetails = new HashMap<>();
-            addChildDetails.put("childId", id);
-            addChildDetails.put("childType", ResourceType.ITEM);
             eventService.logEvent(
-                ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
-                EventChangeType.ADD_CHILD, addChildDetails
-            );
+                    ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
+                    EventChangeType.ADD_CHILD, addChildDetails);
         }
 
         return item;
@@ -183,18 +178,16 @@ public class ItemService {
         removeChildDetails.put("childId", id);
         removeChildDetails.put("childType", ResourceType.ITEM);
         eventService.logEvent(
-            ResourceType.PROJECT, item.getProject().getId(),
-            EventChangeType.REMOVE_CHILD, removeChildDetails
-        );
+                ResourceType.PROJECT, item.getProject().getId(),
+                EventChangeType.REMOVE_CHILD, removeChildDetails);
 
         if (item.getOrgUnit() != null) {
             removeChildDetails = new HashMap<>();
             removeChildDetails.put("childId", id);
             removeChildDetails.put("childType", ResourceType.ITEM);
             eventService.logEvent(
-                ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
-                EventChangeType.REMOVE_CHILD, removeChildDetails
-            );
+                    ResourceType.ORGANIZATIONAL_UNIT, item.getOrgUnit().getId(),
+                    EventChangeType.REMOVE_CHILD, removeChildDetails);
         }
 
         itemRepository.deleteById(id);

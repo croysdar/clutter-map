@@ -186,7 +186,7 @@ test('processEvents should correctly process events from adding a child to a par
             userId: 1,
             userName: 'TestUser',
         },
-        add: {
+        add: [{
             action: TimelineActionType.ADD_CHILD,
             details: JSON.stringify({ childId: 101, childType: ResourceType.ITEM }),
             entityId: 200,
@@ -194,7 +194,7 @@ test('processEvents should correctly process events from adding a child to a par
             timestamp: new Date(),
             userId: 1,
             userName: 'TestUser',
-        },
+        }],
     };
 
     // Process move event
@@ -241,7 +241,7 @@ test('processEvents should correctly process events from removing a child from a
             userId: 1,
             userName: 'TestUser',
         },
-        remove: {
+        remove: [{
             action: TimelineActionType.REMOVE_CHILD,
             details: JSON.stringify({ childId: 102, childType: ResourceType.ITEM }),
             entityId: 201,
@@ -249,7 +249,7 @@ test('processEvents should correctly process events from removing a child from a
             timestamp: new Date(),
             userId: 1,
             userName: 'TestUser',
-        },
+        }],
     };
 
     // Process move event
@@ -301,7 +301,7 @@ test('processEvents should correctly process events from moving a child from one
             userId: 1,
             userName: 'TestUser',
         },
-        remove: {
+        remove: [{
             action: TimelineActionType.REMOVE_CHILD,
             details: JSON.stringify({ childId: 103, childType: ResourceType.ITEM }),
             entityId: 202,
@@ -309,8 +309,8 @@ test('processEvents should correctly process events from moving a child from one
             timestamp: new Date(),
             userId: 1,
             userName: 'TestUser',
-        },
-        add: {
+        }],
+        add: [{
             action: TimelineActionType.ADD_CHILD,
             details: JSON.stringify({ childId: 103, childType: ResourceType.ITEM }),
             entityId: 203,
@@ -318,7 +318,7 @@ test('processEvents should correctly process events from moving a child from one
             timestamp: new Date(),
             userId: 1,
             userName: 'TestUser',
-        },
+        }],
     };
 
     // Process move event
