@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { openDB } from 'idb';
-import { IDB_VERSION } from '@/utils/constants';
-import { Stores } from '@/features/offline/idb';
+
+import { getOrInitDB, Stores } from '@/features/offline/idb';
+
 import { Item } from '@/features/items/itemTypes';
 import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
 import { Room } from '@/features/rooms/roomsTypes';
@@ -22,7 +22,7 @@ export const useEntityHierarchy = (entityType: 'item' | 'orgUnit', entityId: num
     useEffect(() => {
         const fetchHierarchy = async () => {
             try {
-                const db = await openDB('ClutterMapDB', IDB_VERSION);
+                const db = await getOrInitDB();
                 const hierarchy: EntityHierarchy = {};
 
                 if (entityType === 'item') {

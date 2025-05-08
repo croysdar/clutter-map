@@ -1,4 +1,4 @@
-import { IDBPObjectStore, IDBPTransaction, openDB } from "idb";
+import { IDBPDatabase, IDBPObjectStore, IDBPTransaction, openDB } from "idb";
 
 /* ------------- Types ------------- */
 import { Item } from "@/features/items/itemTypes";
@@ -31,6 +31,16 @@ export interface MoveEventGroup {
 }
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
+let dbPromise: Promise<IDBPDatabase> | null = null;
+
+export const getOrInitDB = async (): Promise<IDBPDatabase> => {
+    if (!dbPromise) {
+        await _initDB(false);
+        dbPromise = openDB(IDB_NAME, IDB_VERSION);
+    }
+    return dbPromise;
+};
+
 export const initDB = async () => {
     await _initDB(false);
 }
@@ -59,7 +69,12 @@ export const _initDB = async (testMode: boolean) => {
 };
 
 export const performSync = async (token: string) => {
-    const lastSynced = await getLastSynced(IDB_NAME);
+    let lastSynced = null
+    try {
+        lastSynced = await getLastSynced(IDB_NAME);
+    } catch (error) {
+        console.error("Error checking lastSynced:", error);
+    }
     const now = Date.now();
     const recent = 3 * 1000; // Date is measured in milliseconds
 
@@ -98,7 +113,7 @@ const fullSync = async (token: string) => {
 
     console.log('Data fetched:', data);
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
 
     const tx = db.transaction(Object.values(Stores), 'readwrite');
 
@@ -131,7 +146,7 @@ const partialSync = async (token: string, lastSynced: number) => {
         return;
     }
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     try {
@@ -154,7 +169,7 @@ const syncProjectList = async (token: string) => {
     const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
     const serverProjectIDs = response.data;
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readonly");
     const store = transaction.objectStore(Stores.Projects);
 
@@ -187,7 +202,7 @@ const removeDeletedProject = async (projectID: number) => {
 }
 
 export const _removeDeletedProject = async (projectID: number, IDB_NAME: string) => {
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
     const projectStore = transaction.objectStore(Stores.Projects);
     const project: Project = await projectStore.get(projectID);
@@ -231,7 +246,7 @@ const downloadNewProject = async (token: string, projectID: number) => {
     ]);
 
     // A new transaction must open after every new api call
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     let data = {
@@ -465,7 +480,7 @@ async function processDeleteEvent(store: IDBPObjectStore<any, any, any, "readwri
 /* ------------- Sync Metadata Handling ------------- */
 
 export const getLastSynced = async (IDB_NAME: string): Promise<number | null> => {
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     return (await db.get(Stores.Meta, 'last-synced'))?.value || null;
 }
 

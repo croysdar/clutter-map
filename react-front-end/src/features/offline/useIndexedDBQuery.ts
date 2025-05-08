@@ -1,5 +1,4 @@
-import { IDB_VERSION } from '@/utils/constants';
-import { openDB } from 'idb';
+import { getOrInitDB } from './idb';
 
 /**
  * Fetch all records from an IndexedDB store.
@@ -19,7 +18,7 @@ import { openDB } from 'idb';
  */
 export const getAllFromIndexedDB = async <T>(storeName: string): Promise<{ data?: T[]; error?: any }> => {
     try {
-        const db = await openDB('ClutterMapDB', IDB_VERSION);
+        const db = await getOrInitDB();
         const transaction = db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
         const data = await store.getAll();
@@ -52,7 +51,7 @@ export const getAllFromIndexedDB = async <T>(storeName: string): Promise<{ data?
  */
 export const getByIdFromIndexedDB = async <T>(storeName: string, id: number): Promise<{ data?: T; error?: any }> => {
     try {
-        const db = await openDB('ClutterMapDB', IDB_VERSION);
+        const db = await getOrInitDB();
         const transaction = db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
         const data = await store.get(id);
@@ -106,7 +105,7 @@ export const getRelatedEntities = async <P, R>(
     relatedKey: keyof P
 ): Promise<{ data: R[] } | { error: { status: number, data: { message: string } } }> => {
     try {
-        const db = await openDB('ClutterMapDB', IDB_VERSION);
+        const db = await getOrInitDB();
 
         // Fetch parent entity
         const parentEntity = await db.get(parentStore, parentId);
