@@ -1,11 +1,13 @@
 export interface Item {
-    id: number;
-    name: string;
-    description: string;
+    id: number
+    name: string
+    description: string
     tags: string[]
-    quantity: number;
-    orgUnitId?: number,
-    orgUnitName?: string,
+    quantity: number
+    orgUnitId?: number
+    orgUnitName?: string
+    roomId?: number
+    roomName?: string
     projectId: number
 }
 

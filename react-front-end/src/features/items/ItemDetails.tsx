@@ -59,6 +59,12 @@ const ItemDetails: React.FC = () => {
             >
                 <Typography>Quantity: {item.quantity || 1}</Typography>
                 <RenderTags tags={item.tags} />
+                {item.orgUnitName && (
+                    <Typography>Location: {item.orgUnitName}</Typography>
+                )}
+                {item.roomName && (
+                    <Typography>Room: {item.roomName}</Typography>
+                )}
             </DetailsPagePaper>
             <EntityEventsContainer entityId={item.id} entityType={ResourceType.ITEM} />
         </>
