@@ -19,6 +19,7 @@ import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
+import { SearchManager } from '../search/SearchManager';
 
 const OrgUnitDetails: React.FC = () => {
     const { projectId, orgUnitId } = useParams();
@@ -79,6 +80,7 @@ const OrgUnitDetails: React.FC = () => {
                 to={ROUTES.itemAdd(projectId!)}
             />
             <EntityEventsContainer entityId={orgUnit.id} entityType={ResourceType.ORGANIZATIONAL_UNIT} />
+            <SearchManager />
         </>
     );
 };

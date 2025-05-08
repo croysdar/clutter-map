@@ -15,6 +15,7 @@ import { useGetItemQuery } from '@/features/items/itemApi';
 
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
+import { SearchManager } from '../search/SearchManager';
 
 const ItemDetails: React.FC = () => {
     const { itemId } = useParams();
@@ -67,6 +68,7 @@ const ItemDetails: React.FC = () => {
                 )}
             </DetailsPagePaper>
             <EntityEventsContainer entityId={item.id} entityType={ResourceType.ITEM} />
+            <SearchManager />
         </>
     );
 };

@@ -19,6 +19,7 @@ import { useGetRoomQuery } from '@/features/rooms/roomApi';
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
+import { SearchManager } from '../search/SearchManager';
 
 const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
@@ -80,6 +81,7 @@ const RoomDetails: React.FC = () => {
                 to={ROUTES.orgUnitAdd(projectId!)}
             />
             <EntityEventsContainer entityId={room.id} entityType={ResourceType.ROOM} />
+            <SearchManager />
         </>
     );
 };
