@@ -25,8 +25,8 @@ export const AddItem = () => {
     const [addNewItem, { isLoading }] = useAddNewItemMutation()
 
     const navigate = useNavigate()
-    const { projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
+    const { projectId, orgUnitId } = useParams();
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, orgUnitId!)
 
     const { data: orgUnit } = useGetOrgUnitQuery(Number(orgUnitId!));
 

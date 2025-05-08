@@ -19,9 +19,9 @@ import { useAssignItemsToOrgUnitMutation, useGetOrgUnitQuery } from "@/features/
 import { ROUTES } from "@/utils/constants";
 
 export const RemoveOrgUnitItems = () => {
-    const { orgUnitId, roomId, projectId } = useParams();
+    const { orgUnitId, projectId } = useParams();
     const navigate = useNavigate();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, orgUnitId!);
 
     const { data: items, isLoading: itemsLoading, isError, error } = useGetItemsByOrgUnitQuery(Number(orgUnitId)!);
     const { data: orgUnit, isLoading: orgUnitLoading } = useGetOrgUnitQuery(Number(orgUnitId!));
@@ -83,9 +83,9 @@ export const RemoveOrgUnitItems = () => {
 }
 
 export const AssignItemsToOrgUnit = () => {
-    const { orgUnitId, roomId, projectId } = useParams();
+    const { orgUnitId, projectId } = useParams();
     const navigate = useNavigate();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
+    const redirectUrl = ROUTES.orgUnitDetails(projectId!, orgUnitId!);
 
     const { data: orgUnit, isLoading: orgUnitLoading, isError, error } = useGetOrgUnitQuery(Number(orgUnitId!));
     const { data: projectItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(Number(projectId)!);

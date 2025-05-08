@@ -35,7 +35,7 @@ const RoomDetails: React.FC = () => {
     const navigate = useNavigate();
     const handleClick = (e: React.MouseEvent<HTMLDivElement>, orgUnitId: number) => {
         e.preventDefault();
-        navigate(ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!))
+        navigate(ROUTES.orgUnitDetails(projectId!, orgUnitId!))
     }
 
     if (isLoading) {
@@ -77,7 +77,7 @@ const RoomDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Organizer'
-                to={ROUTES.orgUnitAdd(projectId!, roomId!)}
+                to={ROUTES.orgUnitAdd(projectId!)}
             />
             <EntityEventsContainer entityId={room.id} entityType={ResourceType.ROOM} />
         </>

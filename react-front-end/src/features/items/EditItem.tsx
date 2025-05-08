@@ -21,6 +21,7 @@ import { ROUTES } from '@/utils/constants'
 
 /* ------------- Types ------------- */
 import { Item } from '@/features/items/itemTypes'
+import { useEntityHierarchy } from '@/hooks/useEntityHierarchy'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -34,8 +35,8 @@ interface EditItemFormElements extends HTMLFormElement {
 
 const EditItem = () => {
     const navigate = useNavigate();
-    const { projectId, roomId, orgUnitId, itemId } = useParams();
-    const redirectUrl = ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId!)
+    const { projectId, itemId } = useParams();
+    const redirectUrl = ROUTES.itemDetails(projectId!, itemId!)
 
     const { data: item, isLoading: itemLoading, isError, error } = useGetItemQuery(Number(itemId)!);
     const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
@@ -86,7 +87,6 @@ const EditItem = () => {
 
         if (item && name) {
             await updateItem({ id: item.id, name: name, description: description, tags: tags, quantity: quantity })
-            // redirect to ...[this org unit]/items
             navigate(redirectUrl)
         }
     }
@@ -143,8 +143,15 @@ type DeleteButtonProps = {
 }
 
 const DeleteItemButton: React.FC<DeleteButtonProps> = ({ item, isDisabled }) => {
-    const { projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!);
+    const { projectId, itemId } = useParams();
+
+    const { hierarchy, loading: hierarchyLoading } = useEntityHierarchy(
+        'item', Number(itemId)
+    );
+
+    const redirectUrl = !hierarchyLoading && hierarchy?.orgUnit
+        ? ROUTES.orgUnitDetails(projectId!, hierarchy.orgUnit.id)
+        : ROUTES.projectDetails(projectId!)
 
     return (
         <DeleteEntityButtonWithModal

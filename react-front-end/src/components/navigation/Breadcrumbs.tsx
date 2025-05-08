@@ -9,15 +9,27 @@ import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetProjectQuery } from '@/features/projects/projectApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 
-import { ROUTES } from '@/utils/constants';
+import { useEntityHierarchy } from '@/hooks/useEntityHierarchy';
+
+import { ROUTE_PATTERNS, ROUTES } from '@/utils/constants';
 
 const AppBreadcrumbs: React.FC = () => {
     const params = useExtractParams();
 
     const projectId = params["projectId"]
-    const roomId = params["roomId"]
-    const orgUnitId = params["orgUnitId"]
+    const roomParamId = params["roomId"]
+    const orgUnitParamId = params["orgUnitId"]
     const itemId = params["itemId"]
+
+    // Get hierarchy for items or org units
+    const { hierarchy, loading: hierarchyLoading } = useEntityHierarchy(
+        itemId ? 'item' : orgUnitParamId ? 'orgUnit' : 'item',
+        Number(itemId || orgUnitParamId || 0)
+    );
+
+    // Only enrich if current page is item or orgUnit
+    const orgUnitId = orgUnitParamId || (itemId ? hierarchy.orgUnit?.id.toString() : undefined);
+    const roomId = roomParamId || ((itemId || orgUnitId) ? hierarchy.room?.id.toString() : undefined);
 
     const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(Number(projectId) ?? '', { skip: !projectId });
     const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(Number(roomId) ?? '', { skip: !roomId });
@@ -34,16 +46,16 @@ const AppBreadcrumbs: React.FC = () => {
             to: ROUTES.projectDetails(projectId),
         },
         roomId && {
-            label: roomLoading ? "Loading..." : roomData?.name || `Room ${roomId}`,
+            label: (roomLoading || hierarchyLoading) ? "Loading..." : roomData?.name || `Room ${roomId}`,
             to: ROUTES.roomDetails(projectId!, roomId),
         },
         orgUnitId && {
-            label: orgUnitLoading ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
-            to: ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId),
+            label: (orgUnitLoading || hierarchyLoading) ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
+            to: ROUTES.orgUnitDetails(projectId!, orgUnitId),
         },
         itemId && {
-            label: itemLoading ? "Loading..." : itemData?.name || `Item ${itemId}`,
-            to: ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId),
+            label: (itemLoading || hierarchyLoading) ? "Loading..." : itemData?.name || `Item ${itemId}`,
+            to: ROUTES.itemDetails(projectId!, itemId),
         },
     ].filter(Boolean);
 
@@ -75,23 +87,12 @@ const AppBreadcrumbs: React.FC = () => {
 export const useExtractParams = () => {
     const { pathname } = useLocation();
 
-    // Generate route patterns dynamically from ROUTES
-    const routePatterns = Object.entries(ROUTES)
-        .filter(([_, value]) => typeof value === "function")
-        .map(([_, generateRoute]) =>
-            (generateRoute as Function)(
-                ":projectId",
-                ":roomId",
-                ":orgUnitId",
-                ":itemId"
-            )
-        );
 
-    // Attempt to match the current pathname against the generated route patterns
-    for (const route of routePatterns) {
-        const result = matchPath(route, pathname);
-        if (result?.params) {
-            return result.params as Record<string, string | undefined>;
+    // Attempt to match the current pathname against the route patterns
+    for (const { pattern } of ROUTE_PATTERNS) {
+        const match = matchPath(pattern, pathname);
+        if (match?.params) {
+            return match.params as Record<string, string | undefined>;
         }
     }
 

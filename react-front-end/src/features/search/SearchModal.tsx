@@ -13,9 +13,10 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useGetItemsByProjectQuery } from "../items/itemApi";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { searchItems } from "./search";
 import { Item } from "../items/itemTypes";
+import { ROUTES } from "@/utils/constants";
 
 interface SearchModalProps {
     open: boolean;
@@ -26,6 +27,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Item[]>([]);
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const { projectId } = useParams();
     const { data: allItems, isLoading: itemsLoading } = useGetItemsByProjectQuery(Number(projectId)!);
@@ -75,14 +78,22 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
                 </Button>
 
                 <List sx={{ maxHeight: 300, overflow: "auto", mt: 2 }}>
-                    {results.map((item) => (
-                        <ListItem key={item.id} button>
-                            <ListItemText
-                                primary={item.name}
-                                secondary={`${item.description} • Tags: ${item.tags.join(", ")}`}
-                            />
-                        </ListItem>
-                    ))}
+                    {results.map((item) => {
+                        let route = "";
+                        if (item.orgUnitId) {
+                            route = ROUTES.itemDetails(Number(projectId)!, item.id);
+                        }
+                        return (
+                            <ListItem key={item.id} onClick={() => {
+                                navigate(route);
+                            }}>
+                                <ListItemText
+                                    primary={item.name}
+                                    secondary={`${item.description} • Tags: ${item.tags.join(", ")}`}
+                                />
+                            </ListItem>
+                        )
+                    })}
                 </List>
             </DialogContent>
 
