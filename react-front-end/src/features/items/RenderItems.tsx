@@ -85,9 +85,11 @@ export const ItemListItem: React.FC<ItemListItemProps> = ({
                             {truncateText(item.description, 100)}
                         </Typography>
                     </ListItemText>
-                    <ListItemText sx={{ flex: 1 }}>
-                        <RenderTags tags={item.tags} />
-                    </ListItemText>
+                    {item.tags &&
+                        <ListItemText sx={{ flex: 1 }}>
+                            <RenderTags tags={item.tags} />
+                        </ListItemText>
+                    }
                 </>
             )
         }
