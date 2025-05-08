@@ -10,6 +10,8 @@ import {
     ListItem,
     ListItemText,
     DialogActions,
+    Box,
+    Pagination,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useGetItemsByProjectQuery } from "../items/itemApi";
@@ -27,6 +29,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Item[]>([]);
     const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const navigate = useNavigate();
 
@@ -78,7 +82,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
                 </Button>
 
                 <List sx={{ maxHeight: 300, overflow: "auto", mt: 2 }}>
-                    {results.map((item) => {
+                    {results.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((item) => {
                         let route = "";
                         if (item.orgUnitId) {
                             route = ROUTES.itemDetails(Number(projectId)!, item.id);
@@ -108,6 +112,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({ open, onClose }) => {
                             </ListItem>
                         )
                     })}
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                        <Pagination
+                            count={Math.ceil(results.length / itemsPerPage)}
+                            page={page}
+                            onChange={(_, value) => setPage(value)}
+                            color="primary"
+                        />
+                    </Box>
                 </List>
             </DialogContent>
 
