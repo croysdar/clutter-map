@@ -137,6 +137,7 @@ export const ItemListWithCheckBoxes: React.FC<ItemListWithCheckBoxesProps> = ({
             {items.map((item) =>
                 <>
                     <ItemListItem
+                        key={`item-list-item-${item.id}`}
                         item={item}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleCheckItem(e, item.id)}
                         checked={checkedItems.includes(item.id)}
