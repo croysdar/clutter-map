@@ -35,6 +35,10 @@ export const useEntityHierarchy = (entityType: 'item' | 'orgUnit', entityId: num
                     if (!item) throw new Error('Item not found');
                     hierarchy.item = item;
 
+                    // Get the project
+                    const project = await db.get(Stores.Projects, item.projectId);
+                    if (project) hierarchy.project = project;
+
                     // If item has an org unit, get it
                     if (item.orgUnitId) {
                         const orgUnit = await db.get(Stores.OrgUnits, item.orgUnitId);
@@ -45,18 +49,9 @@ export const useEntityHierarchy = (entityType: 'item' | 'orgUnit', entityId: num
                                 const room = await db.get(Stores.Rooms, orgUnit.roomId);
                                 if (room) {
                                     hierarchy.room = room;
-                                    // Get the project
-                                    if (room.projectId) {
-                                        const project = await db.get(Stores.Projects, room.projectId);
-                                        if (project) hierarchy.project = project;
-                                    }
                                 }
                             }
                         }
-                    } else if (item.projectId) {
-                        // If item is unassigned, get the project directly
-                        const project = await db.get(Stores.Projects, item.projectId);
-                        if (project) hierarchy.project = project;
                     }
                 } else if (entityType === 'orgUnit') {
                     // Get the org unit
@@ -64,16 +59,15 @@ export const useEntityHierarchy = (entityType: 'item' | 'orgUnit', entityId: num
                     if (!orgUnit) throw new Error('Org Unit not found');
                     hierarchy.orgUnit = orgUnit;
 
+                    // Get the project
+                    const project = await db.get(Stores.Projects, orgUnit.projectId);
+                    if (project) hierarchy.project = project;
+
                     // If org unit has a room, get it
                     if (orgUnit.roomId) {
                         const room = await db.get(Stores.Rooms, orgUnit.roomId);
                         if (room) {
                             hierarchy.room = room;
-                            // Get the project
-                            if (room.projectId) {
-                                const project = await db.get(Stores.Projects, room.projectId);
-                                if (project) hierarchy.project = project;
-                            }
                         }
                     }
                 }
