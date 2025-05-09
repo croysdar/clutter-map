@@ -1,4 +1,4 @@
-import { IDBPObjectStore, IDBPTransaction, openDB } from "idb";
+import { IDBPDatabase, IDBPObjectStore, IDBPTransaction, openDB } from "idb";
 
 /* ------------- Types ------------- */
 import { Item } from "@/features/items/itemTypes";
@@ -26,11 +26,21 @@ export enum Stores {
 
 export interface MoveEventGroup {
     move?: Event
-    remove?: Event
-    add?: Event
+    remove?: Event[]
+    add?: Event[]
 }
 
 /* ------------- IndexedDB Initialization & Syncing ------------- */
+let dbPromise: Promise<IDBPDatabase> | null = null;
+
+export const getOrInitDB = async (): Promise<IDBPDatabase> => {
+    if (!dbPromise) {
+        await _initDB(false);
+        dbPromise = openDB(IDB_NAME, IDB_VERSION);
+    }
+    return dbPromise;
+};
+
 export const initDB = async () => {
     await _initDB(false);
 }
@@ -59,7 +69,12 @@ export const _initDB = async (testMode: boolean) => {
 };
 
 export const performSync = async (token: string) => {
-    const lastSynced = await getLastSynced(IDB_NAME);
+    let lastSynced = null
+    try {
+        lastSynced = await getLastSynced(IDB_NAME);
+    } catch (error) {
+        console.error("Error checking lastSynced:", error);
+    }
     const now = Date.now();
     const recent = 3 * 1000; // Date is measured in milliseconds
 
@@ -98,7 +113,7 @@ const fullSync = async (token: string) => {
 
     console.log('Data fetched:', data);
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
 
     const tx = db.transaction(Object.values(Stores), 'readwrite');
 
@@ -131,7 +146,7 @@ const partialSync = async (token: string, lastSynced: number) => {
         return;
     }
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     try {
@@ -154,7 +169,7 @@ const syncProjectList = async (token: string) => {
     const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
     const serverProjectIDs = response.data;
 
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readonly");
     const store = transaction.objectStore(Stores.Projects);
 
@@ -187,7 +202,7 @@ const removeDeletedProject = async (projectID: number) => {
 }
 
 export const _removeDeletedProject = async (projectID: number, IDB_NAME: string) => {
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
     const projectStore = transaction.objectStore(Stores.Projects);
     const project: Project = await projectStore.get(projectID);
@@ -231,7 +246,7 @@ const downloadNewProject = async (token: string, projectID: number) => {
     ]);
 
     // A new transaction must open after every new api call
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readwrite");
 
     let data = {
@@ -293,11 +308,16 @@ export async function processEvents(events: Event[], transaction: IDBPTransactio
                     eventBuffer.set(childEventKey, {});
                 }
 
+                const buffer = eventBuffer.get(childEventKey)!;
+
                 if (event.action === TimelineActionType.REMOVE_CHILD) {
-                    eventBuffer.get(childEventKey)!.remove = event;
+                    if (!buffer.remove) buffer.remove = [];
+                    buffer.remove.push(event);
                 } else {
-                    eventBuffer.get(childEventKey)!.add = event;
+                    if (!buffer.add) buffer.add = [];
+                    buffer.add.push(event);
                 }
+
             }
         } else {
             // Process other events immediately
@@ -337,46 +357,51 @@ export async function processMoveRelatedEvents(
         }
 
         // Handle orphaning
-        if (remove) {
-            const oldParentStore = transaction.objectStore(getStoreName(remove.entityType));
-            const oldParent = await oldParentStore.get(remove.entityId);
+        if (remove && Array.isArray(remove)) {
+            for (const removeEvent of remove) {
 
-            const { childType, childId } = JSON.parse(remove.details);
+                const oldParentStore = transaction.objectStore(getStoreName(removeEvent.entityType));
+                const oldParent = await oldParentStore.get(removeEvent.entityId);
 
-            if (oldParent) {
-                const childTypeListKey = getChildTypeListKeyForType(childType);
-                if (childTypeListKey && Array.isArray(oldParent[childTypeListKey])) {
-                    oldParent[childTypeListKey] = oldParent[childTypeListKey].filter((id: number) => id !== childId);
-                    await oldParentStore.put(oldParent);
+                const { childType, childId } = JSON.parse(removeEvent.details);
+
+                if (oldParent) {
+                    const childTypeListKey = getChildTypeListKeyForType(childType);
+                    if (childTypeListKey && Array.isArray(oldParent[childTypeListKey])) {
+                        oldParent[childTypeListKey] = oldParent[childTypeListKey].filter((id: number) => id !== childId);
+                        await oldParentStore.put(oldParent);
+                    }
                 }
+                console.log(`Processed REMOVE_CHILD event: removed ${childType}-${childId}, from ${removeEvent.entityType}: ${removeEvent.entityId}`);
             }
-            console.log(`Processed REMOVE_CHILD event: removed ${childType}-${childId}, from ${remove.entityType}: ${remove.entityId}`);
         }
 
         // Handle adoption
-        if (add) {
-            const newParentStore = transaction.objectStore(getStoreName(add.entityType));
-            const newParent = await newParentStore.get(add.entityId);
+        if (add && Array.isArray(add)) {
+            for (const addEvent of add) {
+                const newParentStore = transaction.objectStore(getStoreName(addEvent.entityType));
+                const newParent = await newParentStore.get(addEvent.entityId);
 
-            const { childType, childId } = JSON.parse(add.details);
+                const { childType, childId } = JSON.parse(addEvent.details);
 
-            if (newParent) {
-                const childTypeListKey = getChildTypeListKeyForType(childType);
-                if (childTypeListKey) {
-                    if (!Array.isArray(newParent[childTypeListKey])) {
-                        newParent[childTypeListKey] = [];
-                    }
+                if (newParent) {
+                    const childTypeListKey = getChildTypeListKeyForType(childType);
+                    if (childTypeListKey) {
+                        if (!Array.isArray(newParent[childTypeListKey])) {
+                            newParent[childTypeListKey] = [];
+                        }
 
-                    // Prevent duplicate childId
-                    if (!newParent[childTypeListKey].includes(childId)) {
-                        newParent[childTypeListKey].push(childId);
-                        await newParentStore.put(newParent);
-                    } else {
-                        console.warn(`Skipping ADD_CHILD: ${childId} already exists in ${childTypeListKey} of parent ${add.entityId}`);
+                        // Prevent duplicate childId
+                        if (!newParent[childTypeListKey].includes(childId)) {
+                            newParent[childTypeListKey].push(childId);
+                            await newParentStore.put(newParent);
+                        } else {
+                            console.warn(`Skipping ADD_CHILD: ${childId} already exists in ${childTypeListKey} of parent ${addEvent.entityId}`);
+                        }
                     }
                 }
+                console.log(`Processed ADD_CHILD event: added ${childType}-${childId}, to ${addEvent.entityType}: ${addEvent.entityId}`);
             }
-            console.log(`Processed ADD_CHILD event: added ${childType}-${childId}, to ${add.entityType}: ${add.entityId}`);
         }
     } catch (error) {
         console.error(`Error processing MOVE-related events`, error);
@@ -465,7 +490,7 @@ async function processDeleteEvent(store: IDBPObjectStore<any, any, any, "readwri
 /* ------------- Sync Metadata Handling ------------- */
 
 export const getLastSynced = async (IDB_NAME: string): Promise<number | null> => {
-    const db = await openDB(IDB_NAME, IDB_VERSION);
+    const db = await getOrInitDB();
     return (await db.get(Stores.Meta, 'last-synced'))?.value || null;
 }
 

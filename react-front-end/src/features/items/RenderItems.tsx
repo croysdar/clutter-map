@@ -54,7 +54,7 @@ export const ItemListItem: React.FC<ItemListItemProps> = ({
                     }
                     secondary={
                         <Typography variant='body2'>
-                            {truncateText(item.description, 50)}
+                            {item.description && truncateText(item.description, 50)}
                         </Typography>
                     }
                 />
@@ -80,14 +80,18 @@ export const ItemListItem: React.FC<ItemListItemProps> = ({
                             </Typography>
                         </ListItemText>
                     }
-                    <ListItemText sx={{ flex: 2 }}>
-                        <Typography variant='body1'>
-                            {truncateText(item.description, 100)}
-                        </Typography>
-                    </ListItemText>
-                    <ListItemText sx={{ flex: 1 }}>
-                        <RenderTags tags={item.tags} />
-                    </ListItemText>
+                    {item.description &&
+                        <ListItemText sx={{ flex: 2 }}>
+                            <Typography variant='body1'>
+                                {truncateText(item.description, 100)}
+                            </Typography>
+                        </ListItemText>
+                    }
+                    {item.tags &&
+                        <ListItemText sx={{ flex: 1 }}>
+                            <RenderTags tags={item.tags} />
+                        </ListItemText>
+                    }
                 </>
             )
         }
@@ -133,6 +137,7 @@ export const ItemListWithCheckBoxes: React.FC<ItemListWithCheckBoxesProps> = ({
             {items.map((item) =>
                 <>
                     <ItemListItem
+                        key={`item-list-item-${item.id}`}
                         item={item}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => handleCheckItem(e, item.id)}
                         checked={checkedItems.includes(item.id)}

@@ -15,6 +15,7 @@ import { useGetItemQuery } from '@/features/items/itemApi';
 
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
+import { SearchManager } from '../search/SearchManager';
 
 const ItemDetails: React.FC = () => {
     const { itemId } = useParams();
@@ -58,9 +59,18 @@ const ItemDetails: React.FC = () => {
                 menu={<ItemMenu item={item} />}
             >
                 <Typography>Quantity: {item.quantity || 1}</Typography>
-                <RenderTags tags={item.tags} />
+                {item.tags &&
+                    <RenderTags tags={item.tags} />
+                }
+                {item.orgUnitName && (
+                    <Typography>Location: {item.orgUnitName}</Typography>
+                )}
+                {item.roomName && (
+                    <Typography>Room: {item.roomName}</Typography>
+                )}
             </DetailsPagePaper>
             <EntityEventsContainer entityId={item.id} entityType={ResourceType.ITEM} />
+            <SearchManager />
         </>
     );
 };

@@ -19,6 +19,7 @@ import { useGetRoomQuery } from '@/features/rooms/roomApi';
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
+import { SearchManager } from '../search/SearchManager';
 
 const RoomDetails: React.FC = () => {
     const { projectId, roomId } = useParams();
@@ -35,7 +36,7 @@ const RoomDetails: React.FC = () => {
     const navigate = useNavigate();
     const handleClick = (e: React.MouseEvent<HTMLDivElement>, orgUnitId: number) => {
         e.preventDefault();
-        navigate(ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!))
+        navigate(ROUTES.orgUnitDetails(projectId!, orgUnitId!))
     }
 
     if (isLoading) {
@@ -77,9 +78,10 @@ const RoomDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Organizer'
-                to={ROUTES.orgUnitAdd(projectId!, roomId!)}
+                to={`${ROUTES.orgUnitAdd(projectId!)}?roomId=${roomId}`}
             />
             <EntityEventsContainer entityId={room.id} entityType={ResourceType.ROOM} />
+            <SearchManager />
         </>
     );
 };

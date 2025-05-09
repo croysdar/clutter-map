@@ -6,10 +6,11 @@ import AppTextField from '@/components/forms/AppTextField';
 import CancelButton from '@/components/forms/CancelButton';
 import SubmitButton from '@/components/forms/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useGetOrgUnitQuery } from '../orgUnits/orgUnitApi';
-import { useAddNewItemMutation } from './itemApi';
+import { useAddNewItemMutation, useAddNewUnassignedItemMutation } from './itemApi';
 import { ROUTES } from '@/utils/constants';
+import { useResolvedParams } from '@/hooks/useResolvedParams';
 
 interface AddItemFormFields extends HTMLFormControlsCollection {
     itemName: HTMLInputElement,
@@ -23,10 +24,15 @@ interface AddItemFormElements extends HTMLFormElement {
 
 export const AddItem = () => {
     const [addNewItem, { isLoading }] = useAddNewItemMutation()
+    const [addNewUnassignedItem, { isLoading: isLoadingAddNewUnassignedItem }] = useAddNewUnassignedItemMutation()
 
     const navigate = useNavigate()
-    const { projectId, roomId, orgUnitId } = useParams();
-    const redirectUrl = ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId!)
+    const { projectId, orgUnitId } = useResolvedParams();
+
+    let redirectUrl = ROUTES.projectDetails(projectId!)
+    if (orgUnitId) {
+        redirectUrl = ROUTES.orgUnitDetails(projectId!, orgUnitId!)
+    }
 
     const { data: orgUnit } = useGetOrgUnitQuery(Number(orgUnitId!));
 
@@ -43,13 +49,18 @@ export const AddItem = () => {
 
         const form = e.currentTarget
 
-        if (!orgUnit) {
-            console.log("Organizer not found")
-            return
-        }
 
         try {
-            await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
+            if (orgUnitId) {
+                if (!orgUnit) {
+                    console.log("Organizer not found")
+                    return
+                }
+                await addNewItem({ name, description, tags, orgUnitId, quantity }).unwrap()
+            }
+            else {
+                await addNewUnassignedItem({ name, description, tags, quantity }).unwrap()
+            }
             form.reset()
 
             navigate(redirectUrl);
@@ -90,7 +101,7 @@ export const AddItem = () => {
                 <TagField tags={tags} onTagsChange={setTags} />
 
                 <SubmitButton
-                    disabled={isLoading}
+                    disabled={isLoading || isLoadingAddNewUnassignedItem}
                     label="Create Item"
                 />
             </form>

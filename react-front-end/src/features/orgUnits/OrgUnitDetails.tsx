@@ -19,9 +19,10 @@ import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 /* ------------- Constants ------------- */
 import { ResourceType } from '@/types/types';
 import { ROUTES } from '@/utils/constants';
+import { SearchManager } from '../search/SearchManager';
 
 const OrgUnitDetails: React.FC = () => {
-    const { projectId, roomId, orgUnitId } = useParams();
+    const { projectId, orgUnitId } = useParams();
     const { data: orgUnit } = useGetOrgUnitQuery(Number(orgUnitId!));
     const navigate = useNavigate();
 
@@ -58,7 +59,7 @@ const OrgUnitDetails: React.FC = () => {
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>, itemId: number) => {
         e.preventDefault();
-        navigate(ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId))
+        navigate(ROUTES.itemDetails(projectId!, itemId))
     }
 
     return (
@@ -76,9 +77,10 @@ const OrgUnitDetails: React.FC = () => {
             </DetailsPagePaper>
             <CreateNewEntityButton
                 objectLabel='Item'
-                to={ROUTES.itemAdd(projectId!, roomId!, orgUnitId!)}
+                to={`${ROUTES.itemAdd(projectId!)}?orgUnitId=${orgUnitId}`}
             />
             <EntityEventsContainer entityId={orgUnit.id} entityType={ResourceType.ORGANIZATIONAL_UNIT} />
+            <SearchManager />
         </>
     );
 };

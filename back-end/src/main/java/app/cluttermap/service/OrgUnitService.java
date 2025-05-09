@@ -91,26 +91,20 @@ public class OrgUnitService {
         eventService.logEvent(
                 ResourceType.ORGANIZATIONAL_UNIT, id,
                 EventChangeType.CREATE, buildCreatePayload(orgUnit));
-        
 
         Map<String, Object> addChildDetails = new HashMap<>();
         addChildDetails.put("childId", id);
         addChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
         eventService.logEvent(
-            ResourceType.PROJECT, orgUnit.getProject().getId(),
-            EventChangeType.ADD_CHILD, addChildDetails
-        );
+                ResourceType.PROJECT, orgUnit.getProject().getId(),
+                EventChangeType.ADD_CHILD, addChildDetails);
 
         if (orgUnit.getRoom() != null) {
-            addChildDetails = new HashMap<>();
-            addChildDetails.put("childId", id);
-            addChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
             eventService.logEvent(
-                ResourceType.ROOM, orgUnit.getRoom().getId(),
-                EventChangeType.ADD_CHILD, addChildDetails
-            );
+                    ResourceType.ROOM, orgUnit.getRoom().getId(),
+                    EventChangeType.ADD_CHILD, addChildDetails);
         }
-        
+
         return orgUnit;
     }
 
@@ -168,23 +162,21 @@ public class OrgUnitService {
         eventService.logEvent(
                 ResourceType.ORGANIZATIONAL_UNIT, id,
                 EventChangeType.DELETE, null);
-        
+
         Map<String, Object> removeChildDetails = new HashMap<>();
         removeChildDetails.put("childId", id);
         removeChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
         eventService.logEvent(
-            ResourceType.PROJECT, orgUnit.getProject().getId(),
-            EventChangeType.REMOVE_CHILD, removeChildDetails
-        );
+                ResourceType.PROJECT, orgUnit.getProject().getId(),
+                EventChangeType.REMOVE_CHILD, removeChildDetails);
 
         if (orgUnit.getRoom() != null) {
             removeChildDetails = new HashMap<>();
             removeChildDetails.put("childId", id);
             removeChildDetails.put("childType", ResourceType.ORGANIZATIONAL_UNIT);
             eventService.logEvent(
-                ResourceType.ROOM, orgUnit.getRoom().getId(),
-                EventChangeType.REMOVE_CHILD, removeChildDetails
-            );
+                    ResourceType.ROOM, orgUnit.getRoom().getId(),
+                    EventChangeType.REMOVE_CHILD, removeChildDetails);
         }
 
         orgUnitRepository.delete(orgUnit); // Ensures Items are unassigned, not deleted

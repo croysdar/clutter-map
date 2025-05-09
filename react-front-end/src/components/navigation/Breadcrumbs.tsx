@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link as RouterLink, matchPath, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 import { Breadcrumbs, Link, Typography } from '@mui/material';
 
@@ -9,22 +9,57 @@ import { useGetOrgUnitQuery } from '@/features/orgUnits/orgUnitApi';
 import { useGetProjectQuery } from '@/features/projects/projectApi';
 import { useGetRoomQuery } from '@/features/rooms/roomApi';
 
+import { useEntityHierarchy } from '@/hooks/useEntityHierarchy';
+
 import { ROUTES } from '@/utils/constants';
+import { useResolvedParams } from '@/hooks/useResolvedParams';
 
 const AppBreadcrumbs: React.FC = () => {
-    const params = useExtractParams();
-
-    const projectId = params["projectId"]
-    const roomId = params["roomId"]
-    const orgUnitId = params["orgUnitId"]
-    const itemId = params["itemId"]
-
-    const { data: projectData, isLoading: projectLoading } = useGetProjectQuery(Number(projectId) ?? '', { skip: !projectId });
-    const { data: roomData, isLoading: roomLoading } = useGetRoomQuery(Number(roomId) ?? '', { skip: !roomId });
-    const { data: orgUnitData, isLoading: orgUnitLoading } = useGetOrgUnitQuery(Number(orgUnitId) ?? '', { skip: !orgUnitId });
-    const { data: itemData, isLoading: itemLoading } = useGetItemQuery(Number(itemId) ?? '', { skip: !itemId });
-
+    const { projectId, roomId, orgUnitId, itemId, projectIdNum, roomIdNum, orgUnitIdNum, itemIdNum } = useResolvedParams();
     const { pathname } = useLocation();
+
+    const isAddItemPage = pathname.includes("/items/add");
+    const isAddOrgUnitPage = pathname.includes("/org-units/add");
+    const isAddRoomPage = pathname.includes("/rooms/add");
+    const isAddPage = isAddItemPage || isAddOrgUnitPage || isAddRoomPage;
+
+    const isEditItemPage = /\/items\/[^/]+\/edit/.test(pathname);
+    const isEditOrgUnitPage = /\/org-units\/[^/]+\/edit/.test(pathname);
+    const isEditRoomPage = /\/rooms\/[^/]+\/edit/.test(pathname);
+    const isEditPage = isEditItemPage || isEditOrgUnitPage || isEditRoomPage;
+
+    // Get hierarchy for items or org units
+    const shouldFetchHierarchy = !isAddPage && (itemId || orgUnitId);
+    const { hierarchy, loading: hierarchyLoading } = useEntityHierarchy(
+        shouldFetchHierarchy
+            ? itemId
+                ? 'item'
+                : 'orgUnit'
+            : 'item',
+        shouldFetchHierarchy
+            ? itemIdNum ?? orgUnitIdNum ?? -1
+            : -1
+    );
+
+    // Use enriched hierarchy fallbacks only when not in add mode
+    const resolvedOrgUnitId = orgUnitId ?? (itemIdNum ? hierarchy.orgUnit?.id.toString() : undefined);
+    const resolvedRoomId = roomId ?? ((itemIdNum || resolvedOrgUnitId) ? hierarchy.room?.id.toString() : undefined);
+
+    const resolvedRoomIdNum = resolvedRoomId ? Number(resolvedRoomId) : undefined;
+    const resolvedOrgUnitIdNum = resolvedOrgUnitId ? Number(resolvedOrgUnitId) : undefined;
+
+    const { data: projectData, isLoading: projectLoading } =
+        useGetProjectQuery(projectIdNum ?? -1, { skip: !projectIdNum || isNaN(projectIdNum) });
+
+    const { data: roomData, isLoading: roomLoading } =
+        useGetRoomQuery(resolvedRoomIdNum ?? -1, { skip: !resolvedRoomIdNum || isNaN(resolvedRoomIdNum) });
+
+    const { data: orgUnitData, isLoading: orgUnitLoading } =
+        useGetOrgUnitQuery(resolvedOrgUnitIdNum ?? -1, { skip: !resolvedOrgUnitIdNum || isNaN(resolvedOrgUnitIdNum) });
+
+    const { data: itemData, isLoading: itemLoading } =
+        useGetItemQuery(itemIdNum ?? -1, { skip: !itemIdNum || isNaN(itemIdNum) });
+
     const breadcrumbs = [
         { label: "Home", to: ROUTES.home },
         pathname.includes(ROUTES.about) && { label: "About", to: ROUTES.about },
@@ -33,18 +68,26 @@ const AppBreadcrumbs: React.FC = () => {
             label: projectLoading ? "Loading..." : projectData?.name || `Project ${projectId}`,
             to: ROUTES.projectDetails(projectId),
         },
-        roomId && {
-            label: roomLoading ? "Loading..." : roomData?.name || `Room ${roomId}`,
-            to: ROUTES.roomDetails(projectId!, roomId),
+        resolvedRoomIdNum && !isNaN(resolvedRoomIdNum) && {
+            label: (roomLoading || hierarchyLoading) ? "Loading..." : roomData?.name || `Room ${roomId}`,
+            to: ROUTES.roomDetails(projectId!, resolvedRoomIdNum),
         },
-        orgUnitId && {
-            label: orgUnitLoading ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
-            to: ROUTES.orgUnitDetails(projectId!, roomId!, orgUnitId),
+        resolvedOrgUnitIdNum && !isNaN(resolvedOrgUnitIdNum) && {
+            label: (orgUnitLoading || hierarchyLoading) ? "Loading..." : orgUnitData?.name || `Organizer ${orgUnitId}`,
+            to: ROUTES.orgUnitDetails(projectId!, resolvedOrgUnitIdNum),
         },
-        itemId && {
-            label: itemLoading ? "Loading..." : itemData?.name || `Item ${itemId}`,
-            to: ROUTES.itemDetails(projectId!, roomId!, orgUnitId!, itemId),
+        itemIdNum && !isNaN(itemIdNum) && {
+            label: (itemLoading || hierarchyLoading) ? "Loading..." : itemData?.name || `Item ${itemId}`,
+            to: ROUTES.itemDetails(projectId!, itemIdNum),
         },
+        isAddPage && {
+            label: "Add",
+            to: pathname,
+        },
+        isEditPage && {
+            label: "Edit",
+            to: pathname,
+        }
     ].filter(Boolean);
 
     return (
@@ -72,30 +115,5 @@ const AppBreadcrumbs: React.FC = () => {
     );
 }
 
-export const useExtractParams = () => {
-    const { pathname } = useLocation();
-
-    // Generate route patterns dynamically from ROUTES
-    const routePatterns = Object.entries(ROUTES)
-        .filter(([_, value]) => typeof value === "function")
-        .map(([_, generateRoute]) =>
-            (generateRoute as Function)(
-                ":projectId",
-                ":roomId",
-                ":orgUnitId",
-                ":itemId"
-            )
-        );
-
-    // Attempt to match the current pathname against the generated route patterns
-    for (const route of routePatterns) {
-        const result = matchPath(route, pathname);
-        if (result?.params) {
-            return result.params as Record<string, string | undefined>;
-        }
-    }
-
-    return {}; // Return an empty object if no match is found
-};
 
 export default AppBreadcrumbs;

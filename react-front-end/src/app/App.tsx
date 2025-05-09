@@ -154,36 +154,44 @@ function App() {
                                         } />
 
                                         {/* Org Unit Routes */}
-                                        <Route path={ROUTES.orgUnitAdd(":projectId", ":roomId")} element={
-                                            <RequiresOnline redirectUrl={ROUTES.roomDetails}>
+                                        <Route path={ROUTES.orgUnitAdd(":projectId")} element={
+                                            <RequiresOnline
+                                                redirectUrl={ROUTES.projectDetails}
+                                                alternateRedirectParamKey="roomId"
+                                                alternateRedirectUrl={ROUTES.roomDetails}
+                                            >
                                                 <AddOrgUnit />
                                             </RequiresOnline>
                                         } />
-                                        <Route path={ROUTES.orgUnitDetails(":projectId", ":roomId", ":orgUnitId")} Component={OrgUnitDetails} />
-                                        <Route path={ROUTES.orgUnitEdit(":projectId", ":roomId", ":orgUnitId")} element={
+                                        <Route path={ROUTES.orgUnitDetails(":projectId", ":orgUnitId")} Component={OrgUnitDetails} />
+                                        <Route path={ROUTES.orgUnitEdit(":projectId", ":orgUnitId")} element={
                                             <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
                                                 <EditOrgUnit />
                                             </RequiresOnline>
                                         } />
-                                        <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":roomId", ":orgUnitId")} element={
+                                        <Route path={ROUTES.orgUnitRemoveItems(":projectId", ":orgUnitId")} element={
                                             <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
                                                 <RemoveOrgUnitItems />
                                             </RequiresOnline>
                                         } />
-                                        <Route path={ROUTES.orgUnitAssignItems(":projectId", ":roomId", ":orgUnitId")} element={
+                                        <Route path={ROUTES.orgUnitAssignItems(":projectId", ":orgUnitId")} element={
                                             <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
                                                 <AssignItemsToOrgUnit />
                                             </RequiresOnline>
                                         } />
 
                                         {/* Item Routes */}
-                                        <Route path={ROUTES.itemAdd(":projectId", ":roomId", ":orgUnitId")} element={
-                                            <RequiresOnline redirectUrl={ROUTES.orgUnitDetails}>
+                                        <Route path={ROUTES.itemAdd(":projectId")} element={
+                                            <RequiresOnline
+                                                redirectUrl={ROUTES.projectDetails}
+                                                alternateRedirectParamKey="orgUnitId"
+                                                alternateRedirectUrl={ROUTES.orgUnitDetails}
+                                            >
                                                 <AddItem />
                                             </RequiresOnline>
                                         } />
-                                        <Route path={ROUTES.itemDetails(":projectId", ":roomId", ":orgUnitId", ":itemId")} Component={ItemDetails} />
-                                        <Route path={ROUTES.itemEdit(":projectId", ":roomId", ":orgUnitId", ":itemId")} element={
+                                        <Route path={ROUTES.itemDetails(":projectId", ":itemId")} Component={ItemDetails} />
+                                        <Route path={ROUTES.itemEdit(":projectId", ":itemId")} element={
                                             <RequiresOnline redirectUrl={ROUTES.itemDetails}>
                                                 <EditItem />
                                             </RequiresOnline>

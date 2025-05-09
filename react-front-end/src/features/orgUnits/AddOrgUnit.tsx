@@ -1,14 +1,15 @@
 import React from 'react';
 
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import AppTextField from '@/components/forms/AppTextField';
 import CancelButton from '@/components/forms/CancelButton';
 import SubmitButton from '@/components/forms/SubmitButton';
 import { AddNewCardWrapper } from '@/components/pageWrappers/CreatePageWrapper';
 import { useGetRoomQuery } from '../rooms/roomApi';
-import { useAddNewOrgUnitMutation } from './orgUnitApi';
+import { useAddNewOrgUnitMutation, useAddNewUnassignedOrgUnitMutation } from './orgUnitApi';
 import { ROUTES } from '@/utils/constants';
+import { useResolvedParams } from '@/hooks/useResolvedParams';
 
 interface AddOrgUnitFormFields extends HTMLFormControlsCollection {
     orgUnitName: HTMLInputElement,
@@ -21,12 +22,17 @@ interface AddOrgUnitFormElements extends HTMLFormElement {
 
 export const AddOrgUnit = () => {
     const [addNewOrgUnit, { isLoading }] = useAddNewOrgUnitMutation()
+    const [addNewUnassignedOrgUnit, { isLoading: isLoadingAddNewUnassignedOrgUnit }] = useAddNewUnassignedOrgUnitMutation()
+
     const navigate = useNavigate()
-    const { roomId, projectId } = useParams();
-    const redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
+    const { projectId, roomId } = useResolvedParams();
+
+    let redirectUrl = ROUTES.projectDetails(projectId!)
+    if (roomId) {
+        redirectUrl = ROUTES.roomDetails(projectId!, roomId!)
+    }
 
     const { data: room } = useGetRoomQuery(Number(roomId!));
-
 
     const handleSubmit = async (e: React.FormEvent<AddOrgUnitFormElements>) => {
         e.preventDefault()
@@ -37,16 +43,19 @@ export const AddOrgUnit = () => {
 
         const form = e.currentTarget
 
-        if (!room) {
-            console.log("Room not found")
-            return
-        }
-
         try {
-            await addNewOrgUnit({ name, description, roomId }).unwrap()
+            if (roomId) {
+                if (!room) {
+                    console.log("Room not found")
+                    return
+                }
+                await addNewOrgUnit({ name, description, roomId }).unwrap()
+            }
+            else {
+                await addNewUnassignedOrgUnit({ name, description }).unwrap()
+            }
             form.reset()
 
-            // redirect to [this room]/org-units
             navigate(redirectUrl)
         } catch (err) {
             console.error("Failed to create the orgUnit: ", err)
@@ -76,7 +85,7 @@ export const AddOrgUnit = () => {
                 />
 
                 <SubmitButton
-                    disabled={isLoading}
+                    disabled={isLoading || isLoadingAddNewUnassignedOrgUnit}
                     label="Create Organizer"
                 />
             </form>
