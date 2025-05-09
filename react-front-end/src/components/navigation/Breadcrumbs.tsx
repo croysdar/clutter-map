@@ -41,11 +41,17 @@ const AppBreadcrumbs: React.FC = () => {
             : -1
     );
 
-    // Use enriched hierarchy fallbacks only when not in add mode
+    // Use the orgUnitId from the URL if present, otherwise get it from the hierarchy (if viewing an item)
     const resolvedOrgUnitId = orgUnitId ?? (itemIdNum ? hierarchy.orgUnit?.id.toString() : undefined);
+
+    // Use the roomId from the URL if present,
+    // otherwise get it from the hierarchy (if viewing an item or org unit)
     const resolvedRoomId = roomId ?? ((itemIdNum || resolvedOrgUnitId) ? hierarchy.room?.id.toString() : undefined);
 
+    // Convert the resolvedRoomId to a number if it exists, otherwise leave it undefined
     const resolvedRoomIdNum = resolvedRoomId ? Number(resolvedRoomId) : undefined;
+
+    // Convert the resolvedOrgUnitId to a number if it exists, otherwise leave it undefined
     const resolvedOrgUnitIdNum = resolvedOrgUnitId ? Number(resolvedOrgUnitId) : undefined;
 
     const { data: projectData, isLoading: projectLoading } =
