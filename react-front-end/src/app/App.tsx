@@ -155,7 +155,11 @@ function App() {
 
                                         {/* Org Unit Routes */}
                                         <Route path={ROUTES.orgUnitAdd(":projectId")} element={
-                                            <RequiresOnline redirectUrl={ROUTES.projectDetails}>
+                                            <RequiresOnline
+                                                redirectUrl={ROUTES.projectDetails}
+                                                alternateRedirectParamKey="roomId"
+                                                alternateRedirectUrl={ROUTES.roomDetails}
+                                            >
                                                 <AddOrgUnit />
                                             </RequiresOnline>
                                         } />
@@ -178,7 +182,11 @@ function App() {
 
                                         {/* Item Routes */}
                                         <Route path={ROUTES.itemAdd(":projectId")} element={
-                                            <RequiresOnline redirectUrl={ROUTES.projectDetails}>
+                                            <RequiresOnline
+                                                redirectUrl={ROUTES.projectDetails}
+                                                alternateRedirectParamKey="orgUnitId"
+                                                alternateRedirectUrl={ROUTES.orgUnitDetails}
+                                            >
                                                 <AddItem />
                                             </RequiresOnline>
                                         } />
