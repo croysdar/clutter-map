@@ -19,7 +19,6 @@ export const SearchToggle: React.FC<{
     }, []);
 
     const hideFab = () => {
-        console.log('hiding fab')
         setShowSearchFab(false);
         localStorage.setItem("showSearchFab", "false");
         setMenuAnchorEl(null);
@@ -144,7 +143,6 @@ export const SwipeToDismissFab = forwardRef(
                 setDragX(deltaX)
                 if (deltaX > 5) {
                     suppressClick.current = true; // treat as swipe, not click
-                    console.log('suppress')
                 }
                 if (deltaX > dragThreshold.current) onDismiss();
             }
@@ -156,7 +154,6 @@ export const SwipeToDismissFab = forwardRef(
                 }
                 if (deltaX < -5) {
                     suppressClick.current = true; // treat as swipe, not click
-                    console.log('suppress')
                 }
             }
         };
