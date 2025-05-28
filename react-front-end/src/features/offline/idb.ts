@@ -9,7 +9,7 @@ import { ResourceType, TimelineActionType } from "@/types/types";
 import { Event } from "./eventTypes";
 
 /* ------------- Constants ------------- */
-import { API_BASE_URL, IDB_NAME, IDB_VERSION } from "@/utils/constants";
+import { API_BASE_URL, IDB_NAME, IDB_VERSION, TEST_IDB_NAME } from "@/utils/constants";
 
 /* ------------- API ------------- */
 import { client } from "@/services/client";
@@ -33,10 +33,10 @@ export interface MoveEventGroup {
 /* ------------- IndexedDB Initialization & Syncing ------------- */
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
-export const getOrInitDB = async (): Promise<IDBPDatabase> => {
+export const getOrInitDB = async (db_name = IDB_NAME as string): Promise<IDBPDatabase> => {
     if (!dbPromise) {
         await _initDB(false);
-        dbPromise = openDB(IDB_NAME, IDB_VERSION);
+        dbPromise = openDB(db_name, IDB_VERSION);
     }
     return dbPromise;
 };
@@ -46,7 +46,7 @@ export const initDB = async () => {
 }
 
 export const _initDB = async (testMode: boolean) => {
-    const dbName = testMode ? 'ClutterMapDB_Test' : IDB_NAME;
+    const dbName = testMode ? TEST_IDB_NAME : IDB_NAME;
 
     await openDB(dbName, IDB_VERSION, {
         upgrade(db, oldVersion, newVersion, transaction) {
@@ -200,8 +200,8 @@ const removeDeletedProject = async (projectID: number) => {
     await _removeDeletedProject(projectID, IDB_NAME);
 }
 
-export const _removeDeletedProject = async (projectID: number, IDB_NAME: string) => {
-    const db = await getOrInitDB();
+export const _removeDeletedProject = async (projectID: number, db_name: string) => {
+    const db = await getOrInitDB(db_name);
     const transaction = db.transaction(Object.values(Stores), "readwrite");
     const projectStore = transaction.objectStore(Stores.Projects);
     const project: Project = await projectStore.get(projectID);
@@ -488,8 +488,8 @@ async function processDeleteEvent(store: IDBPObjectStore<any, any, any, "readwri
 
 /* ------------- Sync Metadata Handling ------------- */
 
-export const getLastSynced = async (IDB_NAME: string): Promise<number | null> => {
-    const db = await getOrInitDB();
+export const getLastSynced = async (db_name: string): Promise<number | null> => {
+    const db = await getOrInitDB(db_name);
     return (await db.get(Stores.Meta, 'last-synced'))?.value || null;
 }
 
