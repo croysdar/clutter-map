@@ -166,18 +166,17 @@ const partialSync = async (token: string, lastSynced: number) => {
 }
 
 const syncProjectList = async (token: string) => {
+    // Get set of project ids that are stored in the server
     const response = await client.get<number[]>(`${API_BASE_URL}/projects/ids`, { headers: { Authorization: `Bearer ${token}` } });
     const serverProjectIDs = response.data;
+    const serverSet = new Set(serverProjectIDs);
 
+    // Get set of project ids that are stored in the browser
     const db = await getOrInitDB();
     const transaction = db.transaction(Object.values(Stores), "readonly");
     const store = transaction.objectStore(Stores.Projects);
-
     const storedProjectIDs = await store.getAllKeys() as number[];
-
     await transaction.done;
-
-    const serverSet = new Set(serverProjectIDs);
     const storedSet = new Set(storedProjectIDs);
 
     // Check to see if any projects in the idb are not in the serverProjectIDs
