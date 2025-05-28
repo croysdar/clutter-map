@@ -15,13 +15,14 @@ import { ROUTES } from '@/utils/constants';
 import { useResolvedParams } from '@/hooks/useResolvedParams';
 
 const AppBreadcrumbs: React.FC = () => {
-    const { projectId, roomId, orgUnitId, itemId, projectIdNum, roomIdNum, orgUnitIdNum, itemIdNum } = useResolvedParams();
+    const { projectId, roomId, orgUnitId, itemId, projectIdNum, orgUnitIdNum, itemIdNum } = useResolvedParams();
     const { pathname } = useLocation();
 
     const isAddItemPage = pathname.includes("/items/add");
     const isAddOrgUnitPage = pathname.includes("/org-units/add");
     const isAddRoomPage = pathname.includes("/rooms/add");
-    const isAddPage = isAddItemPage || isAddOrgUnitPage || isAddRoomPage;
+    const isAddProjectPage = pathname.includes("/projects/add");
+    const isAddPage = isAddItemPage || isAddOrgUnitPage || isAddRoomPage || isAddProjectPage;
 
     const isEditItemPage = /\/items\/[^/]+\/edit/.test(pathname);
     const isEditOrgUnitPage = /\/org-units\/[^/]+\/edit/.test(pathname);
