@@ -9,10 +9,9 @@ const config = {
         "^.+\\.tsx?$": "ts-jest"
     },
     setupFiles: [
-        'jest-localstorage-mock',
-        'fake-indexeddb/auto'
+        '<rootDir>/jest.node.setup.js',
     ],
-    testMatch: ["**/*.test.ts", "**/*.test.tsx"],
+    testMatch: ["**/tests/*.test.ts", "**/tests/*.test.tsx"],
 };
 
 module.exports = config;
