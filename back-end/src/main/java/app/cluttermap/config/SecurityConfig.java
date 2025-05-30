@@ -82,7 +82,8 @@ public class SecurityConfig {
 
                 // Allow cross-origin requests for all endpoints
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "https://clutter-map.app", "http://localhost:5173")
+                        .allowedOrigins("http://localhost:3000", "https://clutter-map.app", "http://localhost:5173",
+                                "http://localhost:4173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true); // Allow cookies and credentials
