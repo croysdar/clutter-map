@@ -1,15 +1,17 @@
-import { IDBPDatabase, IDBPObjectStore, IDBPTransaction, openDB } from "idb";
+import type { IDBPDatabase, IDBPObjectStore, IDBPTransaction, } from "idb";
+import { openDB } from "idb";
 
 /* ------------- Types ------------- */
-import { Item } from "@/features/items/itemTypes";
-import { OrgUnit } from "@/features/orgUnits/orgUnitsTypes";
-import { Project } from "@/features/projects/projectsTypes";
-import { Room } from "@/features/rooms/roomsTypes";
+import type { Item } from "@/features/items/itemTypes";
+import type { OrgUnit } from "@/features/orgUnits/orgUnitsTypes";
+import type { Project } from "@/features/projects/projectsTypes";
+import type { Room } from "@/features/rooms/roomsTypes";
+import type { Event } from "./eventTypes";
 import { ResourceType, TimelineActionType } from "@/types/types";
-import { Event } from "./eventTypes";
 
 /* ------------- Constants ------------- */
-import { API_BASE_URL, IDB_NAME, IDB_VERSION, TEST_IDB_NAME } from "@/utils/constants";
+import { IDB_NAME, IDB_VERSION, TEST_IDB_NAME } from "@/utils/constants";
+import { API_BASE_URL } from "@/utils/viteConstants";
 
 /* ------------- API ------------- */
 import { client } from "@/services/client";

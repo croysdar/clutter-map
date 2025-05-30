@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-import { API_BASE_URL } from '@/utils/constants';
+import { API_BASE_URL } from "@/utils/viteConstants";
 import { getCsrfTokenFromCookies } from '@/utils/utils';
 
 import { syncIDB } from '@/features/offline/idbSlice';
