@@ -17,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useGetItemsByProjectQuery } from "../items/itemApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { searchItems } from "./search";
-import { Item } from "../items/itemTypes";
+import { type Item } from "../items/itemTypes";
 import { ROUTES } from "@/utils/constants";
 
 interface SearchModalProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { type CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 /* ------------- Material UI ------------- */
 import { CircularProgress, Typography } from '@mui/material';

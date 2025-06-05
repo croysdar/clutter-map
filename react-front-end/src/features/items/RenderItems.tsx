@@ -8,7 +8,7 @@ import { TileWrapper } from '@/components/common/TileWrapper';
 import { RenderTags } from '@/components/forms/TagField';
 
 /* ------------- Types ------------- */
-import { Item } from '@/features/items/itemTypes';
+import { type Item } from '@/features/items/itemTypes';
 
 /* ------------- Utils ------------- */
 import { truncateText } from '@/utils/utils';

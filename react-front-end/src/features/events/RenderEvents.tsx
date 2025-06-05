@@ -21,7 +21,7 @@ import { ResourceType } from '@/types/types';
 import { useGetEntityEventsQuery } from './eventApi';
 
 /* ------------- Constants ------------- */
-import { TimelineEvent } from "./eventTypes";
+import { type TimelineEvent } from "./eventTypes";
 
 type EntityEventsContainerProps = {
     entityId: number;

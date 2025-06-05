@@ -18,7 +18,7 @@ import { useDeleteRoomMutation, useGetRoomQuery, useUpdateRoomMutation } from '@
 import { ROUTES } from '@/utils/constants'
 
 /* ------------- Types ------------- */
-import { Room } from '@/features/rooms/roomsTypes'
+import { type Room } from '@/features/rooms/roomsTypes'
 
 interface EditRoomFormFields extends HTMLFormControlsCollection {
     roomName: HTMLInputElement,

@@ -2,7 +2,7 @@ import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
 import { Stores } from "../offline/idb";
 import { getAllFromIndexedDB, getByIdFromIndexedDB } from "../offline/useIndexedDBQuery";
-import { NewProject, Project, ProjectUpdate } from "./projectsTypes";
+import { type NewProject, type Project, type ProjectUpdate } from "./projectsTypes";
 
 export const projectApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

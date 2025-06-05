@@ -1,8 +1,8 @@
 import React from 'react';
 
 
-import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
-import { Project } from '@/features/projects/projectsTypes';
+import LinksMenu, { type LinkMenuItem } from '@/components/common/LinksMenu';
+import { type Project } from '@/features/projects/projectsTypes';
 import { ROUTES } from '@/utils/constants';
 
 type ProjectMenuProps = {

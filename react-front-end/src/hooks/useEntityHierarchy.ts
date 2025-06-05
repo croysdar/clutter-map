@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { getOrInitDB, Stores } from '@/features/offline/idb';
 
-import { Item } from '@/features/items/itemTypes';
-import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
-import { Room } from '@/features/rooms/roomsTypes';
-import { Project } from '@/features/projects/projectsTypes';
+import { type Item } from '@/features/items/itemTypes';
+import { type OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import { type Room } from '@/features/rooms/roomsTypes';
+import { type Project } from '@/features/projects/projectsTypes';
 
 interface EntityHierarchy {
     project?: Project;

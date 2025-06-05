@@ -1,4 +1,4 @@
-import { Item } from "@/features/items/itemTypes";
+import { type Item } from "@/features/items/itemTypes";
 
 export function searchItems(items: Item[], query: string): Item[] {
     const lowerQuery = query.trim().toLowerCase();

@@ -1,5 +1,5 @@
 import React from 'react';
-import ButtonLink, { ButtonLinkProps } from '../common/ButtonLink';
+import ButtonLink, { type ButtonLinkProps } from '../common/ButtonLink';
 
 import AddIcon from '@mui/icons-material/Add';
 

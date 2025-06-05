@@ -2,13 +2,13 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 /* ------------- Components ------------- */
-import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
+import LinksMenu, { type LinkMenuItem } from '@/components/common/LinksMenu';
 
 /* ------------- Constants ------------- */
 import { ROUTES } from '@/utils/constants';
 
 /* ------------- Types ------------- */
-import { Room } from '@/features/rooms/roomsTypes';
+import { type Room } from '@/features/rooms/roomsTypes';
 
 type RoomMenuProps = {
     room: Room
