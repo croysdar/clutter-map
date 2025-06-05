@@ -1,7 +1,7 @@
 import React from 'react';
 
-import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
-import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import LinksMenu, { type LinkMenuItem } from '@/components/common/LinksMenu';
+import { type OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
 import { useParams } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
 

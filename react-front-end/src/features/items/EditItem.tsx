@@ -20,7 +20,7 @@ import { useDeleteItemMutation, useGetItemQuery, useUpdateItemMutation } from '@
 import { ROUTES } from '@/utils/constants'
 
 /* ------------- Types ------------- */
-import { Item } from '@/features/items/itemTypes'
+import type { Item } from '@/features/items/itemTypes'
 import { useEntityHierarchy } from '@/hooks/useEntityHierarchy'
 
 interface EditItemFormFields extends HTMLFormControlsCollection {

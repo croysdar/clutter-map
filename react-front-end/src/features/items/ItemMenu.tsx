@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Item } from './itemTypes';
-import LinksMenu, { LinkMenuItem } from '@/components/common/LinksMenu';
+import { type Item } from './itemTypes';
+import LinksMenu, { type LinkMenuItem } from '@/components/common/LinksMenu';
 import { ROUTES } from '@/utils/constants';
 
 type ItemMenuProps = {

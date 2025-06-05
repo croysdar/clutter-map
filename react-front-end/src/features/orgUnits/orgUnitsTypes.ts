@@ -1,4 +1,4 @@
-import { Item } from "../items/itemTypes"
+import { type Item } from "../items/itemTypes"
 
 export interface OrgUnit {
     id: number

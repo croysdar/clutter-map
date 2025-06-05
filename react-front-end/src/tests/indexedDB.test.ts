@@ -3,19 +3,26 @@ import { openDB, deleteDB } from 'idb';
 import {
     _initDB, getLastSynced, setLastSynced, Stores,
     processEvents,
-    MoveEventGroup,
     processMoveRelatedEvents,
     _removeDeletedProject
+} from '@/features/offline/idb'
+import type {
+    MoveEventGroup,
 } from '@/features/offline/idb'
 
 import { IDB_VERSION, TEST_IDB_NAME } from '@/utils/constants';
 
 import { ResourceType, TimelineActionType } from '@/types/types';
-import { Event } from '@/features/offline/eventTypes';
-import { Project } from '@/features/projects/projectsTypes';
-import { Item } from '@/features/items/itemTypes';
-import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
-import { Room } from '@/features/rooms/roomsTypes';
+import type { Event } from '@/features/offline/eventTypes';
+import type { Item } from '@/features/items/itemTypes';
+import type { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import type { Room } from '@/features/rooms/roomsTypes';
+import type { Project } from '@/features/projects/projectsTypes';
+
+// We cannot access vite's environment variables during jest
+jest.mock('@/utils/viteConstants', () => ({
+    API_BASE_URL: 'http://localhost:8080',
+}));
 
 beforeEach(async () => {
 });

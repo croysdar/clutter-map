@@ -1,6 +1,6 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
-import { TimelineEvent } from "./eventTypes";
+import { type TimelineEvent } from "./eventTypes";
 
 export const eventApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

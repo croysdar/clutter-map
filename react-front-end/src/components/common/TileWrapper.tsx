@@ -1,5 +1,5 @@
 import { Card, CardHeader, Container, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 
 export type WrapperProps = {
     title: string

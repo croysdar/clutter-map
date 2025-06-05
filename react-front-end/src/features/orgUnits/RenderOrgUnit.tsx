@@ -7,7 +7,7 @@ import { Checkbox, Divider, List, ListItem, ListItemIcon, ListItemText, Typograp
 import { TileWrapper } from '@/components/common/TileWrapper';
 
 /* ------------- Types ------------- */
-import { OrgUnit } from './orgUnitsTypes';
+import { type OrgUnit } from './orgUnitsTypes';
 
 /* ------------- Utils ------------- */
 import { truncateText } from '@/utils/utils';

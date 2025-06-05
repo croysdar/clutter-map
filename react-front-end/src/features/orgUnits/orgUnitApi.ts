@@ -1,11 +1,11 @@
 import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
-import { Item, ItemsAssign } from "../items/itemTypes";
+import { type Item, type ItemsAssign } from "../items/itemTypes";
 import { Stores } from "../offline/idb";
 import { getAllFromIndexedDB, getByIdFromIndexedDB, getRelatedEntities } from "../offline/useIndexedDBQuery";
-import { Project } from "../projects/projectsTypes";
-import { Room } from "../rooms/roomsTypes";
-import { NewOrgUnit, NewUnassignedOrgUnit, OrgUnit, OrgUnitUpdate } from "./orgUnitsTypes";
+import { type Project } from "../projects/projectsTypes";
+import { type Room } from "../rooms/roomsTypes";
+import { type NewOrgUnit, type NewUnassignedOrgUnit, type OrgUnit, type OrgUnitUpdate } from "./orgUnitsTypes";
 
 export const orgUnitApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

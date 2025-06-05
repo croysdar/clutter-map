@@ -1,4 +1,4 @@
-import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import { configureStore, type ThunkAction, type Action } from "@reduxjs/toolkit";
 
 import { baseApiSlice } from "@/services/baseApiSlice";
 

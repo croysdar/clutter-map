@@ -1,4 +1,5 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
 import { useResolvedParams } from '@/hooks/useResolvedParams';

@@ -1,7 +1,7 @@
 import { client } from "@/services/client";
-import { AppDispatch, RootState } from "@/app/store";
+import type { AppDispatch, RootState } from "@/app/store";
 import { createAppSlice } from "@/hooks/useAppHooks";
-import { API_BASE_URL } from "@/utils/constants";
+import { API_BASE_URL } from "@/utils/viteConstants";
 
 interface UserInfo {
     userEmail: string | null,

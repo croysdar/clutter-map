@@ -2,9 +2,9 @@ import { baseApiSlice } from "@/services/baseApiSlice";
 import { ResourceType } from "@/types/types";
 import { Stores } from "../offline/idb";
 import { getAllFromIndexedDB, getByIdFromIndexedDB, getRelatedEntities } from "../offline/useIndexedDBQuery";
-import { OrgUnit, OrgUnitsAssign } from "../orgUnits/orgUnitsTypes";
-import { Project } from "../projects/projectsTypes";
-import { NewRoom, Room, RoomUpdate } from "./roomsTypes";
+import { type OrgUnit, type OrgUnitsAssign } from "../orgUnits/orgUnitsTypes";
+import { type Project } from "../projects/projectsTypes";
+import { type NewRoom, type Room, type RoomUpdate } from "./roomsTypes";
 
 export const roomsApi = baseApiSlice.injectEndpoints({
     endpoints: (builder) => ({

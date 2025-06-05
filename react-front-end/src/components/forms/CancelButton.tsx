@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, ButtonProps } from '@mui/material';
+import { Button, type ButtonProps } from '@mui/material';
 
 export type CancelButtonProps = ButtonProps & {
     label?: string

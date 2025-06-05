@@ -1,4 +1,4 @@
-import { OrgUnit } from '../orgUnits/orgUnitsTypes';
+import { type OrgUnit } from '../orgUnits/orgUnitsTypes';
 export interface Room {
     id: number;
     name: string;

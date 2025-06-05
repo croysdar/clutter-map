@@ -18,7 +18,7 @@ import { useDeleteOrgUnitMutation, useGetOrgUnitQuery, useUpdateOrgUnitMutation 
 import { ROUTES } from '@/utils/constants'
 
 /* ------------- Types ------------- */
-import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes'
+import { type OrgUnit } from '@/features/orgUnits/orgUnitsTypes'
 import { useEntityHierarchy } from '@/hooks/useEntityHierarchy'
 
 interface EditOrgUnitFormFields extends HTMLFormControlsCollection {

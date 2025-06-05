@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
-import { Item } from '@/features/items/itemTypes';
-import { OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
-import { Project } from '@/features/projects/projectsTypes';
-import { Room } from '@/features/rooms/roomsTypes';
+import { type Item } from '@/features/items/itemTypes';
+import { type OrgUnit } from '@/features/orgUnits/orgUnitsTypes';
+import { type Project } from '@/features/projects/projectsTypes';
+import { type Room } from '@/features/rooms/roomsTypes';
 import { DeleteForever } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 

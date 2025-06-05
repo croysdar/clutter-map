@@ -18,7 +18,7 @@ import { useDeleteProjectMutation, useGetProjectQuery, useUpdateProjectMutation 
 import { ROUTES } from '@/utils/constants'
 
 /* ------------- Types ------------- */
-import { Project } from '@/features/projects/projectsTypes'
+import { type Project } from '@/features/projects/projectsTypes'
 
 interface EditProjectFormFields extends HTMLFormControlsCollection {
     projectName: HTMLInputElement,
